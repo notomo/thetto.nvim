@@ -27,6 +27,15 @@ M.set_lines = function(lines)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
 end
 
+M.search = function(pattern)
+  local result = vim.fn.search(pattern)
+  if result == 0 then
+    local msg = string.format("%s not found", pattern)
+    assert(false, msg)
+  end
+  return result
+end
+
 local assert = require("luassert")
 local AM = {}
 
@@ -48,6 +57,12 @@ AM.exists_pattern = function(pattern)
     local msg = ("`%s` not found"):format(pattern)
     assert(false, msg)
   end
+end
+
+AM.filetype = function(expected)
+  local actual = vim.bo.filetype
+  local msg = ("buffer &filetype should be %s, but actual: %s"):format(expected, actual)
+  assert.equals(expected, actual, msg)
 end
 
 M.assert = AM

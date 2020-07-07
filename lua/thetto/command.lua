@@ -4,12 +4,15 @@ local M = {}
 
 M.parse_args = function(raw_args)
   local args = {
-    action_name = "default"
+    insert = true
   }
+
   for _, a in ipairs(raw_args) do
     if not vim.startswith(a, "--") then
       args.source_name = a
-      break
+    elseif vim.startswith(a, "--no-") then
+      local key = a:sub(#("--no-") + 1)
+      args[key] = false
     end
   end
 
@@ -29,7 +32,7 @@ M.find_source = function(args)
   return module
 end
 
-M.main = function(...)
+M.open = function(...)
   local args, err = M.parse_args({...})
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
@@ -40,19 +43,17 @@ M.main = function(...)
     return
   end
 
-  local width = 80
-  local height = 25
-  local row = vim.o.lines / 2 - (height / 2)
-  local col = vim.o.columns / 2 - (width / 2)
-  opts = {
-    row = row,
-    column = col,
-    width = width,
-    height = height,
-    action_name = args.action_name
-  }
+  local opts = args
+  opts.width = 80
+  opts.height = 25
+  opts.row = vim.o.lines / 2 - (opts.height / 2)
+  opts.column = vim.o.columns / 2 - (opts.width / 2)
 
   thetto.start(source, opts)
+end
+
+M.execute = function(...)
+  thetto.execute()
 end
 
 return M

@@ -1,11 +1,12 @@
 local M = {}
 
-local prompt_name = "> "
+local state_key = "_thetto_state"
 
-M.start = function(source, opts)
+M.limit = 100
+
+local make_list_buffer = function(candidates, opts)
   local lines = {}
-  local candidates = source.make()
-  local partial = vim.tbl_values({unpack(candidates, 0, opts.height - 1)})
+  local partial = vim.tbl_values({unpack(candidates, 0, M.limit)})
   for _, candidate in pairs(partial) do
     table.insert(lines, candidate.value)
   end
@@ -26,50 +27,91 @@ M.start = function(source, opts)
     }
   )
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+  vim.api.nvim_buf_set_option(bufnr, "filetype", "thetto")
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(bufnr, "buftype", "prompt")
-  vim.api.nvim_win_set_option(window_id, "scrolloff", 0)
-  vim.api.nvim_win_set_option(window_id, "sidescrolloff", 0)
-  vim.b._thetto_state = {all = candidates, partial = partial}
+  vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
-  vim.api.nvim_command("startinsert")
-  vim.schedule(M.on_changed)
+  return {
+    window = window_id,
+    bufnr = bufnr,
+    all = candidates,
+    partial = partial
+  }
+end
+
+local make_filter_buffer = function(opts)
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  local window_id =
+    vim.api.nvim_open_win(
+    bufnr,
+    true,
+    {
+      width = opts.width,
+      height = 1,
+      relative = "editor",
+      row = opts.row + opts.height,
+      col = opts.column,
+      external = false,
+      style = "minimal"
+    }
+  )
+  vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+  vim.api.nvim_buf_set_option(bufnr, "filetype", "thetto-filter")
+
+  return {
+    window = window_id,
+    bufnr = bufnr
+  }
+end
+
+M.start = function(source, opts)
+  local candidates = source.make()
+  local filter_buffer = make_filter_buffer(opts)
+  local list_buffer = make_list_buffer(candidates, opts)
+
+  if opts.insert then
+    vim.api.nvim_set_current_win(filter_buffer.window)
+    vim.api.nvim_command("startinsert")
+  else
+    vim.api.nvim_set_current_win(list_buffer.window)
+  end
 
   local on_changed =
     ("autocmd TextChanged,TextChangedI <buffer=%s> lua require 'thetto/thetto'.on_changed(%s, %s)"):format(
-    bufnr,
-    bufnr,
-    window_id
+    filter_buffer.bufnr,
+    list_buffer.bufnr,
+    filter_buffer.bufnr
   )
   vim.api.nvim_command(on_changed)
 
-  vim.fn.prompt_setprompt(bufnr, prompt_name)
-
-  local rhs =
-    ("<Cmd>lua require 'thetto/thetto'.finish(%s, %s, '%s', '%s')<CR>"):format(
-    bufnr,
-    window_id,
-    source.kind_name,
-    opts.action_name
+  local on_list_closed =
+    ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close(%s)"):format(
+    list_buffer.bufnr,
+    filter_buffer.window
   )
-  vim.api.nvim_buf_set_keymap(bufnr, "i", "<CR>", rhs, {noremap = true})
-  vim.api.nvim_buf_set_keymap(bufnr, "n", "<CR>", rhs, {noremap = true})
+  vim.api.nvim_command(on_list_closed)
+
+  local on_filter_closed =
+    ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close(%s)"):format(
+    filter_buffer.bufnr,
+    list_buffer.window
+  )
+  vim.api.nvim_command(on_filter_closed)
+
+  vim.api.nvim_buf_set_var(
+    list_buffer.bufnr,
+    state_key,
+    {list = list_buffer, filter = filter_buffer, kind_name = source.kind_name}
+  )
 end
 
-M.on_changed = function(bufnr, window_id)
-  vim.api.nvim_buf_set_option(bufnr, "modified", false)
-
-  local state = vim.b._thetto_state
-  if state == nil then
-    return
-  end
-
-  local prompt = vim.fn.getline("$")
-  local texts = vim.split(prompt:sub(#prompt_name + 1), "%s")
+M.on_changed = function(list_bufnr, filter_bufnr)
+  local state = vim.api.nvim_buf_get_var(list_bufnr, state_key)
+  local line = vim.api.nvim_buf_get_lines(filter_bufnr, 0, 1, true)[1]
+  local texts = vim.split(line, "%s")
   local lines = {}
-  local height = vim.api.nvim_win_get_height(window_id)
   local partial = {}
-  for _, candidate in pairs(state.all) do
+  for _, candidate in pairs(state.list.all) do
     local ok = true
     for _, text in ipairs(texts) do
       if not (candidate.value):find(text) then
@@ -82,21 +124,19 @@ M.on_changed = function(bufnr, window_id)
       table.insert(partial, candidate)
     end
   end
-  vim.api.nvim_buf_set_var(bufnr, "_thetto_state", {all = state.all, partial = partial})
-  print(#partial)
-  for _, c in pairs({unpack(partial, 0, height - 1)}) do
+  for _, c in pairs({unpack(partial, 0, M.limit)}) do
     table.insert(lines, c.value)
   end
 
-  if #lines < height - 1 then
-    lines = vim.list_extend(lines, vim.fn["repeat"]({""}, height - 1 - #lines))
-  end
+  state.list.partial = partial
+  vim.api.nvim_buf_set_var(list_bufnr, state_key, state)
 
-  vim.api.nvim_buf_set_lines(bufnr, 0, -(#prompt_name), false, lines)
-  vim.api.nvim_buf_set_option(bufnr, "modified", false)
+  vim.api.nvim_buf_set_option(list_bufnr, "modifiable", true)
+  vim.api.nvim_buf_set_lines(list_bufnr, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(list_bufnr, "modifiable", false)
 end
 
-local close = function(window_id)
+M.close = function(window_id)
   if window_id == "" then
     return
   end
@@ -115,27 +155,33 @@ find_kind = function(kind_name)
   return module
 end
 
-M.finish = function(_, window_id, kind_name, action_name)
-  local candidates = vim.b._thetto_state.partial
-  local index = vim.fn.line(".")
-  local height = vim.api.nvim_win_get_height(window_id)
-  if index >= height then
-    index = 1
+M.execute = function(action_name)
+  local state = vim.b[state_key]
+  if state == nil then
+    return
   end
 
-  close(window_id)
-  vim.api.nvim_command("stopinsert")
+  local candidates = state.list.partial
 
-  local kind = find_kind(kind_name)
+  local kind = find_kind(state.kind_name)
   if kind == nil then
-    return vim.api.nvim_err_write("not found kind: " .. kind_name .. "\n")
+    return vim.api.nvim_err_write("not found kind: " .. state.kind_name .. "\n")
   end
 
-  local candidate = candidates[index]
-  local action = kind[action_name]
+  local name = action_name or "default"
+  local action = kind[name]
   if action == nil then
-    return vim.api.nvim_err_write("not found action: " .. action_name .. "\n")
+    return vim.api.nvim_err_write("not found action: " .. name .. "\n")
   end
+
+  local index = 1
+  if vim.api.nvim_get_current_buf() == state.list.bufnr then
+    index = vim.fn.line(".")
+  end
+  local candidate = candidates[index]
+
+  M.close(state.list.window)
+
   action({candidate})
 end
 
