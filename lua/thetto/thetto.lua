@@ -1,6 +1,9 @@
 local M = {}
 
 local state_key = "_thetto_state"
+local filter_state_key = "_thetto_filter_state"
+local filetype = "thetto"
+local filter_filetype = "thetto-filter"
 
 M.limit = 100
 
@@ -27,7 +30,7 @@ local make_list_buffer = function(candidates, opts)
     }
   )
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
-  vim.api.nvim_buf_set_option(bufnr, "filetype", "thetto")
+  vim.api.nvim_buf_set_option(bufnr, "filetype", filetype)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
@@ -56,7 +59,7 @@ local make_filter_buffer = function(opts)
     }
   )
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
-  vim.api.nvim_buf_set_option(bufnr, "filetype", "thetto-filter")
+  vim.api.nvim_buf_set_option(bufnr, "filetype", filter_filetype)
 
   return {
     window = window_id,
@@ -103,6 +106,14 @@ M.start = function(source, opts)
     state_key,
     {list = list_buffer, filter = filter_buffer, kind_name = source.kind_name}
   )
+  vim.api.nvim_buf_set_var(
+    filter_buffer.bufnr,
+    filter_state_key,
+    {
+      list = {bufnr = list_buffer.bufnr, window = list_buffer.window},
+      filter = {bufnr = filter_buffer.bufnr, window = filter_buffer.window}
+    }
+  )
 end
 
 M.on_changed = function(list_bufnr, filter_bufnr)
@@ -148,41 +159,43 @@ end
 
 find_kind = function(kind_name)
   local name = ("thetto/kind/%s"):format(kind_name)
-  local ok, module = pcall(require, name)
+  local ok, kind = pcall(require, name)
   if not ok then
     return nil
   end
-  return module
+  return kind
 end
 
-M.execute = function(action_name)
+M.execute = function(args)
   local state = vim.b[state_key]
+  if vim.bo.filetype == filter_filetype then
+    local filter_state = vim.b[filter_state_key]
+    state = vim.api.nvim_buf_get_var(filter_state.list.bufnr, state_key)
+  end
   if state == nil then
     return
   end
-
-  local candidates = state.list.partial
 
   local kind = find_kind(state.kind_name)
   if kind == nil then
     return vim.api.nvim_err_write("not found kind: " .. state.kind_name .. "\n")
   end
 
-  local name = action_name or "default"
-  local action = kind[name]
+  local action = kind[args.action]
   if action == nil then
-    return vim.api.nvim_err_write("not found action: " .. name .. "\n")
+    return vim.api.nvim_err_write("not found action: " .. args.action .. "\n")
   end
 
   local index = 1
-  if vim.api.nvim_get_current_buf() == state.list.bufnr then
+  if vim.bo.filetype == filetype then
     index = vim.fn.line(".")
   end
+  local candidates = state.list.partial
   local candidate = candidates[index]
 
   M.close(state.list.window)
 
-  action({candidate})
+  return action({candidate})
 end
 
 return M

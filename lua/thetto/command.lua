@@ -2,7 +2,7 @@ local thetto = require "thetto/thetto"
 
 local M = {}
 
-M.parse_args = function(raw_args)
+M.parse_open_args = function(raw_args)
   local args = {
     insert = true
   }
@@ -33,7 +33,7 @@ M.find_source = function(args)
 end
 
 M.open = function(...)
-  local args, err = M.parse_args({...})
+  local args, err = M.parse_open_args({...})
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
   end
@@ -52,8 +52,30 @@ M.open = function(...)
   thetto.start(source, opts)
 end
 
+M.parse_execute_args = function(raw_args)
+  local args = {
+    action = "default"
+  }
+
+  for _, a in ipairs(raw_args) do
+    if not vim.startswith(a, "--") then
+      args.action = a
+    elseif vim.startswith(a, "--no-") then
+      local key = a:sub(#("--no-") + 1)
+      args[key] = false
+    end
+  end
+
+  return args, nil
+end
+
 M.execute = function(...)
-  thetto.execute()
+  local args, err = M.parse_execute_args({...})
+  if err ~= nil then
+    return vim.api.nvim_err_write(err .. "\n")
+  end
+
+  return thetto.execute(args)
 end
 
 return M
