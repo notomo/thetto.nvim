@@ -29,4 +29,17 @@ describe('thetto', function ()
     assert.filetype("thetto")
   end)
 
+  it("can move to list even if empty", function()
+    command("Thetto line")
+    vim.api.nvim_put({"test"}, "l", false, false)
+    command("doautocmd TextChanged")
+
+    assert.window_count(3)
+    assert.filetype("thetto-filter")
+
+    command("ThettoDo move_to_list")
+
+    assert.filetype("thetto")
+  end)
+
 end)

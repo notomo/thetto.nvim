@@ -197,8 +197,7 @@ M.execute = function(args)
   if vim.bo.filetype == filetype then
     index = vim.fn.line(".")
   end
-  local candidates = state.list.partial
-  local candidate = candidates[index]
+  local candidate = state.list.partial[index]
 
   if kind.options ~= nil and kind.options[args.action] then
     args = vim.tbl_extend("force", args, kind.options[args.action])
@@ -208,10 +207,11 @@ M.execute = function(args)
     M.close(state.list.window)
   end
 
-  if candidate == nil then
-    return
+  local candidates = {}
+  if candidate ~= nil then
+    table.insert(candidates, candidate)
   end
-  return action({candidate}, state)
+  return action(candidates, state)
 end
 
 return M
