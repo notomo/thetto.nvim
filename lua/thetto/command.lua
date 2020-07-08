@@ -23,22 +23,13 @@ M.parse_open_args = function(raw_args)
   return args, nil
 end
 
-M.find_source = function(source_name)
-  local name = ("thetto/source/%s"):format(source_name)
-  local ok, module = pcall(require, name)
-  if not ok then
-    return nil
-  end
-  return module
-end
-
 M.open = function(...)
   local args, err = M.parse_open_args({...})
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
   end
 
-  local source = M.find_source(args.source_name)
+  local source = thetto.find_source(args.source_name)
   if source == nil then
     return vim.api.nvim_err_write("not found source: " .. args.source_name .. "\n")
   end

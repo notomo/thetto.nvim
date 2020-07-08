@@ -159,15 +159,6 @@ M.close = function(window_id)
   vim.api.nvim_win_close(window_id, true)
 end
 
-find_kind = function(kind_name)
-  local name = ("thetto/kind/%s"):format(kind_name)
-  local ok, kind = pcall(require, name)
-  if not ok then
-    return nil
-  end
-  return kind
-end
-
 M.execute = function(args)
   local state = vim.b[state_key]
   if vim.bo.filetype == filter_filetype then
@@ -182,7 +173,7 @@ M.execute = function(args)
   if base_kind[args.action] ~= nil then
     kind = base_kind
   else
-    kind = find_kind(state.kind_name)
+    kind = M.find_kind(state.kind_name)
   end
   if kind == nil then
     return vim.api.nvim_err_write("not found kind: " .. state.kind_name .. "\n")
@@ -212,6 +203,24 @@ M.execute = function(args)
     table.insert(candidates, candidate)
   end
   return action(candidates, state)
+end
+
+M.find_source = function(name)
+  local path = ("thetto/source/%s"):format(name)
+  local ok, source = pcall(require, path)
+  if not ok then
+    return nil
+  end
+  return source
+end
+
+M.find_kind = function(name)
+  local path = ("thetto/kind/%s"):format(name)
+  local ok, kind = pcall(require, path)
+  if not ok then
+    return nil
+  end
+  return kind
 end
 
 return M
