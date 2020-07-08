@@ -23,8 +23,8 @@ M.parse_open_args = function(raw_args)
   return args, nil
 end
 
-M.find_source = function(args)
-  local name = ("thetto/source/%s"):format(args.source_name)
+M.find_source = function(source_name)
+  local name = ("thetto/source/%s"):format(source_name)
   local ok, module = pcall(require, name)
   if not ok then
     return nil
@@ -38,9 +38,9 @@ M.open = function(...)
     return vim.api.nvim_err_write(err .. "\n")
   end
 
-  local source = M.find_source(args)
+  local source = M.find_source(args.source_name)
   if source == nil then
-    return
+    return vim.api.nvim_err_write("not found source: " .. args.source_name .. "\n")
   end
 
   local opts = args
@@ -54,7 +54,8 @@ end
 
 M.parse_execute_args = function(raw_args)
   local args = {
-    action = "default"
+    action = "default",
+    quit = true
   }
 
   for _, a in ipairs(raw_args) do

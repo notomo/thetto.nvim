@@ -1,3 +1,5 @@
+local base_kind = require "thetto/kind"
+
 local M = {}
 
 local state_key = "_thetto_state"
@@ -176,7 +178,12 @@ M.execute = function(args)
     return
   end
 
-  local kind = find_kind(state.kind_name)
+  local kind
+  if base_kind[args.action] ~= nil then
+    kind = base_kind
+  else
+    kind = find_kind(state.kind_name)
+  end
   if kind == nil then
     return vim.api.nvim_err_write("not found kind: " .. state.kind_name .. "\n")
   end
@@ -193,9 +200,18 @@ M.execute = function(args)
   local candidates = state.list.partial
   local candidate = candidates[index]
 
-  M.close(state.list.window)
+  if kind.options ~= nil and kind.options[args.action] then
+    args = vim.tbl_extend("force", args, kind.options[args.action])
+  end
 
-  return action({candidate})
+  if args.quit then
+    M.close(state.list.window)
+  end
+
+  if candidate == nil then
+    return
+  end
+  return action({candidate}, state)
 end
 
 return M
