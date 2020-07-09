@@ -65,6 +65,12 @@ AM.filetype = function(expected)
   assert.equals(expected, actual, msg)
 end
 
+AM.current_dir = function(expected)
+  local actual = vim.fn.getcwd()
+  local msg = ("current dir should be %s, but actual: %s"):format(expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M

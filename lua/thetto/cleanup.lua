@@ -5,4 +5,5 @@ return function(name)
       package.loaded[key] = nil
     end
   end
+  vim.api.nvim_command("doautocmd User ThettoSourceLoad")
 end

@@ -170,7 +170,7 @@ M.execute = function(args)
   end
 
   local kind
-  if base_kind[args.action] ~= nil then
+  if base_kind["action_" .. args.action] ~= nil then
     kind = base_kind
   else
     kind = M.find_kind(state.kind_name)
@@ -179,7 +179,7 @@ M.execute = function(args)
     return vim.api.nvim_err_write("not found kind: " .. state.kind_name .. "\n")
   end
 
-  local action = kind[args.action]
+  local action = kind["action_" .. args.action]
   if action == nil then
     return vim.api.nvim_err_write("not found action: " .. args.action .. "\n")
   end
