@@ -69,6 +69,51 @@ local make_filter_buffer = function(opts)
   }
 end
 
+M._changed_after = function()
+end
+
+local on_changed = function(filter_bufnr)
+  local filter_state = vim.b[filter_state_key]
+  local list_bufnr = filter_state.list.bufnr
+  local state = vim.api.nvim_buf_get_var(list_bufnr, state_key)
+
+  local line = vim.api.nvim_buf_get_lines(filter_bufnr, 0, 1, true)[1]
+  local texts = vim.split(line, "%s")
+  local lines = {}
+  local partial = {}
+  for _, candidate in pairs(state.list.all) do
+    local ok = true
+    for _, text in ipairs(texts) do
+      if not (candidate.value):find(text) then
+        ok = false
+        break
+      end
+    end
+
+    if ok then
+      table.insert(partial, candidate)
+    end
+  end
+  for _, c in pairs({unpack(partial, 0, M.limit)}) do
+    table.insert(lines, c.value)
+  end
+
+  state.list.partial = partial
+  vim.api.nvim_buf_set_var(list_bufnr, state_key, state)
+
+  vim.schedule(
+    function()
+      if not vim.api.nvim_buf_is_valid(list_bufnr) then
+        return
+      end
+      vim.api.nvim_buf_set_option(list_bufnr, "modifiable", true)
+      vim.api.nvim_buf_set_lines(list_bufnr, 0, -1, false, lines)
+      vim.api.nvim_buf_set_option(list_bufnr, "modifiable", false)
+      M._changed_after()
+    end
+  )
+end
+
 M.start = function(source, opts)
   local candidates = source.make()
   local filter_buffer = make_filter_buffer(opts)
@@ -81,13 +126,7 @@ M.start = function(source, opts)
     vim.api.nvim_set_current_win(list_buffer.window)
   end
 
-  local on_changed =
-    ("autocmd TextChanged,TextChangedI <buffer=%s> lua require 'thetto/thetto'.on_changed(%s, %s)"):format(
-    filter_buffer.bufnr,
-    list_buffer.bufnr,
-    filter_buffer.bufnr
-  )
-  vim.api.nvim_command(on_changed)
+  vim.api.nvim_buf_attach(filter_buffer.bufnr, false, {on_lines = on_changed})
 
   local on_list_closed =
     ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close(%s)"):format(
@@ -116,37 +155,6 @@ M.start = function(source, opts)
       filter = {bufnr = filter_buffer.bufnr, window = filter_buffer.window}
     }
   )
-end
-
-M.on_changed = function(list_bufnr, filter_bufnr)
-  local state = vim.api.nvim_buf_get_var(list_bufnr, state_key)
-  local line = vim.api.nvim_buf_get_lines(filter_bufnr, 0, 1, true)[1]
-  local texts = vim.split(line, "%s")
-  local lines = {}
-  local partial = {}
-  for _, candidate in pairs(state.list.all) do
-    local ok = true
-    for _, text in ipairs(texts) do
-      if not (candidate.value):find(text) then
-        ok = false
-        break
-      end
-    end
-
-    if ok then
-      table.insert(partial, candidate)
-    end
-  end
-  for _, c in pairs({unpack(partial, 0, M.limit)}) do
-    table.insert(lines, c.value)
-  end
-
-  state.list.partial = partial
-  vim.api.nvim_buf_set_var(list_bufnr, state_key, state)
-
-  vim.api.nvim_buf_set_option(list_bufnr, "modifiable", true)
-  vim.api.nvim_buf_set_lines(list_bufnr, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(list_bufnr, "modifiable", false)
 end
 
 M.close = function(window_id)

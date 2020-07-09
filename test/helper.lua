@@ -6,9 +6,15 @@ M.command = function(cmd)
   vim.api.nvim_command(cmd)
 end
 
+local waiting = false
+
 M.before_each = function()
   M.command("filetype on")
   M.command("syntax enable")
+  waiting = false
+  require("thetto/thetto")._changed_after = function()
+    waiting = true
+  end
 end
 
 M.after_each = function()
@@ -25,6 +31,22 @@ end
 
 M.set_lines = function(lines)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
+end
+
+M.sync_input = function(texts)
+  vim.api.nvim_put(texts, "l", false, false)
+  local ok =
+    vim.wait(
+    1000,
+    function()
+      return waiting
+    end,
+    10
+  )
+  waiting = false
+  if not ok then
+    assert(false, "wait timeout")
+  end
 end
 
 M.search = function(pattern)
@@ -55,6 +77,14 @@ AM.exists_pattern = function(pattern)
   local result = vim.fn.search(pattern, "n")
   if result == 0 then
     local msg = ("`%s` not found"):format(pattern)
+    assert(false, msg)
+  end
+end
+
+AM.not_exists_pattern = function(pattern)
+  local result = vim.fn.search(pattern, "n")
+  if result ~= 0 then
+    local msg = ("`%s` found"):format(pattern)
     assert(false, msg)
   end
 end
