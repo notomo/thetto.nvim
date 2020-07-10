@@ -111,6 +111,7 @@ local on_changed = function(filter_bufnr)
       vim.api.nvim_buf_set_option(list_bufnr, "modifiable", true)
       vim.api.nvim_buf_set_lines(list_bufnr, 0, -1, false, lines)
       vim.api.nvim_buf_set_option(list_bufnr, "modifiable", false)
+      vim.api.nvim_win_set_cursor(state.list.window, {1, 0})
       M._changed_after()
     end
   )
