@@ -7,7 +7,7 @@ describe('source source', function ()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can runtime paths", function()
+  it("can show all sources", function()
     command("Thetto source --no-insert")
 
     assert.exists_pattern("source")
