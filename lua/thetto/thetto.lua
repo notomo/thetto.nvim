@@ -8,12 +8,12 @@ local filetype = "thetto"
 local filter_filetype = "thetto-filter"
 
 M.limit = 100
-M.debounce = 50
+M.debounce_ms = 50
 
 local make_list_buffer = function(candidates, opts)
   local lines = {}
-  local partial = vim.tbl_values({unpack(candidates, 0, M.limit)})
-  for _, candidate in pairs(partial) do
+  local filtered = vim.tbl_values({unpack(candidates, 0, M.limit)})
+  for _, candidate in pairs(filtered) do
     table.insert(lines, candidate.value)
   end
 
@@ -41,7 +41,7 @@ local make_list_buffer = function(candidates, opts)
     window = window_id,
     bufnr = bufnr,
     all = candidates,
-    partial = partial
+    filtered = filtered
   }
 end
 
@@ -70,6 +70,7 @@ local make_filter_buffer = function(opts)
   }
 end
 
+-- for testing
 M._changed_after = function()
 end
 
@@ -81,7 +82,7 @@ local on_changed = function(filter_bufnr)
   local line = vim.api.nvim_buf_get_lines(filter_bufnr, 0, 1, true)[1]
   local texts = vim.split(line, "%s")
   local lines = {}
-  local partial = {}
+  local filtered = {}
   for _, candidate in pairs(state.list.all) do
     local ok = true
     for _, text in ipairs(texts) do
@@ -92,14 +93,14 @@ local on_changed = function(filter_bufnr)
     end
 
     if ok then
-      table.insert(partial, candidate)
+      table.insert(filtered, candidate)
     end
   end
-  for _, c in pairs({unpack(partial, 0, M.limit)}) do
+  for _, c in pairs({unpack(filtered, 0, M.limit)}) do
     table.insert(lines, c.value)
   end
 
-  state.list.partial = partial
+  state.list.filtered = filtered
   vim.api.nvim_buf_set_var(list_bufnr, state_key, state)
 
   vim.schedule(
@@ -138,7 +139,7 @@ M.start = function(source, opts)
     end
   end
 
-  vim.api.nvim_buf_attach(filter_buffer.bufnr, false, {on_lines = debounce(M.debounce, on_changed)})
+  vim.api.nvim_buf_attach(filter_buffer.bufnr, false, {on_lines = debounce(M.debounce_ms, on_changed)})
 
   local on_list_closed =
     ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close(%s)"):format(
@@ -208,7 +209,7 @@ M.execute = function(args)
   if vim.bo.filetype == filetype then
     index = vim.fn.line(".")
   end
-  local candidate = state.list.partial[index]
+  local candidate = state.list.filtered[index]
 
   if kind.options ~= nil and kind.options[args.action] then
     args = vim.tbl_extend("force", args, kind.options[args.action])
