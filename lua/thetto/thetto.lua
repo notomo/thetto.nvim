@@ -7,6 +7,37 @@ local filter_state_key = "_thetto_filter_state"
 local filetype = "thetto"
 local filter_filetype = "thetto-filter"
 
+local wrap_state = function(raw_state)
+  return {
+    list = raw_state.list,
+    filter = raw_state.filter,
+    kind_name = raw_state.kind_name,
+    update = function(filtered)
+      raw_state.list.filtered = filtered
+      vim.api.nvim_buf_set_var(raw_state.list.bufnr, state_key, raw_state)
+    end,
+    fixed = function()
+      return {list = raw_state.list, filter = raw_state.filter}
+    end
+  }
+end
+
+local save_state = function(list_buffer, filter_buffer, kind_name)
+  local raw_state = {list = list_buffer, filter = filter_buffer, kind_name = kind_name}
+  vim.api.nvim_buf_set_var(list_buffer.bufnr, state_key, raw_state)
+  local state = wrap_state(raw_state)
+  vim.api.nvim_buf_set_var(filter_buffer.bufnr, filter_state_key, state.fixed())
+end
+
+local get_state = function()
+  local state = vim.b[state_key]
+  if vim.bo.filetype == filter_filetype then
+    local filter_state = vim.b[filter_state_key]
+    state = vim.api.nvim_buf_get_var(filter_state.list.bufnr, state_key)
+  end
+  return wrap_state(state)
+end
+
 M.limit = 100
 M.debounce_ms = 50
 
@@ -75,9 +106,7 @@ M._changed_after = function()
 end
 
 local on_changed = function(filter_bufnr)
-  local filter_state = vim.b[filter_state_key]
-  local list_bufnr = filter_state.list.bufnr
-  local state = vim.api.nvim_buf_get_var(list_bufnr, state_key)
+  local state = get_state()
 
   local line = vim.api.nvim_buf_get_lines(filter_bufnr, 0, 1, true)[1]
   local texts = vim.split(line, "%s")
@@ -100,17 +129,16 @@ local on_changed = function(filter_bufnr)
     table.insert(lines, c.value)
   end
 
-  state.list.filtered = filtered
-  vim.api.nvim_buf_set_var(list_bufnr, state_key, state)
+  state.update(filtered)
 
   vim.schedule(
     function()
-      if not vim.api.nvim_buf_is_valid(list_bufnr) then
+      if not vim.api.nvim_buf_is_valid(state.list.bufnr) then
         return
       end
-      vim.api.nvim_buf_set_option(list_bufnr, "modifiable", true)
-      vim.api.nvim_buf_set_lines(list_bufnr, 0, -1, false, lines)
-      vim.api.nvim_buf_set_option(list_bufnr, "modifiable", false)
+      vim.api.nvim_buf_set_option(state.list.bufnr, "modifiable", true)
+      vim.api.nvim_buf_set_lines(state.list.bufnr, 0, -1, false, lines)
+      vim.api.nvim_buf_set_option(state.list.bufnr, "modifiable", false)
       vim.api.nvim_win_set_cursor(state.list.window, {1, 0})
       M._changed_after()
     end
@@ -156,19 +184,7 @@ M.start = function(source, opts)
   )
   vim.api.nvim_command(on_filter_closed)
 
-  vim.api.nvim_buf_set_var(
-    list_buffer.bufnr,
-    state_key,
-    {list = list_buffer, filter = filter_buffer, kind_name = source.kind_name}
-  )
-  vim.api.nvim_buf_set_var(
-    filter_buffer.bufnr,
-    filter_state_key,
-    {
-      list = {bufnr = list_buffer.bufnr, window = list_buffer.window},
-      filter = {bufnr = filter_buffer.bufnr, window = filter_buffer.window}
-    }
-  )
+  save_state(list_buffer, filter_buffer, source.kind_name)
 end
 
 M.close = function(window_id)
@@ -182,11 +198,7 @@ M.close = function(window_id)
 end
 
 M.execute = function(args)
-  local state = vim.b[state_key]
-  if vim.bo.filetype == filter_filetype then
-    local filter_state = vim.b[filter_state_key]
-    state = vim.api.nvim_buf_get_var(filter_state.list.bufnr, state_key)
-  end
+  local state = get_state()
   if state == nil then
     return
   end
@@ -224,7 +236,7 @@ M.execute = function(args)
   if candidate ~= nil then
     table.insert(candidates, candidate)
   end
-  return action(candidates, state)
+  return action(candidates, state.fixed())
 end
 
 M.find_source = function(name)
