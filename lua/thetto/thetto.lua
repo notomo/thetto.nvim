@@ -8,6 +8,7 @@ local filetype = "thetto"
 local filter_filetype = "thetto-filter"
 
 M.limit = 100
+M.debounce = 50
 
 local make_list_buffer = function(candidates, opts)
   local lines = {}
@@ -126,7 +127,18 @@ M.start = function(source, opts)
     vim.api.nvim_set_current_win(list_buffer.window)
   end
 
-  vim.api.nvim_buf_attach(filter_buffer.bufnr, false, {on_lines = on_changed})
+  local timer = nil
+  local debounce = function(ms, f)
+    return function()
+      if timer == nil then
+        timer = vim.loop.new_timer()
+      end
+      timer:stop()
+      timer:start(ms, 0, vim.schedule_wrap(f))
+    end
+  end
+
+  vim.api.nvim_buf_attach(filter_buffer.bufnr, false, {on_lines = debounce(M.debounce, on_changed)})
 
   local on_list_closed =
     ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close(%s)"):format(
