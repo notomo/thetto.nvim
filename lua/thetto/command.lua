@@ -28,19 +28,7 @@ M.open = function(...)
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
   end
-
-  local source = thetto.find_source(args.source_name)
-  if source == nil then
-    return vim.api.nvim_err_write("not found source: " .. args.source_name .. "\n")
-  end
-
-  local opts = args
-  opts.width = 80
-  opts.height = 25
-  opts.row = vim.o.lines / 2 - (opts.height / 2)
-  opts.column = vim.o.columns / 2 - (opts.width / 2)
-
-  thetto.start(source, opts)
+  return thetto.start(args)
 end
 
 M.parse_execute_args = function(raw_args)
@@ -66,7 +54,6 @@ M.execute = function(...)
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
   end
-
   return thetto.execute(args)
 end
 
