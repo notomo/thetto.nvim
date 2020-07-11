@@ -24,11 +24,15 @@ M.parse_open_args = function(raw_args)
 end
 
 M.open = function(...)
-  local args, err = M.parse_open_args({...})
+  local args, parse_err = M.parse_open_args({...})
+  if parse_err ~= nil then
+    return vim.api.nvim_err_write(parse_err .. "\n")
+  end
+
+  local err = thetto.start(args)
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
   end
-  return thetto.start(args)
 end
 
 M.parse_execute_args = function(raw_args)
@@ -50,11 +54,15 @@ M.parse_execute_args = function(raw_args)
 end
 
 M.execute = function(...)
-  local args, err = M.parse_execute_args({...})
+  local args, parse_err = M.parse_execute_args({...})
+  if parse_err ~= nil then
+    return vim.api.nvim_err_write(parse_err .. "\n")
+  end
+
+  local err = thetto.execute(args)
   if err ~= nil then
     return vim.api.nvim_err_write(err .. "\n")
   end
-  return thetto.execute(args)
 end
 
 return M

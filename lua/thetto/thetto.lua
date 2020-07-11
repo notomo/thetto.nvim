@@ -114,7 +114,7 @@ end
 M.start = function(args)
   local source = util.find_source(args.source_name)
   if source == nil then
-    return vim.api.nvim_err_write("not found source: " .. args.source_name .. "\n")
+    return "not found source: " .. args.source_name
   end
 
   local opts = args
@@ -161,14 +161,14 @@ M.execute = function(args)
 
   local kind = kinds.find(state.kind_name, args.action)
   if kind == nil then
-    return vim.api.nvim_err_write("not found kind: " .. state.kind_name .. "\n")
+    return "not found kind: " .. state.kind_name
   end
 
   local opts = kind.options(args)
 
   local action = kind.find_action(args.action)
   if action == nil then
-    return vim.api.nvim_err_write("not found action: " .. args.action .. "\n")
+    return "not found action: " .. args.action
   end
 
   local candidate = state.select_from_list()
