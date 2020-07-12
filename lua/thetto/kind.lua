@@ -5,12 +5,12 @@ local M = {}
 local base_kind = {}
 
 base_kind.options = {
-  move_to_filter = {quit = false},
+  move_to_input = {quit = false},
   move_to_list = {quit = false}
 }
 
-base_kind.action_move_to_filter = function(_, state)
-  vim.api.nvim_set_current_win(state.windows.filter)
+base_kind.action_move_to_input = function(_, state)
+  vim.api.nvim_set_current_win(state.windows.input)
   vim.api.nvim_command("startinsert")
 end
 

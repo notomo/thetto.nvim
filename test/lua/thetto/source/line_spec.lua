@@ -35,7 +35,7 @@ test3]])
     command("Thetto line")
 
     assert.window_count(3)
-    assert.filetype("thetto-filter")
+    assert.filetype("thetto-input")
 
     command("ThettoDo")
 

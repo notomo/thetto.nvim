@@ -3,10 +3,10 @@ local util = require "thetto/util"
 local M = {}
 
 local list_state_key = "_thetto_list_state"
-local filter_state_key = "_thetto_filter_state"
+local input_state_key = "_thetto_input_state"
 
 M.list_filetype = "thetto"
-M.filter_filetype = "thetto-filter"
+M.input_filetype = "thetto-input"
 
 local wrap = function(raw_state)
   return {
@@ -35,9 +35,9 @@ end
 
 M.get = function(bufnr)
   local state = util.buffer_var(bufnr, list_state_key)
-  if vim.bo.filetype == M.filter_filetype then
-    local filter_state = util.buffer_var(bufnr, filter_state_key)
-    state = vim.api.nvim_buf_get_var(filter_state.buffers.list, list_state_key)
+  if vim.bo.filetype == M.input_filetype then
+    local input_state = util.buffer_var(bufnr, input_state_key)
+    state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
   end
   if state == nil then
     return nil, "not found state"
@@ -50,7 +50,7 @@ M.set = function(buffers, windows)
   local raw_state = {buffers = buffers, windows = windows, started_at = vim.fn.reltimestr(vim.fn.reltime())}
   vim.api.nvim_buf_set_var(buffers.list, list_state_key, raw_state)
   local state = wrap(raw_state)
-  vim.api.nvim_buf_set_var(buffers.filter, filter_state_key, state.fixed())
+  vim.api.nvim_buf_set_var(buffers.input, input_state_key, state.fixed())
 end
 
 M.recent = function(source_name)

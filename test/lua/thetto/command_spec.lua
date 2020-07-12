@@ -28,16 +28,16 @@ test3]])
     assert.window_count(3)
     assert.filetype("thetto")
 
-    command("ThettoDo move_to_filter")
+    command("ThettoDo move_to_input")
 
-    assert.filetype("thetto-filter")
+    assert.filetype("thetto-input")
   end)
 
   it("can move to list", function()
     command("Thetto line")
 
     assert.window_count(3)
-    assert.filetype("thetto-filter")
+    assert.filetype("thetto-input")
 
     command("ThettoDo move_to_list")
 
@@ -49,7 +49,7 @@ test3]])
     helper.sync_input({"test"})
 
     assert.window_count(3)
-    assert.filetype("thetto-filter")
+    assert.filetype("thetto-input")
 
     command("ThettoDo move_to_list")
 
@@ -69,7 +69,7 @@ test22]])
     command("Thetto --resume")
 
     assert.window_count(3)
-    assert.filetype("thetto-filter")
+    assert.filetype("thetto-input")
     assert.current_line("test2")
 
     command("ThettoDo move_to_list")
@@ -92,7 +92,7 @@ test22]])
     command("Thetto line --resume")
 
     assert.window_count(3)
-    assert.filetype("thetto-filter")
+    assert.filetype("thetto-input")
     assert.current_line("test2")
 
     command("ThettoDo move_to_list")
