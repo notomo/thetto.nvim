@@ -10,12 +10,12 @@ base_kind.options = {
 }
 
 base_kind.action_move_to_filter = function(_, state)
-  vim.api.nvim_set_current_win(state.filter.window)
+  vim.api.nvim_set_current_win(state.windows.filter)
   vim.api.nvim_command("startinsert")
 end
 
 base_kind.action_move_to_list = function(_, state)
-  vim.api.nvim_set_current_win(state.list.window)
+  vim.api.nvim_set_current_win(state.windows.list)
 end
 
 local wrap = function(raw_kind)

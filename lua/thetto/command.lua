@@ -4,7 +4,8 @@ local M = {}
 
 M.parse_open_args = function(raw_args)
   local args = {
-    insert = true
+    insert = true,
+    resume = false
   }
 
   for _, a in ipairs(raw_args) do
@@ -13,10 +14,13 @@ M.parse_open_args = function(raw_args)
     elseif vim.startswith(a, "--no-") then
       local key = a:sub(#("--no-") + 1)
       args[key] = false
+    elseif vim.startswith(a, "--") and not a:find("=") then
+      local key = a:sub(#("--") + 1)
+      args[key] = true
     end
   end
 
-  if args.source_name == nil then
+  if args.source_name == nil and not args.resume then
     return nil, "no source"
   end
 

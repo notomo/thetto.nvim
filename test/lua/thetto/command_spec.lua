@@ -56,4 +56,48 @@ test3]])
     assert.filetype("thetto")
   end)
 
+  it("can resume latest", function()
+    helper.set_lines([[
+test11
+test21
+test22]])
+
+    command("Thetto line")
+    helper.sync_input({"test2"})
+
+    command("quit")
+    command("Thetto --resume")
+
+    assert.window_count(3)
+    assert.filetype("thetto-filter")
+    assert.current_line("test2")
+
+    command("ThettoDo move_to_list")
+
+    assert.current_line("test21")
+  end)
+
+  it("can resume by source", function()
+    helper.set_lines([[
+test11
+test21
+test22]])
+
+    command("Thetto line")
+    helper.sync_input({"test2"})
+
+    command("quit")
+    command("Thetto runtimepath")
+    command("quit")
+    command("Thetto line --resume")
+
+    assert.window_count(3)
+    assert.filetype("thetto-filter")
+    assert.current_line("test2")
+
+    command("ThettoDo move_to_list")
+
+    assert.current_line("test21")
+  end)
+
 end)

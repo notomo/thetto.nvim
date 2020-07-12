@@ -10,43 +10,75 @@ M.filter_filetype = "thetto-filter"
 
 local wrap = function(raw_state)
   return {
-    list = raw_state.list,
-    filter = raw_state.filter,
-    kind_name = raw_state.kind_name,
+    buffers = raw_state.buffers,
+    windows = raw_state.windows,
+    started_at = raw_state.started_at,
     update = function(filtered)
-      raw_state.list.filtered = filtered
-      vim.api.nvim_buf_set_var(raw_state.list.bufnr, list_state_key, raw_state)
+      raw_state.buffers.filtered = filtered
+      vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
     end,
     fixed = function()
-      return {list = raw_state.list, filter = raw_state.filter}
+      return {buffers = raw_state.buffers, windows = raw_state.windows}
     end,
     select_from_list = function()
       local index = 1
       if vim.bo.filetype == M.list_filetype then
         index = vim.fn.line(".")
       end
-      return raw_state.list.filtered[index]
+      return raw_state.buffers.filtered[index]
     end,
     close = function()
-      util.close_window(raw_state.list.window)
+      util.close_window(raw_state.windows.list)
     end
   }
 end
 
-M.get = function()
-  local state = vim.b[list_state_key]
+M.get = function(bufnr)
+  local state = util.buffer_var(bufnr, list_state_key)
   if vim.bo.filetype == M.filter_filetype then
-    local filter_state = vim.b[filter_state_key]
-    state = vim.api.nvim_buf_get_var(filter_state.list.bufnr, list_state_key)
+    local filter_state = util.buffer_var(bufnr, filter_state_key)
+    state = vim.api.nvim_buf_get_var(filter_state.buffers.list, list_state_key)
   end
-  return wrap(state)
+  if state == nil then
+    return nil, "not found state"
+  end
+  return wrap(state), nil
 end
 
-M.set = function(list_buffer, filter_buffer, kind_name)
-  local raw_state = {list = list_buffer, filter = filter_buffer, kind_name = kind_name}
-  vim.api.nvim_buf_set_var(list_buffer.bufnr, list_state_key, raw_state)
+M.set = function(buffers, windows)
+  -- HACk: save started_at as str
+  local raw_state = {buffers = buffers, windows = windows, started_at = vim.fn.reltimestr(vim.fn.reltime())}
+  vim.api.nvim_buf_set_var(buffers.list, list_state_key, raw_state)
   local state = wrap(raw_state)
-  vim.api.nvim_buf_set_var(filter_buffer.bufnr, filter_state_key, state.fixed())
+  vim.api.nvim_buf_set_var(buffers.filter, filter_state_key, state.fixed())
+end
+
+M.recent = function(source_name)
+  local bufnrs = vim.api.nvim_list_bufs()
+  local states = {}
+
+  local pattern = "thetto://%w+/thetto"
+  if source_name ~= nil then
+    pattern = ("thetto://%s/thetto"):format(source_name)
+  end
+
+  for _, bufnr in ipairs(bufnrs) do
+    local path = vim.api.nvim_buf_get_name(bufnr)
+    if path:match(pattern) then
+      local state = M.get(bufnr)
+      table.insert(states, state)
+    end
+  end
+
+  local recent = nil
+  local recent_time = 0
+  for _, state in ipairs(states) do
+    if recent_time < tonumber(state.started_at) then
+      recent = state
+    end
+  end
+
+  return recent
 end
 
 return M
