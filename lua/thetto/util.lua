@@ -16,6 +16,10 @@ M.find_kind = function(name)
   return find_module("thetto/kind/" .. name)
 end
 
+M.find_iteradapter = function(name)
+  return find_module("thetto/iteradapter/" .. name)
+end
+
 M.close_window = function(id)
   if id == "" then
     return
@@ -55,6 +59,10 @@ M.buffer_var = function(bufnr, name)
     return nil
   end
   return var
+end
+
+M.print_err = function(err)
+  vim.api.nvim_err_write(err .. "\n")
 end
 
 return M

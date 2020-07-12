@@ -59,26 +59,22 @@ end
 local on_changed = function(input_bufnr)
   local state, err = states.get(0)
   if err ~= nil then
-    return err
+    util.print_err(err)
+    return
   end
   local line = vim.api.nvim_buf_get_lines(input_bufnr, 0, 1, true)[1]
 
-  local texts = vim.split(line, "%s")
-  local lines = {}
-  local filtered = {}
-  for _, candidate in pairs(state.buffers.all) do
-    local ok = true
-    for _, text in ipairs(texts) do
-      if not (candidate.value):find(text) then
-        ok = false
-        break
-      end
+  local filtered = {unpack(state.buffers.all)}
+  for _, name in ipairs(state.buffers.iteradapter_names) do
+    local iteradapter = util.find_iteradapter(name)
+    if iteradapter == nil then
+      util.print_err("not found iteradapter: " .. name)
+      return
     end
-
-    if ok then
-      table.insert(filtered, candidate)
-    end
+    filtered = iteradapter.apply(filtered, line)
   end
+
+  local lines = {}
   for _, c in pairs({unpack(filtered, 0, M.limit)}) do
     table.insert(lines, c.value)
   end
@@ -140,7 +136,14 @@ local make_buffers = function(opts)
     end
   )
 
-  return {list = list_bufnr, input = input_bufnr, all = candidates, filtered = filtered, kind_name = source.kind_name}, nil
+  return {
+    list = list_bufnr,
+    input = input_bufnr,
+    all = candidates,
+    filtered = filtered,
+    kind_name = source.kind_name,
+    iteradapter_names = source.iteradapter_names or {"filter/substring"}
+  }, nil
 end
 
 M.start = function(args)
