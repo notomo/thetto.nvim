@@ -1,19 +1,19 @@
 local M = {}
 
-M.apply = function(candidates, line)
+M.apply = function(items, line)
   local filtered = {}
   local texts = vim.split(line, "%s")
-  for _, candidate in ipairs(candidates) do
+  for _, item in ipairs(items) do
     local ok = true
     for _, text in ipairs(texts) do
-      if not (candidate.value):find(text) then
+      if not item.value:find(text) then
         ok = false
         break
       end
     end
 
     if ok then
-      table.insert(filtered, candidate)
+      table.insert(filtered, item)
     end
   end
   return filtered

@@ -1,8 +1,8 @@
 local M = {}
 
-M.action_open = function(candidates)
-  for _, candidate in ipairs(candidates) do
-    vim.api.nvim_command("help " .. candidate.value)
+M.action_open = function(items)
+  for _, item in ipairs(items) do
+    vim.api.nvim_command("help " .. item.value)
     vim.api.nvim_command("only")
   end
 end

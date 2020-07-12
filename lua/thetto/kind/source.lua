@@ -1,8 +1,8 @@
 local M = {}
 
-M.action_execute = function(candidates)
-  for _, candidate in ipairs(candidates) do
-    vim.api.nvim_command("Thetto " .. candidate.source_name)
+M.action_execute = function(items)
+  for _, item in ipairs(items) do
+    vim.api.nvim_command("Thetto " .. item.source_name)
   end
 end
 

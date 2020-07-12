@@ -7,7 +7,7 @@ local M = {}
 M.limit = 100
 M.debounce_ms = 50
 
-local open_view = function(buffers, opts)
+local open_windows = function(buffers, opts)
   local list_window =
     vim.api.nvim_open_win(
     buffers.list,
@@ -110,11 +110,11 @@ local make_buffers = function(opts)
     return nil, "not found source: " .. source_name
   end
 
-  local candidates = source.make()
+  local items = source.make()
   local lines = {}
-  local filtered = vim.tbl_values({unpack(candidates, 0, M.limit)})
-  for _, candidate in pairs(filtered) do
-    table.insert(lines, candidate.value)
+  local filtered = vim.tbl_values({unpack(items, 0, M.limit)})
+  for _, item in pairs(filtered) do
+    table.insert(lines, item.value)
   end
 
   local list_bufnr =
@@ -139,7 +139,7 @@ local make_buffers = function(opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
-    all = candidates,
+    all = items,
     filtered = filtered,
     kind_name = source.kind_name,
     iteradapter_names = source.iteradapter_names or {"filter/substring"}
@@ -158,7 +158,7 @@ M.start = function(args)
     return err
   end
 
-  local windows = open_view(buffers, opts)
+  local windows = open_windows(buffers, opts)
 
   states.set(buffers, windows)
 end
@@ -181,17 +181,17 @@ M.execute = function(args)
     return "not found action: " .. args.action
   end
 
-  local candidates = {}
-  local candidate = state.select_from_list()
-  if candidate ~= nil then
-    table.insert(candidates, candidate)
+  local items = {}
+  local item = state.select_from_list()
+  if item ~= nil then
+    table.insert(items, item)
   end
 
   if opts.quit then
     state.close()
   end
 
-  return action(candidates, state.fixed())
+  return action(items, state.fixed())
 end
 
 M.close_window = function(id)

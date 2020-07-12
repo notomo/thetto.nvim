@@ -1,8 +1,8 @@
 local M = {}
 
-M.action_open = function(candidates)
-  for _, candidate in ipairs(candidates) do
-    vim.api.nvim_win_set_cursor(0, {candidate.row, 0})
+M.action_open = function(items)
+  for _, item in ipairs(items) do
+    vim.api.nvim_win_set_cursor(0, {item.row, 0})
   end
 end
 
