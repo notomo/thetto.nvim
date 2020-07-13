@@ -11,6 +11,7 @@ describe('source source', function ()
     command("Thetto source --no-insert")
 
     assert.exists_pattern("source")
+    assert.exists_pattern("file/mru")
     helper.search("runtimepath")
 
     command("ThettoDo")
