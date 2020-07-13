@@ -89,6 +89,12 @@ AM.not_exists_pattern = function(pattern)
   end
 end
 
+AM.file_name = function(expected)
+  local actual = vim.fn.fnamemodify(vim.fn.bufname("%"), ":t")
+  local msg = ("file name should be %s, but actual: %s"):format(expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 AM.filetype = function(expected)
   local actual = vim.bo.filetype
   local msg = ("buffer &filetype should be %s, but actual: %s"):format(expected, actual)

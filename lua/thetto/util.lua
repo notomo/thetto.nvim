@@ -61,6 +61,18 @@ M.buffer_var = function(bufnr, name)
   return var
 end
 
+M.uniq = function(list)
+  local hash = {}
+  local new_list = {}
+  for _, v in ipairs(list) do
+    if not hash[v] then
+      new_list[#new_list + 1] = v
+      hash[v] = true
+    end
+  end
+  return new_list
+end
+
 M.print_err = function(err)
   vim.api.nvim_err_write(err .. "\n")
 end
