@@ -30,7 +30,9 @@ M.open = function(...)
     "source_name",
     {
       insert = true,
-      resume = false
+      resume = false,
+      width = 80,
+      height = 25
     }
   )
   if parse_err ~= nil then

@@ -8,6 +8,9 @@ M.limit = 100
 M.debounce_ms = 50
 
 local open_windows = function(buffers, opts)
+  local row = vim.o.lines / 2 - (opts.height / 2)
+  local column = vim.o.columns / 2 - (opts.width / 2)
+
   local list_window =
     vim.api.nvim_open_win(
     buffers.list,
@@ -16,8 +19,8 @@ local open_windows = function(buffers, opts)
       width = opts.width,
       height = opts.height,
       relative = "editor",
-      row = opts.row,
-      col = opts.column,
+      row = row,
+      col = column,
       external = false,
       style = "minimal"
     }
@@ -31,8 +34,8 @@ local open_windows = function(buffers, opts)
       width = opts.width,
       height = 1,
       relative = "editor",
-      row = opts.row + opts.height,
-      col = opts.column,
+      row = row + opts.height,
+      col = column,
       external = false,
       style = "minimal"
     }
@@ -59,64 +62,56 @@ end
 local on_changed = function(input_bufnr)
   local state, err = states.get(0)
   if err ~= nil then
-    util.print_err(err)
-    return
+    return util.print_err(err)
   end
   local line = vim.api.nvim_buf_get_lines(input_bufnr, 0, 1, true)[1]
 
-  local filtered = {unpack(state.buffers.all)}
+  local items = {unpack(state.buffers.all)}
   for _, name in ipairs(state.buffers.iteradapter_names) do
     local iteradapter = util.find_iteradapter(name)
     if iteradapter == nil then
-      util.print_err("not found iteradapter: " .. name)
-      return
+      return util.print_err("not found iteradapter: " .. name)
     end
-    filtered = iteradapter.apply(filtered, line)
+    items = iteradapter.apply(items, line)
   end
 
-  local lines = {}
-  for _, c in pairs({unpack(filtered, 0, M.limit)}) do
-    table.insert(lines, c.value)
-  end
+  state.update(items)
 
-  state.update(filtered)
-
+  local _, lines = M._head(items)
+  local bufnr = state.buffers.list
+  local window = state.windows.list
   vim.schedule(
     function()
-      if not vim.api.nvim_buf_is_valid(state.buffers.list) then
+      if not vim.api.nvim_buf_is_valid(bufnr) then
         return
       end
-      vim.api.nvim_buf_set_option(state.buffers.list, "modifiable", true)
-      vim.api.nvim_buf_set_lines(state.buffers.list, 0, -1, false, lines)
-      vim.api.nvim_buf_set_option(state.buffers.list, "modifiable", false)
-      vim.api.nvim_win_set_cursor(state.windows.list, {1, 0})
+      vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+      vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+      vim.api.nvim_win_set_cursor(window, {1, 0})
       M._changed_after()
     end
   )
 end
 
 local make_buffers = function(opts)
+  local source_name = opts.source_name
+
   if opts.resume then
-    local state = states.recent(opts.source_name)
+    local state = states.recent(source_name)
     if state == nil then
       return nil, "no source to resume"
     end
     return state.buffers
   end
 
-  local source_name = opts.source_name
   local source = util.find_source(source_name)
   if source == nil then
     return nil, "not found source: " .. source_name
   end
 
-  local items = source.make()
-  local lines = {}
-  local filtered = vim.tbl_values({unpack(items, 0, M.limit)})
-  for _, item in pairs(filtered) do
-    table.insert(lines, item.value)
-  end
-
+  local all_items = source.make()
+  local items, lines = M._head(all_items)
   local list_bufnr =
     util.create_buffer(
     ("thetto://%s/%s"):format(source_name, states.list_filetype),
@@ -139,8 +134,8 @@ local make_buffers = function(opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
-    all = items,
-    filtered = filtered,
+    all = all_items,
+    filtered = items,
     kind_name = source.kind_name,
     iteradapter_names = source.iteradapter_names or {"filter/substring"}
   }, nil
@@ -148,10 +143,6 @@ end
 
 M.start = function(args)
   local opts = args
-  opts.width = 80
-  opts.height = 25
-  opts.row = vim.o.lines / 2 - (opts.height / 2)
-  opts.column = vim.o.columns / 2 - (opts.width / 2)
 
   local buffers, err = make_buffers(opts)
   if err ~= nil then
@@ -196,6 +187,15 @@ end
 
 M.close_window = function(id)
   util.close_window(id)
+end
+
+M._head = function(items)
+  local lines = {}
+  local filtered = vim.tbl_values({unpack(items, 0, M.limit)})
+  for _, item in pairs(items) do
+    table.insert(lines, item.value)
+  end
+  return filtered, lines
 end
 
 -- for testing
