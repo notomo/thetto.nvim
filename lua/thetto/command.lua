@@ -31,6 +31,8 @@ M.open = function(...)
     {
       insert = true,
       resume = false,
+      ignorecase = false,
+      smartcase = true,
       width = 80,
       height = 25
     }

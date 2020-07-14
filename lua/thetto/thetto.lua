@@ -64,7 +64,12 @@ local on_changed = function(input_bufnr)
   if err ~= nil then
     return util.print_err(err)
   end
+
   local line = vim.api.nvim_buf_get_lines(input_bufnr, 0, 1, true)[1]
+  local opts = vim.deepcopy(state.buffers.opts)
+  if not opts.ignorecase and opts.smartcase and line:find("[A-Z]") then
+    opts.ignorecase = false
+  end
 
   local items = {unpack(state.buffers.all)}
   for _, name in ipairs(state.buffers.iteradapter_names) do
@@ -72,7 +77,7 @@ local on_changed = function(input_bufnr)
     if iteradapter == nil then
       return util.print_err("not found iteradapter: " .. name)
     end
-    items = iteradapter.apply(items, line)
+    items = iteradapter.apply(items, line, opts)
   end
 
   state.update(items)
@@ -137,7 +142,8 @@ local make_buffers = function(opts)
     all = all_items,
     filtered = items,
     kind_name = source.kind_name,
-    iteradapter_names = source.iteradapter_names or {"filter/substring"}
+    iteradapter_names = source.iteradapter_names or {"filter/substring"},
+    opts = opts
   }, nil
 end
 

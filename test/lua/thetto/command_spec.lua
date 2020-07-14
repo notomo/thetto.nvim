@@ -100,4 +100,46 @@ test22]])
     assert.current_line("test21")
   end)
 
+  it("can filter with ignorecase", function()
+    helper.set_lines([[
+test1
+TEST2
+test2
+test3]])
+
+    command("Thetto line --ignorecase")
+    helper.sync_input({"test2"})
+
+    command("ThettoDo move_to_list")
+
+    assert.current_line("TEST2")
+  end)
+
+  it("can filter with smartcase", function()
+    helper.set_lines([[
+tEST1
+test1
+hoge]])
+
+    command("Thetto line --smartcase")
+    helper.sync_input({"t"})
+
+    command("ThettoDo move_to_list")
+
+    assert.exists_pattern("tEST1")
+    assert.exists_pattern("test1")
+    assert.not_exists_pattern("hoge")
+
+    command("ThettoDo move_to_input")
+
+    command("normal! $")
+    helper.sync_input({"E"})
+
+    command("ThettoDo move_to_list")
+
+    assert.exists_pattern("tEST1")
+    assert.not_exists_pattern("test1")
+    assert.not_exists_pattern("hoge")
+  end)
+
 end)

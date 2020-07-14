@@ -34,7 +34,7 @@ M.set_lines = function(lines)
 end
 
 M.sync_input = function(texts)
-  vim.api.nvim_put(texts, "l", false, false)
+  vim.api.nvim_put(texts, "c", true, true)
   local ok =
     vim.wait(
     1000,
