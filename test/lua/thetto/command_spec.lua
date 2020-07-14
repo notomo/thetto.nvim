@@ -117,7 +117,7 @@ test3]])
 
   it("can filter with smartcase", function()
     helper.set_lines([[
-tEST1
+TEST1
 test1
 hoge]])
 
@@ -126,18 +126,18 @@ hoge]])
 
     command("ThettoDo move_to_list")
 
-    assert.exists_pattern("tEST1")
+    assert.exists_pattern("TEST1")
     assert.exists_pattern("test1")
     assert.not_exists_pattern("hoge")
 
     command("ThettoDo move_to_input")
 
-    command("normal! $")
-    helper.sync_input({"E"})
+    command("normal! dd")
+    helper.sync_input({"TE"})
 
     command("ThettoDo move_to_list")
 
-    assert.exists_pattern("tEST1")
+    assert.exists_pattern("TEST1")
     assert.not_exists_pattern("test1")
     assert.not_exists_pattern("hoge")
   end)

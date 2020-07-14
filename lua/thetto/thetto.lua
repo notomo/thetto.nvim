@@ -69,6 +69,8 @@ local on_changed = function(input_bufnr)
   local opts = vim.deepcopy(state.buffers.opts)
   if not opts.ignorecase and opts.smartcase and line:find("[A-Z]") then
     opts.ignorecase = false
+  else
+    opts.ignorecase = true
   end
 
   -- NOTE: avoid `too many results to unpack`
