@@ -71,7 +71,12 @@ local on_changed = function(input_bufnr)
     opts.ignorecase = false
   end
 
-  local items = {unpack(state.buffers.all)}
+  -- NOTE: avoid `too many results to unpack`
+  local items = {}
+  for _, item in ipairs(state.buffers.all) do
+    table.insert(items, item)
+  end
+
   for _, name in ipairs(state.buffers.iteradapter_names) do
     local iteradapter = util.find_iteradapter(name)
     if iteradapter == nil then
