@@ -4,10 +4,7 @@ local action_prefix = "action_"
 local M = {}
 local base_kind = {}
 
-base_kind.options = {
-  move_to_input = {quit = false},
-  move_to_list = {quit = false}
-}
+base_kind.options = {move_to_input = {quit = false}, move_to_list = {quit = false}}
 
 base_kind.action_move_to_input = function(_, state)
   vim.api.nvim_set_current_win(state.windows.input)
@@ -28,7 +25,7 @@ local wrap = function(raw_kind)
     end,
     find_action = function(name)
       return raw_kind[action_prefix .. name]
-    end
+    end,
   }
 end
 

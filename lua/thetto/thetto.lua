@@ -11,42 +11,30 @@ local open_windows = function(buffers, opts)
   local row = vim.o.lines / 2 - (opts.height / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
 
-  local list_window =
-    vim.api.nvim_open_win(
-    buffers.list,
-    true,
-    {
-      width = opts.width,
-      height = opts.height,
-      relative = "editor",
-      row = row,
-      col = column,
-      external = false,
-      style = "minimal"
-    }
-  )
+  local list_window = vim.api.nvim_open_win(buffers.list, true, {
+    width = opts.width,
+    height = opts.height,
+    relative = "editor",
+    row = row,
+    col = column,
+    external = false,
+    style = "minimal",
+  })
 
-  local input_window =
-    vim.api.nvim_open_win(
-    buffers.input,
-    true,
-    {
-      width = opts.width,
-      height = 1,
-      relative = "editor",
-      row = row + opts.height,
-      col = column,
-      external = false,
-      style = "minimal"
-    }
-  )
+  local input_window = vim.api.nvim_open_win(buffers.input, true, {
+    width = opts.width,
+    height = 1,
+    relative = "editor",
+    row = row + opts.height,
+    col = column,
+    external = false,
+    style = "minimal",
+  })
 
-  local on_list_closed =
-    ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.list, input_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.list, input_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_input_closed =
-    ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.input, list_window)
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.input, list_window)
   vim.api.nvim_command(on_input_closed)
 
   if opts.insert then
@@ -92,18 +80,16 @@ local on_changed = function(input_bufnr)
   local _, lines = M._head(items)
   local bufnr = state.buffers.list
   local window = state.windows.list
-  vim.schedule(
-    function()
-      if not vim.api.nvim_buf_is_valid(bufnr) then
-        return
-      end
-      vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-      vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-      vim.api.nvim_win_set_cursor(window, {1, 0})
-      M._changed_after()
+  vim.schedule(function()
+    if not vim.api.nvim_buf_is_valid(bufnr) then
+      return
     end
-  )
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+    vim.api.nvim_win_set_cursor(window, {1, 0})
+    M._changed_after()
+  end)
 end
 
 local make_buffers = function(opts)
@@ -124,24 +110,16 @@ local make_buffers = function(opts)
 
   local all_items = source.make()
   local items, lines = M._head(all_items)
-  local list_bufnr =
-    util.create_buffer(
-    ("thetto://%s/%s"):format(source_name, states.list_filetype),
-    function(bufnr)
-      vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-      vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-    end
-  )
+  local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  end)
 
-  local input_bufnr =
-    util.create_buffer(
-    ("thetto://%s/%s"):format(source_name, states.input_filetype),
-    function(bufnr)
-      vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
-      vim.api.nvim_buf_attach(bufnr, false, {on_lines = util.debounce(M.debounce_ms, on_changed)})
-    end
-  )
+  local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
+    vim.api.nvim_buf_attach(bufnr, false, {on_lines = util.debounce(M.debounce_ms, on_changed)})
+  end)
 
   return {
     list = list_bufnr,
@@ -150,7 +128,7 @@ local make_buffers = function(opts)
     filtered = items,
     kind_name = source.kind_name,
     iteradapter_names = source.iteradapter_names or {"filter/substring"},
-    opts = opts
+    opts = opts,
   }, nil
 end
 

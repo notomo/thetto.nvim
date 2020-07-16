@@ -2,7 +2,7 @@ local helper = require "test.helper"
 local assert = helper.assert
 local command = helper.command
 
-describe('line source', function ()
+describe("line source", function()
 
   before_each(helper.before_each)
   after_each(helper.after_each)

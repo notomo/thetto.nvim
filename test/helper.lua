@@ -35,14 +35,9 @@ end
 
 M.sync_input = function(texts)
   vim.api.nvim_put(texts, "c", true, true)
-  local ok =
-    vim.wait(
-    1000,
-    function()
-      return waiting
-    end,
-    10
-  )
+  local ok = vim.wait(1000, function()
+    return waiting
+  end, 10)
   waiting = false
   if not ok then
     assert(false, "wait timeout")

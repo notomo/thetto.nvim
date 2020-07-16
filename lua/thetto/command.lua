@@ -24,19 +24,14 @@ M.parse_args = function(raw_args, value_name, default)
 end
 
 M.open = function(...)
-  local args, parse_err =
-    M.parse_args(
-    {...},
-    "source_name",
-    {
-      insert = true,
-      resume = false,
-      ignorecase = false,
-      smartcase = true,
-      width = 80,
-      height = 25
-    }
-  )
+  local args, parse_err = M.parse_args({...}, "source_name", {
+    insert = true,
+    resume = false,
+    ignorecase = false,
+    smartcase = true,
+    width = 80,
+    height = 25,
+  })
   if parse_err ~= nil then
     return util.print_err(parse_err)
   end
@@ -52,15 +47,7 @@ M.open = function(...)
 end
 
 M.execute = function(...)
-  local args, parse_err =
-    M.parse_args(
-    {...},
-    "action",
-    {
-      action = "default",
-      quit = true
-    }
-  )
+  local args, parse_err = M.parse_args({...}, "action", {action = "default", quit = true})
   if parse_err ~= nil then
     return util.print_err(parse_err)
   end

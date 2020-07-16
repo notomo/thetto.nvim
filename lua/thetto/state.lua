@@ -29,7 +29,7 @@ local wrap = function(raw_state)
     end,
     close = function()
       util.close_window(raw_state.windows.list)
-    end
+    end,
   }
 end
 
@@ -47,7 +47,11 @@ end
 
 M.set = function(buffers, windows)
   -- HACk: save started_at as str
-  local raw_state = {buffers = buffers, windows = windows, started_at = vim.fn.reltimestr(vim.fn.reltime())}
+  local raw_state = {
+    buffers = buffers,
+    windows = windows,
+    started_at = vim.fn.reltimestr(vim.fn.reltime()),
+  }
   vim.api.nvim_buf_set_var(buffers.list, list_state_key, raw_state)
   local state = wrap(raw_state)
   vim.api.nvim_buf_set_var(buffers.input, input_state_key, state.fixed())
