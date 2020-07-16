@@ -77,17 +77,19 @@ local on_changed = function(input_bufnr)
 
   state.update(items)
 
-  local _, lines = M._head(items)
   local bufnr = state.buffers.list
   local window = state.windows.list
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
     end
+    local lines = M._head_lines(items)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-    vim.api.nvim_win_set_cursor(window, {1, 0})
+    if vim.bo.filetype ~= states.list_filetype then
+      vim.api.nvim_win_set_cursor(window, {1, 0})
+    end
     M._changed_after()
   end)
 end
@@ -108,17 +110,25 @@ local make_buffers = function(opts)
     return nil, "not found source: " .. source_name
   end
 
-  local all_items = source.make()
-  local items, lines = M._head(all_items)
+  local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
+    vim.api.nvim_buf_attach(bufnr, false, {on_lines = util.debounce(M.debounce_ms, on_changed)})
+  end)
+
+  local list = {
+    update = function(items)
+      states.set_all_items(input_bufnr, items)
+      on_changed(input_bufnr)
+    end,
+  }
+
+  local all_items, job = source.make(list)
+  local items = M._head_items(all_items)
+  local lines = M._head_lines(items)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-  end)
-
-  local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
-    vim.api.nvim_buf_attach(bufnr, false, {on_lines = util.debounce(M.debounce_ms, on_changed)})
   end)
 
   return {
@@ -129,20 +139,25 @@ local make_buffers = function(opts)
     kind_name = source.kind_name,
     iteradapter_names = source.iteradapter_names or {"filter/substring"},
     opts = opts,
-  }, nil
+  }, job, nil
 end
 
 M.start = function(args)
   local opts = args
 
-  local buffers, err = make_buffers(opts)
+  local buffers, job, err = make_buffers(opts)
   if err ~= nil then
-    return err
+    return nil, err
   end
 
   local windows = open_windows(buffers, opts)
 
   states.set(buffers, windows)
+  if job ~= nil then
+    job:start()
+  end
+
+  return job, nil
 end
 
 M.execute = function(args)
@@ -180,13 +195,21 @@ M.close_window = function(id)
   util.close_window(id)
 end
 
-M._head = function(items)
+M._head_items = function(items)
+  local filtered = {}
+  for i = 1, M.limit, 1 do
+    filtered[i] = items[i]
+  end
+  return filtered
+end
+
+M._head_lines = function(items)
+  local filtered = M._head_items(items)
   local lines = {}
-  local filtered = vim.tbl_values({unpack(items, 0, M.limit)})
-  for _, item in pairs(items) do
+  for _, item in pairs(filtered) do
     table.insert(lines, item.value)
   end
-  return filtered, lines
+  return lines
 end
 
 -- for testing

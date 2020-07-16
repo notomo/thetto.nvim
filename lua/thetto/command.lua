@@ -33,17 +33,24 @@ M.open = function(...)
     height = 25,
   })
   if parse_err ~= nil then
-    return util.print_err(parse_err)
+    return nil, util.print_err(parse_err)
   end
 
   if args.source_name == nil and not args.resume then
-    return util.print_err("no source")
+    return nil, util.print_err("no source")
   end
 
-  local err = thetto.start(args)
-  if err ~= nil then
-    return util.print_err(err)
+  local f = function()
+    return thetto.start(args)
   end
+  local ok, result, err = xpcall(f, debug.traceback)
+  if not ok then
+    error(result)
+  end
+  if err ~= nil then
+    return nil, util.print_err(err)
+  end
+  return result, nil
 end
 
 M.execute = function(...)
