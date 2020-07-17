@@ -9,7 +9,7 @@ M.make = function(list)
       for _, output in ipairs(self:get_stdout()) do
         table.insert(items, {value = output})
       end
-      list.update(items)
+      list.set(items)
     end,
   })
   return {}, job

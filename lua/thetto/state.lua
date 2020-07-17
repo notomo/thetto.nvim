@@ -57,13 +57,6 @@ M.set = function(buffers, windows)
   vim.api.nvim_buf_set_var(buffers.input, input_state_key, state.fixed())
 end
 
-M.set_all_items = function(input_bufnr, items)
-  local input_state = util.buffer_var(input_bufnr, input_state_key)
-  local state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
-  state.buffers.all = items
-  vim.api.nvim_buf_set_var(state.buffers.list, list_state_key, state)
-end
-
 M.recent = function(source_name)
   local bufnrs = vim.api.nvim_list_bufs()
   local states = {}

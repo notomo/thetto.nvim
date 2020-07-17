@@ -28,7 +28,9 @@ M.make = function(list)
   local all_data = ""
   local update = function(self)
     local items = {}
-    for _, output in ipairs(self.parse_output(all_data)) do
+    local outputs = self.parse_output(all_data)
+    all_data = ""
+    for _, output in ipairs(outputs) do
       local path, row, matched_line = parse_line(output)
       if path == nil then
         goto continue
@@ -36,9 +38,8 @@ M.make = function(list)
       table.insert(items, {value = matched_line, path = path, row = row})
       ::continue::
     end
-    all_data = ""
     vim.list_extend(all_items, items)
-    list.update(all_items)
+    list.set(all_items)
   end
 
   local paths = vim.fn.fnamemodify(".", ":p")

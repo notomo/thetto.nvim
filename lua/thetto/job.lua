@@ -20,6 +20,10 @@ function Job._shutdown(self, code, signal)
   self:stop()
 end
 
+function Job.is_running(self)
+  return self.handle ~= nil and self.handle:is_active()
+end
+
 function Job.start(self)
   self.stdin = vim.loop.new_pipe(false)
   self.stdout = vim.loop.new_pipe(false)
@@ -53,8 +57,11 @@ function Job.start(self)
 
   if self.on_interval then
     self.timer = vim.loop.new_timer()
-    self.timer:start(self.interval_ms, 100, vim.schedule_wrap(function()
+    self.timer:start(self.interval_ms, 0, vim.schedule_wrap(function()
       self:on_interval()
+      if self:is_running() then
+        self.timer:again()
+      end
     end))
   end
 end

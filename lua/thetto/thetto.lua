@@ -47,7 +47,7 @@ local open_windows = function(buffers, opts)
   return {list = list_window, input = input_window}
 end
 
-local on_changed = function(input_bufnr)
+local on_changed = function(all_items, input_bufnr, iteradapter_names)
   local state, err = states.get(0)
   if err ~= nil then
     return util.print_err(err)
@@ -63,11 +63,11 @@ local on_changed = function(input_bufnr)
 
   -- NOTE: avoid `too many results to unpack`
   local items = {}
-  for _, item in ipairs(state.buffers.all) do
+  for _, item in ipairs(all_items) do
     table.insert(items, item)
   end
 
-  for _, name in ipairs(state.buffers.iteradapter_names) do
+  for _, name in ipairs(iteradapter_names) do
     local iteradapter = util.find_iteradapter(name)
     if iteradapter == nil then
       return util.print_err("not found iteradapter: " .. name)
@@ -75,7 +75,7 @@ local on_changed = function(input_bufnr)
     items = iteradapter.apply(items, line, opts)
   end
 
-  state.update(items)
+  state.update(M._head_items(items))
 
   local bufnr = state.buffers.list
   local window = state.windows.list
@@ -110,19 +110,34 @@ local make_buffers = function(opts)
     return nil, "not found source: " .. source_name
   end
 
+  local all_items = {}
+  local job = nil
+  local iteradapter_names = source.iteradapter_names or {"filter/substring"}
+  local debounced_update = util.debounce(M.debounce_ms, function(bufnr)
+    return on_changed(all_items, bufnr, iteradapter_names)
+  end)
+
   local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
-    vim.api.nvim_buf_attach(bufnr, false, {on_lines = util.debounce(M.debounce_ms, on_changed)})
+    vim.api.nvim_buf_attach(bufnr, false, {
+      on_lines = debounced_update,
+      on_detach = function()
+        if job == nil then
+          return
+        end
+        job:stop()
+      end,
+    })
   end)
 
   local list = {
-    update = function(items)
-      states.set_all_items(input_bufnr, items)
-      on_changed(input_bufnr)
+    set = function(items)
+      all_items = items
+      debounced_update(input_bufnr)
     end,
   }
 
-  local all_items, job = source.make(list)
+  all_items, job = source.make(list)
   local items = M._head_items(all_items)
   local lines = M._head_lines(items)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
@@ -134,10 +149,8 @@ local make_buffers = function(opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
-    all = all_items,
     filtered = items,
     kind_name = source.kind_name,
-    iteradapter_names = source.iteradapter_names or {"filter/substring"},
     opts = opts,
   }, job, nil
 end
