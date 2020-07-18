@@ -2,7 +2,7 @@ local M = {}
 
 M.action_open = function(items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("edit" .. item.path)
+    vim.api.nvim_command("edit " .. item.path)
   end
 end
 

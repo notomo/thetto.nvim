@@ -179,7 +179,16 @@ M.execute = function(args)
     return err
   end
 
-  local kind = kinds.find(state.buffers.kind_name, args.action)
+  local items = {}
+  local item = state.select_from_list()
+  local item_kind_name = nil
+  if item ~= nil then
+    table.insert(items, item)
+    item_kind_name = item.kind_name
+  end
+
+  local kind_name = item_kind_name or state.buffers.kind_name
+  local kind = kinds.find(kind_name, args.action)
   if kind == nil then
     return "not found kind: " .. state.buffers.kind_name
   end
@@ -189,12 +198,6 @@ M.execute = function(args)
   local action = kind.find_action(args.action)
   if action == nil then
     return "not found action: " .. args.action
-  end
-
-  local items = {}
-  local item = state.select_from_list()
-  if item ~= nil then
-    table.insert(items, item)
   end
 
   if opts.quit then
