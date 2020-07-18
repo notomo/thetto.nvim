@@ -15,6 +15,13 @@ base_kind.action_move_to_list = function(_, state)
   vim.api.nvim_set_current_win(state.windows.list)
 end
 
+base_kind.action_quit = function(_, state)
+  if state.closed() then
+    return
+  end
+  state.close()
+end
+
 local wrap = function(raw_kind)
   return {
     options = function(args)

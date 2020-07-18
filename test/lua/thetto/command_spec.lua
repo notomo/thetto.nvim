@@ -65,8 +65,13 @@ test22]])
     command("Thetto line")
     helper.sync_input({"test2"})
 
-    command("quit")
+    command("ThettoDo move_to_list")
+    command("normal! G")
+
+    command("ThettoDo quit")
     command("Thetto --resume")
+
+    command("ThettoDo move_to_input")
 
     assert.window_count(3)
     assert.filetype("thetto-input")
@@ -74,6 +79,8 @@ test22]])
 
     command("ThettoDo move_to_list")
 
+    assert.current_line("test22")
+    command("normal! gg")
     assert.current_line("test21")
   end)
 
@@ -86,9 +93,9 @@ test22]])
     command("Thetto line")
     helper.sync_input({"test2"})
 
-    command("quit")
+    command("ThettoDo quit")
     command("Thetto runtimepath")
-    command("quit")
+    command("ThettoDo quit")
     command("Thetto line --resume")
 
     assert.window_count(3)

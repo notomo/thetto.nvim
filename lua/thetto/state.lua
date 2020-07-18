@@ -28,14 +28,25 @@ local wrap = function(raw_state)
       return raw_state.buffers.filtered[index]
     end,
     close = function()
+      raw_state.windows.list_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.list)
+      raw_state.windows.input_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.input)
+      local active = "input"
+      if vim.api.nvim_get_current_win() == raw_state.windows.list then
+        active = "list"
+      end
+      raw_state.windows.active = active
+      vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
       util.close_window(raw_state.windows.list)
+    end,
+    closed = function()
+      return not vim.api.nvim_win_is_valid(raw_state.windows.list)
     end,
   }
 end
 
 M.get = function(bufnr)
   local state = util.buffer_var(bufnr, list_state_key)
-  if vim.bo.filetype == M.input_filetype then
+  if bufnr == 0 and vim.bo.filetype == M.input_filetype then
     local input_state = util.buffer_var(bufnr, input_state_key)
     state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
   end
@@ -61,7 +72,7 @@ M.recent = function(source_name)
   local bufnrs = vim.api.nvim_list_bufs()
   local states = {}
 
-  local pattern = "thetto://%w+/thetto"
+  local pattern = "thetto://.+/thetto"
   if source_name ~= nil then
     pattern = ("thetto://%s/thetto"):format(source_name)
   end

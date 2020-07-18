@@ -7,7 +7,7 @@ local M = {}
 M.limit = 100
 M.debounce_ms = 50
 
-local open_windows = function(buffers, opts)
+local open_windows = function(buffers, resumed_state, opts)
   local row = vim.o.lines / 2 - (opts.height / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
 
@@ -31,13 +31,26 @@ local open_windows = function(buffers, opts)
     style = "minimal",
   })
 
+  if resumed_state ~= nil then
+    if resumed_state.windows.list_cursor then
+      vim.api.nvim_win_set_cursor(list_window, resumed_state.windows.list_cursor)
+    end
+    if resumed_state.windows.input_cursor then
+      vim.api.nvim_win_set_cursor(input_window, resumed_state.windows.input_cursor)
+    end
+  end
+
   local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.list, input_window)
   vim.api.nvim_command(on_list_closed)
 
   local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.input, list_window)
   vim.api.nvim_command(on_input_closed)
 
-  if opts.insert then
+  local insert = opts.insert
+  if resumed_state ~= nil and resumed_state.windows.active == "list" then
+    insert = false
+  end
+  if insert then
     vim.api.nvim_set_current_win(input_window)
     vim.api.nvim_command("startinsert")
   else
@@ -94,15 +107,11 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names)
   end)
 end
 
-local make_buffers = function(opts)
+local make_buffers = function(resumed_state, opts)
   local source_name = opts.source_name
 
-  if opts.resume then
-    local state = states.recent(source_name)
-    if state == nil then
-      return nil, "no source to resume"
-    end
-    return state.buffers
+  if resumed_state ~= nil then
+    return resumed_state.buffers
   end
 
   local source = util.find_source(source_name)
@@ -158,12 +167,20 @@ end
 M.start = function(args)
   local opts = args
 
-  local buffers, job, err = make_buffers(opts)
+  local resumed_state = nil
+  if opts.resume then
+    resumed_state = states.recent(opts.source_name)
+    if resumed_state == nil then
+      return nil, "no source to resume"
+    end
+  end
+
+  local buffers, job, err = make_buffers(resumed_state, opts)
   if err ~= nil then
     return nil, err
   end
 
-  local windows = open_windows(buffers, opts)
+  local windows = open_windows(buffers, resumed_state, opts)
 
   states.set(buffers, windows)
   if job ~= nil then
@@ -204,7 +221,7 @@ M.execute = function(args)
     state.close()
   end
 
-  return action(items, state.fixed())
+  return action(items, state)
 end
 
 M.close_window = function(id)
