@@ -29,6 +29,13 @@ M.after_each = function()
   vim.api.nvim_set_current_dir(M.root)
 end
 
+M.buffer_log = function()
+  local lines = vim.fn.getbufline("%", 1, "$")
+  for _, line in ipairs(lines) do
+    print(line)
+  end
+end
+
 M.set_lines = function(lines)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
 end
@@ -36,6 +43,24 @@ end
 M.sync_input = function(texts)
   vim.api.nvim_put(texts, "c", true, true)
   local ok = vim.wait(1000, function()
+    return waiting
+  end, 10)
+  waiting = false
+  if not ok then
+    assert(false, "wait timeout")
+  end
+end
+
+M.sync_open = function(...)
+  local job = require("thetto/command").open(...)
+  if job == nil then
+    return
+  end
+  local ok = job:wait(1000)
+  if not ok then
+    assert(false, "job wait timeout")
+  end
+  ok = vim.wait(1000, function()
     return waiting
   end, 10)
   waiting = false
@@ -100,6 +125,22 @@ AM.current_dir = function(expected)
   local actual = vim.fn.getcwd()
   local msg = ("current dir should be %s, but actual: %s"):format(expected, actual)
   assert.equals(expected, actual, msg)
+end
+
+AM.not_current_dir = function(expected)
+  local actual = vim.fn.getcwd()
+  local msg = ("current dir should be %s, but actual: %s"):format(expected, actual)
+  assert.are_not.equals(expected, actual, msg)
+end
+
+AM.exists_message = function(expected)
+  local messages = vim.split(vim.api.nvim_exec("messages", true), "\n")
+  for _, msg in ipairs(messages) do
+    if msg:match(expected) then
+      return
+    end
+  end
+  assert(false, "not found message: " .. expected)
 end
 
 M.assert = AM

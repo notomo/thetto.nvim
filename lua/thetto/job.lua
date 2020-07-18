@@ -92,6 +92,12 @@ function Job.get_stdout(self)
   return output
 end
 
+function Job.wait(self, ms)
+  return vim.wait(ms, function()
+    return not self:is_running()
+  end, 10)
+end
+
 local new = function(cmd_and_args, opts)
   local job = {}
 

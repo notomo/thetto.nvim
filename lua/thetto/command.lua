@@ -7,14 +7,19 @@ M.parse_args = function(raw_args, value_name, default)
   local args = vim.deepcopy(default)
 
   for _, a in ipairs(raw_args) do
+    local eq_index = a:find("=")
     if not vim.startswith(a, "--") then
       args[value_name] = a
     elseif vim.startswith(a, "--no-") then
       local key = a:sub(#("--no-") + 1)
       args[key] = false
-    elseif vim.startswith(a, "--") and not a:find("=") then
+    elseif vim.startswith(a, "--") and not eq_index then
       local key = a:sub(#("--") + 1)
       args[key] = true
+    elseif vim.startswith(a, "--") and eq_index then
+      local key = a:sub(#("--") + 1, eq_index - 1)
+      local value = a:sub(eq_index + 1)
+      args[key] = value
     else
       return nil, "could not parse arg: " .. a
     end
@@ -31,6 +36,7 @@ M.open = function(...)
     smartcase = true,
     width = 80,
     height = 25,
+    input = nil,
   })
   if parse_err ~= nil then
     return nil, util.print_err(parse_err)

@@ -137,7 +137,7 @@ local make_buffers = function(opts)
     end,
   }
 
-  all_items, job = source.make(list)
+  all_items, job = source.make(list, opts)
   local items = M._head_items(all_items)
   local lines = M._head_lines(items)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
