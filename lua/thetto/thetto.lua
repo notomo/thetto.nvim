@@ -33,7 +33,15 @@ local open_windows = function(buffers, resumed_state, opts)
 
   if resumed_state ~= nil then
     if resumed_state.windows.list_cursor then
-      vim.api.nvim_win_set_cursor(list_window, resumed_state.windows.list_cursor)
+      local cursor = resumed_state.windows.list_cursor
+      cursor[1] = cursor[1] + opts.offset
+      local line_count = vim.api.nvim_buf_line_count(buffers.list)
+      if line_count < cursor[1] then
+        cursor[1] = line_count
+      elseif cursor[1] < 1 then
+        cursor[1] = 1
+      end
+      vim.api.nvim_win_set_cursor(list_window, cursor)
     end
     if resumed_state.windows.input_cursor then
       vim.api.nvim_win_set_cursor(input_window, resumed_state.windows.input_cursor)
