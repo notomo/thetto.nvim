@@ -25,12 +25,14 @@ M.make = function()
   vim.list_extend(paths, vim.v.oldfiles)
   paths = util.uniq(paths)
 
+  local home = os.getenv("HOME")
   local regex = vim.regex(M.ignore_pattern)
   for _, path in ipairs(paths) do
     if regex:match_str(path) then
       goto continue
     end
-    table.insert(items, {value = path, path = path})
+    local desc = path:gsub(home, "~")
+    table.insert(items, {desc = desc, value = path, path = path})
     ::continue::
   end
   return items

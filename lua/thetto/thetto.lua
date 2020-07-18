@@ -248,7 +248,7 @@ M._head_lines = function(items)
   local filtered = M._head_items(items)
   local lines = {}
   for _, item in pairs(filtered) do
-    table.insert(lines, item.value)
+    table.insert(lines, item.desc or item.value)
   end
   return lines
 end
