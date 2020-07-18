@@ -68,7 +68,7 @@ local open_windows = function(buffers, resumed_state, opts)
   return {list = list_window, input = input_window}
 end
 
-local on_changed = function(all_items, input_bufnr, iteradapter_names)
+local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   local state, err = states.get(0)
   if err ~= nil then
     return util.print_err(err)
@@ -96,10 +96,18 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names)
     items = iteradapter.apply(items, line, opts)
   end
 
-  state.update(M._head_items(items))
+  items = M._head_items(items)
+  state.update(items)
 
   local bufnr = state.buffers.list
   local window = state.windows.list
+  local highlight = function()
+  end
+  if source.highlight ~= nil then
+    highlight = function()
+      return source.highlight(bufnr, items)
+    end
+  end
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
@@ -111,6 +119,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names)
     if vim.bo.filetype ~= states.list_filetype then
       vim.api.nvim_win_set_cursor(window, {1, 0})
     end
+    highlight()
     M._changed_after()
   end)
 end
@@ -131,7 +140,7 @@ local make_buffers = function(resumed_state, opts)
   local job = nil
   local iteradapter_names = source.iteradapter_names or {"filter/substring"}
   local debounced_update = util.debounce(M.debounce_ms, function(bufnr)
-    return on_changed(all_items, bufnr, iteradapter_names)
+    return on_changed(all_items, bufnr, iteradapter_names, source)
   end)
 
   local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
@@ -161,6 +170,9 @@ local make_buffers = function(resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+    if source.highlight ~= nil then
+      source.highlight(bufnr, items)
+    end
   end)
 
   return {
