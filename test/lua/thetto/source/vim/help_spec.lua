@@ -8,7 +8,7 @@ describe("help source", function()
   after_each(helper.after_each)
 
   it("can show help tags", function()
-    command("Thetto help --no-insert")
+    command("Thetto vim/help --no-insert")
 
     assert.exists_pattern("$VIM")
 
@@ -18,7 +18,7 @@ describe("help source", function()
   end)
 
   it("can execute tab_open", function()
-    command("Thetto help --no-insert")
+    command("Thetto vim/help --no-insert")
 
     assert.exists_pattern("$VIM")
 

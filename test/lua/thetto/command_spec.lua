@@ -94,7 +94,7 @@ test22]])
     helper.sync_input({"test2"})
 
     command("ThettoDo quit")
-    command("Thetto runtimepath")
+    command("Thetto vim/runtimepath")
     command("ThettoDo quit")
     command("Thetto line --resume")
 
@@ -151,7 +151,7 @@ hoge]])
 
   it("should exist only one in a tab", function()
     command("Thetto line")
-    command("Thetto runtimepath")
+    command("Thetto vim/runtimepath")
 
     assert.window_count(3)
   end)

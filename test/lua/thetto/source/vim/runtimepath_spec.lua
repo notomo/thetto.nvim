@@ -8,7 +8,7 @@ describe("runtimepath source", function()
   after_each(helper.after_each)
 
   it("can runtime paths", function()
-    command("Thetto runtimepath --no-insert")
+    command("Thetto vim/runtimepath --no-insert")
 
     helper.search("thetto.nvim")
 
@@ -19,7 +19,7 @@ describe("runtimepath source", function()
   end)
 
   it("can execute tab_open", function()
-    command("Thetto runtimepath --no-insert")
+    command("Thetto vim/runtimepath --no-insert")
 
     helper.search("thetto.nvim")
 

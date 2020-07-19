@@ -14,6 +14,6 @@ M.make = function()
   return items
 end
 
-M.kind_name = "help"
+M.kind_name = "vim/help"
 
 return M
