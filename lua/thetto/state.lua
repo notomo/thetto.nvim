@@ -7,6 +7,7 @@ local input_state_key = "_thetto_input_state"
 
 M.list_filetype = "thetto"
 M.input_filetype = "thetto-input"
+M.path_pattern = "thetto://.+/thetto"
 
 local wrap = function(raw_state)
   return {
@@ -72,7 +73,7 @@ M.recent = function(source_name)
   local bufnrs = vim.api.nvim_list_bufs()
   local states = {}
 
-  local pattern = "thetto://.+/thetto"
+  local pattern = M.path_pattern
   if source_name ~= nil then
     pattern = ("thetto://%s/thetto"):format(source_name)
   end

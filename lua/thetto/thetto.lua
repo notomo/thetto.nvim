@@ -8,6 +8,19 @@ M.limit = 100
 M.debounce_ms = 50
 
 local open_windows = function(buffers, resumed_state, opts)
+  local ids = vim.api.nvim_tabpage_list_wins(0)
+  for _, id in ipairs(ids) do
+    local bufnr = vim.fn.winbufnr(id)
+    if bufnr == -1 then
+      goto continue
+    end
+    local path = vim.api.nvim_buf_get_name(bufnr)
+    if path:match(states.path_pattern) then
+      M.close_window(id)
+    end
+    ::continue::
+  end
+
   local row = vim.o.lines / 2 - (opts.height / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
 

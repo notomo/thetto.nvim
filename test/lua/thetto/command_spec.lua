@@ -149,4 +149,11 @@ hoge]])
     assert.not_exists_pattern("hoge")
   end)
 
+  it("should exist only one in a tab", function()
+    command("Thetto line")
+    command("Thetto runtimepath")
+
+    assert.window_count(3)
+  end)
+
 end)
