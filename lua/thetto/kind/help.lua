@@ -7,6 +7,12 @@ M.action_open = function(items)
   end
 end
 
+M.action_tab_open = function(items)
+  for _, item in ipairs(items) do
+    vim.api.nvim_command("tab help " .. item.value)
+  end
+end
+
 M.action_default = M.action_open
 
 return M

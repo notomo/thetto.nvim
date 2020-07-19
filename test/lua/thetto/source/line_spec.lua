@@ -43,4 +43,20 @@ test3]])
     assert.filetype("")
   end)
 
+  it("can execute tab_oepn", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert")
+
+    helper.search("test2")
+
+    command("ThettoDo tab_open")
+
+    assert.tab_count(2)
+    assert.current_line("test2")
+  end)
+
 end)

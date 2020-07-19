@@ -17,4 +17,15 @@ describe("help source", function()
     assert.exists_pattern("%*$VIM%*")
   end)
 
+  it("can execute tab_open", function()
+    command("Thetto help --no-insert")
+
+    assert.exists_pattern("$VIM")
+
+    command("ThettoDo tab_open")
+
+    assert.tab_count(2)
+    assert.exists_pattern("%*$VIM%*")
+  end)
+
 end)

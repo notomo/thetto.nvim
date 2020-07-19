@@ -143,6 +143,12 @@ AM.exists_message = function(expected)
   assert(false, "not found message: " .. expected)
 end
 
+AM.tab_count = function(expected)
+  local actual = vim.fn.tabpagenr("$")
+  local msg = ("tab count should be %s, but actual: %s"):format(expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M

@@ -18,4 +18,16 @@ describe("runtimepath source", function()
     assert.current_dir(helper.root)
   end)
 
+  it("can execute tab_open", function()
+    command("Thetto runtimepath --no-insert")
+
+    helper.search("thetto.nvim")
+
+    vim.api.nvim_set_current_dir("./test")
+    command("ThettoDo tab_open")
+
+    assert.tab_count(2)
+    assert.current_dir(helper.root)
+  end)
+
 end)
