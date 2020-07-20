@@ -199,6 +199,7 @@ end
 
 M.start = function(args)
   local opts = args
+  opts.cwd = vim.fn.expand(opts.cwd)
 
   if opts.target ~= nil then
     local target = util.find_target(opts.target)
