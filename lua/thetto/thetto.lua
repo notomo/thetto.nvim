@@ -176,7 +176,7 @@ local make_buffers = function(resumed_state, opts)
     end,
   }
 
-  all_items, job = source.make(list, opts)
+  all_items, job = source.make(opts, list)
   local items = M._head_items(all_items)
   local lines = M._head_lines(items)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
@@ -199,6 +199,14 @@ end
 
 M.start = function(args)
   local opts = args
+
+  if opts.target ~= nil then
+    local target = util.find_target(opts.target)
+    if target == nil then
+      return nil, "not found target: " .. opts.target
+    end
+    opts.cwd = target.cwd()
+  end
 
   local resumed_state = nil
   if opts.resume then

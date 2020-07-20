@@ -38,6 +38,8 @@ M.open = function(...)
     height = 25,
     input = nil,
     offset = 0,
+    cwd = ".",
+    target = nil,
   })
   if parse_err ~= nil then
     return nil, util.print_err(parse_err)

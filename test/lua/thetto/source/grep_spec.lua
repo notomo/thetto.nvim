@@ -13,10 +13,20 @@ describe("grep source", function()
     helper.sync_open("grep", "--no-insert", "--input=hoge")
 
     assert.exists_pattern("hoge")
+    helper.search("grep")
 
     command("ThettoDo")
 
     assert.current_line("hoge")
+  end)
+
+  it("can show grep results in project dir", function()
+    require("thetto/target/project").root_patterns = {"0_root_pattern"}
+    vim.api.nvim_set_current_dir("./test/_test_data/dir")
+
+    helper.sync_open("grep", "--no-insert", "--target=project", "--input=hoge")
+
+    assert.exists_pattern("0_root_pattern/in_root_pattern:1 hoge in root_pattern")
   end)
 
   it("can execute tab_open", function()

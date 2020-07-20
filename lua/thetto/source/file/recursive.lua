@@ -16,8 +16,8 @@ local function collect(path)
   return paths
 end
 
-M.make = function()
-  local paths = collect(".")
+M.make = function(opts)
+  local paths = collect(opts.cwd)
   local home = os.getenv("HOME")
   local items = {}
   for _, path in ipairs(paths) do

@@ -20,6 +20,10 @@ M.find_iteradapter = function(name)
   return find_module("thetto/iteradapter/" .. name)
 end
 
+M.find_target = function(name)
+  return find_module("thetto/target/" .. name)
+end
+
 M.close_window = function(id)
   if id == "" then
     return

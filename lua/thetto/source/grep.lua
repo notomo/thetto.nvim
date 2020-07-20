@@ -18,7 +18,7 @@ M.opts = {"-inH"}
 M.recursive_opt = "-r"
 M.separator = "--"
 
-M.make = function(list, opts)
+M.make = function(opts, list)
   local pattern = opts.input or vim.fn.input("Pattern: ")
   if pattern == "" then
     return {}, nil
@@ -35,16 +35,24 @@ M.make = function(list, opts)
       if path == nil then
         goto continue
       end
-      table.insert(items, {value = matched_line, path = path, row = row})
+      local relative_path = path:gsub("^" .. opts.cwd .. "/", "")
+      local desc = ("%s:%d %s"):format(relative_path, row, matched_line)
+      table.insert(items, {desc = desc, value = matched_line, path = path, row = row})
       ::continue::
     end
     vim.list_extend(all_items, items)
     list.set(all_items)
   end
 
-  local paths = vim.fn.fnamemodify(".", ":p")
+  local paths = opts.cwd
   local cmd = vim.list_extend({M.command}, M.opts)
-  vim.list_extend(cmd, {M.recursive_opt, M.pattern_opt, pattern, M.separator, paths})
+  for _, x in ipairs({M.recursive_opt, M.pattern_opt, pattern, M.separator, paths}) do
+    if x == "" then
+      goto continue
+    end
+    table.insert(cmd, x)
+    ::continue::
+  end
   local job = jobs.new(cmd, {
     on_stdout = function(_, _, data)
       if data == nil then
@@ -54,6 +62,7 @@ M.make = function(list, opts)
     end,
     on_exit = update,
     on_interval = update,
+    cwd = opts.cwd,
   })
 
   return {}, job

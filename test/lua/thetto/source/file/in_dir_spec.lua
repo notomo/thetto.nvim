@@ -13,6 +13,7 @@ describe("file/in_dir source", function()
     command("Thetto file/in_dir --no-insert")
 
     assert.exists_pattern("oldfile")
+    helper.search("dir")
 
     command("ThettoDo")
 
@@ -23,6 +24,15 @@ describe("file/in_dir source", function()
     command("ThettoDo")
 
     assert.file_name("file")
+  end)
+
+  it("can show files in project dir", function()
+    require("thetto/target/project").root_patterns = {"0_root_pattern"}
+    vim.api.nvim_set_current_dir("./test/_test_data/dir")
+    command("Thetto file/in_dir --no-insert --target=project")
+
+    command("normal! gg")
+    assert.current_line("0_root_pattern/")
   end)
 
 end)

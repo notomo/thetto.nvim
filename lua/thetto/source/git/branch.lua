@@ -2,7 +2,7 @@ local jobs = require "thetto/job"
 
 local M = {}
 
-M.make = function(list)
+M.make = function(opts, list)
   local job = jobs.new({"git", "branch", "--format", "%(refname:short)"}, {
     on_exit = function(self)
       local items = {}
@@ -11,6 +11,7 @@ M.make = function(list)
       end
       list.set(items)
     end,
+    cwd = opts.cwd,
   })
   return {}, job
 end
