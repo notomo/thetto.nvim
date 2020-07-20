@@ -1,3 +1,4 @@
+local highlight = require("thetto/highlight")
 local jobs = require "thetto/job"
 
 local M = {}
@@ -36,8 +37,15 @@ M.make = function(opts, list)
         goto continue
       end
       local relative_path = path:gsub("^" .. opts.cwd .. "/", "")
-      local desc = ("%s:%d %s"):format(relative_path, row, matched_line)
-      table.insert(items, {desc = desc, value = matched_line, path = path, row = row})
+      local label = ("%s:%d"):format(relative_path, row)
+      local desc = ("%s %s"):format(label, matched_line)
+      table.insert(items, {
+        desc = desc,
+        value = matched_line,
+        path = path,
+        row = row,
+        _label_length = #label,
+      })
       ::continue::
     end
     vim.list_extend(all_items, items)
@@ -66,6 +74,13 @@ M.make = function(opts, list)
   })
 
   return {}, job
+end
+
+M.highlight = function(bufnr, items)
+  local ns = highlight.reset(bufnr)
+  for i, item in ipairs(items) do
+    vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, 0, item._label_length)
+  end
 end
 
 M.kind_name = "file/position"

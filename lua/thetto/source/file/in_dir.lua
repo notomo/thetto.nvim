@@ -29,7 +29,8 @@ M.make = function(opts)
 end
 
 M.highlight = function(bufnr, items)
-  highlight.kind(bufnr, items, "directory", "String")
+  local ns = highlight.reset(bufnr)
+  highlight.kind(bufnr, items, ns, "directory", "String")
 end
 
 M.kind_name = "file"
