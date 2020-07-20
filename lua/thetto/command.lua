@@ -49,13 +49,9 @@ M.open = function(...)
     return nil, util.print_err("no source")
   end
 
-  local f = function()
+  local result, err = util.with_traceback(function()
     return thetto.start(args)
-  end
-  local ok, result, err = xpcall(f, debug.traceback)
-  if not ok then
-    error(result)
-  end
+  end)
   if err ~= nil then
     return nil, util.print_err(err)
   end
@@ -65,13 +61,16 @@ end
 M.execute = function(...)
   local args, parse_err = M.parse_args({...}, "action", {action = "default", quit = true})
   if parse_err ~= nil then
-    return util.print_err(parse_err)
+    return nil, util.print_err(parse_err)
   end
 
-  local err = thetto.execute(args)
+  local result, err = util.with_traceback(function()
+    return thetto.execute(args)
+  end)
   if err ~= nil then
-    return util.print_err(err)
+    return nil, util.print_err(err)
   end
+  return result, nil
 end
 
 return M

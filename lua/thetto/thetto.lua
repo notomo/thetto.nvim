@@ -141,12 +141,12 @@ local make_buffers = function(resumed_state, opts)
   local source_name = opts.source_name
 
   if resumed_state ~= nil then
-    return resumed_state.buffers
+    return resumed_state.buffers, nil, nil
   end
 
   local source = util.find_source(source_name)
   if source == nil then
-    return nil, "not found source: " .. source_name
+    return nil, nil, "not found source: " .. source_name
   end
 
   local all_items = {}
@@ -234,7 +234,7 @@ end
 M.execute = function(args)
   local state, err = states.get(0)
   if err ~= nil then
-    return err
+    return nil, err
   end
 
   local items = {}
@@ -248,14 +248,14 @@ M.execute = function(args)
   local kind_name = item_kind_name or state.buffers.kind_name
   local kind = kinds.find(kind_name, args.action)
   if kind == nil then
-    return "not found kind: " .. state.buffers.kind_name
+    return nil, "not found kind: " .. state.buffers.kind_name
   end
 
   local opts = kind.options(args)
 
   local action = kind.find_action(args.action)
   if action == nil then
-    return "not found action: " .. args.action
+    return nil, "not found action: " .. args.action
   end
 
   if opts.quit then

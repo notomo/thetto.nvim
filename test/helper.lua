@@ -149,6 +149,15 @@ AM.tab_count = function(expected)
   assert.equals(expected, actual, msg)
 end
 
+AM.error_message = function(expected, f)
+  local ok, actual = pcall(f)
+  if ok then
+    assert(false, "should be error")
+  end
+  local msg = ("error message should end with '%s', but actual: '%s'"):format(expected, actual)
+  assert.is_true(vim.endswith(actual, expected), msg)
+end
+
 M.assert = AM
 
 return M

@@ -81,4 +81,12 @@ M.print_err = function(err)
   vim.api.nvim_err_write(err .. "\n")
 end
 
+M.with_traceback = function(f)
+  local ok, result, err = xpcall(f, debug.traceback)
+  if not ok then
+    error(result)
+  end
+  return result, err
+end
+
 return M
