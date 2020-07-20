@@ -59,4 +59,20 @@ test3]])
     assert.current_line("test2")
   end)
 
+  it("can execute vsplit_open", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert")
+
+    helper.search("test2")
+
+    command("ThettoDo vsplit_open")
+
+    assert.window_count(2)
+    assert.current_line("test2")
+  end)
+
 end)

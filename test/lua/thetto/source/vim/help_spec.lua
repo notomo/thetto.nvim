@@ -28,4 +28,15 @@ describe("help source", function()
     assert.exists_pattern("%*$VIM%*")
   end)
 
+  it("can execute vsplit_open", function()
+    command("Thetto vim/help --no-insert")
+
+    assert.exists_pattern("$VIM")
+
+    command("ThettoDo vsplit_open")
+
+    assert.window_count(2)
+    assert.exists_pattern("%*$VIM%*")
+  end)
+
 end)

@@ -42,4 +42,17 @@ describe("grep source", function()
     assert.current_line("foo")
   end)
 
+  it("can execute vsplit_open", function()
+    vim.api.nvim_set_current_dir("./test/_test_data")
+
+    helper.sync_open("grep", "--no-insert", "--input=foo")
+
+    assert.exists_pattern("foo")
+
+    command("ThettoDo vsplit_open")
+
+    assert.window_count(2)
+    assert.current_line("foo")
+  end)
+
 end)
