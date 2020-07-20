@@ -23,7 +23,7 @@ M.make = function()
   end
 
   vim.list_extend(paths, vim.v.oldfiles)
-  paths = util.uniq(paths)
+  paths = util.unique(paths)
 
   local home = os.getenv("HOME")
   local regex = vim.regex(M.ignore_pattern)

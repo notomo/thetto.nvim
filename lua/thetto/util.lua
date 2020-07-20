@@ -65,7 +65,7 @@ M.buffer_var = function(bufnr, name)
   return var
 end
 
-M.uniq = function(list)
+M.unique = function(list)
   local hash = {}
   local new_list = {}
   for _, v in ipairs(list) do
