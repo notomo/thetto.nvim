@@ -2,7 +2,7 @@ local highlight = require("thetto/highlight")
 
 local M = {}
 
-M.ignore_files = {".git", "node_modules", ".mypy_cache"}
+M.ignore_files = {".git", "node_modules", ".mypy_cache", "__pycache__"}
 
 local function collect(path)
   local paths = {}
