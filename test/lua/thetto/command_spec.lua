@@ -171,4 +171,28 @@ hoge]])
     assert.window_count(3)
   end)
 
+  it("can resume with offset", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line")
+    command("ThettoDo quit")
+
+    command("ThettoDo --resume --offset=-1")
+    assert.current_line("test1")
+
+    command("ThettoDo --resume --offset=1")
+    assert.window_count(1)
+    assert.current_line("test2")
+
+    command("ThettoDo --resume --offset=1")
+    assert.window_count(1)
+    assert.current_line("test3")
+
+    command("ThettoDo --resume --offset=1")
+    assert.current_line("test3")
+  end)
+
 end)

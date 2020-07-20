@@ -21,23 +21,40 @@ local wrap = function(raw_state)
     fixed = function()
       return {buffers = raw_state.buffers, windows = raw_state.windows}
     end,
-    select_from_list = function()
-      local index = 1
-      if vim.bo.filetype == M.list_filetype then
+    select_from_list = function(offset)
+      local index
+      if vim.bo.filetype == M.input_filetype then
+        index = 1
+      elseif vim.bo.filetype == M.list_filetype then
         index = vim.fn.line(".")
+      else
+        index = raw_state.windows.list_cursor[1]
       end
-      return raw_state.buffers.filtered[index]
+      return raw_state.buffers.filtered[index + offset]
     end,
-    close = function()
-      raw_state.windows.list_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.list)
-      raw_state.windows.input_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.input)
-      local active = "input"
-      if vim.api.nvim_get_current_win() == raw_state.windows.list then
-        active = "list"
+    close = function(args)
+      if vim.api.nvim_win_is_valid(raw_state.windows.list) then
+        raw_state.windows.list_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.list)
+        raw_state.windows.input_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.input)
+        local active = "input"
+        if vim.api.nvim_get_current_win() == raw_state.windows.list then
+          active = "list"
+        end
+        raw_state.windows.active = active
+        util.close_window(raw_state.windows.list)
       end
-      raw_state.windows.active = active
+      if args.resume then
+        local cursor = raw_state.windows.list_cursor
+        cursor[1] = cursor[1] + args.offset
+        local line_count = vim.api.nvim_buf_line_count(raw_state.buffers.list)
+        if line_count < cursor[1] then
+          cursor[1] = line_count
+        elseif cursor[1] < 1 then
+          cursor[1] = 1
+        end
+        raw_state.windows.list_cursor = cursor
+      end
       vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
-      util.close_window(raw_state.windows.list)
     end,
     closed = function()
       return not vim.api.nvim_win_is_valid(raw_state.windows.list)

@@ -59,7 +59,12 @@ M.open = function(...)
 end
 
 M.execute = function(...)
-  local args, parse_err = M.parse_args({...}, "action", {action = "default", quit = true})
+  local args, parse_err = M.parse_args({...}, "action", {
+    action = "default",
+    quit = true,
+    resume = false,
+    offset = 0,
+  })
   if parse_err ~= nil then
     return nil, util.print_err(parse_err)
   end

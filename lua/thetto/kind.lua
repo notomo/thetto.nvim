@@ -16,10 +16,7 @@ base_kind.action_move_to_list = function(_, state)
 end
 
 base_kind.action_quit = function(_, state)
-  if state.closed() then
-    return
-  end
-  state.close()
+  state.close({})
 end
 
 local wrap = function(raw_kind)

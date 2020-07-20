@@ -232,13 +232,21 @@ M.start = function(args)
 end
 
 M.execute = function(args)
-  local state, err = states.get(0)
+  local state, err
+  if args.resume then
+    state = states.recent(args.source_name)
+    if state == nil then
+      err = "no source to resume"
+    end
+  else
+    state, err = states.get(0)
+  end
   if err ~= nil then
     return nil, err
   end
 
   local items = {}
-  local item = state.select_from_list()
+  local item = state.select_from_list(args.offset)
   local item_kind_name = nil
   if item ~= nil then
     table.insert(items, item)
@@ -259,7 +267,7 @@ M.execute = function(args)
   end
 
   if opts.quit then
-    state.close()
+    state.close(args)
   end
 
   return action(items, state)
