@@ -195,4 +195,44 @@ test3]])
     assert.current_line("test3")
   end)
 
+  it("can custom source action", function()
+    local called = false
+    local actions = require("thetto/kind").source_user_actions
+    actions["line"] = {
+      hoge = function(_)
+        called = true
+      end,
+    }
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --action=hoge")
+    command("ThettoDo")
+
+    assert.is_true(called)
+  end)
+
+  it("can custom kind action", function()
+    local called = false
+    local actions = require("thetto/kind").user_actions
+    actions["directory"] = {
+      hoge = function(_)
+        called = true
+      end,
+    }
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto vim/runtimepath --action=hoge")
+    command("ThettoDo")
+
+    assert.is_true(called)
+  end)
+
 end)

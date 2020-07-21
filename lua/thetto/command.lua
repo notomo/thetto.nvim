@@ -40,6 +40,7 @@ M.open = function(...)
     offset = 0,
     cwd = ".",
     target = nil,
+    action = nil,
   })
   if parse_err ~= nil then
     return nil, util.print_err(parse_err)

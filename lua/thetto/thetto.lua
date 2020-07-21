@@ -262,7 +262,7 @@ M.execute = function(args)
 
   local opts = kind.options(args)
 
-  local action = kind.find_action(args.action)
+  local action = kind.find_action(args.action, state.buffers.opts.action, state.buffers.opts.source_name)
   if action == nil then
     return nil, "not found action: " .. args.action
   end

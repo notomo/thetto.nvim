@@ -79,7 +79,7 @@ M.search = function(pattern)
 end
 
 local assert = require("luassert")
-local AM = {}
+local AM = assert
 
 AM.window_count = function(expected)
   local actual = vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
