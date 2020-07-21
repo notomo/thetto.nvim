@@ -1,6 +1,6 @@
 local M = {}
 
-M.ignore_files = {".git", "node_modules", ".mypy_cache", "__pycache__"}
+M.ignore_files = {".git", "node_modules", ".mypy_cache", "__pycache__", ".DS_Store"}
 
 local function collect(path)
   local paths = {}
