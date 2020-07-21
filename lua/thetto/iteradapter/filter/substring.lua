@@ -16,7 +16,8 @@ M.apply = function(items, input_line, opts)
 
     local ok = true
     for _, text in ipairs(texts) do
-      if not value:find(text) then
+      local escaped = text:gsub("([^%w])", "%%%1")
+      if not value:find(escaped) then
         ok = false
         break
       end

@@ -235,4 +235,18 @@ test3]])
     assert.is_true(called)
   end)
 
+  it("can input lua escape character", function()
+    helper.set_lines([[
+test1
+test%
+test3]])
+
+    command("Thetto line")
+    helper.sync_input({"%"})
+
+    command("ThettoDo move_to_list")
+
+    assert.current_line("test%")
+  end)
+
 end)
