@@ -78,4 +78,6 @@ M.execute = function(...)
   return result, nil
 end
 
+vim.api.nvim_command("doautocmd User ThettoSourceLoad")
+
 return M
