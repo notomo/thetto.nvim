@@ -1,6 +1,6 @@
 local M = {}
 
-local ns_key = "thetto-list-hihglight"
+local ns_key = "thetto-list-highlight"
 
 M.reset = function(bufnr)
   local ns = vim.api.nvim_create_namespace(ns_key)
