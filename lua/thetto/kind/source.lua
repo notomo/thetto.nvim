@@ -1,6 +1,6 @@
 local M = {}
 
-M.action_execute = function(items)
+M.action_execute = function(_, items)
   for _, item in ipairs(items) do
     vim.api.nvim_command("Thetto " .. item.source_name)
   end

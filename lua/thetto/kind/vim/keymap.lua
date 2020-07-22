@@ -1,6 +1,6 @@
 local M = {}
 
-M.action_execute = function(items)
+M.action_execute = function(_, items)
   for _, item in ipairs(items) do
     if not item.keymap.mode:find("n") then
       goto continue

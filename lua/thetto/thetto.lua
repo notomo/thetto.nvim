@@ -253,23 +253,21 @@ M.execute = function(action_name, args)
   end
 
   local kind_name = item_kind_name or state.buffers.kind_name
-  local kind = kinds.find(kind_name, action_name)
-  if kind == nil then
-    return nil, "not found kind: " .. state.buffers.kind_name
+  local kind, opts, kind_err = kinds.create(kind_name, action_name, args)
+  if kind_err ~= nil then
+    return nil, kind_err
   end
 
-  local opts = kind.options(action_name, args)
-
-  local action = kind.find_action(action_name, state.buffers.opts.action, state.buffers.source_name)
-  if action == nil then
-    return nil, "not found action: " .. action_name
+  local action, action_err = kinds.find_action(kind, action_name, state.buffers.opts.action, state.buffers.source_name)
+  if action_err ~= nil then
+    return nil, action_err
   end
 
   if opts.quit then
     state.close(args)
   end
 
-  return action(items, state)
+  return action(kind, items, state)
 end
 
 M.close_window = function(id)

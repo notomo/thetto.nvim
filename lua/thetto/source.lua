@@ -4,7 +4,7 @@ local highlight = require("thetto/highlight")
 
 local M = {}
 
-local create = function(source_name, source_opts)
+M.create = function(source_name, source_opts)
   local origin = util.find_source(source_name)
   if origin == nil then
     return nil, "not found source: " .. source_name
@@ -20,7 +20,5 @@ local create = function(source_name, source_opts)
 
   return setmetatable(source, origin), nil
 end
-
-M.create = create
 
 return M

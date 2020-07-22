@@ -1,16 +1,14 @@
-local jobs = require "thetto/job"
-
 local M = {}
 
-M.action_checkout = function(items)
+M.action_checkout = function(self, items)
   local item = items[1]
   if item == nil then
     return
   end
   local cmd = {"git", "checkout", item.value}
-  local job = jobs.new(cmd, {
-    on_exit = function(self)
-      vim.api.nvim_out_write(self.all_output .. "\n")
+  local job = self.jobs.new(cmd, {
+    on_exit = function(job_self)
+      vim.api.nvim_out_write(job_self.all_output .. "\n")
     end,
   })
   job:start()

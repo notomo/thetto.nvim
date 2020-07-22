@@ -1,12 +1,12 @@
 local M = {}
 
-M.action_open = function(items)
+M.action_open = function(_, items)
   for _, item in ipairs(items) do
     vim.api.nvim_win_set_cursor(0, {item.row, 0})
   end
 end
 
-M.action_tab_open = function(items)
+M.action_tab_open = function(_, items)
   local bufnr = vim.api.nvim_get_current_buf()
   for _, item in ipairs(items) do
     vim.api.nvim_command("tabedit")
@@ -15,7 +15,7 @@ M.action_tab_open = function(items)
   end
 end
 
-M.action_vsplit_open = function(items)
+M.action_vsplit_open = function(_, items)
   local bufnr = vim.api.nvim_get_current_buf()
   for _, item in ipairs(items) do
     vim.api.nvim_command("vsplit")
