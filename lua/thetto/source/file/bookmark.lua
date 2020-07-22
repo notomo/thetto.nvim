@@ -5,7 +5,7 @@ local M = {}
 M.file_path = util.user_data_path("file_bookmark.txt")
 M.paths = {}
 
-M.make = function()
+M.collect = function()
   if util.create_file_if_need(M.file_path) then
     return {}
   end

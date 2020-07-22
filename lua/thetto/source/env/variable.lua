@@ -1,6 +1,6 @@
 local M = {}
 
-M.make = function(self)
+M.collect = function(self)
   -- use `vim.fn.getcompletion("*", "environment")`?
   local job = self.jobs.new({"env"}, {
     on_exit = function(job_self)

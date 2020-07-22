@@ -1,6 +1,6 @@
 local M = {}
 
-M.make = function()
+M.collect = function()
   local items = {}
   local names = vim.fn.getcompletion("*", "filetype")
   for _, name in ipairs(names) do

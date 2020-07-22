@@ -25,7 +25,7 @@ local function collect(path)
   return paths
 end
 
-M.make = function(_, opts)
+M.collect = function(_, opts)
   local paths = collect(opts.cwd)
   local home = os.getenv("HOME")
   local items = {}

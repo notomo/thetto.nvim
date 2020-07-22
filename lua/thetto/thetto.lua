@@ -173,7 +173,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     debounced_update(input_bufnr)
   end
 
-  all_items, job = source:make(opts)
+  all_items, job = source:collect(opts)
   local items = M._head_items(all_items)
   local lines = M._head_lines(items)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)

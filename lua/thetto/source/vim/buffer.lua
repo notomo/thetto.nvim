@@ -1,6 +1,6 @@
 local M = {}
 
-M.make = function()
+M.collect = function()
   local items = {}
   local bufnrs = vim.api.nvim_list_bufs()
   for _, bufnr in ipairs(bufnrs) do

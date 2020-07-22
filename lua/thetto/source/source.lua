@@ -1,6 +1,6 @@
 local M = {}
 
-M.make = function()
+M.collect = function()
   local items = {}
   local paths = vim.api.nvim_get_runtime_file("lua/thetto/source/**/*.lua", true)
   for _, path in ipairs(paths) do

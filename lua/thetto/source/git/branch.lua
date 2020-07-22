@@ -1,6 +1,6 @@
 local M = {}
 
-M.make = function(self, opts)
+M.collect = function(self, opts)
   local cmd = {"git", "branch", "--format", "%(refname:short)"}
   if self.opts.all then
     table.insert(cmd, "--all")

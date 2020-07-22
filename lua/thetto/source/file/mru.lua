@@ -4,7 +4,7 @@ local M = {}
 
 M.ignore_pattern = "^$"
 
-M.make = function()
+M.collect = function()
   local items = {}
 
   local paths = {}

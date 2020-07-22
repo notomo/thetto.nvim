@@ -2,7 +2,7 @@ local M = {}
 
 local colored = "xxx"
 
-M.make = function()
+M.collect = function()
   local items = {}
   local names = vim.fn.getcompletion("*", "highlight")
   for _, name in ipairs(names) do

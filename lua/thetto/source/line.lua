@@ -1,6 +1,6 @@
 local M = {}
 
-M.make = function()
+M.collect = function()
   local items = {}
   local lines = vim.api.nvim_buf_get_lines(0, 0, -1, true)
   for i, line in ipairs(lines) do
