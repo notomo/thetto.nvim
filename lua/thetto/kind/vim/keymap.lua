@@ -12,6 +12,6 @@ M.action_execute = function(_, items)
   end
 end
 
-M.action_default = M.action_execute
+M.default_action = "execute"
 
 return M

@@ -19,6 +19,6 @@ M.action_vsplit_open = function(_, items)
   end
 end
 
-M.action_default = M.action_open
+M.default_action = "open"
 
 return M

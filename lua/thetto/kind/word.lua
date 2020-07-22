@@ -6,6 +6,6 @@ M.action_echo = function(_, items)
   end
 end
 
-M.action_default = M.action_echo
+M.default_action = "echo"
 
 return M

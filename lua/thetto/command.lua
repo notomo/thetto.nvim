@@ -87,7 +87,7 @@ M.open = function(...)
 end
 
 M.execute = function(...)
-  local action_name, args, _, parse_err = M.parse_args({...}, {
+  local action_name, args, action_opts, parse_err = M.parse_args({...}, {
     quit = true,
     resume = false,
     offset = 0,
@@ -101,7 +101,7 @@ M.execute = function(...)
   end
 
   local result, err = util.with_traceback(function()
-    return thetto.execute(action_name, args)
+    return thetto.execute(action_name, action_opts, args)
   end)
   if err ~= nil then
     return nil, util.print_err(err)

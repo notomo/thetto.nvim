@@ -230,7 +230,7 @@ M.start = function(source_name, source_opts, args)
   return job, nil
 end
 
-M.execute = function(action_name, args)
+M.execute = function(action_name, action_opts, args)
   local state, err
   if args.resume then
     state = states.recent(nil)
@@ -258,10 +258,11 @@ M.execute = function(action_name, args)
     return nil, kind_err
   end
 
-  local action, action_err = kinds.find_action(kind, action_name, state.buffers.opts.action, state.buffers.source_name)
+  local action, _action_opts, action_err = kinds.find_action(kind, action_opts, action_name, state.buffers.opts.action, state.buffers.source_name)
   if action_err ~= nil then
     return nil, action_err
   end
+  kind.action_opts = _action_opts
 
   if opts.quit then
     state.close(args)

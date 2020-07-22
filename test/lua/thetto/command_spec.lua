@@ -199,7 +199,7 @@ test3]])
     local called = false
     local actions = require("thetto/kind").source_user_actions
     actions["line"] = {
-      hoge = function(_)
+      action_hoge = function(_)
         called = true
       end,
     }
@@ -219,7 +219,7 @@ test3]])
     local called = false
     local actions = require("thetto/kind").user_actions
     actions["directory"] = {
-      hoge = function(_)
+      action_hoge = function(_)
         called = true
       end,
     }

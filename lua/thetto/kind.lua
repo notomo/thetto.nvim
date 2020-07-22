@@ -4,32 +4,36 @@ local jobs = require("thetto/job")
 local M = {}
 
 local action_prefix = "action_"
-M.find_action = function(kind, action_name, default_action_name, source_name)
-  local key, name
+M.find_action = function(kind, action_opts, action_name, default_action_name, source_name)
+  local name
   if action_name == "default" and default_action_name ~= nil then
-    key = default_action_name
     name = default_action_name
   else
-    key = action_prefix .. action_name
     name = action_name
   end
+  if name == "default" then
+    name = kind.default_action
+  end
+
+  local key = action_prefix .. name
+  local opts = vim.tbl_extend("force", kind.opts[name] or {}, action_opts)
 
   local source_action = M.source_user_actions[source_name]
   if source_action ~= nil and source_action[key] then
-    return source_action[key], nil
+    return source_action[key], opts, nil
   end
 
   local kind_action = M.user_actions[kind.name]
   if kind_action ~= nil and kind_action[key] then
-    return kind_action[key], nil
+    return kind_action[key], opts, nil
   end
 
   local action = kind[key]
   if action ~= nil then
-    return action, nil
+    return action, opts, nil
   end
 
-  return nil, "not found action: " .. name
+  return nil, nil, "not found action: " .. name
 end
 
 local base_options = {
@@ -47,6 +51,7 @@ M.create = function(kind_name, action_name, args)
 
   local kind = {}
   kind.name = kind_name
+  kind.opts = origin.opts or {}
   kind.jobs = jobs
 
   kind.action_move_to_input = function(_, _, state)
