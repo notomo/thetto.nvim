@@ -17,7 +17,7 @@ describe("file/recursive source", function()
 
     command("ThettoDo")
 
-    assert.current_dir(helper.root .. "/test/_test_data/dir")
+    assert.file_name("file")
   end)
 
   it("can show files in project dir", function()
