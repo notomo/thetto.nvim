@@ -1,16 +1,14 @@
-local jobs = require "thetto/job"
-
 local M = {}
 
-M.make = function(_, list)
+M.make = function(self)
   -- use `vim.fn.getcompletion("*", "environment")`?
-  local job = jobs.new({"env"}, {
-    on_exit = function(self)
+  local job = self.jobs.new({"env"}, {
+    on_exit = function(job_self)
       local items = {}
-      for _, output in ipairs(self:get_stdout()) do
+      for _, output in ipairs(job_self:get_stdout()) do
         table.insert(items, {value = output})
       end
-      list.set(items)
+      self.set(items)
     end,
   })
   return {}, job

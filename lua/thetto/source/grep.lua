@@ -1,6 +1,3 @@
-local highlight = require("thetto/highlight")
-local jobs = require "thetto/job"
-
 local M = {}
 
 local parse_line = function(line)
@@ -19,7 +16,7 @@ M.opts = {"-inH"}
 M.recursive_opt = "-r"
 M.separator = "--"
 
-M.make = function(opts, list)
+M.make = function(self, opts)
   local pattern = opts.input or vim.fn.input("Pattern: ")
   if pattern == "" then
     return {}, nil
@@ -27,9 +24,9 @@ M.make = function(opts, list)
 
   local all_items = {}
   local all_data = ""
-  local update = function(self)
+  local update = function(job_self)
     local items = {}
-    local outputs = self.parse_output(all_data)
+    local outputs = job_self.parse_output(all_data)
     all_data = ""
     for _, output in ipairs(outputs) do
       local path, row, matched_line = parse_line(output)
@@ -49,7 +46,7 @@ M.make = function(opts, list)
       ::continue::
     end
     vim.list_extend(all_items, items)
-    list.set(all_items)
+    self.set(all_items)
   end
 
   local paths = opts.cwd
@@ -61,7 +58,7 @@ M.make = function(opts, list)
     table.insert(cmd, x)
     ::continue::
   end
-  local job = jobs.new(cmd, {
+  local job = self.jobs.new(cmd, {
     on_stdout = function(_, _, data)
       if data == nil then
         return
@@ -76,8 +73,8 @@ M.make = function(opts, list)
   return {}, job
 end
 
-M.highlight = function(bufnr, items)
-  local ns = highlight.reset(bufnr)
+M.highlight = function(self, bufnr, items)
+  local ns = self.highlights.reset(bufnr)
   for i, item in ipairs(items) do
     vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, 0, item._label_length)
   end

@@ -1,8 +1,6 @@
-local highlight = require("thetto/highlight")
-
 local M = {}
 
-M.make = function(opts)
+M.make = function(_, opts)
   local paths = {}
   for _, path in ipairs(vim.fn.readdir(opts.cwd)) do
     local abs_path = vim.fn.fnamemodify(opts.cwd .. "/" .. path, ":p:gs?\\?\\/?")
@@ -28,9 +26,9 @@ M.make = function(opts)
   return items
 end
 
-M.highlight = function(bufnr, items)
-  local ns = highlight.reset(bufnr)
-  highlight.kind(bufnr, items, ns, "directory", "String")
+M.highlight = function(self, bufnr, items)
+  local ns = self.highlights.reset(bufnr)
+  self.highlights.kind(bufnr, items, ns, "directory", "String")
 end
 
 M.kind_name = "file"

@@ -1,5 +1,3 @@
-local highlight = require("thetto/highlight")
-
 local M = {}
 
 local colored = "xxx"
@@ -44,8 +42,8 @@ M.make = function()
   return items
 end
 
-M.highlight = function(bufnr, items)
-  local ns = highlight.reset(bufnr)
+M.highlight = function(self, bufnr, items)
+  local ns = self.highlights.reset(bufnr)
   local end_col = #colored
   for i, item in ipairs(items) do
     vim.api.nvim_buf_add_highlight(bufnr, ns, item.value, i - 1, 0, end_col)

@@ -1,4 +1,3 @@
-local highlight = require("thetto/highlight")
 local util = require("thetto/util")
 
 local M = {}
@@ -40,9 +39,9 @@ M.make = function()
   return items
 end
 
-M.highlight = function(bufnr, items)
-  local ns = highlight.reset(bufnr)
-  highlight.kind(bufnr, items, ns, "directory", "String")
+M.highlight = function(self, bufnr, items)
+  local ns = self.highlights.reset(bufnr)
+  self.highlights.kind(bufnr, items, ns, "directory", "String")
 end
 
 M.kind_name = "file"

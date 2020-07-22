@@ -1,4 +1,5 @@
 local kinds = require "thetto/kind"
+local sources = require "thetto/source"
 local states = require "thetto/state"
 local util = require "thetto/util"
 
@@ -118,7 +119,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   end
   if source.highlight ~= nil then
     highlight = function()
-      return source.highlight(bufnr, items)
+      return source:highlight(bufnr, items)
     end
   end
   vim.schedule(function()
@@ -137,16 +138,14 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   end)
 end
 
-local make_buffers = function(resumed_state, opts)
-  local source_name = opts.source_name
-
+local make_buffers = function(source_name, source_opts, resumed_state, opts)
   if resumed_state ~= nil then
     return resumed_state.buffers, nil, nil
   end
 
-  local source = util.find_source(source_name)
-  if source == nil then
-    return nil, nil, "not found source: " .. source_name
+  local source, err = sources.create(source_name, source_opts)
+  if err ~= nil then
+    return nil, nil, err
   end
 
   local all_items = {}
@@ -169,14 +168,12 @@ local make_buffers = function(resumed_state, opts)
     })
   end)
 
-  local list = {
-    set = function(items)
-      all_items = items
-      debounced_update(input_bufnr)
-    end,
-  }
+  source.set = function(items)
+    all_items = items
+    debounced_update(input_bufnr)
+  end
 
-  all_items, job = source.make(opts, list)
+  all_items, job = source:make(opts)
   local items = M._head_items(all_items)
   local lines = M._head_lines(items)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
@@ -184,7 +181,7 @@ local make_buffers = function(resumed_state, opts)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
     if source.highlight ~= nil then
-      source.highlight(bufnr, items)
+      source:highlight(bufnr, items)
     end
   end)
 
@@ -193,11 +190,12 @@ local make_buffers = function(resumed_state, opts)
     input = input_bufnr,
     filtered = items,
     kind_name = source.kind_name,
+    source_name = source_name,
     opts = opts,
   }, job, nil
 end
 
-M.start = function(args)
+M.start = function(source_name, source_opts, args)
   local opts = args
   opts.cwd = vim.fn.expand(opts.cwd)
 
@@ -211,13 +209,13 @@ M.start = function(args)
 
   local resumed_state = nil
   if opts.resume then
-    resumed_state = states.recent(opts.source_name)
+    resumed_state = states.recent(source_name)
     if resumed_state == nil then
       return nil, "no source to resume"
     end
   end
 
-  local buffers, job, err = make_buffers(resumed_state, opts)
+  local buffers, job, err = make_buffers(source_name, source_opts, resumed_state, opts)
   if err ~= nil then
     return nil, err
   end
@@ -232,10 +230,10 @@ M.start = function(args)
   return job, nil
 end
 
-M.execute = function(args)
+M.execute = function(action_name, args)
   local state, err
   if args.resume then
-    state = states.recent(args.source_name)
+    state = states.recent(nil)
     if state == nil then
       err = "no source to resume"
     end
@@ -255,16 +253,16 @@ M.execute = function(args)
   end
 
   local kind_name = item_kind_name or state.buffers.kind_name
-  local kind = kinds.find(kind_name, args.action)
+  local kind = kinds.find(kind_name, action_name)
   if kind == nil then
     return nil, "not found kind: " .. state.buffers.kind_name
   end
 
-  local opts = kind.options(args)
+  local opts = kind.options(action_name, args)
 
-  local action = kind.find_action(args.action, state.buffers.opts.action, state.buffers.opts.source_name)
+  local action = kind.find_action(action_name, state.buffers.opts.action, state.buffers.source_name)
   if action == nil then
-    return nil, "not found action: " .. args.action
+    return nil, "not found action: " .. action_name
   end
 
   if opts.quit then

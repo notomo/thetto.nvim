@@ -34,9 +34,9 @@ M.user_actions = {}
 
 local wrap = function(raw_kind, kind_name)
   return {
-    options = function(args)
-      if raw_kind.options ~= nil and raw_kind.options[args.action] then
-        return vim.tbl_extend("force", args, raw_kind.options[args.action])
+    options = function(action_name, args)
+      if raw_kind.options ~= nil and raw_kind.options[action_name] then
+        return vim.tbl_extend("force", args, raw_kind.options[action_name])
       end
       return args
     end,

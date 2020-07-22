@@ -12,4 +12,10 @@ describe("git/branch source", function()
     assert.exists_pattern("master")
   end)
 
+  it("can show all branches", function()
+    helper.sync_open("git/branch", "--no-insert", "--x-all")
+
+    assert.exists_pattern("origin/master")
+  end)
+
 end)

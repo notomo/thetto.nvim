@@ -1,18 +1,22 @@
-local jobs = require "thetto/job"
-
 local M = {}
 
-M.make = function(opts, list)
-  local job = jobs.new({"git", "branch", "--format", "%(refname:short)"}, {
-    on_exit = function(self)
+M.make = function(self, opts)
+  local cmd = {"git", "branch", "--format", "%(refname:short)"}
+  if self.opts.all then
+    table.insert(cmd, "--all")
+  end
+
+  local job = self.jobs.new(cmd, {
+    on_exit = function(job_self)
       local items = {}
-      for _, output in ipairs(self:get_stdout()) do
+      for _, output in ipairs(job_self:get_stdout()) do
         table.insert(items, {value = output})
       end
-      list.set(items)
+      self.set(items)
     end,
     cwd = opts.cwd,
   })
+
   return {}, job
 end
 

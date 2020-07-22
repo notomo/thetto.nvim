@@ -1,5 +1,3 @@
-local highlight = require("thetto/highlight")
-
 local M = {}
 
 M.ignore_files = {".git", "node_modules", ".mypy_cache", "__pycache__", ".DS_Store"}
@@ -25,7 +23,7 @@ local function collect(path)
   return paths
 end
 
-M.make = function(opts)
+M.make = function(_, opts)
   local paths = collect(opts.cwd)
   local home = os.getenv("HOME")
   local items = {}
@@ -43,9 +41,9 @@ M.make = function(opts)
   return items
 end
 
-M.highlight = function(bufnr, items)
-  local ns = highlight.reset(bufnr)
-  highlight.kind(bufnr, items, ns, "directory", "String")
+M.highlight = function(self, bufnr, items)
+  local ns = self.highlights.reset(bufnr)
+  self.highlights.kind(bufnr, items, ns, "directory", "String")
 end
 
 M.kind_name = "file"
