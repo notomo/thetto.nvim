@@ -4,7 +4,11 @@ local action_prefix = "action_"
 local M = {}
 local base_kind = {}
 
-base_kind.options = {move_to_input = {quit = false}, move_to_list = {quit = false}}
+base_kind.options = {
+  move_to_input = {quit = false},
+  move_to_list = {quit = false},
+  debug_print = {quit = false},
+}
 
 base_kind.action_move_to_input = function(_, state)
   vim.api.nvim_set_current_win(state.windows.input)
@@ -17,6 +21,12 @@ end
 
 base_kind.action_quit = function(_, state)
   state.close({})
+end
+
+base_kind.action_debug_print = function(items)
+  for _, item in ipairs(items) do
+    print(vim.inspect(item))
+  end
 end
 
 M.source_user_actions = {}

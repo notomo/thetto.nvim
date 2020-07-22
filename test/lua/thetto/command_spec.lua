@@ -249,4 +249,17 @@ test3]])
     assert.current_line("test%")
   end)
 
+  it("can execute debug_print", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    command("Thetto line")
+
+    command("ThettoDo debug_print")
+
+    assert.exists_message("row = 1")
+    assert.exists_message("value = \"test1\"")
+  end)
+
 end)
