@@ -4,7 +4,7 @@ local Job = {}
 Job.__index = Job
 
 local close = function(handle)
-  if handle:is_closing() then
+  if handle == nil or handle:is_closing() then
     return
   end
   handle:close()
@@ -37,7 +37,7 @@ function Job.start(self)
 
   self.stdout:read_start(vim.schedule_wrap(function(err, data)
     if data ~= nil then
-      self._stdout_output = self._stdout_output .. data
+      self.stdout_output = self.stdout_output .. data
       self.all_output = self.all_output .. data
     end
     if self.on_stdout then
@@ -47,7 +47,7 @@ function Job.start(self)
 
   self.stderr:read_start(vim.schedule_wrap(function(err, data)
     if data ~= nil then
-      self._stderr_output = self._stderr_output .. data
+      self.stderr_output = self.stderr_output .. data
       self.all_output = self.all_output .. data
     end
     if self.on_stderr then
@@ -85,7 +85,23 @@ function Job.parse_output(data)
 end
 
 function Job.get_stdout(self)
-  local output = self.parse_output(self._stdout_output)
+  local output = self.parse_output(self.stdout_output)
+  if output[#output] == "" then
+    table.remove(output, #output)
+  end
+  return output
+end
+
+function Job.get_stderr(self)
+  local output = self.parse_output(self.stderr_output)
+  if output[#output] == "" then
+    table.remove(output, #output)
+  end
+  return output
+end
+
+function Job.get_output(self)
+  local output = self.parse_output(self.all_output)
   if output[#output] == "" then
     table.remove(output, #output)
   end
@@ -98,7 +114,7 @@ function Job.wait(self, ms)
   end, 10)
 end
 
-local new = function(cmd_and_args, opts)
+M.new = function(cmd_and_args, opts)
   local job = {}
 
   local command = table.remove(cmd_and_args, 1)
@@ -112,8 +128,8 @@ local new = function(cmd_and_args, opts)
   job.on_stdout = opts.on_stdout
   job.on_stderr = opts.on_stderr
   job.on_exit = opts.on_exit
-  job._stdout_output = ""
-  job._stderr_output = ""
+  job.stdout_output = ""
+  job.stderr_output = ""
   job.all_output = ""
 
   job.on_interval = opts.on_interval
@@ -122,6 +138,29 @@ local new = function(cmd_and_args, opts)
   return setmetatable(job, Job)
 end
 
-M.new = new
+M.print_stderr = function(_, _, data)
+  if data == nil or data == "" then
+    return
+  end
+  vim.api.nvim_err_write(data .. "\n")
+end
+
+M.print_stdout = function(self)
+  if self.stdout_output == "" then
+    return
+  end
+  local output = table.concat(self:get_stdout(), "\n")
+  vim.api.nvim_out_write(output .. "\n")
+end
+
+M.print_output = function(self)
+  if self.all_output == "" then
+    return
+  end
+  -- HACK: nvim_out_write does not display message
+  vim.api.nvim_err_write("\n")
+  local output = table.concat(self:get_output(), "\n")
+  vim.api.nvim_out_write(output .. "\n")
+end
 
 return M

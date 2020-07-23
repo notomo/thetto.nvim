@@ -11,6 +11,7 @@ M.collect = function(self, opts)
     on_exit = function(job_self)
       current_branch = job_self:get_stdout()[1]
     end,
+    on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,
   })
   get_current_job:start()
@@ -25,6 +26,7 @@ M.collect = function(self, opts)
       end
       self.set(items)
     end,
+    on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,
   })
 
@@ -34,11 +36,9 @@ end
 M.highlight = function(self, bufnr, items)
   local ns = self.highlights.reset()
   for i, item in ipairs(items) do
-    if not item.is_current_branch then
-      goto continue
+    if item.is_current_branch then
+      vim.api.nvim_buf_add_highlight(bufnr, ns, "Type", i - 1, 0, -1)
     end
-    vim.api.nvim_buf_add_highlight(bufnr, ns, "Type", i - 1, 0, -1)
-    ::continue::
   end
 end
 
