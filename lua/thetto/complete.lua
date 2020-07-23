@@ -10,7 +10,7 @@ M.action = function(_, _, _)
   end
 
   local offset = 0
-  local item = state.select_from_list(offset)
+  local item = state:selected_items(offset)
   if item == nil then
     return ""
   end

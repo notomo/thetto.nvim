@@ -110,7 +110,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   end
 
   items = M._head_items(items, opts.display_limit)
-  state.update(items)
+  state:update(items)
 
   local bufnr = state.buffers.list
   local window = state.windows.list
@@ -252,7 +252,7 @@ M.execute = function(action_name, action_opts, args)
     return nil, err
   end
 
-  local items = state.select_from_list(args.offset)
+  local items = state:selected_items(args.offset)
   local actions = {}
   local opts
   local i = 1
@@ -284,7 +284,7 @@ M.execute = function(action_name, action_opts, args)
   until i > #items
 
   if opts.quit then
-    state.close(args)
+    state:close(args.resume, args.offset)
   end
 
   local result, action_err

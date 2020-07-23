@@ -9,93 +9,90 @@ M.list_filetype = "thetto"
 M.input_filetype = "thetto-input"
 M.path_pattern = "thetto://.+/thetto"
 
-local wrap = function(raw_state)
-  return {
-    buffers = raw_state.buffers,
-    windows = raw_state.windows,
-    started_at = raw_state.started_at,
-    update = function(filtered)
-      raw_state.buffers.filtered = filtered
-      vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
-    end,
-    fixed = function()
-      return {buffers = raw_state.buffers, windows = raw_state.windows}
-    end,
-    select_from_list = function(offset)
-      local index
-      if vim.bo.filetype == M.input_filetype then
-        index = 1
-      elseif vim.bo.filetype == M.list_filetype then
-        index = vim.fn.line(".")
-      else
-        index = raw_state.windows.list_cursor[1]
-      end
-      return {raw_state.buffers.filtered[index + offset]}
-    end,
-    close = function(args)
-      if vim.api.nvim_win_is_valid(raw_state.windows.list) then
-        raw_state.windows.list_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.list)
-        raw_state.windows.input_cursor = vim.api.nvim_win_get_cursor(raw_state.windows.input)
-        local active = "input"
-        if vim.api.nvim_get_current_win() == raw_state.windows.list then
-          active = "list"
-        end
-        raw_state.windows.active = active
-        util.close_window(raw_state.windows.list)
-      end
-      if args.resume then
-        local cursor = raw_state.windows.list_cursor
-        cursor[1] = cursor[1] + args.offset
-        local line_count = vim.api.nvim_buf_line_count(raw_state.buffers.list)
-        if line_count < cursor[1] then
-          cursor[1] = line_count
-        elseif cursor[1] < 1 then
-          cursor[1] = 1
-        end
-        raw_state.windows.list_cursor = cursor
-      end
-      vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
-    end,
-    closed = function()
-      return not vim.api.nvim_win_is_valid(raw_state.windows.list)
-    end,
-  }
+local State = {}
+State.__index = State
+
+function State.close(self, resume, offset)
+  if vim.api.nvim_win_is_valid(self.windows.list) then
+    self.windows.list_cursor = vim.api.nvim_win_get_cursor(self.windows.list)
+    self.windows.input_cursor = vim.api.nvim_win_get_cursor(self.windows.input)
+    local active = "input"
+    if vim.api.nvim_get_current_win() == self.windows.list then
+      active = "list"
+    end
+    self.windows.active = active
+    util.close_window(self.windows.list)
+  end
+  if resume then
+    local cursor = self.windows.list_cursor
+    cursor[1] = cursor[1] + offset
+    local line_count = vim.api.nvim_buf_line_count(self.buffers.list)
+    if line_count < cursor[1] then
+      cursor[1] = line_count
+    elseif cursor[1] < 1 then
+      cursor[1] = 1
+    end
+    self.windows.list_cursor = cursor
+  end
+  vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, self)
 end
 
-M.get = function(bufnr)
-  local state = util.buffer_var(bufnr, list_state_key)
-  if bufnr == 0 and vim.bo.filetype == M.input_filetype then
-    local input_state = util.buffer_var(bufnr, input_state_key)
-    state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
+function State.selected_items(self, offset)
+  local index
+  if vim.bo.filetype == M.input_filetype then
+    index = 1
+  elseif vim.bo.filetype == M.list_filetype then
+    index = vim.fn.line(".")
+  else
+    index = self.windows.list_cursor[1]
   end
-  if state == nil then
-    return nil, "not found state"
-  end
-  return wrap(state), nil
+  return {self.buffers.filtered[index + offset]}
+end
+
+function State._raw(self)
+  return {buffers = self.buffers, windows = self.windows, started_at = self.started_at}
+end
+
+function State.update(self, filtered)
+  local raw = self:_raw()
+  raw.buffers.filtered = filtered
+  vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, raw)
 end
 
 M.set = function(buffers, windows)
+  local raw_state = {}
+  raw_state.buffers = buffers
+  raw_state.windows = windows
   -- HACk: save started_at as str
-  local raw_state = {
-    buffers = buffers,
-    windows = windows,
-    started_at = vim.fn.reltimestr(vim.fn.reltime()),
-  }
-  vim.api.nvim_buf_set_var(buffers.list, list_state_key, raw_state)
-  local state = wrap(raw_state)
-  vim.api.nvim_buf_set_var(buffers.input, input_state_key, state.fixed())
+  raw_state.started_at = vim.fn.reltimestr(vim.fn.reltime())
+
+  vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
+  vim.api.nvim_buf_set_var(raw_state.buffers.input, input_state_key, {
+    buffers = {list = raw_state.buffers.list, input = raw_state.buffers.input},
+    windows = {list = raw_state.windows.list, input = raw_state.windows.input},
+  })
+end
+
+M.get = function(bufnr)
+  local raw_state = util.buffer_var(bufnr, list_state_key)
+  if bufnr == 0 and vim.bo.filetype == M.input_filetype then
+    local input_state = util.buffer_var(bufnr, input_state_key)
+    raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
+  end
+  if raw_state == nil then
+    return nil, "not found state"
+  end
+  return setmetatable(raw_state, State), nil
 end
 
 M.recent = function(source_name)
-  local bufnrs = vim.api.nvim_list_bufs()
-  local states = {}
-
   local pattern = M.path_pattern
   if source_name ~= nil then
     pattern = ("thetto://%s/thetto"):format(source_name)
   end
 
-  for _, bufnr in ipairs(bufnrs) do
+  local states = {}
+  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
     local path = vim.api.nvim_buf_get_name(bufnr)
     if path:match(pattern) then
       local state = M.get(bufnr)

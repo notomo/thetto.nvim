@@ -64,7 +64,9 @@ M.create = function(kind_name, action_name, args)
   end
 
   kind.action_quit = function(_, _, state)
-    state.close({})
+    local resume = false
+    local offset = 0
+    state:close(resume, offset)
   end
 
   kind.action_debug_print = function(_, items)
