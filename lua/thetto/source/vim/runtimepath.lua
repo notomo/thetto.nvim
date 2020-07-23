@@ -5,8 +5,8 @@ M.collect = function()
   local home = os.getenv("HOME")
   local paths = vim.api.nvim_list_runtime_paths()
   for _, path in ipairs(paths) do
-    local desc = path:gsub(home, "~")
-    table.insert(items, {desc = desc, value = path, path = path})
+    local value = path:gsub(home, "~")
+    table.insert(items, {value = value, path = path})
   end
   return items
 end

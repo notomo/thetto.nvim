@@ -28,10 +28,8 @@ M.collect = function(_, opts)
   local home = os.getenv("HOME")
   local items = {}
   for _, path in ipairs(paths) do
-    local value = path .. "/"
-    local desc = value:gsub("^" .. opts.cwd .. "/", "")
-    desc = desc:gsub(home, "~")
-    table.insert(items, {desc = desc, value = value, path = path})
+    local value = (path .. "/"):gsub("^" .. opts.cwd .. "/", ""):gsub(home, "~")
+    table.insert(items, {value = value, path = path})
   end
   return items
 end

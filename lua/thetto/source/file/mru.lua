@@ -31,8 +31,8 @@ M.collect = function()
     if regex:match_str(path) then
       goto continue
     end
-    local desc = path:gsub(home, "~")
-    table.insert(items, {desc = desc, value = path, path = path})
+    local value = path:gsub(home, "~")
+    table.insert(items, {value = value, path = path})
     ::continue::
   end
   return items
