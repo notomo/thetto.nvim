@@ -5,9 +5,6 @@ local util = require "thetto/util"
 
 local M = {}
 
-M.limit = 100
-M.debounce_ms = 50
-
 local open_windows = function(buffers, resumed_state, opts)
   local ids = vim.api.nvim_tabpage_list_wins(0)
   for _, id in ipairs(ids) do
@@ -110,7 +107,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
     items = iteradapter.apply(items, line, opts)
   end
 
-  items = M._head_items(items)
+  items = M._head_items(items, opts.display_limit)
   state.update(items)
 
   local bufnr = state.buffers.list
@@ -126,7 +123,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
     end
-    local lines = M._head_lines(items)
+    local lines = M._head_lines(items, opts.display_limit)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
@@ -151,7 +148,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   local all_items = {}
   local job = nil
   local iteradapter_names = source.iteradapter_names or {"filter/substring"}
-  local debounced_update = util.debounce(M.debounce_ms, function(bufnr)
+  local debounced_update = util.debounce(opts.debounce_ms, function(bufnr)
     return on_changed(all_items, bufnr, iteradapter_names, source)
   end)
 
@@ -174,8 +171,8 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   end
 
   all_items, job = source:collect(opts)
-  local items = M._head_items(all_items)
-  local lines = M._head_lines(items)
+  local items = M._head_items(all_items, opts.display_limit)
+  local lines = M._head_lines(items, opts.display_limit)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
@@ -275,16 +272,16 @@ M.close_window = function(id)
   util.close_window(id)
 end
 
-M._head_items = function(items)
+M._head_items = function(items, limit)
   local filtered = {}
-  for i = 1, M.limit, 1 do
+  for i = 1, limit, 1 do
     filtered[i] = items[i]
   end
   return filtered
 end
 
-M._head_lines = function(items)
-  local filtered = M._head_items(items)
+M._head_lines = function(items, limit)
+  local filtered = M._head_items(items, limit)
   local lines = {}
   for _, item in pairs(filtered) do
     table.insert(lines, item.desc or item.value)

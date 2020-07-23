@@ -71,6 +71,8 @@ M.open = function(...)
     cwd = ".",
     target = nil,
     action = nil,
+    display_limit = 100,
+    debounce_ms = 50,
   })
   if parse_err ~= nil then
     return nil, util.print_err(parse_err)
