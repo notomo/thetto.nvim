@@ -158,6 +158,17 @@ AM.error_message = function(expected, f)
   assert.is_true(vim.endswith(actual, expected), msg)
 end
 
+AM.completion_contains = function(result, expected)
+  local names = vim.split(result, "\n", true)
+  for _, name in ipairs(names) do
+    if name == expected then
+      return
+    end
+  end
+  local msg = ("completion should contain \"%s\", but actual: %s"):format(expected, vim.inspect(names))
+  assert(false, msg)
+end
+
 M.assert = AM
 
 return M

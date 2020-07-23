@@ -81,6 +81,22 @@ M.create = function(kind_name, action_name, args)
   return setmetatable(kind, origin), opts, nil
 end
 
+M.actions = function(kind_name)
+  local kind = util.find_kind(kind_name)
+  if kind == nil then
+    return {}
+  end
+
+  local names = {}
+  for key in pairs(kind) do
+    if vim.startswith(key, action_prefix) then
+      local name = key:gsub("^" .. action_prefix, "")
+      table.insert(names, name)
+    end
+  end
+  return names
+end
+
 M.source_user_actions = {}
 M.user_actions = {}
 
