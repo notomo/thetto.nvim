@@ -13,7 +13,7 @@ describe("file/recursive source", function()
     command("Thetto file/recursive --no-insert")
 
     assert.exists_pattern("dir/file")
-    helper.search("dir")
+    helper.search("dir\\/file")
 
     command("ThettoDo")
 

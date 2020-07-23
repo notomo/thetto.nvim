@@ -21,4 +21,15 @@ describe("directory/recursive source", function()
     assert.current_dir(helper.root .. "/test/_test_data/dir")
   end)
 
+  it("can show directories with depth range", function()
+    vim.api.nvim_set_current_dir("./test/_test_data")
+
+    command("Thetto directory/recursive --no-insert --x-min-depth=2")
+
+    assert.exists_pattern("dir/depth2")
+    assert.not_exists_pattern("dir/$")
+
+    command("ThettoDo")
+  end)
+
 end)

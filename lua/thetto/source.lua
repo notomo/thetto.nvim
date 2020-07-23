@@ -13,7 +13,7 @@ M.create = function(source_name, source_opts)
 
   local source = {}
   source.name = source_name
-  source.opts = source_opts
+  source.opts = vim.tbl_extend("force", origin.opts or {}, source_opts)
 
   source.jobs = jobs
   source.highlights = highlight

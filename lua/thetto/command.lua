@@ -8,14 +8,17 @@ local parse = function(arg)
   if not vim.startswith(arg, "--") then
     return nil, arg
   elseif vim.startswith(arg, "--no-") then
-    local key = arg:sub(#("--no-") + 1)
+    local key = arg:sub(#("--no-") + 1):gsub("-", "_")
     return key, false
   elseif vim.startswith(arg, "--") and not has_equal then
-    local key = arg:sub(#("--") + 1)
+    local key = arg:sub(#("--") + 1):gsub("-", "_")
     return key, true
   elseif vim.startswith(arg, "--") and has_equal then
-    local key = arg:sub(#("--") + 1, has_equal - 1)
+    local key = arg:sub(#("--") + 1, has_equal - 1):gsub("-", "_")
     local value = arg:sub(has_equal + 1)
+    if value:match("^%d+$") then
+      return key, tonumber(value)
+    end
     return key, value
   end
   return nil, nil

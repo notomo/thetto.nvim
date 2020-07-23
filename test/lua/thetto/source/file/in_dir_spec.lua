@@ -20,6 +20,7 @@ describe("file/in_dir source", function()
     assert.current_dir(helper.root .. "/test/_test_data/dir")
 
     command("Thetto file/in_dir --no-insert")
+    helper.search("file")
 
     command("ThettoDo")
 

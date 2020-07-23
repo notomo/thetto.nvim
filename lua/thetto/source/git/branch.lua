@@ -1,5 +1,7 @@
 local M = {}
 
+M.opts = {all = false}
+
 M.collect = function(self, opts)
   local cmd = {"git", "branch", "--format", "%(refname:short)"}
   if self.opts.all then
