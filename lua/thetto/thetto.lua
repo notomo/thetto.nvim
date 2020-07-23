@@ -2,6 +2,7 @@ local kinds = require "thetto/kind"
 local sources = require "thetto/source"
 local states = require "thetto/state"
 local util = require "thetto/util"
+local inputs = require "thetto/input"
 
 local M = {}
 
@@ -194,6 +195,7 @@ end
 
 M.start = function(source_name, source_opts, args)
   local opts = args
+
   opts.cwd = vim.fn.expand(opts.cwd)
 
   if opts.target ~= nil then
@@ -202,6 +204,14 @@ M.start = function(source_name, source_opts, args)
       return nil, "not found target: " .. opts.target
     end
     opts.cwd = target.cwd()
+  end
+
+  if opts.pattern_type ~= nil then
+    local pattern = inputs.get(opts.pattern_type)
+    if pattern == nil then
+      return nil, "not found pattern type: " .. opts.pattern_type
+    end
+    opts.pattern = pattern
   end
 
   local resumed_state = nil

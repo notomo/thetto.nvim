@@ -17,7 +17,7 @@ M.recursive_opt = "-r"
 M.separator = "--"
 
 M.collect = function(self, opts)
-  local pattern = opts.input or vim.fn.input("Pattern: ")
+  local pattern = opts.pattern or vim.fn.input("Pattern: ")
   if pattern == "" then
     return {}, nil
   end
