@@ -30,7 +30,7 @@ local wrap = function(raw_state)
       else
         index = raw_state.windows.list_cursor[1]
       end
-      return raw_state.buffers.filtered[index + offset]
+      return {raw_state.buffers.filtered[index + offset]}
     end,
     close = function(args)
       if vim.api.nvim_win_is_valid(raw_state.windows.list) then

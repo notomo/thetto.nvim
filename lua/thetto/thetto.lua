@@ -96,7 +96,8 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
 
   -- NOTE: avoid `too many results to unpack`
   local items = {}
-  for _, item in ipairs(all_items) do
+  for i, item in ipairs(all_items) do
+    item._index = i
     table.insert(items, item)
   end
 
@@ -251,31 +252,46 @@ M.execute = function(action_name, action_opts, args)
     return nil, err
   end
 
-  local items = {}
-  local item = state.select_from_list(args.offset)
-  local item_kind_name = nil
-  if item ~= nil then
-    table.insert(items, item)
-    item_kind_name = item.kind_name
-  end
+  local items = state.select_from_list(args.offset)
+  local actions = {}
+  local opts
+  local i = 1
+  repeat
+    local item = items[i]
+    local item_kind_name
+    if item ~= nil then
+      item_kind_name = item.kind_name
+    end
 
-  local kind_name = item_kind_name or state.buffers.kind_name
-  local kind, opts, kind_err = kinds.create(kind_name, action_name, args)
-  if kind_err ~= nil then
-    return nil, kind_err
-  end
+    local kind_name = item_kind_name or state.buffers.kind_name
+    local kind, _opts, kind_err = kinds.create(kind_name, action_name, args)
+    if kind_err ~= nil then
+      return nil, kind_err
+    end
+    opts = _opts
 
-  local action, _action_opts, action_err = kinds.find_action(kind, action_opts, action_name, state.buffers.opts.action, state.buffers.source_name)
-  if action_err ~= nil then
-    return nil, action_err
-  end
-  kind.action_opts = _action_opts
+    local action, _action_opts, action_err = kinds.find_action(kind, action_opts, action_name, state.buffers.opts.action, state.buffers.source_name)
+    if action_err ~= nil then
+      return nil, action_err
+    end
+    kind.action_opts = _action_opts
+
+    table.insert(actions, function(_state)
+      return action(kind, {item}, _state)
+    end)
+
+    i = i + 1
+  until i > #items
 
   if opts.quit then
     state.close(args)
   end
 
-  return action(kind, items, state)
+  local result, action_err
+  for _, action in ipairs(actions) do
+    result, action_err = action(state)
+  end
+  return result, action_err
 end
 
 M.close_window = function(id)
