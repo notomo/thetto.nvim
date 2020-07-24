@@ -26,7 +26,7 @@ M.collect = function(self, opts)
         local is_current_branch = output == current_branch
         table.insert(items, {value = output, is_current_branch = is_current_branch})
       end
-      self.set(items)
+      self.append(items)
     end,
     on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,

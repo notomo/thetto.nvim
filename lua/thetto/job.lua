@@ -14,10 +14,10 @@ function Job._shutdown(self, code, signal)
   if self.on_interval then
     self.timer:stop()
   end
+  self:stop()
   if self.on_exit then
     self:on_exit(code, signal)
   end
-  self:stop()
 end
 
 function Job.is_running(self)
@@ -36,7 +36,7 @@ function Job.start(self)
   end))
 
   self.stdout:read_start(vim.schedule_wrap(function(err, data)
-    if data ~= nil then
+    if self.stdout_buffered and data ~= nil then
       self.stdout_output = self.stdout_output .. data
       self.all_output = self.all_output .. data
     end
@@ -46,7 +46,7 @@ function Job.start(self)
   end))
 
   self.stderr:read_start(vim.schedule_wrap(function(err, data)
-    if data ~= nil then
+    if self.stderr_buffered and data ~= nil then
       self.stderr_output = self.stderr_output .. data
       self.all_output = self.all_output .. data
     end
@@ -128,8 +128,19 @@ M.new = function(cmd_and_args, opts)
   job.on_stdout = opts.on_stdout
   job.on_stderr = opts.on_stderr
   job.on_exit = opts.on_exit
+
   job.stdout_output = ""
+  job.stdout_buffered = true
+  if opts.stdout_buffered ~= nil then
+    job.stdout_buffered = opts.stdout_buffered
+  end
+
   job.stderr_output = ""
+  job.stderr_buffered = true
+  if opts.stderr_buffered ~= nil then
+    job.stderr_buffered = opts.stderr_buffered
+  end
+
   job.all_output = ""
 
   job.on_interval = opts.on_interval

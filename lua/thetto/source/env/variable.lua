@@ -8,7 +8,7 @@ M.collect = function(self)
       for _, output in ipairs(job_self:get_stdout()) do
         table.insert(items, {value = output})
       end
-      self.set(items)
+      self.append(items)
     end,
   })
   return {}, job

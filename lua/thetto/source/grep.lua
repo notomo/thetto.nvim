@@ -22,33 +22,6 @@ M.collect = function(self, opts)
     return {}, nil
   end
 
-  local all_items = {}
-  local all_data = ""
-  local update = function(job_self)
-    local items = {}
-    local outputs = job_self.parse_output(all_data)
-    all_data = ""
-    for _, output in ipairs(outputs) do
-      local path, row, matched_line = parse_line(output)
-      if path == nil then
-        goto continue
-      end
-      local relative_path = path:gsub("^" .. opts.cwd .. "/", "")
-      local label = ("%s:%d"):format(relative_path, row)
-      local desc = ("%s %s"):format(label, matched_line)
-      table.insert(items, {
-        desc = desc,
-        value = matched_line,
-        path = path,
-        row = row,
-        _label_length = #label,
-      })
-      ::continue::
-    end
-    vim.list_extend(all_items, items)
-    self.set(all_items)
-  end
-
   local paths = opts.cwd
   local cmd = vim.list_extend({M.command}, M.opts)
   for _, x in ipairs({M.recursive_opt, M.pattern_opt, pattern, M.separator, paths}) do
@@ -58,15 +31,43 @@ M.collect = function(self, opts)
     table.insert(cmd, x)
     ::continue::
   end
+
+  local buffered_items = {}
   local job = self.jobs.new(cmd, {
-    on_stdout = function(_, _, data)
+    on_stdout = function(job_self, _, data)
       if data == nil then
         return
       end
-      all_data = all_data .. data
+
+      local outputs = job_self.parse_output(data)
+      for _, output in ipairs(outputs) do
+        local path, row, matched_line = parse_line(output)
+        if path == nil then
+          goto continue
+        end
+        local relative_path = path:gsub("^" .. opts.cwd .. "/", "")
+        local label = ("%s:%d"):format(relative_path, row)
+        local desc = ("%s %s"):format(label, matched_line)
+        table.insert(buffered_items, {
+          desc = desc,
+          value = matched_line,
+          path = path,
+          row = row,
+          _label_length = #label,
+        })
+        ::continue::
+      end
     end,
-    on_exit = update,
-    on_interval = update,
+    on_exit = function(_)
+      self.append(buffered_items)
+      buffered_items = {}
+    end,
+    on_interval = function(_)
+      self.append(buffered_items)
+      buffered_items = {}
+    end,
+    stdout_buffered = false,
+    stderr_buffered = false,
     cwd = opts.cwd,
   })
 

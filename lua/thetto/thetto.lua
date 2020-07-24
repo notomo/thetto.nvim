@@ -96,7 +96,9 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   end
 
   for _, item in ipairs(state.buffers.filtered) do
-    all_items[item.index].selected = item.selected
+    if item.selected ~= nil then
+      all_items[item.index].selected = item.selected
+    end
   end
 
   -- NOTE: avoid `too many results to unpack`
@@ -118,26 +120,25 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
 
   local bufnr = state.buffers.list
   local window = state.windows.list
-  local highlight = function()
-  end
-  if source.highlight ~= nil then
-    highlight = function()
-      return source:highlight(bufnr, items)
-    end
-  end
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
     end
+
     local lines = M._head_lines(items, opts.display_limit)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+
     if vim.bo.filetype ~= states.list_filetype then
       vim.api.nvim_win_set_cursor(window, {1, 0})
     end
-    highlight()
+
+    if source.highlight ~= nil then
+      source:highlight(bufnr, items)
+    end
     highlights.update_selections(bufnr, items)
+
     M._changed_after()
   end)
 end
@@ -172,11 +173,12 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     })
   end)
 
-  source.set = function(items)
-    all_items = items
-    for i, item in ipairs(all_items) do
-      item.index = i
+  source.append = function(items)
+    local len = #all_items
+    for i, item in ipairs(items) do
+      item.index = len + i
     end
+    vim.list_extend(all_items, items)
     debounced_update(input_bufnr)
   end
 
