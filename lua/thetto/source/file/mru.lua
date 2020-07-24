@@ -28,7 +28,7 @@ M.collect = function()
   local home = os.getenv("HOME")
   local regex = vim.regex(M.ignore_pattern)
   for _, path in ipairs(paths) do
-    if regex:match_str(path) then
+    if regex:match_str(path) or vim.fn.filereadable(path) == 0 then
       goto continue
     end
     local value = path:gsub(home, "~")
