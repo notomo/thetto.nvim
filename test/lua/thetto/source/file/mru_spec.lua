@@ -18,4 +18,15 @@ describe("file/mru source", function()
     assert.file_name("oldfile")
   end)
 
+  it("can execute directory_open", function()
+    command("edit " .. helper.root .. "/test/_test_data/oldfile")
+
+    command("Thetto file/mru --no-insert")
+
+    helper.search("oldfile")
+    command("ThettoDo directory_open")
+
+    assert.current_dir(helper.root .. "/test/_test_data")
+  end)
+
 end)

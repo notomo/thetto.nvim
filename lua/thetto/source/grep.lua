@@ -81,6 +81,6 @@ M.highlight = function(self, bufnr, items)
   end
 end
 
-M.kind_name = "file/position"
+M.kind_name = "file"
 
 return M
