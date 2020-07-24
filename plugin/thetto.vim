@@ -10,3 +10,5 @@ else
     command! -nargs=* Thetto lua require("thetto/command").open(<f-args>)
     command! -nargs=* -complete=custom,thetto#complete#action ThettoDo lua require("thetto/command").execute(<f-args>)
 endif
+
+highlight default link ThettoSelected Statement

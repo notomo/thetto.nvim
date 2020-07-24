@@ -262,4 +262,26 @@ test2]])
     assert.exists_message("value = \"test1\"")
   end)
 
+  it("can select items and execute action", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert")
+
+    command("ThettoDo toggle_selection")
+    command("normal! j")
+    command("ThettoDo toggle_selection")
+    command("normal! j")
+
+    command("ThettoDo toggle_selection")
+    command("ThettoDo toggle_selection")
+
+    command("ThettoDo tab_open")
+
+    assert.tab_count(3)
+    assert.current_line("test2")
+  end)
+
 end)

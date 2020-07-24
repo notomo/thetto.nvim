@@ -1,5 +1,6 @@
 local util = require("thetto/util")
 local jobs = require("thetto/job")
+local highlights = require("thetto/highlight")
 
 local M = {}
 
@@ -40,6 +41,7 @@ local base_options = {
   move_to_input = {quit = false},
   move_to_list = {quit = false},
   debug_print = {quit = false},
+  toggle_selection = {quit = false},
 }
 
 M.create = function(kind_name, action_name, args)
@@ -53,6 +55,11 @@ M.create = function(kind_name, action_name, args)
   kind.name = kind_name
   kind.opts = origin.opts or {}
   kind.jobs = jobs
+
+  kind.action_toggle_selection = function(_, items, state)
+    state:toggle_selections(items)
+    highlights.update_selections(state.buffers.list, state.buffers.filtered)
+  end
 
   kind.action_move_to_input = function(_, _, state)
     vim.api.nvim_set_current_win(state.windows.input)

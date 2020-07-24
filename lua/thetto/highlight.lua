@@ -1,6 +1,7 @@
 local M = {}
 
 local ns_key = "thetto-list-highlight"
+local selection_ns_key = "thetto-selection-highlight"
 
 M.reset = function(bufnr)
   local ns = vim.api.nvim_create_namespace(ns_key)
@@ -15,6 +16,16 @@ M.kind = function(bufnr, items, ns, kind_name, highlight_group_name)
     end
     vim.api.nvim_buf_add_highlight(bufnr, ns, highlight_group_name, i - 1, 0, -1)
     ::continue::
+  end
+end
+
+M.update_selections = function(bufnr, items)
+  local ns = vim.api.nvim_create_namespace(selection_ns_key)
+  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+  for i, item in ipairs(items) do
+    if item.selected then
+      vim.api.nvim_buf_add_highlight(bufnr, ns, "ThettoSelected", i - 1, 0, -1)
+    end
   end
 end
 

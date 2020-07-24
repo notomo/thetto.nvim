@@ -37,7 +37,15 @@ function State.close(self, resume, offset)
   vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, self)
 end
 
-function State.selected_items(self, offset)
+function State.selected_items(self, action_name, offset)
+  if action_name ~= "toggle_selection" and not vim.tbl_isempty(self.buffers.selected) then
+    local selected = vim.tbl_values(self.buffers.selected)
+    table.sort(selected, function(a, b)
+      return a.index < b.index
+    end)
+    return selected
+  end
+
   local index
   if vim.bo.filetype == M.input_filetype then
     index = 1
@@ -56,6 +64,27 @@ end
 function State.update(self, filtered)
   local raw = self:_raw()
   raw.buffers.filtered = filtered
+  vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, raw)
+end
+
+function State.toggle_selections(self, items)
+  local raw = self:_raw()
+  for _, item in ipairs(items) do
+    local key = tostring(item.index)
+    if raw.buffers.selected[key] then
+      raw.buffers.selected[key] = nil
+    else
+      raw.buffers.selected[key] = item
+    end
+
+    for _, filtered_item in ipairs(raw.buffers.filtered) do
+      if filtered_item.index == item.index then
+        filtered_item.selected = not filtered_item.selected
+        break
+      end
+    end
+  end
+
   vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, raw)
 end
 

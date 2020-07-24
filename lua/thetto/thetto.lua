@@ -1,6 +1,7 @@
 local kinds = require "thetto/kind"
 local sources = require "thetto/source"
 local states = require "thetto/state"
+local highlights = require("thetto/highlight")
 local util = require "thetto/util"
 local inputs = require "thetto/input"
 
@@ -94,10 +95,13 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
     opts.ignorecase = true
   end
 
+  for _, item in ipairs(state.buffers.filtered) do
+    all_items[item.index].selected = item.selected
+  end
+
   -- NOTE: avoid `too many results to unpack`
   local items = {}
-  for i, item in ipairs(all_items) do
-    item._index = i
+  for _, item in ipairs(all_items) do
     table.insert(items, item)
   end
 
@@ -133,6 +137,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
       vim.api.nvim_win_set_cursor(window, {1, 0})
     end
     highlight()
+    highlights.update_selections(bufnr, items)
     M._changed_after()
   end)
 end
@@ -169,10 +174,17 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
 
   source.set = function(items)
     all_items = items
+    for i, item in ipairs(all_items) do
+      item.index = i
+    end
     debounced_update(input_bufnr)
   end
 
   all_items, job = source:collect(opts)
+  for i, item in ipairs(all_items) do
+    item.index = i
+  end
+
   local items = M._head_items(all_items, opts.display_limit)
   local lines = M._head_lines(items, opts.display_limit)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
@@ -188,6 +200,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     list = list_bufnr,
     input = input_bufnr,
     filtered = items,
+    selected = {},
     kind_name = source.kind_name,
     source_name = source_name,
     opts = opts,
@@ -252,18 +265,22 @@ M.execute = function(action_name, action_opts, args)
     return nil, err
   end
 
-  local items = state:selected_items(args.offset)
+  local selected_items = state:selected_items(action_name, args.offset)
+  local item_groups = util.group_by(selected_items, function(item)
+    return item.kind_name or state.buffers.kind_name
+  end)
+
   local actions = {}
   local opts
   local i = 1
   repeat
-    local item = items[i]
-    local item_kind_name
-    if item ~= nil then
-      item_kind_name = item.kind_name
+    local kind_name, items
+    if #item_groups == 0 then
+      kind_name = state.buffers.kind_name
+      items = {}
+    else
+      kind_name, items = unpack(item_groups[i])
     end
-
-    local kind_name = item_kind_name or state.buffers.kind_name
     local kind, _opts, kind_err = kinds.create(kind_name, action_name, args)
     if kind_err ~= nil then
       return nil, kind_err
@@ -277,11 +294,11 @@ M.execute = function(action_name, action_opts, args)
     kind.action_opts = _action_opts
 
     table.insert(actions, function(_state)
-      return action(kind, {item}, _state)
+      return action(kind, items, _state)
     end)
 
     i = i + 1
-  until i > #items
+  until i > #item_groups
 
   if opts.quit then
     state:close(args.resume, args.offset)
