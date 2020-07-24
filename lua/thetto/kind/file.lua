@@ -48,6 +48,15 @@ M.action_directory_tab_open = function(self, items)
   directory_kind.action_tab_open(self, to_dirs(items))
 end
 
+M.action_directory_enter = function(_, items)
+  local item = items[1]
+  if item == nil then
+    return
+  end
+  local path = vim.fn.fnamemodify(item.path, ":h")
+  vim.api.nvim_command("Thetto file/in_dir --cwd=" .. path)
+end
+
 M.default_action = "open"
 
 return M

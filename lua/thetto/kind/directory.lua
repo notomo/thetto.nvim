@@ -26,9 +26,18 @@ M.action_vsplit_open = function(_, items)
   end
 end
 
+M.action_enter = function(_, items)
+  local item = items[1]
+  if item == nil then
+    return
+  end
+  vim.api.nvim_command("Thetto file/in_dir --cwd=" .. item.path)
+end
+
 M.action_open = M.action_cd
 M.action_directory_open = M.action_open
 M.action_directory_tab_open = M.action_tab_open
+M.action_directory_enter = M.action_enter
 
 M.default_action = "cd"
 

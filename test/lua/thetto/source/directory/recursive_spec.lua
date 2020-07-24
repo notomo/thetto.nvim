@@ -32,4 +32,16 @@ describe("directory/recursive source", function()
     command("ThettoDo")
   end)
 
+  it("can execute enter", function()
+    vim.api.nvim_set_current_dir("./test/_test_data")
+
+    command("Thetto directory/recursive --no-insert")
+    helper.search("dir/")
+
+    command("ThettoDo enter")
+    command("ThettoDo move_to_list")
+
+    assert.exists_pattern("depth2/")
+  end)
+
 end)
