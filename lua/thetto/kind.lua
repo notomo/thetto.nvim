@@ -42,6 +42,7 @@ local base_options = {
   move_to_list = {quit = false},
   debug_print = {quit = false},
   toggle_selection = {quit = false},
+  toggle_all_selection = {quit = false},
 }
 
 M.create = function(kind_name, action_name, args)
@@ -58,6 +59,11 @@ M.create = function(kind_name, action_name, args)
 
   kind.action_toggle_selection = function(_, items, state)
     state:toggle_selections(items)
+    highlights.update_selections(state.buffers.list, state.buffers.filtered)
+  end
+
+  kind.action_toggle_all_selection = function(_, _, state)
+    state:toggle_selections(state.buffers.filtered)
     highlights.update_selections(state.buffers.list, state.buffers.filtered)
   end
 

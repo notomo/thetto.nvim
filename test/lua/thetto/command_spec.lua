@@ -284,4 +284,25 @@ test3]])
     assert.current_line("test2")
   end)
 
+  it("can execute toggle_all_selection", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert")
+
+    helper.search("test2")
+    command("ThettoDo toggle_selection")
+
+    command("ThettoDo toggle_all_selection")
+
+    command("ThettoDo tab_open")
+
+    assert.tab_count(3)
+    assert.current_line("test3")
+    command("tabclose")
+    assert.current_line("test1")
+  end)
+
 end)
