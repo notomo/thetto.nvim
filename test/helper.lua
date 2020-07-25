@@ -41,6 +41,7 @@ M.set_lines = function(lines)
 end
 
 M.sync_input = function(texts)
+  waiting = false
   vim.api.nvim_put(texts, "c", true, true)
   local ok = vim.wait(1000, function()
     return waiting
@@ -52,6 +53,7 @@ M.sync_input = function(texts)
 end
 
 M.sync_open = function(...)
+  waiting = false
   local job = require("thetto/command").open(...)
   if job == nil then
     return
@@ -66,6 +68,17 @@ M.sync_open = function(...)
   waiting = false
   if not ok then
     assert(false, "wait timeout")
+  end
+end
+
+M.sync_execute = function(...)
+  local job = require("thetto/command").execute(...)
+  if job == nil then
+    return
+  end
+  local ok = job:wait(1000)
+  if not ok then
+    assert(false, "job wait timeout")
   end
 end
 

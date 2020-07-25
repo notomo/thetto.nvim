@@ -55,6 +55,7 @@ M.create = function(kind_name, action_name, args)
   local kind = {}
   kind.name = kind_name
   kind.opts = origin.opts or {}
+  kind.default_action = origin.default_action or "echo"
   kind.jobs = jobs
 
   kind.action_toggle_selection = function(_, items, state)
@@ -85,6 +86,12 @@ M.create = function(kind_name, action_name, args)
   kind.action_debug_print = function(_, items)
     for _, item in ipairs(items) do
       print(vim.inspect(item))
+    end
+  end
+
+  kind.action_echo = function(_, items)
+    for _, item in ipairs(items) do
+      print(item.value)
     end
   end
 
