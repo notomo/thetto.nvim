@@ -182,6 +182,18 @@ AM.completion_contains = function(result, expected)
   assert(false, msg)
 end
 
+AM.virtual_text = function(expected)
+  local bufnr = vim.api.nvim_get_current_buf()
+  local line = vim.fn.line(".") - 1
+  local chunk = vim.api.nvim_buf_get_virtual_text(bufnr, line)[1]
+  if chunk == nil then
+    assert(false, ("expected virtual text \"%s\" is not found"):format(expected))
+  end
+  local actual = chunk[1]
+  local msg = ("virtual text should be %s, but actual: %s"):format(expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M

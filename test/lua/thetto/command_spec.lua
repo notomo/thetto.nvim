@@ -16,6 +16,9 @@ test3]])
     command("Thetto line")
     helper.sync_input({"2"})
 
+    command("normal! G")
+    assert.virtual_text("line [ 1 / 3 ]")
+
     command("ThettoDo move_to_list")
 
     assert.current_line("test2")

@@ -21,7 +21,7 @@ local open_windows = function(buffers, resumed_state, opts)
     ::continue::
   end
 
-  local row = vim.o.lines / 2 - (opts.height / 2)
+  local row = vim.o.lines / 2 - ((opts.height + 2) / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
 
   local list_window = vim.api.nvim_open_win(buffers.list, true, {
@@ -36,7 +36,7 @@ local open_windows = function(buffers, resumed_state, opts)
 
   local input_window = vim.api.nvim_open_win(buffers.input, true, {
     width = opts.width,
-    height = 1,
+    height = 2,
     relative = "editor",
     row = row + opts.height,
     col = column,
@@ -121,6 +121,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
 
   items = M._head_items(items, opts.display_limit)
   state:update(items)
+  M.update_info(input_bufnr, items, all_items, source.name)
 
   local bufnr = state.buffers.list
   local window = state.windows.list
@@ -169,6 +170,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
 
   local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {"", ""})
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = debounced_update,
       on_detach = function()
@@ -204,6 +206,8 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
       source:highlight(bufnr, items)
     end
   end)
+
+  M.update_info(input_bufnr, items, all_items, source.name)
 
   return {
     list = list_bufnr,
@@ -322,6 +326,13 @@ end
 
 M.close_window = function(id)
   util.close_window(id)
+end
+
+M.update_info = function(bufnr, items, all_items, source_name)
+  local ns = vim.api.nvim_create_namespace("thetto-info-text")
+  local text = ("%s [ %s / %s ]"):format(source_name, vim.tbl_count(items), #all_items)
+  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 1, {{text, "Comment"}}, {})
 end
 
 M._head_items = function(items, limit)
