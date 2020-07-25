@@ -107,12 +107,16 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
     table.insert(items, item)
   end
 
+  local highlighters = {}
   for _, name in ipairs(iteradapter_names) do
     local iteradapter = util.find_iteradapter(name)
     if iteradapter == nil then
       return util.print_err("not found iteradapter: " .. name)
     end
     items = iteradapter.apply(items, line, opts)
+    if iteradapter.highlight ~= nil then
+      table.insert(highlighters, iteradapter)
+    end
   end
 
   items = M._head_items(items, opts.display_limit)
@@ -138,6 +142,9 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
       source:highlight(bufnr, items)
     end
     highlights.update_selections(bufnr, items)
+    for _, highlighter in ipairs(highlighters) do
+      highlighter.highlight(bufnr, items, line, opts)
+    end
 
     M._changed_after()
   end)
