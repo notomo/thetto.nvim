@@ -102,11 +102,16 @@ M.set = function(buffers, windows)
   })
 end
 
-M.get = function(bufnr)
-  local raw_state = util.buffer_var(bufnr, list_state_key)
-  if bufnr == 0 and vim.bo.filetype == M.input_filetype then
+M.get = function(bufnr, input_bufnr)
+  local raw_state
+  if input_bufnr ~= nil then
+    local input_state = util.buffer_var(input_bufnr, input_state_key)
+    raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
+  elseif bufnr == 0 and vim.bo.filetype == M.input_filetype then
     local input_state = util.buffer_var(bufnr, input_state_key)
     raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
+  else
+    raw_state = util.buffer_var(bufnr, list_state_key)
   end
   if raw_state == nil then
     return nil, "not found state"

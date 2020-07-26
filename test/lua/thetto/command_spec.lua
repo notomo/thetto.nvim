@@ -308,4 +308,16 @@ test3]])
     assert.current_line("test1")
   end)
 
+  it("stops the unfinished job on closed", function()
+    local job = require("thetto/job").new({"sleep", "9"}, {})
+    require("thetto/source/line").collect = function(_)
+      return {}, job
+    end
+
+    command("Thetto line --no-insert")
+    command("ThettoDo quit")
+
+    assert.is_false(job:is_running())
+  end)
+
 end)

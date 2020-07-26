@@ -27,6 +27,8 @@ M.after_each = function()
 
   -- NOTE: for require("test.helper")
   vim.api.nvim_set_current_dir(M.root)
+
+  require("thetto/cleanup")("thetto")
 end
 
 M.buffer_log = function()

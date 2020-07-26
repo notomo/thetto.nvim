@@ -7,6 +7,8 @@ local inputs = require "thetto/input"
 
 local M = {}
 
+M.jobs = {}
+
 local open_windows = function(buffers, resumed_state, opts)
   local ids = vim.api.nvim_tabpage_list_wins(0)
   for _, id in ipairs(ids) do
@@ -61,10 +63,10 @@ local open_windows = function(buffers, resumed_state, opts)
     end
   end
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.list, input_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.list, input_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s)"):format(buffers.input, list_window)
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.input, list_window)
   vim.api.nvim_command(on_input_closed)
 
   local insert = opts.insert
@@ -82,7 +84,7 @@ local open_windows = function(buffers, resumed_state, opts)
 end
 
 local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
-  local state, err = states.get(0)
+  local state, err = states.get(nil, input_bufnr)
   if err ~= nil then
     return util.print_err(err)
   end
@@ -135,7 +137,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
 
-    if vim.bo.filetype ~= states.list_filetype then
+    if vim.api.nvim_win_is_valid(window) and vim.bo.filetype ~= states.list_filetype then
       vim.api.nvim_win_set_cursor(window, {1, 0})
     end
 
@@ -164,11 +166,12 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   local all_items = {}
   local job = nil
   local iteradapter_names = source.iteradapter_names or {"filter/substring"}
-  local debounced_update = util.debounce(opts.debounce_ms, function(bufnr)
-    return on_changed(all_items, bufnr, iteradapter_names, source)
+  local input_bufnr = nil
+  local debounced_update = util.debounce(opts.debounce_ms, function()
+    return on_changed(all_items, input_bufnr, iteradapter_names, source)
   end)
 
-  local input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
+  input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {"", ""})
     vim.api.nvim_buf_attach(bufnr, false, {
@@ -257,8 +260,11 @@ M.start = function(source_name, source_opts, args)
   local windows = open_windows(buffers, resumed_state, opts)
 
   states.set(buffers, windows)
+
   if job ~= nil then
     job:start()
+    M.jobs[windows.list] = job
+    M.jobs[windows.input] = job
   end
 
   return job, nil
@@ -324,8 +330,15 @@ M.execute = function(action_name, action_opts, args)
   return result, action_err
 end
 
-M.close_window = function(id)
-  util.close_window(id)
+M.close_window = function(...)
+  for _, id in ipairs({...}) do
+    util.close_window(id)
+    local job = M.jobs[id]
+    if job ~= nil then
+      job:stop()
+      M.jobs[id] = nil
+    end
+  end
 end
 
 M.update_info = function(bufnr, items, all_items, source_name)
