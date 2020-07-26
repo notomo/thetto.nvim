@@ -63,10 +63,10 @@ local open_windows = function(buffers, resumed_state, opts)
     end
   end
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.list, input_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.list, input_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/thetto'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.input, list_window)
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.input, list_window)
   vim.api.nvim_command(on_input_closed)
 
   local insert = opts.insert

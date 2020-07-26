@@ -1,4 +1,4 @@
-local thetto = require "thetto/thetto"
+local engine = require "thetto/engine" -- more concrete naming?
 local util = require "thetto/util"
 
 local M = {}
@@ -84,7 +84,7 @@ M.open = function(...)
   end
 
   local result, err = util.with_traceback(function()
-    return thetto.start(source_name, source_opts, args)
+    return engine.start(source_name, source_opts, args)
   end)
   if err ~= nil then
     return nil, util.print_err(err)
@@ -107,7 +107,7 @@ M.execute = function(...)
   end
 
   local result, err = util.with_traceback(function()
-    return thetto.execute(action_name, action_opts, args)
+    return engine.execute(action_name, action_opts, args)
   end)
   if err ~= nil then
     return nil, util.print_err(err)
