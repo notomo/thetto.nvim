@@ -49,7 +49,10 @@ M.collect = function(_)
     table.insert(factors, rhs)
 
     local value = table.concat(factors, " ")
-    table.insert(items, {value = value, keymap = {mode = mode, lhs = lhs, rhs = rhs}})
+    table.insert(items, {
+      value = value,
+      keymap = {mode = mode, lhs = lhs, rhs = rhs, row = keymap.lnum},
+    })
   end
   return items
 end
