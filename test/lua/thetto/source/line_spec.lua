@@ -15,7 +15,7 @@ test3]])
 
     command("Thetto line --no-insert")
 
-    assert.window_count(3)
+    assert.window_count(4)
     assert.filetype("thetto")
 
     helper.search("test2")
@@ -34,7 +34,7 @@ test3]])
 
     command("Thetto line")
 
-    assert.window_count(3)
+    assert.window_count(4)
     assert.filetype("thetto-input")
 
     command("ThettoDo")

@@ -40,6 +40,7 @@ end
 local base_options = {
   move_to_input = {quit = false},
   move_to_list = {quit = false},
+  move_to_info = {quit = false},
   debug_print = {quit = false},
   toggle_selection = {quit = false},
   toggle_all_selection = {quit = false},
@@ -75,6 +76,10 @@ M.create = function(kind_name, action_name, args)
 
   kind.action_move_to_list = function(_, _, state)
     vim.api.nvim_set_current_win(state.windows.list)
+  end
+
+  kind.action_move_to_info = function(_, _, state)
+    vim.api.nvim_set_current_win(state.windows.info)
   end
 
   kind.action_quit = function(_, _, state)

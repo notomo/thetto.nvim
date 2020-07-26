@@ -4,9 +4,11 @@ local M = {}
 
 local list_state_key = "_thetto_list_state"
 local input_state_key = "_thetto_input_state"
+local info_state_key = "_thetto_info_state"
 
 M.list_filetype = "thetto"
 M.input_filetype = "thetto-input"
+M.info_filetype = "thetto-info"
 M.path_pattern = "thetto://.+/thetto"
 
 local State = {}
@@ -47,7 +49,8 @@ function State.selected_items(self, action_name, offset)
   end
 
   local index
-  if vim.bo.filetype == M.input_filetype then
+  local filetype = vim.bo.filetype
+  if filetype == M.input_filetype or filetype == M.info_filetype then
     index = 1
   elseif vim.bo.filetype == M.list_filetype then
     index = vim.fn.line(".")
@@ -96,10 +99,21 @@ M.set = function(buffers, windows)
   raw_state.started_at = vim.fn.reltimestr(vim.fn.reltime())
 
   vim.api.nvim_buf_set_var(raw_state.buffers.list, list_state_key, raw_state)
-  vim.api.nvim_buf_set_var(raw_state.buffers.input, input_state_key, {
-    buffers = {list = raw_state.buffers.list, input = raw_state.buffers.input},
-    windows = {list = raw_state.windows.list, input = raw_state.windows.input},
-  })
+
+  local simple = {
+    buffers = {
+      list = raw_state.buffers.list,
+      input = raw_state.buffers.input,
+      info = raw_state.buffers.info,
+    },
+    windows = {
+      list = raw_state.windows.list,
+      input = raw_state.windows.input,
+      info = raw_state.windows.info,
+    },
+  }
+  vim.api.nvim_buf_set_var(raw_state.buffers.input, input_state_key, simple)
+  vim.api.nvim_buf_set_var(raw_state.buffers.info, info_state_key, simple)
 end
 
 M.get = function(bufnr, input_bufnr)
@@ -110,6 +124,9 @@ M.get = function(bufnr, input_bufnr)
   elseif bufnr == 0 and vim.bo.filetype == M.input_filetype then
     local input_state = util.buffer_var(bufnr, input_state_key)
     raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
+  elseif bufnr == 0 and vim.bo.filetype == M.info_filetype then
+    local info_state = util.buffer_var(bufnr, info_state_key)
+    raw_state = vim.api.nvim_buf_get_var(info_state.buffers.list, list_state_key)
   else
     raw_state = util.buffer_var(bufnr, list_state_key)
   end

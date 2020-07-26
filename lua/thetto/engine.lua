@@ -36,11 +36,22 @@ local open_windows = function(buffers, resumed_state, opts)
     style = "minimal",
   })
 
-  local input_window = vim.api.nvim_open_win(buffers.input, true, {
+  local info_window = vim.api.nvim_open_win(buffers.info, false, {
     width = opts.width,
-    height = 2,
+    height = 1,
     relative = "editor",
     row = row + opts.height,
+    col = column,
+    focusable = false,
+    external = false,
+    style = "minimal",
+  })
+
+  local input_window = vim.api.nvim_open_win(buffers.input, true, {
+    width = opts.width,
+    height = 1,
+    relative = "editor",
+    row = row + opts.height + 1,
     col = column,
     external = false,
     style = "minimal",
@@ -63,11 +74,14 @@ local open_windows = function(buffers, resumed_state, opts)
     end
   end
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.list, input_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, vim.fn.expand('<afile>'))"):format(buffers.input, list_window)
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window)
   vim.api.nvim_command(on_input_closed)
+
+  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window)
+  vim.api.nvim_command(on_info_closed)
 
   local insert = opts.insert
   if resumed_state ~= nil and resumed_state.windows.active == "list" then
@@ -80,7 +94,7 @@ local open_windows = function(buffers, resumed_state, opts)
     vim.api.nvim_set_current_win(list_window)
   end
 
-  return {list = list_window, input = input_window}
+  return {list = list_window, input = input_window, info = info_window}
 end
 
 local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
@@ -123,7 +137,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
 
   items = M._head_items(items, opts.display_limit)
   state:update(items)
-  M.update_info(input_bufnr, items, all_items, source.name)
+  M.update_info(state.buffers.info, items, all_items, source.name)
 
   local bufnr = state.buffers.list
   local window = state.windows.list
@@ -173,7 +187,6 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
 
   input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {"", ""})
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = debounced_update,
       on_detach = function()
@@ -210,11 +223,17 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     end
   end)
 
-  M.update_info(input_bufnr, items, all_items, source.name)
+  local info_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.info_filetype), function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "filetype", states.info_filetype)
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  end)
+
+  M.update_info(info_bufnr, items, all_items, source.name)
 
   return {
     list = list_bufnr,
     input = input_bufnr,
+    info = info_bufnr,
     filtered = items,
     selected = {},
     kind_name = source.kind_name,
@@ -345,7 +364,7 @@ M.update_info = function(bufnr, items, all_items, source_name)
   local ns = vim.api.nvim_create_namespace("thetto-info-text")
   local text = ("%s [ %s / %s ]"):format(source_name, vim.tbl_count(items), #all_items)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 1, {{text, "Comment"}}, {})
+  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {{text, "Comment"}}, {})
 end
 
 M._head_items = function(items, limit)
