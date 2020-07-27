@@ -10,7 +10,7 @@ describe("directory/recursive source", function()
   it("can show directories recursively", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    command("Thetto directory/recursive --no-insert")
+    helper.sync_open("directory/recursive", "--no-insert")
 
     assert.exists_pattern("dir/")
     assert.not_exists_pattern("dir/file")
@@ -24,10 +24,10 @@ describe("directory/recursive source", function()
   it("can show directories with depth range", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    command("Thetto directory/recursive --no-insert --x-min-depth=2")
+    helper.sync_open("directory/recursive", "--no-insert", "--x-max-depth=1")
 
-    assert.exists_pattern("dir/depth2")
-    assert.not_exists_pattern("dir/$")
+    assert.not_exists_pattern("dir/depth2")
+    assert.exists_pattern("dir$")
 
     command("ThettoDo")
   end)
@@ -35,8 +35,8 @@ describe("directory/recursive source", function()
   it("can execute enter", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    command("Thetto directory/recursive --no-insert")
-    helper.search("dir/")
+    helper.sync_open("directory/recursive", "--no-insert")
+    helper.search("dir$")
 
     command("ThettoDo enter")
     command("ThettoDo move_to_list")
