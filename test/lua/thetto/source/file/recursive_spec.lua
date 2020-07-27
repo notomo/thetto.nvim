@@ -10,7 +10,7 @@ describe("file/recursive source", function()
   it("can show files recursively", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    command("Thetto file/recursive --no-insert")
+    helper.sync_open("file/recursive", "--no-insert")
 
     assert.exists_pattern("dir/file")
     helper.search("dir\\/file")
@@ -23,7 +23,7 @@ describe("file/recursive source", function()
   it("can show files in project dir", function()
     require("thetto/target/project").root_patterns = {"0_root_pattern"}
     vim.api.nvim_set_current_dir("./test/_test_data/dir")
-    command("Thetto file/recursive --no-insert --target=project")
+    helper.sync_open("file/recursive", "--no-insert", "--target=project")
 
     assert.exists_pattern("root_pattern/in_root_pattern")
   end)
