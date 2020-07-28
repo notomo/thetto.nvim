@@ -1,3 +1,5 @@
+local util = require("thetto/util")
+
 local M = {}
 
 M.get_command = function(path, max_depth)
@@ -25,6 +27,7 @@ M.collect = function(self, opts)
   local cmd = self.get_command(opts.cwd, self.opts.max_depth)
   local buffered_items = {}
   local prev_last = nil
+  local to_relative = util.relative_path_mod(opts.cwd)
   local job = self.jobs.new(cmd, {
     on_stdout = function(job_self, _, data)
       if data == nil then
@@ -48,7 +51,7 @@ M.collect = function(self, opts)
           goto continue
         end
 
-        local relative_path = path:gsub("^" .. opts.cwd .. "/", "")
+        local relative_path = to_relative(path)
         table.insert(buffered_items, {value = relative_path, path = path})
         ::continue::
       end

@@ -120,4 +120,11 @@ M.group_by = function(list, make_key)
   return groups
 end
 
+M.relative_path_mod = function(base_path)
+  local pattern = "^" .. base_path:gsub("([^%w])", "%%%1") .. "/"
+  return function(path)
+    return path:gsub(pattern, "", 1)
+  end
+end
+
 return M

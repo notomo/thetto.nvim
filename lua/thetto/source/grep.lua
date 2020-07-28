@@ -1,3 +1,5 @@
+local util = require("thetto/util")
+
 local M = {}
 
 local parse_line = function(line)
@@ -32,6 +34,7 @@ M.collect = function(self, opts)
     ::continue::
   end
 
+  local to_relative = util.relative_path_mod(opts.cwd)
   local buffered_items = {}
   local job = self.jobs.new(cmd, {
     on_stdout = function(job_self, _, data)
@@ -45,7 +48,7 @@ M.collect = function(self, opts)
         if path == nil then
           goto continue
         end
-        local relative_path = path:gsub("^" .. opts.cwd .. "/", "")
+        local relative_path = to_relative(path)
         local label = ("%s:%d"):format(relative_path, row)
         local desc = ("%s %s"):format(label, matched_line)
         table.insert(buffered_items, {
