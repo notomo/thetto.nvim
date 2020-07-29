@@ -46,7 +46,9 @@ local base_options = {
   toggle_all_selection = {quit = false},
 }
 
-M.create = function(kind_name, action_name, args)
+local base_action_opts = {yank = {key = "value", register = "+"}}
+
+M.create = function(source_name, kind_name, action_name, args)
   local origin = util.find_kind(kind_name)
   if origin == nil then
     return nil, nil, "not found kind: " .. kind_name
@@ -55,7 +57,17 @@ M.create = function(kind_name, action_name, args)
 
   local kind = {}
   kind.name = kind_name
-  kind.opts = origin.opts or {}
+
+  local source_user_opts = {}
+  if M.source_user_actions ~= nil and M.source_user_actions[source_name] ~= nil then
+    source_user_opts = M.source_user_actions[source_name].opts or {}
+  end
+  local user_opts = {}
+  if M.user_actions ~= nil and M.user_actions[kind_name] ~= nil then
+    user_opts = M.user_actions[kind_name].opts or {}
+  end
+  kind.opts = vim.tbl_extend("force", base_action_opts, origin.opts or {}, user_opts, source_user_opts)
+
   kind.default_action = origin.default_action or "echo"
   kind.jobs = jobs
 
@@ -97,6 +109,14 @@ M.create = function(kind_name, action_name, args)
   kind.action_echo = function(_, items)
     for _, item in ipairs(items) do
       print(item.value)
+    end
+  end
+
+  kind.action_yank = function(self, items)
+    for _, item in ipairs(items) do
+      local value = item[self.action_opts.key]
+      vim.fn.setreg(self.action_opts.register, value)
+      print("yank: " .. value)
     end
   end
 

@@ -319,7 +319,7 @@ M.execute = function(action_name, action_opts, args)
     else
       kind_name, items = unpack(item_groups[i])
     end
-    local kind, _opts, kind_err = kinds.create(kind_name, action_name, args)
+    local kind, _opts, kind_err = kinds.create(state.buffers.source_name, kind_name, action_name, args)
     if kind_err ~= nil then
       return nil, kind_err
     end
