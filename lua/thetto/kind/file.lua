@@ -1,30 +1,57 @@
 local M = {}
 
+local adjust_cursor = function(item)
+  if item.row == nil then
+    return
+  end
+  local count = vim.api.nvim_buf_line_count(0)
+  local row = item.row
+  if item.row > count then
+    row = count
+  end
+  vim.api.nvim_win_set_cursor(0, {row, 0})
+end
+
+local get_bufnr = function(item)
+  local pattern = ("^%s$"):format(item.path)
+  return vim.fn.bufnr(pattern)
+end
+
 M.action_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("edit " .. item.path)
-    if item.row ~= nil then
-      vim.api.nvim_win_set_cursor(0, {item.row, 0})
+    local bufnr = get_bufnr(item)
+    if bufnr ~= -1 then
+      vim.api.nvim_command("buffer " .. bufnr)
+    else
+      vim.api.nvim_command("edit " .. item.path)
     end
+    adjust_cursor(item)
   end
 end
 
 M.action_tab_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("tabedit " .. item.path)
-    if item.row ~= nil then
-      vim.api.nvim_win_set_cursor(0, {item.row, 0})
+    local bufnr = get_bufnr(item)
+    if bufnr ~= -1 then
+      vim.api.nvim_command("tabedit")
+      vim.api.nvim_command("buffer " .. bufnr)
+    else
+      vim.api.nvim_command("tabedit " .. item.path)
     end
+    adjust_cursor(item)
   end
 end
 
 M.action_vsplit_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("vsplit")
-    vim.api.nvim_command("edit " .. item.path)
-    if item.row ~= nil then
-      vim.api.nvim_win_set_cursor(0, {item.row, 0})
+    local bufnr = get_bufnr(item)
+    if bufnr ~= -1 then
+      vim.api.nvim_command("vsplit")
+      vim.api.nvim_command("buffer " .. bufnr)
+    else
+      vim.api.nvim_command("vsplit" .. item.path)
     end
+    adjust_cursor(item)
   end
 end
 
