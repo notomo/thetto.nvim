@@ -1,12 +1,22 @@
 local M = {}
 
-M.cmd = {"ps", "--no-headers", "faxo", "pid,user,command"}
-
 M.collect = function(self)
-  local job = self.jobs.new(M.cmd, {
+  local cmd = {"ps", "--no-headers", "faxo", "pid,user,command"}
+  local remove_header = function(_)
+  end
+  if vim.fn.has("mac") then
+    cmd = {"ps", "-axo", "pid,user,command"}
+    remove_header = function(outputs)
+      table.remove(outputs, 1)
+    end
+  end
+
+  local job = self.jobs.new(cmd, {
     on_exit = function(job_self)
       local items = {}
-      for _, output in ipairs(job_self:get_stdout()) do
+      local outputs = job_self:get_stdout()
+      remove_header(outputs)
+      for _, output in ipairs(outputs) do
         local splitted = vim.split(output:gsub("^%s+", ""), "%s")
         table.insert(items, {value = output, pid = splitted[1]})
       end
