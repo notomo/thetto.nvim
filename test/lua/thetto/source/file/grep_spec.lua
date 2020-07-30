@@ -2,7 +2,7 @@ local helper = require "test.helper"
 local assert = helper.assert
 local command = helper.command
 
-describe("grep source", function()
+describe("file/grep source", function()
 
   before_each(helper.before_each)
   after_each(helper.after_each)
@@ -10,7 +10,7 @@ describe("grep source", function()
   it("can show grep results", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    helper.sync_open("grep", "--no-insert", "--pattern=hoge")
+    helper.sync_open("file/grep", "--no-insert", "--pattern=hoge")
 
     assert.exists_pattern("hoge")
     helper.search("grep")
@@ -29,7 +29,7 @@ foo]])
     command("setlocal buftype=nofile")
     helper.search("hoge")
 
-    helper.sync_open("grep", "--no-insert", "--pattern-type=word")
+    helper.sync_open("file/grep", "--no-insert", "--pattern-type=word")
 
     assert.exists_pattern("hoge")
     helper.search("grep")
@@ -43,7 +43,7 @@ foo]])
     require("thetto/target/project").root_patterns = {"0_root_pattern"}
     vim.api.nvim_set_current_dir("./test/_test_data/dir")
 
-    helper.sync_open("grep", "--no-insert", "--target=project", "--pattern=hoge")
+    helper.sync_open("file/grep", "--no-insert", "--target=project", "--pattern=hoge")
 
     assert.exists_pattern("0_root_pattern/in_root_pattern:1 hoge in root_pattern")
   end)
@@ -51,7 +51,7 @@ foo]])
   it("can execute tab_open", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    helper.sync_open("grep", "--no-insert", "--pattern=foo")
+    helper.sync_open("file/grep", "--no-insert", "--pattern=foo")
 
     assert.exists_pattern("foo")
 
@@ -64,7 +64,7 @@ foo]])
   it("can execute vsplit_open", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
-    helper.sync_open("grep", "--no-insert", "--pattern=foo")
+    helper.sync_open("file/grep", "--no-insert", "--pattern=foo")
 
     assert.exists_pattern("foo")
 
