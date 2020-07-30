@@ -1,4 +1,4 @@
-local kinds = require("thetto/kind")
+local kinds = require("thetto/base_kind")
 local states = require "thetto/state"
 
 local M = {}

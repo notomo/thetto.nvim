@@ -1,5 +1,5 @@
-local kinds = require "thetto/kind"
-local sources = require "thetto/source"
+local kinds = require "thetto/base_kind"
+local sources = require "thetto/base_source"
 local states = require "thetto/state"
 local highlights = require("thetto/highlight")
 local util = require "thetto/util"
