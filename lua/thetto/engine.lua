@@ -27,7 +27,7 @@ local open_windows = function(buffers, resumed_state, opts)
   local row = vim.o.lines / 2 - ((opts.height + 2) / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
 
-  local list_window = vim.api.nvim_open_win(buffers.list, true, {
+  local list_window = vim.api.nvim_open_win(buffers.list, false, {
     width = opts.width - sign_width,
     height = opts.height,
     relative = "editor",
@@ -37,7 +37,7 @@ local open_windows = function(buffers, resumed_state, opts)
     style = "minimal",
   })
 
-  local sign_window = vim.api.nvim_open_win(buffers.sign, true, {
+  local sign_window = vim.api.nvim_open_win(buffers.sign, false, {
     width = sign_width,
     height = opts.height,
     relative = "editor",
@@ -47,6 +47,7 @@ local open_windows = function(buffers, resumed_state, opts)
     external = false,
     style = "minimal",
   })
+  vim.api.nvim_win_set_option(sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
 
   local info_window = vim.api.nvim_open_win(buffers.info, false, {
     width = opts.width,
@@ -58,6 +59,8 @@ local open_windows = function(buffers, resumed_state, opts)
     external = false,
     style = "minimal",
   })
+  vim.api.nvim_win_set_option(info_window, "signcolumn", "yes:1")
+  vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo")
 
   local input_window = vim.api.nvim_open_win(buffers.input, true, {
     width = opts.width,
@@ -68,6 +71,8 @@ local open_windows = function(buffers, resumed_state, opts)
     external = false,
     style = "minimal",
   })
+  vim.api.nvim_win_set_option(input_window, "signcolumn", "yes:1")
+  vim.api.nvim_win_set_option(input_window, "winhighlight", "SignColumn:NormalFloat")
 
   if resumed_state ~= nil then
     if resumed_state.windows.list_cursor then
@@ -171,12 +176,8 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
       vim.api.nvim_win_set_cursor(window, {1, 0})
     end
 
-    if source.highlight ~= nil then
-      source:highlight(bufnr, items)
-    end
-    if source.highlight_sign ~= nil then
-      source:highlight_sign(sign_bufnr, items)
-    end
+    source:highlight(bufnr, items)
+    source:highlight_sign(sign_bufnr, items)
     highlights.update_selections(bufnr, items)
     for _, highlighter in ipairs(highlighters) do
       highlighter.highlight(bufnr, items, line, opts)
@@ -243,12 +244,8 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-    if source.highlight ~= nil then
-      source:highlight(bufnr, items)
-    end
-    if source.highlight_sign ~= nil then
-      source:highlight_sign(sign_bufnr, items)
-    end
+    source:highlight(bufnr, items)
+    source:highlight_sign(sign_bufnr, items)
   end)
 
   local info_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.info_filetype), function(bufnr)
@@ -393,7 +390,7 @@ M.update_info = function(bufnr, items, all_items, source_name)
   local ns = vim.api.nvim_create_namespace("thetto-info-text")
   local text = ("%s [ %s / %s ]"):format(source_name, vim.tbl_count(items), #all_items)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {{text, "Comment"}}, {})
+  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {{text, "ThettoInfo"}}, {})
 end
 
 M._head_items = function(items, limit)

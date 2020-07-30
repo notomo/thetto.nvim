@@ -12,4 +12,6 @@ else
 endif
 
 highlight default link ThettoSelected Statement
-highlight link ThettoColorLabelOthers StatusLine
+highlight default link ThettoInfo StatusLine
+highlight default link ThettoColorLabelOthers StatusLine
+highlight default link ThettoColorLabelBackground NormalFloat

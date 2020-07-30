@@ -25,7 +25,7 @@ M.color_labels = function(bufnr, items, colors, key)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   for i, item in ipairs(items) do
     for _, color in ipairs(colors) do
-      if color.regex:match_str(item[key]) then
+      if color.always or color.regex:match_str(item[key]) then
         vim.api.nvim_buf_set_virtual_text(bufnr, ns, i - 1, color.chunks, {})
         break
       end
