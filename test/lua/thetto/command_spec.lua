@@ -28,7 +28,7 @@ test3]])
   it("can move to filter", function()
     command("Thetto line --no-insert")
 
-    assert.window_count(4)
+    assert.window_count(5)
     assert.filetype("thetto")
 
     command("ThettoDo move_to_input")
@@ -39,7 +39,7 @@ test3]])
   it("can move to list", function()
     command("Thetto line")
 
-    assert.window_count(4)
+    assert.window_count(5)
     assert.filetype("thetto-input")
 
     command("ThettoDo move_to_list")
@@ -51,7 +51,7 @@ test3]])
     command("Thetto line")
     helper.sync_input({"test"})
 
-    assert.window_count(4)
+    assert.window_count(5)
     assert.filetype("thetto-input")
 
     command("ThettoDo move_to_list")
@@ -76,7 +76,7 @@ test22]])
 
     command("ThettoDo move_to_input")
 
-    assert.window_count(4)
+    assert.window_count(5)
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
@@ -101,7 +101,7 @@ test22]])
     command("ThettoDo quit")
     command("Thetto line --resume")
 
-    assert.window_count(4)
+    assert.window_count(5)
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
@@ -156,7 +156,7 @@ hoge]])
     command("Thetto line")
     command("Thetto vim/runtimepath")
 
-    assert.window_count(4)
+    assert.window_count(5)
   end)
 
   it("should show an error message if not found source", function()
@@ -171,7 +171,7 @@ hoge]])
     assert.error_message("not found action: invalid", function()
       command("ThettoDo invalid")
     end)
-    assert.window_count(4)
+    assert.window_count(5)
   end)
 
   it("can resume with offset", function()

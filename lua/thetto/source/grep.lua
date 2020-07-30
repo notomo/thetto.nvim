@@ -14,7 +14,7 @@ end
 
 M.command = "grep"
 M.pattern_opt = "-e"
-M.opts = {"-inH"}
+M.command_opts = {"-inH"}
 M.recursive_opt = "-r"
 M.separator = "--"
 
@@ -25,7 +25,7 @@ M.collect = function(self, opts)
   end
 
   local paths = opts.cwd
-  local cmd = vim.list_extend({M.command}, M.opts)
+  local cmd = vim.list_extend({M.command}, M.command_opts)
   for _, x in ipairs({M.recursive_opt, M.pattern_opt, pattern, M.separator, paths}) do
     if x == "" then
       goto continue
@@ -85,5 +85,6 @@ M.highlight = function(self, bufnr, items)
 end
 
 M.kind_name = "file"
+M.color_label_key = "path"
 
 return M

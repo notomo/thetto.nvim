@@ -7,6 +7,7 @@ local input_state_key = "_thetto_input_state"
 local info_state_key = "_thetto_info_state"
 
 M.list_filetype = "thetto"
+M.sign_filetype = "thetto-sign"
 M.input_filetype = "thetto-input"
 M.info_filetype = "thetto-info"
 M.path_pattern = "thetto://.+/thetto"

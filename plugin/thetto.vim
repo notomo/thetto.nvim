@@ -12,3 +12,4 @@ else
 endif
 
 highlight default link ThettoSelected Statement
+highlight link ThettoColorLabelOthers StatusLine

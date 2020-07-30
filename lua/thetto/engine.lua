@@ -23,15 +23,27 @@ local open_windows = function(buffers, resumed_state, opts)
     ::continue::
   end
 
+  local sign_width = 4
   local row = vim.o.lines / 2 - ((opts.height + 2) / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
 
   local list_window = vim.api.nvim_open_win(buffers.list, true, {
-    width = opts.width,
+    width = opts.width - sign_width,
+    height = opts.height,
+    relative = "editor",
+    row = row,
+    col = column + sign_width,
+    external = false,
+    style = "minimal",
+  })
+
+  local sign_window = vim.api.nvim_open_win(buffers.sign, true, {
+    width = sign_width,
     height = opts.height,
     relative = "editor",
     row = row,
     col = column,
+    focusable = false,
     external = false,
     style = "minimal",
   })
@@ -74,13 +86,16 @@ local open_windows = function(buffers, resumed_state, opts)
     end
   end
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window, sign_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window)
+  local on_sign_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.sign, input_window, list_window, info_window)
+  vim.api.nvim_command(on_sign_closed)
+
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window, sign_window)
   vim.api.nvim_command(on_input_closed)
 
-  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window)
+  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window, sign_window)
   vim.api.nvim_command(on_info_closed)
 
   local insert = opts.insert
@@ -94,7 +109,7 @@ local open_windows = function(buffers, resumed_state, opts)
     vim.api.nvim_set_current_win(list_window)
   end
 
-  return {list = list_window, input = input_window, info = info_window}
+  return {list = list_window, input = input_window, info = info_window, sign = sign_window}
 end
 
 local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
@@ -140,6 +155,7 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   M.update_info(state.buffers.info, items, all_items, source.name)
 
   local bufnr = state.buffers.list
+  local sign_bufnr = state.buffers.sign
   local window = state.windows.list
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(bufnr) then
@@ -157,6 +173,9 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
 
     if source.highlight ~= nil then
       source:highlight(bufnr, items)
+    end
+    if source.highlight_sign ~= nil then
+      source:highlight_sign(sign_bufnr, items)
     end
     highlights.update_selections(bufnr, items)
     for _, highlighter in ipairs(highlighters) do
@@ -212,6 +231,12 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     item.index = i
   end
 
+  local sign_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.sign_filetype), function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "filetype", states.sign_filetype)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, opts.display_limit))
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  end)
+
   local items = M._head_items(all_items, opts.display_limit)
   local lines = M._head_lines(items, opts.display_limit)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
@@ -220,6 +245,9 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
     if source.highlight ~= nil then
       source:highlight(bufnr, items)
+    end
+    if source.highlight_sign ~= nil then
+      source:highlight_sign(sign_bufnr, items)
     end
   end)
 
@@ -234,6 +262,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     list = list_bufnr,
     input = input_bufnr,
     info = info_bufnr,
+    sign = sign_bufnr,
     filtered = items,
     selected = {},
     kind_name = source.kind_name,
