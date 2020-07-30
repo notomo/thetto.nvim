@@ -5,17 +5,9 @@ local to_texts = function(input_line, opts)
   if opts.ignorecase then
     line = input_line:lower()
   end
-
-  local texts = {}
-  for _, text in ipairs(vim.split(line, "%s")) do
-    if text == "" then
-      goto continue
-    end
-    local escaped = text:gsub("([^%w])", "%%%1")
-    table.insert(texts, escaped)
-    ::continue::
-  end
-  return texts
+  return vim.tbl_filter(function(text)
+    return text ~= ""
+  end, vim.split(line, "%s"))
 end
 
 M.apply = function(items, input_line, opts)
@@ -29,7 +21,7 @@ M.apply = function(items, input_line, opts)
 
     local ok = true
     for _, text in ipairs(texts) do
-      if not value:find(text) then
+      if not value:find(text, 1, true) then
         ok = false
         break
       end
@@ -62,7 +54,7 @@ M.highlight = function(bufnr, items, input_line, opts)
       local s
       local e = 0
       repeat
-        s, e = value:find(text, e + 1)
+        s, e = value:find(text, e + 1, true)
         if s ~= nil then
           table.insert(positions, {s, e})
         end
