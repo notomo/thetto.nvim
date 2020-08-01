@@ -348,4 +348,19 @@ test3]])
     assert.register("1", "test3")
   end)
 
+  it("can execute append", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+    command("normal! $")
+
+    command("Thetto line --no-insert")
+    helper.search("test2")
+
+    command("ThettoDo append")
+
+    assert.current_line("test1test2")
+  end)
+
 end)

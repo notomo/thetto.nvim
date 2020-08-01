@@ -46,7 +46,10 @@ local base_options = {
   toggle_all_selection = {quit = false},
 }
 
-local base_action_opts = {yank = {key = "value", register = "+"}}
+local base_action_opts = {
+  yank = {key = "value", register = "+"},
+  append = {key = "value", type = ""},
+}
 
 M.create = function(source_name, kind_name, action_name, args)
   local origin = util.find_kind(kind_name)
@@ -117,6 +120,12 @@ M.create = function(source_name, kind_name, action_name, args)
       local value = item[self.action_opts.key]
       vim.fn.setreg(self.action_opts.register, value)
       print("yank: " .. value)
+    end
+  end
+
+  kind.action_append = function(self, items)
+    for _, item in ipairs(items) do
+      vim.api.nvim_put({item[self.action_opts.key]}, self.action_opts.type, true, true)
     end
   end
 
