@@ -36,6 +36,7 @@ local open_windows = function(buffers, resumed_state, opts)
     external = false,
     style = "minimal",
   })
+  vim.api.nvim_win_set_option(list_window, "scrollbind", true)
 
   local sign_window = vim.api.nvim_open_win(buffers.sign, false, {
     width = sign_width,
@@ -48,6 +49,7 @@ local open_windows = function(buffers, resumed_state, opts)
     style = "minimal",
   })
   vim.api.nvim_win_set_option(sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
+  vim.api.nvim_win_set_option(sign_window, "scrollbind", true)
 
   local info_window = vim.api.nvim_open_win(buffers.info, false, {
     width = opts.width,
@@ -161,6 +163,7 @@ local on_changed = function(all_items, input_bufnr, source)
   local bufnr = state.buffers.list
   local sign_bufnr = state.buffers.sign
   local window = state.windows.list
+  local sign_window = state.windows.sign
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
@@ -173,6 +176,9 @@ local on_changed = function(all_items, input_bufnr, source)
 
     if vim.api.nvim_win_is_valid(window) and vim.bo.filetype ~= states.list_filetype then
       vim.api.nvim_win_set_cursor(window, {1, 0})
+      if vim.api.nvim_win_is_valid(sign_window) then
+        vim.api.nvim_win_set_cursor(sign_window, {1, 0})
+      end
     end
 
     source:highlight(bufnr, items)
