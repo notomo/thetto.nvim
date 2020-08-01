@@ -56,7 +56,7 @@ end
 
 M.sync_open = function(...)
   waiting = false
-  local job = require("thetto/command").open(...)
+  local job = require("thetto/entrypoint/command").open(...)
   if job == nil then
     return
   end
@@ -74,7 +74,7 @@ M.sync_open = function(...)
 end
 
 M.sync_execute = function(...)
-  local job = require("thetto/command").execute(...)
+  local job = require("thetto/entrypoint/command").execute(...)
   if job == nil then
     return
   end
