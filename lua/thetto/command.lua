@@ -35,7 +35,14 @@ M.parse_args = function(raw_args, default)
       if key == nil then
         return nil, nil, nil, "could not parse arg: " .. arg
       end
-      ex_opts.x[key] = value
+
+      local current = ex_opts.x[key]
+      if type(current) == "table" then
+        table.insert(ex_opts.x[key], value)
+      else
+        ex_opts.x[key] = value
+      end
+
       goto continue
     end
 
@@ -44,7 +51,14 @@ M.parse_args = function(raw_args, default)
       if key == nil then
         return nil, nil, nil, "could not parse arg: " .. arg
       end
-      ex_opts.xx[key] = value
+
+      local current = ex_opts.xx[key]
+      if type(current) == "table" then
+        table.insert(ex_opts.xx[key], value)
+      else
+        ex_opts.xx[key] = value
+      end
+
       goto continue
     end
 
@@ -55,7 +69,12 @@ M.parse_args = function(raw_args, default)
     if key == nil then
       name = value
     else
-      args[key] = value
+      local current = args[key]
+      if type(current) == "table" then
+        table.insert(args[key], value)
+      else
+        args[key] = value
+      end
     end
     ::continue::
   end
@@ -79,6 +98,8 @@ M.open = function(...)
     action = nil,
     display_limit = 100,
     debounce_ms = 50,
+    filters = {},
+    sorters = {},
   })
   if parse_err ~= nil then
     return nil, util.print_err(parse_err)

@@ -117,7 +117,7 @@ local open_windows = function(buffers, resumed_state, opts)
   return {list = list_window, input = input_window, info = info_window, sign = sign_window}
 end
 
-local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
+local on_changed = function(all_items, input_bufnr, source)
   local state, err = states.get(nil, input_bufnr)
   if err ~= nil then
     return util.print_err(err)
@@ -144,15 +144,14 @@ local on_changed = function(all_items, input_bufnr, iteradapter_names, source)
   end
 
   local highlighters = {}
-  for _, name in ipairs(iteradapter_names) do
-    local iteradapter = util.find_iteradapter(name)
-    if iteradapter == nil then
-      return util.print_err("not found iteradapter: " .. name)
+  for _, filter in ipairs(source.iteradapter.filters) do
+    items = filter.apply(items, line, opts)
+    if filter.highlight ~= nil then
+      table.insert(highlighters, filter)
     end
-    items = iteradapter.apply(items, line, opts)
-    if iteradapter.highlight ~= nil then
-      table.insert(highlighters, iteradapter)
-    end
+  end
+  for _, sorter in ipairs(source.iteradapter.sorters) do
+    items = sorter.apply(items, line, opts)
   end
 
   items = M._head_items(items, opts.display_limit)
@@ -192,17 +191,16 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     return resumed_state.buffers, nil, nil
   end
 
-  local source, err = sources.create(source_name, source_opts)
+  local source, err = sources.create(source_name, source_opts, opts)
   if err ~= nil then
     return nil, nil, err
   end
 
   local all_items = {}
   local job = nil
-  local iteradapter_names = source.iteradapter_names or {"filter/substring"}
   local input_bufnr = nil
   local debounced_update = util.debounce(opts.debounce_ms, function()
-    return on_changed(all_items, input_bufnr, iteradapter_names, source)
+    return on_changed(all_items, input_bufnr, source)
   end)
 
   input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
@@ -239,6 +237,9 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   end)
 
   local items = M._head_items(all_items, opts.display_limit)
+  for _, sorter in ipairs(source.iteradapter.sorters) do
+    items = sorter.apply(items, "", opts)
+  end
   local lines = M._head_lines(items, opts.display_limit)
   local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)

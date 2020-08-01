@@ -363,4 +363,20 @@ test3]])
     assert.current_line("test1test2")
   end)
 
+  it("can use sorters", function()
+    helper.set_lines([[
+te
+t
+test
+tes]])
+
+    command("Thetto line --no-insert --sorters=length")
+
+    assert.current_line("t")
+    command("normal! j")
+    assert.current_line("te")
+    command("normal! j")
+    assert.current_line("tes")
+  end)
+
 end)

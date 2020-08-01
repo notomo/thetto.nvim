@@ -4,7 +4,7 @@ local highlights = require("thetto/highlight")
 
 local M = {}
 
-M.create = function(source_name, source_opts)
+M.create = function(source_name, source_opts, opts)
   local origin = util.find_source(source_name)
   if origin == nil then
     return nil, "not found source: " .. source_name
@@ -37,6 +37,36 @@ M.create = function(source_name, source_opts)
 
   source.highlight = origin.highlight or function(_, _, _)
   end
+
+  local filter_names = origin.filters or {"substring"}
+  if #opts.filters ~= 0 then
+    filter_names = opts.filters
+  end
+
+  local filters = {}
+  for _, name in ipairs(filter_names) do
+    local filter = util.find_iteradapter("filter/" .. name)
+    if filter == nil then
+      return nil, util.print_err("not found filter: " .. name)
+    end
+    table.insert(filters, filter)
+  end
+
+  local sorter_names = origin.sorters or {}
+  if #opts.sorters ~= 0 then
+    sorter_names = opts.sorters
+  end
+
+  local sorters = {}
+  for _, name in ipairs(sorter_names) do
+    local sorter = util.find_iteradapter("sorter/" .. name)
+    if sorter == nil then
+      return nil, util.print_err("not found sorter: " .. name)
+    end
+    table.insert(sorters, sorter)
+  end
+
+  source.iteradapter = {filters = filters, sorters = sorters}
 
   return setmetatable(source, origin), nil
 end
