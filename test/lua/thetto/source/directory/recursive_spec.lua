@@ -27,7 +27,7 @@ describe("directory/recursive source", function()
     helper.sync_open("directory/recursive", "--no-insert", "--x-max-depth=1")
 
     assert.not_exists_pattern("dir/depth2")
-    assert.exists_pattern("dir$")
+    assert.exists_pattern("dir/$")
 
     command("ThettoDo")
   end)
@@ -36,7 +36,7 @@ describe("directory/recursive source", function()
     vim.api.nvim_set_current_dir("./test/_test_data")
 
     helper.sync_open("directory/recursive", "--no-insert")
-    helper.search("dir$")
+    helper.search("dir/$")
 
     command("ThettoDo enter")
     command("ThettoDo move_to_list")

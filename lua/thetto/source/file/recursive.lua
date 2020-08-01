@@ -51,7 +51,7 @@ M.collect = function(self, opts)
           goto continue
         end
 
-        local relative_path = to_relative(path)
+        local relative_path = self._modify_path(to_relative(path))
         table.insert(buffered_items, {value = relative_path, path = path})
         ::continue::
       end
@@ -73,5 +73,9 @@ M.collect = function(self, opts)
 end
 
 M.kind_name = "file"
+
+M._modify_path = function(path)
+  return path
+end
 
 return M

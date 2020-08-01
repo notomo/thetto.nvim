@@ -27,4 +27,8 @@ end
 
 M.kind_name = "directory"
 
+M._modify_path = function(path)
+  return path .. "/"
+end
+
 return M
