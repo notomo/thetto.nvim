@@ -1,4 +1,4 @@
-local engine = require "thetto/engine" -- more concrete naming?
+local engine = require "thetto/core/engine" -- more concrete naming?
 local util = require "thetto/util"
 
 local M = {}

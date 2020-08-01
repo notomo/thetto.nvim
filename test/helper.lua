@@ -12,7 +12,7 @@ M.before_each = function()
   M.command("filetype on")
   M.command("syntax enable")
   waiting = false
-  require("thetto/engine")._changed_after = function()
+  require("thetto/core/engine")._changed_after = function()
     waiting = true
   end
 end

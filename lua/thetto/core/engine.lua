@@ -1,6 +1,6 @@
-local kinds = require "thetto/base_kind"
-local sources = require "thetto/base_source"
-local states = require "thetto/state"
+local kinds = require "thetto/core/base_kind"
+local sources = require "thetto/core/base_source"
+local states = require "thetto/core/state"
 local highlights = require("thetto/highlight")
 local util = require "thetto/util"
 local inputs = require "thetto/input"
@@ -93,16 +93,16 @@ local open_windows = function(buffers, resumed_state, opts)
     end
   end
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window, sign_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/core/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window, sign_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_sign_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.sign, input_window, list_window, info_window)
+  local on_sign_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/core/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.sign, input_window, list_window, info_window)
   vim.api.nvim_command(on_sign_closed)
 
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window, sign_window)
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/core/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window, sign_window)
   vim.api.nvim_command(on_input_closed)
 
-  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window, sign_window)
+  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/core/engine'.close_window(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window, sign_window)
   vim.api.nvim_command(on_info_closed)
 
   local insert = opts.insert
