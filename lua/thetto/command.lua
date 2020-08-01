@@ -27,19 +27,24 @@ end
 M.parse_args = function(raw_args, default)
   local name = nil
   local args = vim.deepcopy(default)
-  local ex_opts = {}
+  local ex_opts = {x = {}, xx = {}}
 
   for _, arg in ipairs(raw_args) do
     if vim.startswith(arg, "--x-") then
       local key, value = parse("--" .. arg:sub(#("--x-") + 1))
-      if value == nil then
+      if key == nil then
         return nil, nil, nil, "could not parse arg: " .. arg
       end
+      ex_opts.x[key] = value
+      goto continue
+    end
+
+    if vim.startswith(arg, "--xx-") then
+      local key, value = parse("--" .. arg:sub(#("--xx-") + 1))
       if key == nil then
-        name = value
-      else
-        ex_opts[key] = value
+        return nil, nil, nil, "could not parse arg: " .. arg
       end
+      ex_opts.xx[key] = value
       goto continue
     end
 
@@ -59,7 +64,7 @@ M.parse_args = function(raw_args, default)
 end
 
 M.open = function(...)
-  local source_name, args, source_opts, parse_err = M.parse_args({...}, {
+  local source_name, args, ex_opts, parse_err = M.parse_args({...}, {
     insert = true,
     resume = false,
     ignorecase = false,
@@ -83,8 +88,10 @@ M.open = function(...)
     return nil, util.print_err("no source")
   end
 
+  local source_opts = ex_opts.x or {}
+  local action_opts = ex_opts.xx or {}
   local result, err = util.with_traceback(function()
-    return engine.start(source_name, source_opts, args)
+    return engine.start(source_name, source_opts, action_opts, args)
   end)
   if err ~= nil then
     return nil, util.print_err(err)
@@ -93,7 +100,7 @@ M.open = function(...)
 end
 
 M.execute = function(...)
-  local action_name, args, action_opts, parse_err = M.parse_args({...}, {
+  local action_name, args, ex_opts, parse_err = M.parse_args({...}, {
     quit = true,
     resume = false,
     offset = 0,
@@ -106,6 +113,7 @@ M.execute = function(...)
     action_name = "default"
   end
 
+  local action_opts = ex_opts.x or {}
   local result, err = util.with_traceback(function()
     return engine.execute(action_name, action_opts, args)
   end)

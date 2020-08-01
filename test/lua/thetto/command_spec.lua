@@ -320,4 +320,32 @@ test3]])
     assert.is_false(job:is_running())
   end)
 
+  it("can execute yank", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert")
+    helper.search("test2")
+
+    command("ThettoDo yank")
+
+    assert.register("+", "test2")
+  end)
+
+  it("can open with action opts", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert --xx-register=1")
+    helper.search("test3")
+
+    command("ThettoDo yank")
+
+    assert.register("1", "test3")
+  end)
+
 end)

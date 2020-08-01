@@ -268,7 +268,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   }, job, nil
 end
 
-M.start = function(source_name, source_opts, args)
+M.start = function(source_name, source_opts, action_opts, args)
   local opts = args
 
   opts.cwd = vim.fn.expand(opts.cwd)
@@ -301,6 +301,7 @@ M.start = function(source_name, source_opts, args)
   if err ~= nil then
     return nil, err
   end
+  buffers.action_opts = action_opts
 
   local windows = open_windows(buffers, resumed_state, opts)
 
@@ -351,7 +352,7 @@ M.execute = function(action_name, action_opts, args)
     end
     opts = _opts
 
-    local action, _action_opts, action_err = kinds.find_action(kind, action_opts, action_name, state.buffers.opts.action, state.buffers.source_name)
+    local action, _action_opts, action_err = kinds.find_action(kind, vim.tbl_extend("force", state.buffers.action_opts, action_opts), action_name, state.buffers.opts.action, state.buffers.source_name)
     if action_err ~= nil then
       return nil, action_err
     end

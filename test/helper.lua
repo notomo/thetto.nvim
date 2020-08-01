@@ -196,6 +196,12 @@ AM.virtual_text = function(expected)
   assert.equals(expected, actual, msg)
 end
 
+AM.register = function(name, expected)
+  local actual = vim.fn.getreg(name)
+  local msg = ("%s register should be %s, but actual: %s"):format(name, expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M
