@@ -52,3 +52,16 @@ test1]])
   end)
 
 end)
+
+describe("thetto source completion", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can show source names", function()
+    local result = vim.fn["thetto#complete#source"]("", "Thetto ", _cursor)
+
+    assert.completion_contains(result, "source")
+  end)
+
+end)

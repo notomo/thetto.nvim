@@ -1,4 +1,5 @@
 local kinds = require("thetto/core/base_kind")
+local sources = require("thetto/core/base_source")
 local states = require "thetto/core/state"
 
 local M = {}
@@ -19,6 +20,11 @@ M.action = function(_, _, _)
   local kind_name = item.kind_name or state.buffers.kind_name
   local source_name = state.buffers.source_name
   local names = kinds.actions(kind_name, source_name)
+  return table.concat(names, "\n")
+end
+
+M.source = function(_, _, _)
+  local names = sources.names()
   return table.concat(names, "\n")
 end
 
