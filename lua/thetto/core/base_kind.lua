@@ -1,6 +1,7 @@
 local jobs = require("thetto/lib/job")
 local highlights = require("thetto/view/highlight")
 local modulelib = require("thetto/lib/module")
+local custom = require("thetto/custom")
 
 local M = {}
 
@@ -19,12 +20,12 @@ M.find_action = function(kind, action_opts, action_name, default_action_name, so
   local key = action_prefix .. name
   local opts = vim.tbl_extend("force", kind.opts[name] or {}, action_opts)
 
-  local source_action = M.source_user_actions[source_name]
+  local source_action = custom.source_actions[source_name]
   if source_action ~= nil and source_action[key] then
     return source_action[key], opts, nil
   end
 
-  local kind_action = M.user_actions[kind.name]
+  local kind_action = custom.kind_actions[kind.name]
   if kind_action ~= nil and kind_action[key] then
     return kind_action[key], opts, nil
   end
@@ -62,12 +63,12 @@ M.create = function(source_name, kind_name, action_name, args)
   kind.name = kind_name
 
   local source_user_opts = {}
-  if M.source_user_actions ~= nil and M.source_user_actions[source_name] ~= nil then
-    source_user_opts = M.source_user_actions[source_name].opts or {}
+  if custom.source_actions ~= nil and custom.source_actions[source_name] ~= nil then
+    source_user_opts = custom.source_actions[source_name].opts or {}
   end
   local user_opts = {}
-  if M.user_actions ~= nil and M.user_actions[kind_name] ~= nil then
-    user_opts = M.user_actions[kind_name].opts or {}
+  if custom.kind_actions ~= nil and custom.kind_actions[kind_name] ~= nil then
+    user_opts = custom.kind_actions[kind_name].opts or {}
   end
   kind.opts = vim.tbl_extend("force", base_action_opts, origin.opts or {}, user_opts, source_user_opts)
 
@@ -152,8 +153,5 @@ M.actions = function(kind_name)
   end
   return names
 end
-
-M.source_user_actions = {}
-M.user_actions = {}
 
 return M

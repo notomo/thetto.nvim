@@ -200,7 +200,7 @@ test3]])
 
   it("can custom source action", function()
     local called = false
-    local actions = require("thetto/core/base_kind").source_user_actions
+    local actions = require("thetto/custom").source_actions
     actions["line"] = {
       action_hoge = function(_)
         called = true
@@ -220,7 +220,7 @@ test3]])
 
   it("can custom kind action", function()
     local called = false
-    local actions = require("thetto/core/base_kind").user_actions
+    local actions = require("thetto/custom").kind_actions
     actions["directory"] = {
       action_hoge = function(_)
         called = true
