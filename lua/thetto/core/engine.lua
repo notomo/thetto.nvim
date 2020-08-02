@@ -1,7 +1,7 @@
 local kinds = require "thetto/core/base_kind"
 local sources = require "thetto/core/base_source"
 local states = require "thetto/core/state"
-local highlights = require("thetto/highlight")
+local highlights = require("thetto/view/highlight")
 local util = require "thetto/util"
 local inputs = require "thetto/input"
 

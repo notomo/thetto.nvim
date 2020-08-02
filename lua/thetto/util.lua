@@ -1,5 +1,7 @@
 local M = {}
 
+-- TODO: move to lib/*
+
 local find_module = function(path)
   local ok, module = pcall(require, path)
   if not ok then

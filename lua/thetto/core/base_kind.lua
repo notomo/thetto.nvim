@@ -1,6 +1,6 @@
 local util = require("thetto/util")
-local jobs = require("thetto/job")
-local highlights = require("thetto/highlight")
+local jobs = require("thetto/lib/job")
+local highlights = require("thetto/view/highlight")
 
 local M = {}
 

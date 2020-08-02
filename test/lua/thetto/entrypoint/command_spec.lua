@@ -309,7 +309,7 @@ test3]])
   end)
 
   it("stops the unfinished job on closed", function()
-    local job = require("thetto/job").new({"sleep", "9"}, {})
+    local job = require("thetto/lib/job").new({"sleep", "9"}, {})
     require("thetto/source/line").collect = function(_)
       return {}, job
     end

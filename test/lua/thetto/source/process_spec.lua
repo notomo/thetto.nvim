@@ -8,7 +8,7 @@ describe("process source", function()
   after_each(helper.after_each)
 
   it("can execute kill", function()
-    local sleep = require("thetto/job").new({"sleep", "8"}, {})
+    local sleep = require("thetto/lib/job").new({"sleep", "8"}, {})
     sleep:start()
 
     helper.sync_open("process", "--no-insert")
