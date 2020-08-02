@@ -1,4 +1,5 @@
-local util = require "thetto/util"
+local bufferlib = require "thetto/lib/buffer"
+local windowlib = require "thetto/lib/window"
 
 local M = {}
 
@@ -24,7 +25,7 @@ function State.close(self, resume, offset)
       active = "list"
     end
     self.windows.active = active
-    util.close_window(self.windows.list)
+    windowlib.close(self.windows.list)
   end
   if resume then
     local cursor = self.windows.list_cursor
@@ -120,16 +121,16 @@ end
 M.get = function(bufnr, input_bufnr)
   local raw_state
   if input_bufnr ~= nil then
-    local input_state = util.buffer_var(input_bufnr, input_state_key)
+    local input_state = bufferlib.find_var(input_bufnr, input_state_key)
     raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
   elseif bufnr == 0 and vim.bo.filetype == M.input_filetype then
-    local input_state = util.buffer_var(bufnr, input_state_key)
+    local input_state = bufferlib.find_var(bufnr, input_state_key)
     raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
   elseif bufnr == 0 and vim.bo.filetype == M.info_filetype then
-    local info_state = util.buffer_var(bufnr, info_state_key)
+    local info_state = bufferlib.find_var(bufnr, info_state_key)
     raw_state = vim.api.nvim_buf_get_var(info_state.buffers.list, list_state_key)
   else
-    raw_state = util.buffer_var(bufnr, list_state_key)
+    raw_state = bufferlib.find_var(bufnr, list_state_key)
   end
   if raw_state == nil then
     return nil, "not found state"

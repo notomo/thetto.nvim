@@ -1,6 +1,6 @@
-local util = require("thetto/util")
 local jobs = require("thetto/lib/job")
 local highlights = require("thetto/view/highlight")
+local modulelib = require("thetto/lib/module")
 
 local M = {}
 
@@ -52,7 +52,7 @@ local base_action_opts = {
 }
 
 M.create = function(source_name, kind_name, action_name, args)
-  local origin = util.find_kind(kind_name)
+  local origin = modulelib.find_kind(kind_name)
   if origin == nil then
     return nil, nil, "not found kind: " .. kind_name
   end
@@ -138,7 +138,7 @@ M.create = function(source_name, kind_name, action_name, args)
 end
 
 M.actions = function(kind_name)
-  local kind = util.find_kind(kind_name)
+  local kind = modulelib.find_kind(kind_name)
   if kind == nil then
     return {}
   end

@@ -1,16 +1,15 @@
-local util = require("thetto/util")
-
 local M = {}
 
-M.file_path = util.user_data_path("file_bookmark.txt")
+M.file_path = nil
 M.paths = {}
 
-M.collect = function()
-  if util.create_file_if_need(M.file_path) then
+M.collect = function(self)
+  local file_path = M.file_path or self.pathlib.user_data_path("file_bookmark.txt")
+  if self.filelib.create_if_need(file_path) then
     return {}
   end
 
-  local f = io.open(M.file_path, "r")
+  local f = io.open(file_path, "r")
   local lines = vim.deepcopy(M.paths)
   for line in f:lines() do
     table.insert(lines, line)

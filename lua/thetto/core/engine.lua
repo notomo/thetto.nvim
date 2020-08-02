@@ -2,7 +2,12 @@ local kinds = require "thetto/core/base_kind"
 local sources = require "thetto/core/base_source"
 local states = require "thetto/core/state"
 local highlights = require("thetto/view/highlight")
-local util = require "thetto/util"
+local listlib = require "thetto/lib/list"
+local bufferlib = require "thetto/lib/buffer"
+local windowlib = require "thetto/lib/window"
+local modulelib = require "thetto/lib/module"
+local messagelib = require "thetto/lib/message"
+local wraplib = require "thetto/lib/wrap"
 local inputs = require "thetto/input"
 
 local M = {}
@@ -122,7 +127,7 @@ end
 local on_changed = function(all_items, input_bufnr, source)
   local state, err = states.get(nil, input_bufnr)
   if err ~= nil then
-    return util.print_err(err)
+    return messagelib.error(err)
   end
 
   local line = vim.api.nvim_buf_get_lines(input_bufnr, 0, 1, true)[1]
@@ -205,11 +210,11 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   local all_items = {}
   local job = nil
   local input_bufnr = nil
-  local debounced_update = util.debounce(opts.debounce_ms, function()
+  local debounced_update = wraplib.debounce(opts.debounce_ms, function()
     return on_changed(all_items, input_bufnr, source)
   end)
 
-  input_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
+  input_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = debounced_update,
@@ -236,7 +241,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     item.index = i
   end
 
-  local sign_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.sign_filetype), function(bufnr)
+  local sign_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source_name, states.sign_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.sign_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, opts.display_limit))
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
@@ -247,7 +252,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     items = sorter.apply(items, "", opts)
   end
   local lines = M._head_lines(items, opts.display_limit)
-  local list_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
+  local list_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source_name, states.list_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.list_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
@@ -255,7 +260,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     source:highlight_sign(sign_bufnr, items)
   end)
 
-  local info_bufnr = util.create_buffer(("thetto://%s/%s"):format(source_name, states.info_filetype), function(bufnr)
+  local info_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source_name, states.info_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.info_filetype)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
   end)
@@ -281,7 +286,7 @@ M.start = function(source_name, source_opts, action_opts, args)
   opts.cwd = vim.fn.expand(opts.cwd)
 
   if opts.target ~= nil then
-    local target = util.find_target(opts.target)
+    local target = modulelib.find_target(opts.target)
     if target == nil then
       return nil, "not found target: " .. opts.target
     end
@@ -338,7 +343,7 @@ M.execute = function(action_name, action_opts, args)
   end
 
   local selected_items = state:selected_items(action_name, args.offset)
-  local item_groups = util.group_by(selected_items, function(item)
+  local item_groups = listlib.group_by(selected_items, function(item)
     return item.kind_name or state.buffers.kind_name
   end)
 
@@ -385,7 +390,7 @@ end
 
 M.close_window = function(...)
   for _, id in ipairs({...}) do
-    util.close_window(id)
+    windowlib.close(id)
     local job = M.jobs[id]
     if job ~= nil then
       job:stop()

@@ -1,11 +1,14 @@
-local util = require("thetto/util")
-local jobs = require("thetto/lib/job")
 local highlights = require("thetto/view/highlight")
+local jobs = require("thetto/lib/job")
+local pathlib = require("thetto/lib/path")
+local filelib = require("thetto/lib/file")
+local listlib = require("thetto/lib/list")
+local modulelib = require("thetto/lib/module")
 
 local M = {}
 
 M.create = function(source_name, source_opts, opts)
-  local origin = util.find_source(source_name)
+  local origin = modulelib.find_source(source_name)
   if origin == nil then
     return nil, "not found source: " .. source_name
   end
@@ -27,6 +30,9 @@ M.create = function(source_name, source_opts, opts)
 
   source.jobs = jobs
   source.highlights = highlights
+  source.pathlib = pathlib
+  source.filelib = filelib
+  source.listlib = listlib
 
   source.highlight_sign = origin.highlight_sign or function(self, bufnr, items)
     if #compiled_colors == 0 then
@@ -45,9 +51,9 @@ M.create = function(source_name, source_opts, opts)
 
   local filters = {}
   for _, name in ipairs(filter_names) do
-    local filter = util.find_iteradapter("filter/" .. name)
+    local filter = modulelib.find_iteradapter("filter/" .. name)
     if filter == nil then
-      return nil, util.print_err("not found filter: " .. name)
+      return nil, "not found filter: " .. name
     end
     table.insert(filters, filter)
   end
@@ -59,9 +65,9 @@ M.create = function(source_name, source_opts, opts)
 
   local sorters = {}
   for _, name in ipairs(sorter_names) do
-    local sorter = util.find_iteradapter("sorter/" .. name)
+    local sorter = modulelib.find_iteradapter("sorter/" .. name)
     if sorter == nil then
-      return nil, util.print_err("not found sorter: " .. name)
+      return nil, "not found sorter: " .. name
     end
     table.insert(sorters, sorter)
   end

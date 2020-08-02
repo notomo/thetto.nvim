@@ -1,5 +1,3 @@
-local util = require("thetto/util")
-
 local M = {}
 
 local parse_line = function(line)
@@ -34,7 +32,7 @@ M.collect = function(self, opts)
     ::continue::
   end
 
-  local to_relative = util.relative_path_mod(opts.cwd)
+  local to_relative = self.pathlib.relative_modifier(opts.cwd)
   local buffered_items = {}
   local job = self.jobs.new(cmd, {
     on_stdout = function(job_self, _, data)

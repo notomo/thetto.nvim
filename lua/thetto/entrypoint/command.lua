@@ -1,5 +1,6 @@
 local engine = require "thetto/core/engine" -- more concrete naming?
-local util = require "thetto/util"
+local wraplib = require "thetto/lib/wrap"
+local messagelib = require "thetto/lib/message"
 
 local M = {}
 
@@ -102,20 +103,20 @@ M.open = function(...)
     sorters = {},
   })
   if parse_err ~= nil then
-    return nil, util.print_err(parse_err)
+    return nil, messagelib.error(parse_err)
   end
 
   if source_name == nil and not args.resume then
-    return nil, util.print_err("no source")
+    return nil, messagelib.error("no source")
   end
 
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
-  local result, err = util.with_traceback(function()
+  local result, err = wraplib.traceback(function()
     return engine.start(source_name, source_opts, action_opts, args)
   end)
   if err ~= nil then
-    return nil, util.print_err(err)
+    return nil, messagelib.error(err)
   end
   return result, nil
 end
@@ -127,7 +128,7 @@ M.execute = function(...)
     offset = 0,
   })
   if parse_err ~= nil then
-    return nil, util.print_err(parse_err)
+    return nil, messagelib.error(parse_err)
   end
 
   if action_name == nil then
@@ -135,11 +136,11 @@ M.execute = function(...)
   end
 
   local action_opts = ex_opts.x or {}
-  local result, err = util.with_traceback(function()
+  local result, err = wraplib.traceback(function()
     return engine.execute(action_name, action_opts, args)
   end)
   if err ~= nil then
-    return nil, util.print_err(err)
+    return nil, messagelib.error(err)
   end
   return result, nil
 end

@@ -1,10 +1,8 @@
-local util = require "thetto/util"
-
 local M = {}
 
 M.ignore_pattern = "^$"
 
-M.collect = function()
+M.collect = function(self)
   local items = {}
 
   local paths = {}
@@ -23,7 +21,7 @@ M.collect = function()
   end
 
   vim.list_extend(paths, vim.v.oldfiles)
-  paths = util.unique(paths)
+  paths = self.listlib.unique(paths)
 
   local home = os.getenv("HOME")
   local regex = vim.regex(M.ignore_pattern)
