@@ -101,6 +101,7 @@ M.open = function(...)
     debounce_ms = 50,
     filters = {},
     sorters = {},
+    allow_empty = false,
   })
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)

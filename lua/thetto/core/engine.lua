@@ -156,6 +156,10 @@ M.start = function(source_name, source_opts, action_opts, args)
   end
   buffers.action_opts = action_opts
 
+  if job == nil and all_items_count == 0 and not opts.allow_empty then
+    return nil, source.name .. ": empty"
+  end
+
   local windows = ui_windows.open(buffers, resumed_state, opts, function()
     if job ~= nil then
       job:stop()

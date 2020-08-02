@@ -379,4 +379,11 @@ tes]])
     assert.current_line("tes")
   end)
 
+  it("does not open windows if no items", function()
+    assert.error_message("outline: empty", function()
+      command("Thetto outline")
+    end)
+    assert.window_count(1)
+  end)
+
 end)
