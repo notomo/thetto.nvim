@@ -119,6 +119,12 @@ M.start = function(source_name, source_opts, action_opts, args)
   local opts = args
 
   opts.cwd = vim.fn.expand(opts.cwd)
+  if opts.cwd == "." then
+    opts.cwd = vim.fn.fnamemodify(".", ":p")
+  end
+  if opts.cwd ~= "/" and vim.endswith(opts.cwd, "/") then
+    opts.cwd = opts.cwd:sub(1, #opts.cwd - 1)
+  end
 
   if opts.target ~= nil then
     local target = modulelib.find_target(opts.target)
