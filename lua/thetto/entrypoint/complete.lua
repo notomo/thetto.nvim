@@ -17,7 +17,8 @@ M.action = function(_, _, _)
   end
 
   local kind_name = item.kind_name or state.buffers.kind_name
-  local names = kinds.actions(kind_name)
+  local source_name = state.buffers.source_name
+  local names = kinds.actions(kind_name, source_name)
   return table.concat(names, "\n")
 end
 

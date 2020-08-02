@@ -19,4 +19,36 @@ test1]])
     assert.completion_contains(result, "open")
   end)
 
+  it("includes custom source action names", function()
+    local actions = require("thetto/custom").source_actions
+    actions["line"] = {
+      action_hoge = function(_)
+      end,
+    }
+
+    helper.set_lines([[
+test1]])
+    command("Thetto line --no-insert")
+
+    local result = vim.fn["thetto#complete#action"]("", "ThettoDo ", _cursor)
+
+    assert.completion_contains(result, "hoge")
+  end)
+
+  it("includes custom kind action names", function()
+    local actions = require("thetto/custom").kind_actions
+    actions["position"] = {
+      action_foo = function(_)
+      end,
+    }
+
+    helper.set_lines([[
+test1]])
+    command("Thetto line --no-insert")
+
+    local result = vim.fn["thetto#complete#action"]("", "ThettoDo ", _cursor)
+
+    assert.completion_contains(result, "foo")
+  end)
+
 end)

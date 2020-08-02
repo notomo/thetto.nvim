@@ -138,19 +138,34 @@ M.create = function(source_name, kind_name, action_name, args)
   return setmetatable(kind, origin), opts, nil
 end
 
-M.actions = function(kind_name)
+M.actions = function(kind_name, source_name)
   local kind = modulelib.find_kind(kind_name)
   if kind == nil then
     return {}
   end
 
   local names = {}
-  for key in pairs(kind) do
+  local add_name = function(key)
     if vim.startswith(key, action_prefix) then
       local name = key:gsub("^" .. action_prefix, "")
       table.insert(names, name)
     end
   end
+
+  for key in pairs(kind) do
+    add_name(key)
+  end
+
+  local source_action = custom.source_actions[source_name] or {}
+  for key in pairs(source_action) do
+    add_name(key)
+  end
+
+  local kind_action = custom.kind_actions[kind_name] or {}
+  for key in pairs(kind_action) do
+    add_name(key)
+  end
+
   return names
 end
 
