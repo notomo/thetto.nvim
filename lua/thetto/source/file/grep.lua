@@ -1,12 +1,11 @@
 local M = {}
 
 local parse_line = function(line)
-  local path_row = line:match(".*:%d+:")
-  if not path_row then
+  local path, row = line:match("(.*):(%d+):")
+  if not path then
     return
   end
-  local path, row = unpack(vim.split(path_row, ":", true))
-  local matched_line = line:sub(#path_row + 1)
+  local matched_line = line:sub(#path + #row + #("::") + 1)
   return path, tonumber(row), matched_line
 end
 
