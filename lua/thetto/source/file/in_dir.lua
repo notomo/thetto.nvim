@@ -7,8 +7,13 @@ M.collect = function(_, opts)
     table.insert(paths, abs_path)
   end
 
-  paths = vim.fn.sort(paths, function(a, b)
-    return vim.fn.isdirectory(b) - vim.fn.isdirectory(a)
+  table.sort(paths, function(a, b)
+    local is_dir_a = vim.fn.isdirectory(a)
+    local is_dir_b = vim.fn.isdirectory(b)
+    if is_dir_a ~= is_dir_b then
+      return is_dir_a > is_dir_b
+    end
+    return a < b
   end)
 
   local items = {}
