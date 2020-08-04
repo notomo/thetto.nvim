@@ -7,7 +7,7 @@ describe("vim/runtimepath source", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can runtime paths", function()
+  it("can show runtime paths", function()
     command("Thetto vim/runtimepath --no-insert")
 
     helper.search("thetto.nvim")
