@@ -386,4 +386,17 @@ tes]])
     assert.window_count(1)
   end)
 
+  it("can custom default opts", function()
+    require("thetto/custom").opts = {display_limit = 1}
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert")
+
+    assert.line_count(1)
+  end)
+
 end)

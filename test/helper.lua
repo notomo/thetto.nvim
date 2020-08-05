@@ -202,6 +202,12 @@ AM.register = function(name, expected)
   assert.equals(expected, actual, msg)
 end
 
+AM.line_count = function(expected)
+  local actual = vim.api.nvim_buf_line_count(0)
+  local msg = string.format("line count should be %s, but actual: %s", expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M

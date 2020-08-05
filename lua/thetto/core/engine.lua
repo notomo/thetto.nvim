@@ -115,9 +115,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   }, source, job, items, #all_items, nil
 end
 
-M.start = function(source_name, source_opts, action_opts, args)
-  local opts = args
-
+M.start = function(source_name, source_opts, action_opts, opts)
   opts.cwd = vim.fn.expand(opts.cwd)
   if opts.cwd == "." then
     opts.cwd = vim.fn.fnamemodify(".", ":p")

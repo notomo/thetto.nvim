@@ -1,6 +1,7 @@
 local engine = require "thetto/core/engine" -- more concrete naming?
 local wraplib = require "thetto/lib/wrap"
 local messagelib = require "thetto/lib/message"
+local custom = require "thetto/custom"
 
 local M = {}
 
@@ -27,7 +28,7 @@ end
 
 M.parse_args = function(raw_args, default)
   local name = nil
-  local args = vim.deepcopy(default)
+  local opts = vim.deepcopy(default)
   local ex_opts = {x = {}, xx = {}}
 
   for _, arg in ipairs(raw_args) do
@@ -70,26 +71,26 @@ M.parse_args = function(raw_args, default)
     if key == nil then
       name = value
     else
-      local current = args[key]
+      local current = opts[key]
       if type(current) == "table" then
-        table.insert(args[key], value)
+        table.insert(opts[key], value)
       else
-        args[key] = value
+        opts[key] = value
       end
     end
     ::continue::
   end
 
-  return name, args, ex_opts, nil
+  return name, opts, ex_opts, nil
 end
 
 M.open = function(...)
-  local source_name, args, ex_opts, parse_err = M.parse_args({...}, {
+  local default_opts = {
     insert = true,
     resume = false,
     ignorecase = false,
     smartcase = true,
-    width = 90,
+    width = 100,
     height = 25,
     pattern = nil,
     pattern_type = nil,
@@ -102,19 +103,20 @@ M.open = function(...)
     filters = {},
     sorters = {},
     allow_empty = false,
-  })
+  }
+  local source_name, opts, ex_opts, parse_err = M.parse_args({...}, vim.tbl_extend("force", default_opts, custom.opts))
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
   end
 
-  if source_name == nil and not args.resume then
+  if source_name == nil and not opts.resume then
     return nil, messagelib.error("no source")
   end
 
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()
-    return engine.start(source_name, source_opts, action_opts, args)
+    return engine.start(source_name, source_opts, action_opts, opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
@@ -123,7 +125,7 @@ M.open = function(...)
 end
 
 M.execute = function(...)
-  local action_name, args, ex_opts, parse_err = M.parse_args({...}, {
+  local action_name, opts, ex_opts, parse_err = M.parse_args({...}, {
     quit = true,
     resume = false,
     offset = 0,
@@ -138,7 +140,7 @@ M.execute = function(...)
 
   local action_opts = ex_opts.x or {}
   local result, err = wraplib.traceback(function()
-    return engine.execute(action_name, action_opts, args)
+    return engine.execute(action_name, action_opts, opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
