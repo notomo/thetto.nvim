@@ -1,5 +1,6 @@
 local kinds = require "thetto/core/base_kind"
 local sources = require "thetto/core/base_source"
+local filter_core = require "thetto/core/base_filter"
 local states = require "thetto/core/state"
 local listlib = require "thetto/lib/list"
 local bufferlib = require "thetto/lib/buffer"
@@ -17,12 +18,21 @@ local on_changed = function(all_items, input_bufnr, source)
     return messagelib.error(err)
   end
 
-  local input_line = vim.api.nvim_buf_get_lines(input_bufnr, 0, 1, true)[1]
+  local input_lines = vim.api.nvim_buf_get_lines(input_bufnr, 0, -1, true)
   local opts = vim.deepcopy(state.buffers.opts)
-  if not opts.ignorecase and opts.smartcase and input_line:find("[A-Z]") then
+  if not opts.ignorecase and opts.smartcase and table.concat(input_lines, ""):find("[A-Z]") then
     opts.ignorecase = false
   else
     opts.ignorecase = true
+  end
+
+  local filters = {}
+  for _, name in ipairs(state.buffers.filters) do
+    local filter, filter_err = filter_core.create(name)
+    if filter_err ~= nil then
+      return messagelib.error(filter_err)
+    end
+    table.insert(filters, filter)
   end
 
   for _, item in ipairs(state.buffers.filtered) do
@@ -30,15 +40,13 @@ local on_changed = function(all_items, input_bufnr, source)
       all_items[item.index].selected = item.selected
     end
   end
-  local items = M._modify_items(source, all_items, input_line, opts)
+
+  local items = M._modify_items(source, all_items, filters, input_lines, opts)
 
   state:update(items)
 
   vim.schedule(function()
-    if not vim.api.nvim_buf_is_valid(state.buffers.list) then
-      return
-    end
-    ui_windows.render(source, items, #all_items, state.buffers, state.windows, input_line, opts)
+    ui_windows.render(source, items, #all_items, state.buffers, state.windows, filters, input_lines, opts)
     M._changed_after()
   end)
 end
@@ -62,6 +70,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
 
   input_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source_name, states.input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.input_filetype)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, #source.filters))
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = update_list,
       on_detach = function()
@@ -101,7 +110,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
   end)
 
-  local items = M._modify_items(source, all_items, "", opts)
+  local items = M._modify_items(source, all_items, {}, {}, opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
@@ -111,6 +120,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     selected = {},
     kind_name = source.kind_name,
     source_name = source_name,
+    filters = source.filters,
     opts = opts,
   }, source, job, items, #all_items, nil
 end
@@ -170,7 +180,7 @@ M.start = function(source_name, source_opts, action_opts, opts)
   end
 
   if source ~= nil then
-    ui_windows.render(source, items, all_items_count, buffers, windows, "", opts)
+    ui_windows.render(source, items, all_items_count, buffers, windows, {}, {}, opts)
   end
 
   return job, nil
@@ -236,20 +246,21 @@ M.execute = function(action_name, action_opts, args)
   return result, action_err
 end
 
-M._modify_items = function(source, all_items, input_line, opts)
+M._modify_items = function(source, all_items, filters, input_lines, opts)
   -- NOTE: avoid `too many results to unpack`
   local items = {}
   for _, item in ipairs(all_items) do
     table.insert(items, item)
   end
 
-  if input_line ~= "" then
-    for _, filter in ipairs(source.iteradapter.filters) do
-      items = filter.apply(items, input_line, opts)
+  for i, filter in ipairs(filters) do
+    local input_line = input_lines[i]
+    if input_line ~= nil and input_line ~= "" then
+      items = filter:apply(items, input_line, opts)
     end
   end
   for _, sorter in ipairs(source.iteradapter.sorters) do
-    items = sorter.apply(items, input_line, opts)
+    items = sorter.apply(items, opts)
   end
 
   local filtered = {}

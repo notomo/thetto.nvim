@@ -10,7 +10,7 @@ local to_texts = function(input_line, opts)
   end, vim.split(line, "%s"))
 end
 
-M.apply = function(items, input_line, opts)
+M.apply = function(self, items, input_line, opts)
   local filtered = {}
   local texts = to_texts(input_line, opts)
   for _, item in ipairs(items) do
@@ -21,7 +21,7 @@ M.apply = function(items, input_line, opts)
 
     local ok = true
     for _, text in ipairs(texts) do
-      if not value:find(text, 1, true) then
+      if (value:find(text, 1, true) ~= nil) == self.inverse then
         ok = false
         break
       end
@@ -34,7 +34,11 @@ M.apply = function(items, input_line, opts)
   return filtered
 end
 
-M.highlight = function(bufnr, items, input_line, opts)
+M.highlight = function(self, bufnr, items, input_line, opts)
+  if self.inverse then
+    return
+  end
+
   local ns = vim.api.nvim_create_namespace("thetto-filter-substring-highlight")
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
 

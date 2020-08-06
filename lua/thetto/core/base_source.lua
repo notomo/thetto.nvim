@@ -48,15 +48,7 @@ M.create = function(source_name, source_opts, opts)
   if #opts.filters ~= 0 then
     filter_names = opts.filters
   end
-
-  local filters = {}
-  for _, name in ipairs(filter_names) do
-    local filter = modulelib.find_iteradapter("filter/" .. name)
-    if filter == nil then
-      return nil, "not found filter: " .. name
-    end
-    table.insert(filters, filter)
-  end
+  source.filters = filter_names
 
   local sorter_names = origin.sorters or {}
   if #opts.sorters ~= 0 then
@@ -72,7 +64,7 @@ M.create = function(source_name, source_opts, opts)
     table.insert(sorters, sorter)
   end
 
-  source.iteradapter = {filters = filters, sorters = sorters}
+  source.iteradapter = {sorters = sorters}
 
   return setmetatable(source, origin), nil
 end

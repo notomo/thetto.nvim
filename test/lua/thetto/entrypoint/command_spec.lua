@@ -399,4 +399,50 @@ test3]])
     assert.line_count(1)
   end)
 
+  it("can add filter", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line")
+    command("ThettoDo add_filter --x-name=-substring")
+
+    command("normal! G")
+    helper.sync_input({"test2"})
+
+    command("ThettoDo move_to_list")
+
+    assert.exists_pattern("test1")
+    assert.exists_pattern("test3")
+  end)
+
+  it("can remove filter", function()
+    require("thetto/source/line").filters = {"substring", "-substring"}
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line")
+
+    command("normal! G")
+    helper.sync_input({"test2"})
+
+    command("ThettoDo remove_filter --x-name=-substring")
+    helper.wait_ui()
+    command("ThettoDo move_to_list")
+
+    assert.exists_pattern("test2")
+  end)
+
+  it("cannot remove the last filter", function()
+    command("Thetto line")
+
+    assert.error_message("the last filter cannot be removed", function()
+      command("ThettoDo remove_filter")
+    end)
+  end)
+
 end)

@@ -84,6 +84,16 @@ M.sync_execute = function(...)
   end
 end
 
+M.wait_ui = function()
+  local ok = vim.wait(1000, function()
+    return waiting
+  end, 10)
+  waiting = false
+  if not ok then
+    assert(false, "wait timeout")
+  end
+end
+
 M.search = function(pattern)
   local result = vim.fn.search(pattern)
   if result == 0 then

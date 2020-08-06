@@ -1,6 +1,7 @@
 local jobs = require("thetto/lib/job")
 local highlights = require("thetto/view/highlight")
 local modulelib = require("thetto/lib/module")
+local filter_core = require("thetto/core/base_filter")
 local custom = require("thetto/custom")
 
 local M = {}
@@ -45,11 +46,15 @@ local base_options = {
   debug_print = {quit = false},
   toggle_selection = {quit = false},
   toggle_all_selection = {quit = false},
+  add_filter = {quit = false},
+  remove_filter = {quit = false},
 }
 
 local base_action_opts = {
   yank = {key = "value", register = "+"},
   append = {key = "value", type = ""},
+  add_filter = {name = "substring"},
+  remove_filter = {name = nil},
 }
 
 M.create = function(source_name, kind_name, action_name, args)
@@ -128,6 +133,53 @@ M.create = function(source_name, kind_name, action_name, args)
     for _, item in ipairs(items) do
       vim.api.nvim_put({item[self.action_opts.key]}, self.action_opts.type, true, true)
     end
+  end
+
+  kind.action_add_filter = function(self, _, state)
+    local filter_name = self.action_opts.name
+    local _, err = filter_core.create(filter_name)
+    if err ~= nil then
+      return nil, err
+    end
+
+    vim.api.nvim_buf_set_lines(state.buffers.input, -1, -1, false, {""})
+    vim.api.nvim_win_set_height(state.windows.input, #state.buffers.filters + 1)
+
+    local filter_names = vim.deepcopy(state.buffers.filters)
+    table.insert(filter_names, filter_name)
+
+    state:update_filters(filter_names)
+  end
+
+  kind.action_remove_filter = function(self, _, state)
+    if #state.buffers.filters == 1 then
+      return nil, "the last filter cannot be removed"
+    end
+
+    local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
+    local filter_name = self.action_opts.name or state.buffers.filters[cursor[1]]
+    local _, err = filter_core.create(filter_name)
+    if err ~= nil then
+      return nil, err
+    end
+
+    local removed_index = nil
+    local filter_names = {}
+    for i, name in ipairs(state.buffers.filters) do
+      if filter_name == name then
+        removed_index = i
+      else
+        table.insert(filter_names, name)
+      end
+    end
+
+    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, 0, -1, false)
+    table.remove(lines, removed_index)
+
+    vim.api.nvim_buf_set_lines(state.buffers.input, 0, -1, false, lines)
+    vim.api.nvim_win_set_height(state.windows.input, #state.buffers.filters - 1)
+
+    state:update_filters(filter_names)
   end
 
   local opts = args

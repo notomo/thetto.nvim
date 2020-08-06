@@ -63,7 +63,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
 
   local input_window = vim.api.nvim_open_win(buffers.input, true, {
     width = opts.width,
-    height = 1,
+    height = #buffers.filters,
     relative = "editor",
     row = row + opts.height + 1,
     col = column,
@@ -119,7 +119,11 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   return {list = list_window, input = input_window, info = info_window, sign = sign_window}
 end
 
-M.render = function(source, items, all_items_count, buffers, windows, input_line, opts)
+M.render = function(source, items, all_items_count, buffers, windows, filters, input_lines, opts)
+  if not vim.api.nvim_buf_is_valid(buffers.list) then
+    return
+  end
+
   local lines = M._head_lines(items, opts.display_limit)
   vim.api.nvim_buf_set_option(buffers.list, "modifiable", true)
   vim.api.nvim_buf_set_lines(buffers.list, 0, -1, false, lines)
@@ -138,9 +142,10 @@ M.render = function(source, items, all_items_count, buffers, windows, input_line
   source:highlight_sign(buffers.sign, items)
   highlights.update_selections(buffers.list, items)
 
-  for _, filter in ipairs(source.iteradapter.filters) do
-    if filter.highlight ~= nil then
-      filter.highlight(buffers.list, items, input_line, opts)
+  for i, filter in ipairs(filters) do
+    local input_line = input_lines[i]
+    if filter.highlight ~= nil and input_line ~= nil and input_line ~= "" then
+      filter:highlight(buffers.list, items, input_line, opts)
     end
   end
 end
