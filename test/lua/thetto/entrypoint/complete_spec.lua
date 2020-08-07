@@ -51,6 +51,16 @@ test1]])
     assert.completion_contains(result, "foo")
   end)
 
+  it("includes base kind action names", function()
+    helper.set_lines([[
+test1]])
+    command("Thetto line --no-insert")
+
+    local result = vim.fn["thetto#complete#action"]("", "ThettoDo ", _cursor)
+
+    assert.completion_contains(result, "move_to_list")
+  end)
+
 end)
 
 describe("thetto source completion", function()

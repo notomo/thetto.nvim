@@ -191,7 +191,7 @@ M.create = function(source_name, kind_name, action_name, args)
 end
 
 M.actions = function(kind_name, source_name)
-  local kind = modulelib.find_kind(kind_name)
+  local kind = M.create(source_name, kind_name, "", {})
   if kind == nil then
     return {}
   end
@@ -205,6 +205,10 @@ M.actions = function(kind_name, source_name)
   end
 
   for key in pairs(kind) do
+    add_name(key)
+  end
+
+  for key in pairs(getmetatable(kind)) do
     add_name(key)
   end
 
