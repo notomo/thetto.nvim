@@ -7,6 +7,10 @@ M.relative_modifier = function(base_path)
   end
 end
 
+M.to_relative = function(path, base_path)
+  return M.relative_modifier(base_path)(path)
+end
+
 -- for app
 
 M.user_data_path = function(file_name)

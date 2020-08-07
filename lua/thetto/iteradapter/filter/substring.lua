@@ -14,7 +14,7 @@ M.apply = function(self, items, input_line, opts)
   local filtered = {}
   local texts = to_texts(input_line, opts)
   for _, item in ipairs(items) do
-    local value = item.value
+    local value = self:to_value(item)
     if opts.ignorecase then
       value = value:lower()
     end
@@ -35,7 +35,8 @@ M.apply = function(self, items, input_line, opts)
 end
 
 M.highlight = function(self, bufnr, items, input_line, opts)
-  if self.inverse then
+  -- NOTICE: support only "value"
+  if self.inverse or self.key ~= "value" then
     return
   end
 

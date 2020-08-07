@@ -28,7 +28,7 @@ local on_changed = function(all_items, input_bufnr, source)
 
   local filters = {}
   for _, name in ipairs(state.buffers.filters) do
-    local filter, filter_err = filter_core.create(name)
+    local filter, filter_err = filter_core.create(name, opts)
     if filter_err ~= nil then
       return messagelib.error(filter_err)
     end

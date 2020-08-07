@@ -1,13 +1,29 @@
 local highlights = require("thetto/view/highlight")
 local modulelib = require("thetto/lib/module")
+local pathlib = require("thetto/lib/path")
 
 local M = {}
 
-M.create = function(filter_name)
+local modifiers = {
+  relative = function(value, opts)
+    return pathlib.to_relative(value, opts.cwd)
+  end,
+}
+
+M.create = function(filter_name, opts)
   local inverse = false
   if vim.startswith(filter_name, "-") then
     inverse = true
     filter_name = filter_name:sub(2)
+  end
+
+  local args = vim.split(filter_name, ":", true)
+  filter_name = args[1]
+  local key = args[2]
+  local modifier_name = args[3]
+  local modifier = modifiers[modifier_name]
+  if modifier_name ~= nil and modifier == nil then
+    return nil, "not found filter modifier: " .. modifier_name
   end
 
   local origin = modulelib.find_iteradapter("filter/" .. filter_name)
@@ -18,8 +34,19 @@ M.create = function(filter_name)
 
   local filter = {}
   filter.name = filter_name
+  filter.key = key or origin.key or "value"
   filter.inverse = inverse
   filter.highlights = highlights
+
+  if modifier ~= nil then
+    filter.to_value = function(self, item)
+      return modifier(item[self.key], opts)
+    end
+  else
+    filter.to_value = function(self, item)
+      return item[self.key]
+    end
+  end
 
   return setmetatable(filter, origin), nil
 end
