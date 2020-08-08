@@ -15,6 +15,9 @@ local M = {}
 local on_changed = function(all_items, input_bufnr, source)
   local state, err = states.get(nil, input_bufnr)
   if err ~= nil then
+    if err == states.err_finished then
+      return
+    end
     return messagelib.error(err)
   end
 

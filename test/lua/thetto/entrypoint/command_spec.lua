@@ -445,4 +445,13 @@ test3]])
     end)
   end)
 
+  it("cannot delete input lines", function()
+    require("thetto/custom").default_filters = {"substring", "-substring"}
+
+    command("Thetto line")
+    command("normal! dd")
+
+    assert.line_count(2)
+  end)
+
 end)

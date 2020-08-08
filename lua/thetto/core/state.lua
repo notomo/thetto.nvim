@@ -13,6 +13,7 @@ M.input_filetype = "thetto-input"
 M.info_filetype = "thetto-info"
 M.filter_info_filetype = "thetto-filter-info"
 M.path_pattern = "thetto://.+/thetto"
+M.err_finished = "finished"
 
 local State = {}
 State.__index = State
@@ -131,6 +132,9 @@ end
 M.get = function(bufnr, input_bufnr)
   local raw_state
   if input_bufnr ~= nil then
+    if not vim.api.nvim_buf_is_valid(input_bufnr) then
+      return nil, M.err_finished
+    end
     local input_state = bufferlib.find_var(input_bufnr, input_state_key)
     raw_state = vim.api.nvim_buf_get_var(input_state.buffers.list, list_state_key)
   elseif bufnr == 0 and vim.bo.filetype == M.input_filetype then

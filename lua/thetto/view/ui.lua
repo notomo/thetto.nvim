@@ -165,10 +165,12 @@ M.render = function(source, items, all_items_count, buffers, windows, filters, i
   source:highlight_sign(buffers.sign, items)
   highlights.update_selections(buffers.list, items)
 
-  local input_height = #filters
-  vim.api.nvim_win_set_height(windows.input, input_height)
-  vim.api.nvim_win_set_height(windows.filter_info, input_height)
-  vim.api.nvim_buf_set_lines(buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, input_height))
+  if vim.api.nvim_win_is_valid(windows.input) then
+    local input_height = #filters
+    vim.api.nvim_win_set_height(windows.input, input_height)
+    vim.api.nvim_win_set_height(windows.filter_info, input_height)
+    vim.api.nvim_buf_set_lines(buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, input_height))
+  end
 
   local ns = vim.api.nvim_create_namespace("thetto-input-filter-info")
   for i, filter in ipairs(filters) do
@@ -178,6 +180,13 @@ M.render = function(source, items, all_items_count, buffers, windows, filters, i
     end
     local filter_info = ("[%s]"):format(filter.name)
     vim.api.nvim_buf_set_virtual_text(buffers.filter_info, ns, i - 1, {{filter_info, "Comment"}}, {})
+  end
+
+  local line_count_diff = #filters - #input_lines
+  if line_count_diff > 0 then
+    vim.api.nvim_buf_set_lines(buffers.input, #filters - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
+  elseif line_count_diff < 0 then
+    vim.api.nvim_buf_set_lines(buffers.input, #filters, -1, false, {})
   end
 end
 
