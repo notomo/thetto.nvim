@@ -1,6 +1,7 @@
 local kinds = require "thetto/core/base_kind"
 local sources = require "thetto/core/base_source"
 local filter_core = require "thetto/core/base_filter"
+local sorter_core = require "thetto/core/base_sorter"
 local states = require "thetto/core/state"
 local listlib = require "thetto/lib/list"
 local bufferlib = require "thetto/lib/buffer"
@@ -30,6 +31,7 @@ local on_changed = function(all_items, input_bufnr, source)
   end
 
   local filters = M._get_filters(state.buffers, opts)
+  local sorters = M._get_sorters(state.buffers)
 
   for _, item in ipairs(state.buffers.filtered) do
     if item.selected ~= nil then
@@ -37,7 +39,7 @@ local on_changed = function(all_items, input_bufnr, source)
     end
   end
 
-  local items = M._modify_items(source, all_items, filters, input_lines, opts)
+  local items = M._modify_items(source, all_items, filters, input_lines, sorters, opts)
 
   state:update(items)
 
@@ -110,7 +112,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.filter_info_filetype)
   end)
 
-  local items = M._modify_items(source, all_items, {}, {}, opts)
+  local items = M._modify_items(source, all_items, {}, {}, M._get_sorters({sorters = source.sorters}), opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
@@ -122,6 +124,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     kind_name = source.kind_name,
     source_name = source_name,
     filters = source.filters,
+    sorters = source.sorters,
     opts = opts,
   }, source, job, items, #all_items, nil
 end
@@ -248,7 +251,7 @@ M.execute = function(action_name, action_opts, args)
   return result, action_err
 end
 
-M._modify_items = function(source, all_items, filters, input_lines, opts)
+M._modify_items = function(source, all_items, filters, input_lines, sorters, opts)
   -- NOTE: avoid `too many results to unpack`
   local items = {}
   for _, item in ipairs(all_items) do
@@ -261,8 +264,8 @@ M._modify_items = function(source, all_items, filters, input_lines, opts)
       items = filter:apply(items, input_line, opts)
     end
   end
-  for _, sorter in ipairs(source.iteradapter.sorters) do
-    items = sorter.apply(items, opts)
+  for _, sorter in ipairs(sorters) do
+    items = sorter:apply(items)
   end
 
   local filtered = {}
@@ -275,13 +278,25 @@ end
 M._get_filters = function(buffers, opts)
   local filters = {}
   for _, name in ipairs(buffers.filters) do
-    local filter, filter_err = filter_core.create(name, opts)
-    if filter_err ~= nil then
-      return messagelib.error(filter_err)
+    local filter, err = filter_core.create(name, opts)
+    if err ~= nil then
+      return messagelib.error(err)
     end
     table.insert(filters, filter)
   end
   return filters
+end
+
+M._get_sorters = function(buffers)
+  local sorters = {}
+  for _, name in ipairs(buffers.sorters) do
+    local sorter, err = sorter_core.create(name)
+    if err ~= nil then
+      return messagelib.error(err)
+    end
+    table.insert(sorters, sorter)
+  end
+  return sorters
 end
 
 -- for testing

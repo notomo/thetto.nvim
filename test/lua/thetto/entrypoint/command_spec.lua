@@ -488,4 +488,21 @@ test3]])
     assert.line_count(2)
   end)
 
+  it("can reverse sorter", function()
+    require("thetto/custom").default_sorters = {"length"}
+
+    helper.set_lines([[
+te
+t
+tes]])
+
+    command("Thetto line --no-insert")
+    assert.current_line("t")
+
+    command("ThettoDo reverse_sorter")
+    helper.wait_ui()
+
+    assert.current_line("tes")
+  end)
+
 end)

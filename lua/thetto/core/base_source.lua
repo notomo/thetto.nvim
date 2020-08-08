@@ -55,17 +55,7 @@ M.create = function(source_name, source_opts, opts)
   if #opts.sorters ~= 0 then
     sorter_names = opts.sorters
   end
-
-  local sorters = {}
-  for _, name in ipairs(sorter_names) do
-    local sorter = modulelib.find_iteradapter("sorter/" .. name)
-    if sorter == nil then
-      return nil, "not found sorter: " .. name
-    end
-    table.insert(sorters, sorter)
-  end
-
-  source.iteradapter = {sorters = sorters}
+  source.sorters = sorter_names
 
   return setmetatable(source, origin), nil
 end

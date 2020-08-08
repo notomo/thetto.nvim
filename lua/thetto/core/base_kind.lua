@@ -2,6 +2,7 @@ local jobs = require("thetto/lib/job")
 local highlights = require("thetto/view/highlight")
 local modulelib = require("thetto/lib/module")
 local filter_core = require("thetto/core/base_filter")
+local sorter_core = require("thetto/core/base_sorter")
 local custom = require("thetto/custom")
 
 local M = {}
@@ -50,6 +51,7 @@ local base_options = {
   remove_filter = {quit = false},
   inverse_filter = {quit = false},
   change_filter = {quit = false},
+  reverse_sorter = {quit = false},
 }
 
 local base_action_opts = {
@@ -58,6 +60,7 @@ local base_action_opts = {
   add_filter = {name = "substring"},
   remove_filter = {name = nil},
   change_filter = {name = nil},
+  reverse_sorter = {name = nil},
 }
 
 M.create = function(source_name, kind_name, action_name, args)
@@ -233,6 +236,22 @@ M.create = function(source_name, kind_name, action_name, args)
     state:update_filters(filter_names)
     local lines = vim.api.nvim_buf_get_lines(state.buffers.input, cursor[1], cursor[1], false)
     vim.api.nvim_buf_set_lines(state.buffers.input, cursor[1], cursor[1], false, lines)
+  end
+
+  kind.action_reverse_sorter = function(_, _, state)
+    local sorter_names = {}
+    for _, name in ipairs(state.buffers.sorters) do
+      local sorter, err = sorter_core.create(name)
+      if err ~= nil then
+        return nil, err
+      end
+      sorter.reverse = not sorter.reverse
+      table.insert(sorter_names, sorter:get_name())
+    end
+
+    state:update_sorters(sorter_names)
+    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, 0, 0, false)
+    vim.api.nvim_buf_set_lines(state.buffers.input, 0, 0, false, lines)
   end
 
   local opts = args

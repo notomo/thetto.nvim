@@ -83,6 +83,12 @@ function State.update_filters(self, filter_names)
   vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, raw)
 end
 
+function State.update_sorters(self, sorter_names)
+  local raw = self:_raw()
+  raw.buffers.sorters = sorter_names
+  vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, raw)
+end
+
 function State.toggle_selections(self, items)
   local raw = self:_raw()
   for _, item in ipairs(items) do
