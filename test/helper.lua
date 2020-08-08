@@ -218,6 +218,12 @@ AM.line_count = function(expected)
   assert.equals(expected, actual, msg)
 end
 
+AM.current_window = function(expected)
+  local actual = vim.api.nvim_get_current_win()
+  local msg = string.format("current window should be %s, but actual: %s", expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M

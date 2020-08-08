@@ -23,6 +23,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   local sign_width = 4
   local row = vim.o.lines / 2 - ((opts.height + 2) / 2)
   local column = vim.o.columns / 2 - (opts.width / 2)
+  local origin_window = vim.api.nvim_get_current_win()
 
   local list_window = vim.api.nvim_open_win(buffers.list, false, {
     width = opts.width - sign_width,
@@ -62,7 +63,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo")
 
   local input_width = opts.width * 0.75
-  local input_window = vim.api.nvim_open_win(buffers.input, true, {
+  local input_window = vim.api.nvim_open_win(buffers.input, false, {
     width = input_width,
     height = #buffers.filters,
     relative = "editor",
@@ -74,7 +75,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   vim.api.nvim_win_set_option(input_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_option(input_window, "winhighlight", "SignColumn:NormalFloat")
 
-  local filter_info_window = vim.api.nvim_open_win(buffers.filter_info, true, {
+  local filter_info_window = vim.api.nvim_open_win(buffers.filter_info, false, {
     width = opts.width - input_width,
     height = #buffers.filters,
     relative = "editor",
@@ -137,6 +138,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
     info = info_window,
     sign = sign_window,
     filter_info = filter_info_window,
+    origin = origin_window,
   }
 end
 

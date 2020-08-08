@@ -75,4 +75,20 @@ test3]])
     assert.current_line("test2")
   end)
 
+  it("can execute open", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+    command("vsplit")
+    command("wincmd w")
+    local window = vim.api.nvim_get_current_win()
+
+    command("Thetto line --no-insert")
+
+    command("ThettoDo open")
+
+    assert.current_window(window)
+  end)
+
 end)

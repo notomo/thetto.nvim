@@ -40,6 +40,9 @@ function State.close(self, resume, offset)
     self.windows.list_cursor = cursor
   end
   vim.api.nvim_buf_set_var(self.buffers.list, list_state_key, self)
+  if vim.api.nvim_win_is_valid(self.windows.origin) then
+    vim.api.nvim_set_current_win(self.windows.origin)
+  end
 end
 
 function State.selected_items(self, action_name, offset)
