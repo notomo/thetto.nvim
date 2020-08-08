@@ -74,12 +74,4 @@ foo]])
     assert.current_line("foo")
   end)
 
-  it("can parse file path has colon", function()
-    vim.api.nvim_set_current_dir("./test/_test_data")
-
-    helper.sync_open("file/grep", "--no-insert", "--pattern=colon")
-
-    assert.exists_pattern("has colon")
-  end)
-
 end)
