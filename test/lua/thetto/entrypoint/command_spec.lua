@@ -453,6 +453,24 @@ test3]])
     assert.exists_pattern("test2")
   end)
 
+  it("can change filter", function()
+    require("thetto/custom").default_filters = {"substring"}
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line")
+    helper.sync_input({"test2"})
+
+    command("ThettoDo change_filter --x-name=-substring")
+    helper.wait_ui()
+    command("ThettoDo move_to_list")
+
+    assert.not_exists_pattern("test2")
+  end)
+
   it("cannot remove the last filter", function()
     command("Thetto line")
 

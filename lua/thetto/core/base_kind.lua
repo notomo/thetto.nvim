@@ -49,6 +49,7 @@ local base_options = {
   add_filter = {quit = false},
   remove_filter = {quit = false},
   inverse_filter = {quit = false},
+  change_filter = {quit = false},
 }
 
 local base_action_opts = {
@@ -56,6 +57,7 @@ local base_action_opts = {
   append = {key = "value", type = ""},
   add_filter = {name = "substring"},
   remove_filter = {name = nil},
+  change_filter = {name = nil},
 }
 
 M.create = function(source_name, kind_name, action_name, args)
@@ -199,6 +201,35 @@ M.create = function(source_name, kind_name, action_name, args)
     local filter_names = vim.deepcopy(state.buffers.filters)
     filter.inverse = not filter.inverse
     filter_names[index] = filter:get_name()
+    state:update_filters(filter_names)
+    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, cursor[1], cursor[1], false)
+    vim.api.nvim_buf_set_lines(state.buffers.input, cursor[1], cursor[1], false, lines)
+  end
+
+  kind.action_change_filter = function(self, _, state)
+    if not self.action_opts.name then
+      return nil, "needs filter name to change"
+    end
+
+    local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
+    local filter_name = state.buffers.filters[cursor[1]]
+    local _, err = filter_core.create(filter_name)
+    if err ~= nil then
+      return nil, err
+    end
+
+    local index = nil
+    for i, name in ipairs(state.buffers.filters) do
+      if filter_name == name then
+        index = i
+      end
+    end
+    if index == nil then
+      return
+    end
+
+    local filter_names = vim.deepcopy(state.buffers.filters)
+    filter_names[index] = self.action_opts.name
     state:update_filters(filter_names)
     local lines = vim.api.nvim_buf_get_lines(state.buffers.input, cursor[1], cursor[1], false)
     vim.api.nvim_buf_set_lines(state.buffers.input, cursor[1], cursor[1], false, lines)
