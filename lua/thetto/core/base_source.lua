@@ -4,6 +4,7 @@ local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
 local listlib = require("thetto/lib/list")
 local modulelib = require("thetto/lib/module")
+local custom = require("thetto/custom")
 
 local M = {}
 
@@ -44,13 +45,13 @@ M.create = function(source_name, source_opts, opts)
   source.highlight = origin.highlight or function(_, _, _)
   end
 
-  local filter_names = origin.filters or {"substring"}
+  local filter_names = origin.filters or custom.default_filters or {"substring"}
   if #opts.filters ~= 0 then
     filter_names = opts.filters
   end
   source.filters = filter_names
 
-  local sorter_names = origin.sorters or {}
+  local sorter_names = origin.sorters or custom.default_sorters or {}
   if #opts.sorters ~= 0 then
     sorter_names = opts.sorters
   end
