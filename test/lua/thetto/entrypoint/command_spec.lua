@@ -506,4 +506,28 @@ tes]])
     assert.current_line("tes")
   end)
 
+  it("can move to input with behavior as `i`", function()
+    require("thetto/custom").default_filters = {"substring", "-substring"}
+
+    command("Thetto line")
+    helper.sync_input({"hoge"})
+
+    command("ThettoDo move_to_list")
+    command("ThettoDo move_to_input")
+
+    assert.current_column(#("hoge"))
+  end)
+
+  it("can move to input with behavior as `a`", function()
+    require("thetto/custom").default_filters = {"substring", "-substring"}
+
+    command("Thetto line")
+    helper.sync_input({"hoge"})
+
+    command("ThettoDo move_to_list")
+    command("ThettoDo move_to_input --x-behavior=a")
+
+    assert.current_column(#("hoge") + 1)
+  end)
+
 end)

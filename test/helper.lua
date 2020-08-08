@@ -224,6 +224,12 @@ AM.current_window = function(expected)
   assert.equals(expected, actual, msg)
 end
 
+AM.current_column = function(expected)
+  local actual = vim.fn.col(".")
+  local msg = string.format("current column should be %s, but actual: %s", expected, actual)
+  assert.equals(expected, actual, msg)
+end
+
 M.assert = AM
 
 return M

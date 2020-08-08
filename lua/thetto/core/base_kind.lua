@@ -61,6 +61,7 @@ local base_action_opts = {
   remove_filter = {name = nil},
   change_filter = {name = nil},
   reverse_sorter = {name = nil},
+  move_to_input = {behavior = "i"},
 }
 
 M.create = function(source_name, kind_name, action_name, args)
@@ -96,13 +97,22 @@ M.create = function(source_name, kind_name, action_name, args)
     highlights.update_selections(state.buffers.list, state.buffers.filtered)
   end
 
-  kind.action_move_to_input = function(_, _, state)
+  kind.action_move_to_input = function(self, _, state)
     vim.api.nvim_set_current_win(state.windows.input)
     vim.api.nvim_command("startinsert")
+    if self.action_opts.behavior == "a" then
+      local max_col = vim.fn.col("$")
+      local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
+      if cursor[2] ~= max_col then
+        cursor[2] = cursor[2] + 1
+        vim.api.nvim_win_set_cursor(state.windows.input, cursor)
+      end
+    end
   end
 
   kind.action_move_to_list = function(_, _, state)
     vim.api.nvim_set_current_win(state.windows.list)
+    vim.api.nvim_command("stopinsert")
   end
 
   kind.action_move_to_info = function(_, _, state)
