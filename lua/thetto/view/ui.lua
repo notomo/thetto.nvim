@@ -61,8 +61,9 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   vim.api.nvim_win_set_option(info_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo")
 
+  local input_width = opts.width * 0.75
   local input_window = vim.api.nvim_open_win(buffers.input, true, {
-    width = opts.width,
+    width = input_width,
     height = #buffers.filters,
     relative = "editor",
     row = row + opts.height + 1,
@@ -72,6 +73,17 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   })
   vim.api.nvim_win_set_option(input_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_option(input_window, "winhighlight", "SignColumn:NormalFloat")
+
+  local filter_info_window = vim.api.nvim_open_win(buffers.filter_info, true, {
+    width = opts.width - input_width,
+    height = #buffers.filters,
+    relative = "editor",
+    row = row + opts.height + 1,
+    col = column + input_width,
+    focusable = false,
+    external = false,
+    style = "minimal",
+  })
 
   if resumed_state ~= nil then
     if resumed_state.windows.list_cursor then
@@ -93,17 +105,20 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   M.close_callbacks[list_window] = on_closed
   M.close_callbacks[input_window] = on_closed
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window, sign_window)
+  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window, sign_window, filter_info_window)
   vim.api.nvim_command(on_list_closed)
 
-  local on_sign_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.sign, input_window, list_window, info_window)
+  local on_sign_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.sign, input_window, list_window, info_window, filter_info_window)
   vim.api.nvim_command(on_sign_closed)
 
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window, sign_window)
+  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window, sign_window, filter_info_window)
   vim.api.nvim_command(on_input_closed)
 
-  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window, sign_window)
+  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window, sign_window, filter_info_window)
   vim.api.nvim_command(on_info_closed)
+
+  local on_filter_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.filter_info, input_window, list_window, sign_window, list_window)
+  vim.api.nvim_command(on_filter_info_closed)
 
   local insert = opts.insert
   if resumed_state ~= nil and resumed_state.windows.active == "list" then
@@ -116,7 +131,13 @@ M.open = function(buffers, resumed_state, opts, on_closed)
     vim.api.nvim_set_current_win(list_window)
   end
 
-  return {list = list_window, input = input_window, info = info_window, sign = sign_window}
+  return {
+    list = list_window,
+    input = input_window,
+    info = info_window,
+    sign = sign_window,
+    filter_info = filter_info_window,
+  }
 end
 
 M.render = function(source, items, all_items_count, buffers, windows, filters, input_lines, opts)
@@ -142,11 +163,19 @@ M.render = function(source, items, all_items_count, buffers, windows, filters, i
   source:highlight_sign(buffers.sign, items)
   highlights.update_selections(buffers.list, items)
 
+  local input_height = #filters
+  vim.api.nvim_win_set_height(windows.input, input_height)
+  vim.api.nvim_win_set_height(windows.filter_info, input_height)
+  vim.api.nvim_buf_set_lines(buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, input_height))
+
+  local ns = vim.api.nvim_create_namespace("thetto-input-filter-info")
   for i, filter in ipairs(filters) do
-    local input_line = input_lines[i]
-    if filter.highlight ~= nil and input_line ~= nil and input_line ~= "" then
+    local input_line = input_lines[i] or ""
+    if filter.highlight ~= nil and input_line ~= "" then
       filter:highlight(buffers.list, items, input_line, opts)
     end
+    local filter_info = ("[%s]"):format(filter.name)
+    vim.api.nvim_buf_set_virtual_text(buffers.filter_info, ns, i - 1, {{filter_info, "Comment"}}, {})
   end
 end
 

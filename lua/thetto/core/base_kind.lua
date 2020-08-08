@@ -142,13 +142,11 @@ M.create = function(source_name, kind_name, action_name, args)
       return nil, err
     end
 
-    vim.api.nvim_buf_set_lines(state.buffers.input, -1, -1, false, {""})
-    vim.api.nvim_win_set_height(state.windows.input, #state.buffers.filters + 1)
-
     local filter_names = vim.deepcopy(state.buffers.filters)
     table.insert(filter_names, filter_name)
-
     state:update_filters(filter_names)
+
+    vim.api.nvim_buf_set_lines(state.buffers.input, -1, -1, false, {""})
   end
 
   kind.action_remove_filter = function(self, _, state)
@@ -164,22 +162,19 @@ M.create = function(source_name, kind_name, action_name, args)
     end
 
     local removed_index = nil
-    local filter_names = {}
     for i, name in ipairs(state.buffers.filters) do
       if filter_name == name then
         removed_index = i
-      else
-        table.insert(filter_names, name)
       end
     end
 
+    local filter_names = vim.deepcopy(state.buffers.filters)
+    table.remove(filter_names, removed_index)
+    state:update_filters(filter_names)
+
     local lines = vim.api.nvim_buf_get_lines(state.buffers.input, 0, -1, false)
     table.remove(lines, removed_index)
-
     vim.api.nvim_buf_set_lines(state.buffers.input, 0, -1, false, lines)
-    vim.api.nvim_win_set_height(state.windows.input, #state.buffers.filters - 1)
-
-    state:update_filters(filter_names)
   end
 
   local opts = args

@@ -26,14 +26,7 @@ local on_changed = function(all_items, input_bufnr, source)
     opts.ignorecase = true
   end
 
-  local filters = {}
-  for _, name in ipairs(state.buffers.filters) do
-    local filter, filter_err = filter_core.create(name, opts)
-    if filter_err ~= nil then
-      return messagelib.error(filter_err)
-    end
-    table.insert(filters, filter)
-  end
+  local filters = M._get_filters(state.buffers, opts)
 
   for _, item in ipairs(state.buffers.filtered) do
     if item.selected ~= nil then
@@ -110,11 +103,16 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
   end)
 
+  local filter_info_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source_name, states.filter_info_filetype), function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "filetype", states.filter_info_filetype)
+  end)
+
   local items = M._modify_items(source, all_items, {}, {}, opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
     info = info_bufnr,
+    filter_info = filter_info_bufnr,
     sign = sign_bufnr,
     filtered = items,
     selected = {},
@@ -180,7 +178,8 @@ M.start = function(source_name, source_opts, action_opts, opts)
   end
 
   if source ~= nil then
-    ui_windows.render(source, items, all_items_count, buffers, windows, {}, {}, opts)
+    local filters = M._get_filters(buffers, opts)
+    ui_windows.render(source, items, all_items_count, buffers, windows, filters, {}, opts)
   end
 
   return job, nil
@@ -268,6 +267,18 @@ M._modify_items = function(source, all_items, filters, input_lines, opts)
     filtered[i] = items[i]
   end
   return filtered
+end
+
+M._get_filters = function(buffers, opts)
+  local filters = {}
+  for _, name in ipairs(buffers.filters) do
+    local filter, filter_err = filter_core.create(name, opts)
+    if filter_err ~= nil then
+      return messagelib.error(filter_err)
+    end
+    table.insert(filters, filter)
+  end
+  return filters
 end
 
 -- for testing

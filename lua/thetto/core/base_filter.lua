@@ -33,8 +33,14 @@ M.create = function(filter_name, opts)
   origin.__index = origin
 
   local filter = {}
-  filter.name = filter_name
   filter.key = key or origin.key or "value"
+  filter.name = ("%s:%s"):format(filter_name, filter.key)
+  if inverse then
+    filter.name = "-" .. filter.name
+  end
+  if modifier_name ~= nil then
+    filter.name = ("%s:%s"):format(filter.name, modifier_name)
+  end
   filter.inverse = inverse
   filter.highlights = highlights
 

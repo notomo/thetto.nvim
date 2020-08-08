@@ -11,6 +11,7 @@ M.list_filetype = "thetto"
 M.sign_filetype = "thetto-sign"
 M.input_filetype = "thetto-input"
 M.info_filetype = "thetto-info"
+M.filter_info_filetype = "thetto-filter-info"
 M.path_pattern = "thetto://.+/thetto"
 
 local State = {}
