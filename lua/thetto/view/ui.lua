@@ -142,7 +142,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   }
 end
 
-M.render = function(source, items, all_items_count, buffers, windows, filters, input_lines, opts)
+M.render = function(source, items, all_items_count, buffers, windows, filters, input_lines, sorters, opts)
   if not vim.api.nvim_buf_is_valid(buffers.list) then
     return
   end
@@ -152,7 +152,7 @@ M.render = function(source, items, all_items_count, buffers, windows, filters, i
   vim.api.nvim_buf_set_lines(buffers.list, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(buffers.list, "modifiable", false)
 
-  M._render_info(buffers.info, items, all_items_count, source.name)
+  M._render_info(buffers.info, items, all_items_count, source.name, sorters)
 
   if vim.api.nvim_win_is_valid(windows.list) and vim.bo.filetype ~= states.list_filetype then
     vim.api.nvim_win_set_cursor(windows.list, {1, 0})
@@ -190,10 +190,19 @@ M.render = function(source, items, all_items_count, buffers, windows, filters, i
   end
 end
 
-M._render_info = function(bufnr, items, all_items_count, source_name)
+M._render_info = function(bufnr, items, all_items_count, source_name, sorters)
+  local sorter_info = ""
+  local sorter_names = {}
+  for _, sorter in ipairs(sorters) do
+    table.insert(sorter_names, sorter:get_name())
+  end
+  if #sorter_names > 0 then
+    sorter_info = "  sorter=" .. table.concat(sorter_names, ", ")
+  end
+
   local ns = vim.api.nvim_create_namespace("thetto-info-text")
-  local text = ("%s [ %s / %s ]"):format(source_name, vim.tbl_count(items), all_items_count)
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+  local text = ("%s%s  [ %s / %s ]"):format(source_name, sorter_info, vim.tbl_count(items), all_items_count)
   vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {{text, "ThettoInfo"}}, {})
 end
 

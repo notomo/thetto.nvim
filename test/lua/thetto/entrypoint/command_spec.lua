@@ -8,6 +8,7 @@ describe("thetto", function()
   after_each(helper.after_each)
 
   it("can filter", function()
+    require("thetto/custom").default_sorters = {"length"}
     helper.set_lines([[
 test1
 test2
@@ -17,7 +18,7 @@ test3]])
     helper.sync_input({"2"})
 
     command("ThettoDo move_to_info")
-    assert.virtual_text("line [ 1 / 3 ]")
+    assert.virtual_text("line  sorter=length  [ 1 / 3 ]")
 
     command("ThettoDo move_to_list")
 

@@ -44,7 +44,7 @@ local on_changed = function(all_items, input_bufnr, source)
   state:update(items)
 
   vim.schedule(function()
-    ui_windows.render(source, items, #all_items, state.buffers, state.windows, filters, input_lines, opts)
+    ui_windows.render(source, items, #all_items, state.buffers, state.windows, filters, input_lines, sorters, opts)
     M._changed_after()
   end)
 end
@@ -56,7 +56,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
 
   local source, err = sources.create(source_name, source_opts, opts)
   if err ~= nil then
-    return nil, nil, nil, nil, nil, err
+    return nil, nil, nil, nil, nil, nil, err
   end
 
   local all_items = {}
@@ -112,7 +112,8 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     vim.api.nvim_buf_set_option(bufnr, "filetype", states.filter_info_filetype)
   end)
 
-  local items = M._modify_items(source, all_items, {}, {}, M._get_sorters({sorters = source.sorters}), opts)
+  local sorters = M._get_sorters({sorters = source.sorters})
+  local items = M._modify_items(source, all_items, {}, {}, sorters, opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
@@ -126,7 +127,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
     filters = source.filters,
     sorters = source.sorters,
     opts = opts,
-  }, source, job, items, #all_items, nil
+  }, source, job, items, #all_items, sorters, nil
 end
 
 M.start = function(source_name, source_opts, action_opts, opts)
@@ -162,7 +163,7 @@ M.start = function(source_name, source_opts, action_opts, opts)
     end
   end
 
-  local buffers, source, job, items, all_items_count, err = make_buffers(source_name, source_opts, resumed_state, opts)
+  local buffers, source, job, items, all_items_count, sorters, err = make_buffers(source_name, source_opts, resumed_state, opts)
   if err ~= nil then
     return nil, err
   end
@@ -185,7 +186,7 @@ M.start = function(source_name, source_opts, action_opts, opts)
 
   if source ~= nil then
     local filters = M._get_filters(buffers, opts)
-    ui_windows.render(source, items, all_items_count, buffers, windows, filters, {}, opts)
+    ui_windows.render(source, items, all_items_count, buffers, windows, filters, {}, sorters, opts)
   end
 
   return job, nil
