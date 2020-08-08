@@ -34,15 +34,20 @@ M.create = function(filter_name, opts)
 
   local filter = {}
   filter.key = key or origin.key or "value"
-  filter.name = ("%s:%s"):format(filter_name, filter.key)
-  if inverse then
-    filter.name = "-" .. filter.name
-  end
-  if modifier_name ~= nil then
-    filter.name = ("%s:%s"):format(filter.name, modifier_name)
-  end
   filter.inverse = inverse
   filter.highlights = highlights
+
+  filter.get_name = function(self)
+    local name = ("%s:%s"):format(filter_name, self.key)
+    if self.inverse then
+      name = "-" .. name
+    end
+    if modifier_name ~= nil then
+      name = ("%s:%s"):format(name, modifier_name)
+    end
+    return name
+  end
+  filter.name = filter:get_name()
 
   if modifier ~= nil then
     filter.to_value = function(self, item)
