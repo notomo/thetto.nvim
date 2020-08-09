@@ -24,9 +24,7 @@ M.collect = function(self, opts)
           value = value,
           path = path,
           row = tonumber(row),
-          value_start_col = 0,
-          _line_start = #_desc,
-          _type_start = #value + 1,
+          column_offsets = {value = 0, line = #_desc, type = #value + 1},
         })
         ::continue::
       end
@@ -42,8 +40,8 @@ end
 M.highlight = function(self, bufnr, items)
   local ns = self.highlights.reset(bufnr)
   for i, item in ipairs(items) do
-    vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, item._line_start, -1)
-    vim.api.nvim_buf_add_highlight(bufnr, ns, "Statement", i - 1, item._type_start, item._line_start)
+    vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, item.column_offsets.line, -1)
+    vim.api.nvim_buf_add_highlight(bufnr, ns, "Statement", i - 1, item.column_offsets.type, item.column_offsets.line)
   end
 end
 

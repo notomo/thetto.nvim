@@ -35,8 +35,7 @@ M.apply = function(self, items, input_line, opts)
 end
 
 M.highlight = function(self, bufnr, items, input_line, opts)
-  -- NOTICE: support only "value"
-  if self.inverse or self.key ~= "value" then
+  if self.inverse then
     return
   end
 
@@ -45,11 +44,12 @@ M.highlight = function(self, bufnr, items, input_line, opts)
 
   local texts = to_texts(input_line, opts)
   for i, item in ipairs(items) do
-    if item.desc ~= nil and item.value_start_col == nil then
+    local offsets = item.column_offsets or {}
+    if item.desc ~= nil and offsets[self.key] == nil then
       return
     end
 
-    local value = item.value
+    local value = self:to_value(item)
     if opts.ignorecase then
       value = value:lower()
     end
@@ -66,7 +66,7 @@ M.highlight = function(self, bufnr, items, input_line, opts)
       until s == nil
     end
 
-    local offset = item.value_start_col or 0
+    local offset = offsets[self.key] or 0
     for _, pos in ipairs(positions) do
       vim.api.nvim_buf_add_highlight(bufnr, ns, "Boolean", i - 1, offset + pos[1] - 1, offset + pos[2])
     end

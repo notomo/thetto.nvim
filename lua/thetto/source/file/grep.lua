@@ -53,7 +53,7 @@ M.collect = function(self, opts)
           value = matched_line,
           path = path,
           row = row,
-          value_start_col = #label + 1,
+          column_offsets = {value = #label + 1},
         })
         ::continue::
       end
@@ -77,7 +77,7 @@ end
 M.highlight = function(self, bufnr, items)
   local ns = self.highlights.reset(bufnr)
   for i, item in ipairs(items) do
-    vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, 0, item.value_start_col - 1)
+    vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, 0, item.column_offsets.value - 1)
   end
 end
 
