@@ -127,7 +127,11 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   end
   if insert then
     vim.api.nvim_set_current_win(input_window)
-    vim.api.nvim_command("startinsert")
+    if resumed_state ~= nil and resumed_state.windows.mode == "n" then
+      vim.api.nvim_command("stopinsert")
+    else
+      vim.api.nvim_command("startinsert")
+    end
   else
     vim.api.nvim_set_current_win(list_window)
   end

@@ -27,6 +27,7 @@ function State.close(self, resume, offset)
       active = "list"
     end
     self.windows.active = active
+    self.windows.mode = vim.api.nvim_get_mode().mode
     windowlib.close(self.windows.list)
   end
   if resume then
