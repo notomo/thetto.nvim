@@ -7,7 +7,7 @@ describe("thetto", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can filter", function()
+  it("can filter by substring", function()
     require("thetto/custom").default_sorters = {"length"}
     helper.set_lines([[
 test1
@@ -528,6 +528,22 @@ tes]])
     command("ThettoDo move_to_input --x-behavior=a")
 
     assert.current_column(#("hoge") + 1)
+  end)
+
+  it("can filter by regex", function()
+    require("thetto/custom").default_filters = {"regex"}
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line")
+    helper.sync_input({"2$"})
+
+    command("ThettoDo move_to_list")
+
+    assert.exists_pattern("test2")
   end)
 
 end)
