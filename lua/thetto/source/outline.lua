@@ -1,5 +1,7 @@
 local M = {}
 
+M.opts = {ignore = {}}
+
 M.collect = function(self, opts)
   local file_path = vim.api.nvim_buf_get_name(0)
   if vim.fn.filereadable(file_path) ~= 1 then
@@ -12,6 +14,9 @@ M.collect = function(self, opts)
       local items = {}
       for _, output in ipairs(job_self:get_stdout()) do
         local value, typ, row, path, line = output:match("(%S+)%s+(%S+)%s+(%d+)%s+(%S+)%s+(.+)")
+        if vim.tbl_contains(self.opts.ignore, typ) then
+          goto continue
+        end
         local _desc = ("%s [%s]"):format(value, typ)
         local desc = ("%s %s"):format(_desc, line)
         table.insert(items, {
@@ -23,6 +28,7 @@ M.collect = function(self, opts)
           _line_start = #_desc,
           _type_start = #value + 1,
         })
+        ::continue::
       end
       self.append(items)
     end,
