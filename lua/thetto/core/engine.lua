@@ -39,7 +39,7 @@ local on_changed = function(all_items, input_bufnr, source)
     end
   end
 
-  local items = M._modify_items(source, all_items, filters, input_lines, sorters, opts)
+  local items = M._modify_items(all_items, filters, input_lines, sorters, opts)
 
   state:update(items)
 
@@ -113,7 +113,7 @@ local make_buffers = function(source_name, source_opts, resumed_state, opts)
   end)
 
   local sorters = M._get_sorters({sorters = source.sorters})
-  local items = M._modify_items(source, all_items, {}, {}, sorters, opts)
+  local items = M._modify_items(all_items, {}, {}, sorters, opts)
   return {
     list = list_bufnr,
     input = input_bufnr,
@@ -252,7 +252,7 @@ M.execute = function(action_name, action_opts, args)
   return result, action_err
 end
 
-M._modify_items = function(source, all_items, filters, input_lines, sorters, opts)
+M._modify_items = function(all_items, filters, input_lines, sorters, opts)
   -- NOTE: avoid `too many results to unpack`
   local items = {}
   for _, item in ipairs(all_items) do
