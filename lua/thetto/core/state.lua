@@ -47,13 +47,21 @@ function State.close(self, resume, offset)
   end
 end
 
-function State.selected_items(self, action_name, offset)
+function State.selected_items(self, action_name, range, offset)
   if action_name ~= "toggle_selection" and not vim.tbl_isempty(self.buffers.selected) then
     local selected = vim.tbl_values(self.buffers.selected)
     table.sort(selected, function(a, b)
       return a.index < b.index
     end)
     return selected
+  end
+
+  if range.given and vim.bo.filetype == M.list_filetype then
+    local items = {}
+    for i = range.first, range.last, 1 do
+      table.insert(items, self.buffers.filtered[i])
+    end
+    return items
   end
 
   local index

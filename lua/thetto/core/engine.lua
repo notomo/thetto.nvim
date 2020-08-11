@@ -192,7 +192,7 @@ M.start = function(source_name, source_opts, action_opts, opts)
   return job, nil
 end
 
-M.execute = function(action_name, action_opts, args)
+M.execute = function(action_name, range, action_opts, args)
   local state, err
   if args.resume then
     state = states.recent(nil)
@@ -206,7 +206,7 @@ M.execute = function(action_name, action_opts, args)
     return nil, err
   end
 
-  local selected_items = state:selected_items(action_name, args.offset)
+  local selected_items = state:selected_items(action_name, range, args.offset)
   local item_groups = listlib.group_by(selected_items, function(item)
     return item.kind_name or state.buffers.kind_name
   end)

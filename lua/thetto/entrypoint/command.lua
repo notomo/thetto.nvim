@@ -84,7 +84,7 @@ M.parse_args = function(raw_args, default)
   return name, opts, ex_opts, nil
 end
 
-M.open = function(...)
+M.open = function(raw_args)
   local default_opts = {
     insert = true,
     resume = false,
@@ -104,7 +104,7 @@ M.open = function(...)
     sorters = {},
     allow_empty = false,
   }
-  local source_name, opts, ex_opts, parse_err = M.parse_args({...}, vim.tbl_extend("force", default_opts, custom.opts))
+  local source_name, opts, ex_opts, parse_err = M.parse_args(raw_args, vim.tbl_extend("force", default_opts, custom.opts))
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
   end
@@ -124,8 +124,8 @@ M.open = function(...)
   return result, nil
 end
 
-M.execute = function(...)
-  local action_name, opts, ex_opts, parse_err = M.parse_args({...}, {
+M.execute = function(has_range, raw_range, raw_args)
+  local action_name, opts, ex_opts, parse_err = M.parse_args(raw_args, {
     quit = true,
     resume = false,
     offset = 0,
@@ -138,9 +138,10 @@ M.execute = function(...)
     action_name = "default"
   end
 
+  local range = {first = raw_range[1], last = raw_range[2], given = has_range ~= 0}
   local action_opts = ex_opts.x or {}
   local result, err = wraplib.traceback(function()
-    return engine.execute(action_name, action_opts, opts)
+    return engine.execute(action_name, range, action_opts, opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)

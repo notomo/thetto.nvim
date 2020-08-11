@@ -546,4 +546,20 @@ test3]])
     assert.exists_pattern("test2")
   end)
 
+  it("can execute action with range", function()
+    helper.set_lines([[
+test1
+test2
+test3
+test4
+test5]])
+
+    command("Thetto line --no-insert")
+
+    command("2,4ThettoDo toggle_selection")
+    command("ThettoDo tab_open")
+
+    assert.tab_count(4)
+  end)
+
 end)
