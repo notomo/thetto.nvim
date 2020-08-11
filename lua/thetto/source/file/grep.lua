@@ -1,14 +1,5 @@
 local M = {}
 
-local parse_line = function(line)
-  local path, row = line:match("(.*):(%d+):")
-  if not path then
-    return
-  end
-  local matched_line = line:sub(#path + #row + #("::") + 1)
-  return path, tonumber(row), matched_line
-end
-
 M.command = "grep"
 M.pattern_opt = "-e"
 M.command_opts = {"-inH"}
@@ -41,7 +32,7 @@ M.collect = function(self, opts)
 
       local outputs = job_self.parse_output(data)
       for _, output in ipairs(outputs) do
-        local path, row, matched_line = parse_line(output)
+        local path, row, matched_line = self.pathlib.parse_with_row(output)
         if path == nil then
           goto continue
         end
