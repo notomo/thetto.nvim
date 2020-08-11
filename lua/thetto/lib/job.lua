@@ -29,7 +29,13 @@ function Job.start(self)
   self.stdout = vim.loop.new_pipe(false)
   self.stderr = vim.loop.new_pipe(false)
 
-  local opts = {args = self.args, stdio = {self.stdin, self.stdout, self.stderr}}
+  local opts = {
+    args = self.args,
+    stdio = {self.stdin, self.stdout, self.stderr},
+    cwd = self.cwd,
+    env = self.env,
+    detach = self.detach,
+  }
 
   self.handle, self.pid = vim.loop.spawn(self.command, opts, vim.schedule_wrap(function(code, signal)
     self:_shutdown(code, signal)
