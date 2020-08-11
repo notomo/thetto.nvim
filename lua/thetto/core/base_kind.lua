@@ -82,7 +82,7 @@ M.create = function(source_name, kind_name, action_name, args)
   if custom.kind_actions ~= nil and custom.kind_actions[kind_name] ~= nil then
     user_opts = custom.kind_actions[kind_name].opts or {}
   end
-  kind.opts = vim.tbl_extend("force", base_action_opts, origin.opts or {}, user_opts, source_user_opts)
+  kind.opts = vim.tbl_deep_extend("force", base_action_opts, origin.opts or {}, user_opts, source_user_opts)
 
   kind.default_action = origin.default_action or "echo"
   kind.jobs = jobs
