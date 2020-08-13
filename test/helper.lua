@@ -104,13 +104,53 @@ M.search = function(pattern)
 end
 
 local assert = require("luassert")
+local say = require("say")
 local AM = assert
 
-AM.window_count = function(expected)
-  local actual = vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
-  local msg = string.format("window count should be %s, but actual: %s", expected, actual)
-  assert.equals(expected, actual, msg)
+local asserts = {}
+asserts.__index = asserts
+
+function asserts.create(name)
+  local assert_fn = {
+    name = name,
+    positive = ("assertion.%s.positive"):format(name),
+    negative = ("assertion.%s.negative"):format(name),
+  }
+  return setmetatable(assert_fn, asserts)
 end
+
+function asserts.set_compare_msg(self, expected, actual)
+  self:set_positive(expected, actual)
+  self:set_negative(expected, actual)
+end
+
+function asserts.set_positive(self, expected, actual)
+  local msg = ("%s should be %s, but actual: %s"):format(self.name, expected, actual)
+  say:set(self.positive, msg)
+end
+
+function asserts.set_negative(self, expected, actual)
+  local msg = ("%s should not be %s, but actual: %s"):format(self.name, expected, actual)
+  say:set(self.negative, msg)
+end
+
+function asserts.register(self, fn)
+  assert:register("assertion", self.name, fn, self.positive, self.negative)
+end
+
+function asserts.register_compare(self, get_actual)
+  local fn = function(_, args)
+    local expected = args[1]
+    local actual = get_actual()
+    self:set_compare_msg(expected, actual)
+    return actual == expected
+  end
+  self:register(fn)
+end
+
+asserts.create("window_count"):register_compare(function()
+  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
+end)
 
 AM.current_line = function(expected)
   local actual = vim.fn.getline(".")
@@ -206,7 +246,7 @@ AM.virtual_text = function(expected)
   assert.equals(expected, actual, msg)
 end
 
-AM.register = function(name, expected)
+AM.register_value = function(name, expected)
   local actual = vim.fn.getreg(name)
   local msg = ("%s register should be %s, but actual: %s"):format(name, expected, actual)
   assert.equals(expected, actual, msg)

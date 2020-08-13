@@ -332,7 +332,7 @@ test3]])
 
     command("ThettoDo yank")
 
-    assert.register("+", "test2")
+    assert.register_value("+", "test2")
   end)
 
   it("can open with action opts", function()
@@ -346,7 +346,7 @@ test3]])
 
     command("ThettoDo yank")
 
-    assert.register("1", "test3")
+    assert.register_value("1", "test3")
   end)
 
   it("can execute append", function()
