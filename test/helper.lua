@@ -3,7 +3,13 @@ local M = {}
 M.root = vim.fn.getcwd()
 
 M.command = function(cmd)
-  vim.api.nvim_command(cmd)
+  local _, err = pcall(vim.api.nvim_command, cmd)
+  if err then
+    local info = debug.getinfo(2)
+    local pos = ("%s:%d"):format(info.source, info.currentline)
+    local msg = ("on %s: failed excmd `%s`\n%s"):format(pos, cmd, err)
+    error(msg)
+  end
 end
 
 local waiting = false
@@ -97,7 +103,10 @@ end
 M.search = function(pattern)
   local result = vim.fn.search(pattern)
   if result == 0 then
-    local msg = string.format("%s not found", pattern)
+    local info = debug.getinfo(2)
+    local pos = ("%s:%d"):format(info.source, info.currentline)
+    local lines = table.concat(vim.fn.getbufline("%", 1, "$"), "\n")
+    local msg = ("on %s: `%s` not found in buffer:\n%s"):format(pos, pattern, lines)
     assert(false, msg)
   end
   return result
