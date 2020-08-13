@@ -14,7 +14,7 @@ describe("directory/recursive source", function()
 
     assert.exists_pattern("dir/")
     assert.no.exists_pattern("dir/file")
-    helper.search("dir")
+    helper.search("dir/$")
 
     command("ThettoDo")
 
