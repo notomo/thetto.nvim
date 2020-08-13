@@ -13,7 +13,7 @@ describe("directory/recursive source", function()
     helper.sync_open("directory/recursive", "--no-insert")
 
     assert.exists_pattern("dir/")
-    assert.not_exists_pattern("dir/file")
+    assert.no.exists_pattern("dir/file")
     helper.search("dir")
 
     command("ThettoDo")
@@ -26,7 +26,7 @@ describe("directory/recursive source", function()
 
     helper.sync_open("directory/recursive", "--no-insert", "--x-max-depth=1")
 
-    assert.not_exists_pattern("dir/depth2")
+    assert.no.exists_pattern("dir/depth2")
     assert.exists_pattern("dir/$")
 
     command("ThettoDo")

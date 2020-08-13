@@ -103,173 +103,118 @@ M.search = function(pattern)
   return result
 end
 
-local assert = require("luassert")
-local say = require("say")
-local AM = assert
+local vassert = require("vusted.assert")
+local asserts = vassert.asserts
+M.assert = vassert.assert
 
-local asserts = {}
-asserts.__index = asserts
-
-function asserts.create(name)
-  local assert_fn = {
-    name = name,
-    positive = ("assertion.%s.positive"):format(name),
-    negative = ("assertion.%s.negative"):format(name),
-  }
-  return setmetatable(assert_fn, asserts)
-end
-
-function asserts.set_compare_msg(self, expected, actual)
-  self:set_positive(expected, actual)
-  self:set_negative(expected, actual)
-end
-
-function asserts.set_positive(self, expected, actual)
-  local msg = ("%s should be %s, but actual: %s"):format(self.name, expected, actual)
-  say:set(self.positive, msg)
-end
-
-function asserts.set_negative(self, expected, actual)
-  local msg = ("%s should not be %s, but actual: %s"):format(self.name, expected, actual)
-  say:set(self.negative, msg)
-end
-
-function asserts.register(self, fn)
-  assert:register("assertion", self.name, fn, self.positive, self.negative)
-end
-
-function asserts.register_compare(self, get_actual)
-  local fn = function(_, args)
-    local expected = args[1]
-    local actual = get_actual()
-    self:set_compare_msg(expected, actual)
-    return actual == expected
-  end
-  self:register(fn)
-end
-
-asserts.create("window_count"):register_compare(function()
+asserts.create("window_count"):register_eq(function()
   return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
 end)
 
-AM.current_line = function(expected)
-  local actual = vim.fn.getline(".")
-  local msg = string.format("current line should be %s, but actual: %s", expected, actual)
-  assert.equals(expected, actual, msg)
-end
+asserts.create("current_line"):register_eq(function()
+  return vim.fn.getline(".")
+end)
 
-AM.exists_pattern = function(pattern)
-  local result = vim.fn.search(pattern, "n")
-  if result == 0 then
-    local msg = ("`%s` not found"):format(pattern)
-    assert(false, msg)
+asserts.create("register_value"):register_eq(function(name)
+  return vim.fn.getreg(name)
+end)
+
+asserts.create("line_count"):register_eq(function()
+  return vim.api.nvim_buf_line_count(0)
+end)
+
+asserts.create("current_window"):register_eq(function()
+  return vim.api.nvim_get_current_win()
+end)
+
+asserts.create("current_column"):register_eq(function()
+  return vim.fn.col(".")
+end)
+
+asserts.create("tab_count"):register_eq(function()
+  return vim.fn.tabpagenr("$")
+end)
+
+asserts.create("file_name"):register_eq(function()
+  return vim.fn.fnamemodify(vim.fn.bufname("%"), ":t")
+end)
+
+asserts.create("filetype"):register_eq(function()
+  return vim.bo.filetype
+end)
+
+asserts.create("current_dir"):register_eq(function()
+  return vim.fn.getcwd()
+end)
+
+asserts.create("exists_pattern"):register(function(self)
+  return function(_, args)
+    local pattern = args[1]
+    local result = vim.fn.search(pattern, "n")
+    self:set_positive(("`%s` not found"):format(pattern))
+    self:set_negative(("`%s` found"):format(pattern))
+    return result ~= 0
   end
-end
+end)
 
-AM.not_exists_pattern = function(pattern)
-  local result = vim.fn.search(pattern, "n")
-  if result ~= 0 then
-    local msg = ("`%s` found"):format(pattern)
-    assert(false, msg)
-  end
-end
-
-AM.file_name = function(expected)
-  local actual = vim.fn.fnamemodify(vim.fn.bufname("%"), ":t")
-  local msg = ("file name should be %s, but actual: %s"):format(expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.filetype = function(expected)
-  local actual = vim.bo.filetype
-  local msg = ("buffer &filetype should be %s, but actual: %s"):format(expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.current_dir = function(expected)
-  local actual = vim.fn.getcwd()
-  local msg = ("current dir should be %s, but actual: %s"):format(expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.not_current_dir = function(expected)
-  local actual = vim.fn.getcwd()
-  local msg = ("current dir should be %s, but actual: %s"):format(expected, actual)
-  assert.are_not.equals(expected, actual, msg)
-end
-
-AM.exists_message = function(expected)
-  local messages = vim.split(vim.api.nvim_exec("messages", true), "\n")
-  for _, msg in ipairs(messages) do
-    if msg:match(expected) then
-      return
+asserts.create("exists_message"):register(function(self)
+  return function(_, args)
+    local expected = args[1]
+    self:set_positive(("`%s` not found message"):format(expected))
+    self:set_negative(("`%s` found message"):format(expected))
+    local messages = vim.split(vim.api.nvim_exec("messages", true), "\n")
+    for _, msg in ipairs(messages) do
+      if msg:match(expected) then
+        return true
+      end
     end
+    return false
   end
-  assert(false, "not found message: " .. expected)
-end
+end)
 
-AM.tab_count = function(expected)
-  local actual = vim.fn.tabpagenr("$")
-  local msg = ("tab count should be %s, but actual: %s"):format(expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.error_message = function(expected, f)
-  local ok, actual = pcall(f)
-  if ok then
-    assert(false, "should be error")
-  end
-  local msg = ("error message should end with '%s', but actual: '%s'"):format(expected, actual)
-  assert.is_true(vim.endswith(actual, expected), msg)
-end
-
-AM.completion_contains = function(result, expected)
-  local names = vim.split(result, "\n", true)
-  for _, name in ipairs(names) do
-    if name == expected then
-      return
+asserts.create("error_message"):register(function(self)
+  return function(_, args)
+    local expected = args[1]
+    local f = args[2]
+    local ok, actual = pcall(f)
+    if ok then
+      self:set_positive("should be error")
+      self:set_negative("should be error")
+      return false
     end
+    self:set_positive(("error message should end with '%s', but actual: '%s'"):format(expected, actual))
+    self:set_negative(("error message should not end with '%s', but actual: '%s'"):format(expected, actual))
+    return vim.endswith(actual, expected)
   end
-  local msg = ("completion should contain \"%s\", but actual: %s"):format(expected, vim.inspect(names))
-  assert(false, msg)
-end
+end)
 
-AM.virtual_text = function(expected)
-  local bufnr = vim.api.nvim_get_current_buf()
-  local line = vim.fn.line(".") - 1
-  local chunk = vim.api.nvim_buf_get_virtual_text(bufnr, line)[1]
-  if chunk == nil then
-    assert(false, ("expected virtual text \"%s\" is not found"):format(expected))
+asserts.create("completion_contains"):register(function(self)
+  return function(_, args)
+    local result = args[1]
+    local expected = args[2]
+    local names = vim.split(result, "\n", true)
+    self:set_positive(("completion should contain \"%s\", but actual: %s"):format(expected, vim.inspect(names)))
+    self:set_negative(("completion should not contain \"%s\", but actual: %s"):format(expected, vim.inspect(names)))
+    for _, name in ipairs(names) do
+      if name == expected then
+        return true
+      end
+    end
+    return false
   end
-  local actual = chunk[1]
-  local msg = ("virtual text should be %s, but actual: %s"):format(expected, actual)
-  assert.equals(expected, actual, msg)
-end
+end)
 
-AM.register_value = function(name, expected)
-  local actual = vim.fn.getreg(name)
-  local msg = ("%s register should be %s, but actual: %s"):format(name, expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.line_count = function(expected)
-  local actual = vim.api.nvim_buf_line_count(0)
-  local msg = string.format("line count should be %s, but actual: %s", expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.current_window = function(expected)
-  local actual = vim.api.nvim_get_current_win()
-  local msg = string.format("current window should be %s, but actual: %s", expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-AM.current_column = function(expected)
-  local actual = vim.fn.col(".")
-  local msg = string.format("current column should be %s, but actual: %s", expected, actual)
-  assert.equals(expected, actual, msg)
-end
-
-M.assert = AM
+asserts.create("virtual_text"):register(function(self)
+  return function(_, args)
+    local expected = args[1]
+    local bufnr = vim.api.nvim_get_current_buf()
+    local line = vim.fn.line(".") - 1
+    local chunk = vim.api.nvim_buf_get_virtual_text(bufnr, line)[1]
+    local actual = chunk[1]
+    self:set_positive(("virtual_text should be %s, but actual: %s"):format(expected, actual))
+    self:set_negative(("virtual_text should not be %s, but actual: %s"):format(expected, actual))
+    return expected == actual
+  end
+end)
 
 return M

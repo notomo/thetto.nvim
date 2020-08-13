@@ -23,7 +23,7 @@ test3]])
     command("ThettoDo move_to_list")
 
     assert.current_line("test2")
-    assert.not_exists_pattern("test1")
+    assert.no.exists_pattern("test1")
   end)
 
   it("can move to filter", function()
@@ -139,7 +139,7 @@ hoge]])
 
     assert.exists_pattern("TEST1")
     assert.exists_pattern("test1")
-    assert.not_exists_pattern("hoge")
+    assert.no.exists_pattern("hoge")
 
     command("ThettoDo move_to_input")
 
@@ -149,8 +149,8 @@ hoge]])
     command("ThettoDo move_to_list")
 
     assert.exists_pattern("TEST1")
-    assert.not_exists_pattern("test1")
-    assert.not_exists_pattern("hoge")
+    assert.no.exists_pattern("test1")
+    assert.no.exists_pattern("hoge")
   end)
 
   it("should exist only one in a tab", function()
@@ -469,7 +469,7 @@ test3]])
     helper.wait_ui()
     command("ThettoDo move_to_list")
 
-    assert.not_exists_pattern("test2")
+    assert.no.exists_pattern("test2")
   end)
 
   it("cannot remove the last filter", function()

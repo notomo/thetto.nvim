@@ -14,7 +14,7 @@ describe("env/path source", function()
 
     command("ThettoDo")
 
-    assert.not_current_dir(helper.root)
+    assert.no.current_dir(helper.root)
   end)
 
 end)
