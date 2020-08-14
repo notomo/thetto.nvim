@@ -2,6 +2,8 @@ local M = {}
 
 M.root = vim.fn.getcwd()
 
+M.test_data_dir = M.root .. "/test/test_data/"
+
 M.command = function(cmd)
   local _, err = pcall(vim.api.nvim_command, cmd)
   if err then
@@ -21,6 +23,7 @@ M.before_each = function()
   require("thetto/core/engine")._changed_after = function()
     waiting = true
   end
+  M.new_directory("")
 end
 
 M.after_each = function()
@@ -35,6 +38,7 @@ M.after_each = function()
   vim.api.nvim_set_current_dir(M.root)
 
   require("thetto/lib/module").cleanup("thetto")
+  M.delete("")
 end
 
 M.buffer_log = function()
@@ -110,6 +114,22 @@ M.search = function(pattern)
     assert(false, msg)
   end
   return result
+end
+
+M.new_file = function(path, ...)
+  local f = io.open(M.test_data_dir .. path, "w")
+  for _, line in ipairs({...}) do
+    f:write(line .. "\n")
+  end
+  f:close()
+end
+
+M.new_directory = function(path)
+  vim.fn.mkdir(M.test_data_dir .. path, "p")
+end
+
+M.delete = function(path)
+  vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
 local vassert = require("vusted.assert")

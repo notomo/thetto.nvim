@@ -8,7 +8,12 @@ describe("outline source", function()
   after_each(helper.after_each)
 
   it("can show outline", function()
-    -- TODO: use test_data
+    helper.new_file("Makefile", [[
+test:
+	echo 1
+    ]])
+    vim.api.nvim_set_current_dir(helper.test_data_dir)
+
     command("edit Makefile")
 
     helper.sync_open("outline", "--no-insert")
