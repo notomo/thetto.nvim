@@ -1,4 +1,4 @@
-local helper = require "test.helper"
+local helper = require("thetto/lib/testlib/helper")
 local assert = helper.assert
 local command = helper.command
 
