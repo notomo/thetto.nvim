@@ -28,10 +28,15 @@ end
 
 M.cleanup = function(name)
   local dir = name .. "/"
+  local testlib_path = dir .. "lib/testlib/"
   for key in pairs(package.loaded) do
+    if vim.startswith(key, testlib_path) then
+      goto continue
+    end
     if vim.startswith(key, dir) or key == name then
       package.loaded[key] = nil
     end
+    ::continue::
   end
   vim.api.nvim_command("doautocmd User ThettoSourceLoad")
 end

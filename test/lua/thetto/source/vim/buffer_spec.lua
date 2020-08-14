@@ -8,8 +8,12 @@ describe("vim/buffer source", function()
   after_each(helper.after_each)
 
   it("can show buffers", function()
-    command("edit " .. helper.root .. "/test/_test_data/dir/foo")
-    command("edit " .. helper.root .. "/test/_test_data/dir/file")
+    helper.new_directory("dir")
+    helper.new_file("dir/foo")
+    helper.new_file("dir/file")
+
+    command("edit " .. "dir/foo")
+    command("edit " .. "dir/file")
 
     command("Thetto vim/buffer")
 

@@ -8,7 +8,8 @@ describe("file/mru source", function()
   after_each(helper.after_each)
 
   it("can show mru files", function()
-    command("edit " .. helper.root .. "/test/_test_data/oldfile")
+    helper.new_file("oldfile")
+    command("edit oldfile")
 
     command("Thetto file/mru --no-insert")
 
@@ -19,14 +20,15 @@ describe("file/mru source", function()
   end)
 
   it("can execute directory_open", function()
-    command("edit " .. helper.root .. "/test/_test_data/oldfile")
+    helper.new_file("oldfile")
+    command("edit oldfile")
 
     command("Thetto file/mru --no-insert")
 
     helper.search("oldfile")
     command("ThettoDo directory_open")
 
-    assert.current_dir(helper.root .. "/test/_test_data")
+    assert.current_dir("")
   end)
 
 end)

@@ -4,12 +4,16 @@ local command = helper.command
 
 describe("directory/recursive source", function()
 
-  before_each(helper.before_each)
+  before_each(function()
+    helper.before_each()
+    helper.new_directory("dir")
+    helper.new_directory("dir/depth2")
+    helper.new_file("dir/file")
+  end)
+
   after_each(helper.after_each)
 
   it("can show directories recursively", function()
-    vim.api.nvim_set_current_dir("./test/_test_data")
-
     helper.sync_open("directory/recursive", "--no-insert")
 
     assert.exists_pattern("dir/")
@@ -18,12 +22,10 @@ describe("directory/recursive source", function()
 
     command("ThettoDo")
 
-    assert.current_dir(helper.root .. "/test/_test_data/dir")
+    assert.current_dir("dir")
   end)
 
   it("can show directories with depth range", function()
-    vim.api.nvim_set_current_dir("./test/_test_data")
-
     helper.sync_open("directory/recursive", "--no-insert", "--x-max-depth=1")
 
     assert.no.exists_pattern("dir/depth2")
@@ -33,8 +35,6 @@ describe("directory/recursive source", function()
   end)
 
   it("can execute enter", function()
-    vim.api.nvim_set_current_dir("./test/_test_data")
-
     helper.sync_open("directory/recursive", "--no-insert")
     helper.search("dir/$")
 

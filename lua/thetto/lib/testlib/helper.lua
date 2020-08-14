@@ -1,8 +1,7 @@
 local M = {}
 
-M.root = vim.fn.getcwd()
-
-M.test_data_dir = M.root .. "/test/test_data/"
+local root = vim.fn.getcwd()
+local test_data_dir = root .. "/test/test_data/"
 
 M.command = function(cmd)
   local _, err = pcall(vim.api.nvim_command, cmd)
@@ -24,6 +23,7 @@ M.before_each = function()
     waiting = true
   end
   M.new_directory("")
+  vim.api.nvim_set_current_dir(test_data_dir)
 end
 
 M.after_each = function()
@@ -33,9 +33,6 @@ M.after_each = function()
   M.command("filetype off")
   M.command("syntax off")
   print(" ")
-
-  -- NOTE: for require("test.helper")
-  vim.api.nvim_set_current_dir(M.root)
 
   require("thetto/lib/module").cleanup("thetto")
   M.delete("")
@@ -117,7 +114,7 @@ M.search = function(pattern)
 end
 
 M.new_file = function(path, ...)
-  local f = io.open(M.test_data_dir .. path, "w")
+  local f = io.open(test_data_dir .. path, "w")
   for _, line in ipairs({...}) do
     f:write(line .. "\n")
   end
@@ -125,11 +122,19 @@ M.new_file = function(path, ...)
 end
 
 M.new_directory = function(path)
-  vim.fn.mkdir(M.test_data_dir .. path, "p")
+  vim.fn.mkdir(test_data_dir .. path, "p")
 end
 
 M.delete = function(path)
-  vim.fn.delete(M.test_data_dir .. path, "rf")
+  vim.fn.delete(test_data_dir .. path, "rf")
+end
+
+M.cd = function(path)
+  vim.api.nvim_set_current_dir(test_data_dir .. path)
+end
+
+M.path = function(path)
+  return test_data_dir .. (path or "")
 end
 
 local vassert = require("vusted.assert")
@@ -173,7 +178,7 @@ asserts.create("filetype"):register_eq(function()
 end)
 
 asserts.create("current_dir"):register_eq(function()
-  return vim.fn.getcwd()
+  return vim.fn.getcwd():gsub(test_data_dir .. "?", "")
 end)
 
 asserts.create("exists_pattern"):register(function(self)

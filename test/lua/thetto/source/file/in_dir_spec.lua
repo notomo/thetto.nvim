@@ -8,7 +8,9 @@ describe("file/in_dir source", function()
   after_each(helper.after_each)
 
   it("can show current dir files", function()
-    vim.api.nvim_set_current_dir("./test/_test_data")
+    helper.new_file("oldfile", [[for mru test]])
+    helper.new_directory("dir")
+    helper.new_file("dir/file")
 
     command("Thetto file/in_dir --no-insert")
 
@@ -17,7 +19,7 @@ describe("file/in_dir source", function()
 
     command("ThettoDo")
 
-    assert.current_dir(helper.root .. "/test/_test_data/dir")
+    assert.current_dir("dir")
 
     command("Thetto file/in_dir --no-insert")
     helper.search("file")
@@ -29,7 +31,11 @@ describe("file/in_dir source", function()
 
   it("can show files in project dir", function()
     require("thetto/target/project").root_patterns = {"0_root_pattern"}
-    vim.api.nvim_set_current_dir("./test/_test_data/dir")
+
+    helper.new_directory("0_root_pattern")
+    helper.new_directory("dir")
+    helper.cd("dir")
+
     command("Thetto file/in_dir --no-insert --target=project")
 
     command("normal! gg")
