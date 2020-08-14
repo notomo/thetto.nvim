@@ -11,10 +11,6 @@ describe("env/path source", function()
     command("Thetto env/path --no-insert")
 
     assert.exists_pattern("/bin")
-
-    command("ThettoDo")
-
-    assert.no.current_dir(helper.root)
   end)
 
 end)
