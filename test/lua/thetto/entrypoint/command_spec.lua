@@ -7,6 +7,25 @@ describe("thetto", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
+  it("can open ui in list buffer", function()
+    command("Thetto line --no-insert")
+
+    assert.filetype("thetto")
+  end)
+
+  it("can open ui in input buffer", function()
+    command("Thetto line")
+
+    assert.filetype("thetto-input")
+  end)
+
+  it("should exist only one in a tab", function()
+    command("Thetto line")
+    command("Thetto vim/runtimepath")
+
+    assert.window_count(6)
+  end)
+
   it("can filter by substring", function()
     require("thetto/custom").default_sorters = {"length"}
     helper.set_lines([[
@@ -29,7 +48,6 @@ test3]])
   it("can move to filter", function()
     command("Thetto line --no-insert")
 
-    assert.window_count(6)
     assert.filetype("thetto")
 
     command("ThettoDo move_to_input")
@@ -40,7 +58,6 @@ test3]])
   it("can move to list", function()
     command("Thetto line")
 
-    assert.window_count(6)
     assert.filetype("thetto-input")
 
     command("ThettoDo move_to_list")
@@ -52,7 +69,6 @@ test3]])
     command("Thetto line")
     helper.sync_input({"test"})
 
-    assert.window_count(6)
     assert.filetype("thetto-input")
 
     command("ThettoDo move_to_list")
@@ -77,7 +93,6 @@ test22]])
 
     command("ThettoDo move_to_input")
 
-    assert.window_count(6)
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
@@ -102,7 +117,6 @@ test22]])
     command("ThettoDo quit")
     command("Thetto line --resume")
 
-    assert.window_count(6)
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
@@ -153,13 +167,6 @@ hoge]])
     assert.no.exists_pattern("hoge")
   end)
 
-  it("should exist only one in a tab", function()
-    command("Thetto line")
-    command("Thetto vim/runtimepath")
-
-    assert.window_count(6)
-  end)
-
   it("should show an error message if not found source", function()
     assert.error_message("not found source: invalid", function()
       command("Thetto invalid")
@@ -172,7 +179,6 @@ hoge]])
     assert.error_message("not found action: invalid", function()
       command("ThettoDo invalid")
     end)
-    assert.window_count(6)
   end)
 
   it("can resume with offset", function()
