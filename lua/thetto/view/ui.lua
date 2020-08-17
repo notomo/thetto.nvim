@@ -15,7 +15,7 @@ M.open = function(buffers, resumed_state, opts, on_closed)
     end
     local path = vim.api.nvim_buf_get_name(bufnr)
     if path:match(states.path_pattern) then
-      M.close(id)
+      M._close(id)
     end
     ::continue::
   end
@@ -106,20 +106,11 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   M.close_callbacks[list_window] = on_closed
   M.close_callbacks[input_window] = on_closed
 
-  local on_list_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.list, info_window, input_window, sign_window, filter_info_window)
-  vim.api.nvim_command(on_list_closed)
-
-  local on_sign_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.sign, input_window, list_window, info_window, filter_info_window)
-  vim.api.nvim_command(on_sign_closed)
-
-  local on_input_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.input, info_window, list_window, sign_window, filter_info_window)
-  vim.api.nvim_command(on_input_closed)
-
-  local on_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.info, input_window, list_window, sign_window, filter_info_window)
-  vim.api.nvim_command(on_info_closed)
-
-  local on_filter_info_closed = ("autocmd WinClosed <buffer=%s> lua require 'thetto/view/ui'.close(%s, %s, %s, %s, vim.fn.expand('<afile>'))"):format(buffers.filter_info, input_window, list_window, sign_window, list_window)
-  vim.api.nvim_command(on_filter_info_closed)
+  local group_name = "theto_closed_" .. buffers.list
+  vim.api.nvim_command(("augroup %s"):format(group_name))
+  local on_win_closed = ("autocmd %s WinClosed * lua require 'thetto/view/ui'.close(\"%s\", tonumber(vim.fn.expand('<afile>')), %s, %s, %s, %s, %s)"):format(group_name, group_name, list_window, info_window, input_window, sign_window, filter_info_window)
+  vim.api.nvim_command(on_win_closed)
+  vim.api.nvim_command("augroup END")
 
   local insert = opts.insert
   if resumed_state ~= nil and resumed_state.windows.active == "list" then
@@ -210,14 +201,32 @@ M._render_info = function(bufnr, items, all_items_count, source_name, sorters)
   vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {{text, "ThettoInfo"}}, {})
 end
 
-M.close = function(...)
-  for _, id in ipairs({...}) do
-    windowlib.close(id)
-    local on_closed = M.close_callbacks[id]
-    if on_closed ~= nil then
-      on_closed(id)
-      M.close_callbacks[id] = nil
+M.close = function(group_name, closed_id, ...)
+  local ids = {...}
+  local ok = false
+  for _, id in ipairs(ids) do
+    if closed_id == id then
+      ok = true
+      break
     end
+  end
+  if not ok then
+    return
+  end
+
+  for _, id in ipairs(ids) do
+    M._close(id)
+  end
+
+  vim.api.nvim_command("autocmd! " .. group_name)
+end
+
+M._close = function(id)
+  windowlib.close(id)
+  local on_closed = M.close_callbacks[id]
+  if on_closed ~= nil then
+    on_closed(id)
+    M.close_callbacks[id] = nil
   end
 end
 

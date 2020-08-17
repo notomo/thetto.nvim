@@ -568,4 +568,12 @@ test5]])
     assert.tab_count(4)
   end)
 
+  it("closes ui completely", function()
+    command("Thetto line")
+    command("buffer #")
+    command("close")
+
+    assert.window_count(1)
+  end)
+
 end)
