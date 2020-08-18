@@ -42,25 +42,13 @@ M.open = function(buffers, resumed_state, opts, on_closed)
     relative = "editor",
     row = row,
     col = column,
-    focusable = false,
     external = false,
     style = "minimal",
   })
   vim.api.nvim_win_set_option(sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
   vim.api.nvim_win_set_option(sign_window, "scrollbind", true)
-
-  local info_window = vim.api.nvim_open_win(buffers.info, false, {
-    width = opts.width,
-    height = 1,
-    relative = "editor",
-    row = row + opts.height,
-    col = column,
-    focusable = false,
-    external = false,
-    style = "minimal",
-  })
-  vim.api.nvim_win_set_option(info_window, "signcolumn", "yes:1")
-  vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo")
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._enter(%s)"):format(buffers.sign, list_window)
+  vim.api.nvim_command(on_sign_enter)
 
   local input_width = opts.width * 0.75
   local input_window = vim.api.nvim_open_win(buffers.input, false, {
@@ -75,16 +63,31 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   vim.api.nvim_win_set_option(input_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_option(input_window, "winhighlight", "SignColumn:NormalFloat")
 
+  local info_window = vim.api.nvim_open_win(buffers.info, false, {
+    width = opts.width,
+    height = 1,
+    relative = "editor",
+    row = row + opts.height,
+    col = column,
+    external = false,
+    style = "minimal",
+  })
+  vim.api.nvim_win_set_option(info_window, "signcolumn", "yes:1")
+  vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._enter(%s)"):format(buffers.info, input_window)
+  vim.api.nvim_command(on_info_enter)
+
   local filter_info_window = vim.api.nvim_open_win(buffers.filter_info, false, {
     width = opts.width - input_width,
     height = #buffers.filters,
     relative = "editor",
     row = row + opts.height + 1,
     col = column + input_width,
-    focusable = false,
     external = false,
     style = "minimal",
   })
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._enter(%s)"):format(buffers.filter_info, input_window)
+  vim.api.nvim_command(on_filter_info_enter)
 
   if resumed_state ~= nil then
     if resumed_state.windows.list_cursor then
@@ -228,6 +231,10 @@ M._close = function(id)
     on_closed(id)
     M.close_callbacks[id] = nil
   end
+end
+
+M._enter = function(id)
+  windowlib.enter(id)
 end
 
 M._head_lines = function(items)

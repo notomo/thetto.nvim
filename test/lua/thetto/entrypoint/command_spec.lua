@@ -36,9 +36,6 @@ test3]])
     command("Thetto line")
     helper.sync_input({"2"})
 
-    command("ThettoDo move_to_info")
-    assert.virtual_text("line  sorter=length  [ 1 / 3 ]")
-
     command("ThettoDo move_to_list")
 
     assert.current_line("test2")
