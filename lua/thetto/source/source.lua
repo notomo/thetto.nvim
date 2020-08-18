@@ -1,4 +1,4 @@
-local sources = require("thetto/core/base_source")
+local sources = require("thetto/core/source")
 
 local M = {}
 

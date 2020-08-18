@@ -1,5 +1,5 @@
-local kinds = require("thetto/core/base_kind")
-local sources = require("thetto/core/base_source")
+local kinds = require("thetto/core/kind")
+local sources = require("thetto/core/source")
 local states = require "thetto/core/state"
 
 local M = {}

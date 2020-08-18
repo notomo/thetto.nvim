@@ -1,8 +1,8 @@
 local jobs = require("thetto/lib/job")
 local highlights = require("thetto/view/highlight")
 local modulelib = require("thetto/lib/module")
-local filter_core = require("thetto/core/base_filter")
-local sorter_core = require("thetto/core/base_sorter")
+local filter_core = require("thetto/core/filter")
+local sorter_core = require("thetto/core/sorter")
 local custom = require("thetto/custom")
 
 local M = {}
