@@ -6,7 +6,7 @@ local M = {}
 
 M.close_callbacks = {}
 
-M.open = function(buffers, resumed_state, opts, on_closed)
+M.open = function(buffers, opts, on_closed)
   local ids = vim.api.nvim_tabpage_list_wins(0)
   for _, id in ipairs(ids) do
     local bufnr = vim.fn.winbufnr(id)
@@ -89,23 +89,6 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._enter(%s)"):format(buffers.filter_info, input_window)
   vim.api.nvim_command(on_filter_info_enter)
 
-  if resumed_state ~= nil then
-    if resumed_state.windows.list_cursor then
-      local cursor = resumed_state.windows.list_cursor
-      cursor[1] = cursor[1] + opts.offset
-      local line_count = vim.api.nvim_buf_line_count(buffers.list)
-      if line_count < cursor[1] then
-        cursor[1] = line_count
-      elseif cursor[1] < 1 then
-        cursor[1] = 1
-      end
-      vim.api.nvim_win_set_cursor(list_window, cursor)
-    end
-    if resumed_state.windows.input_cursor then
-      vim.api.nvim_win_set_cursor(input_window, resumed_state.windows.input_cursor)
-    end
-  end
-
   M.close_callbacks[list_window] = on_closed
   M.close_callbacks[input_window] = on_closed
 
@@ -114,21 +97,6 @@ M.open = function(buffers, resumed_state, opts, on_closed)
   local on_win_closed = ("autocmd %s WinClosed * lua require 'thetto/view/ui'.close(\"%s\", tonumber(vim.fn.expand('<afile>')), %s, %s, %s, %s, %s)"):format(group_name, group_name, list_window, info_window, input_window, sign_window, filter_info_window)
   vim.api.nvim_command(on_win_closed)
   vim.api.nvim_command("augroup END")
-
-  local insert = opts.insert
-  if resumed_state ~= nil and resumed_state.windows.active == "list" then
-    insert = false
-  end
-  if insert then
-    vim.api.nvim_set_current_win(input_window)
-    if resumed_state ~= nil and resumed_state.windows.mode == "n" then
-      vim.api.nvim_command("stopinsert")
-    else
-      vim.api.nvim_command("startinsert")
-    end
-  else
-    vim.api.nvim_set_current_win(list_window)
-  end
 
   return {
     list = list_window,

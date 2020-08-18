@@ -49,11 +49,7 @@ local on_changed = function(all_items, input_bufnr, source)
   end)
 end
 
-local make_buffers = function(source_name, source_opts, resumed_state, opts)
-  if resumed_state ~= nil then
-    return resumed_state.buffers
-  end
-
+local make_buffers = function(source_name, source_opts, opts)
   local source, err = sources.create(source_name, source_opts, opts)
   if err ~= nil then
     return nil, nil, nil, nil, nil, nil, err
@@ -156,16 +152,18 @@ M.start = function(source_name, source_opts, action_opts, opts)
   end
 
   local resumed_state = nil
+  local buffers, source, job, items, all_items_count, sorters
   if opts.resume then
     resumed_state = states.recent(source_name)
     if resumed_state == nil then
       return nil, "no source to resume"
     end
-  end
-
-  local buffers, source, job, items, all_items_count, sorters, err = make_buffers(source_name, source_opts, resumed_state, opts)
-  if err ~= nil then
-    return nil, err
+    buffers = resumed_state.buffers
+  else
+    buffers, source, job, items, all_items_count, sorters, err = make_buffers(source_name, source_opts, opts)
+    if err ~= nil then
+      return nil, err
+    end
   end
   buffers.action_opts = action_opts
 
@@ -173,11 +171,12 @@ M.start = function(source_name, source_opts, action_opts, opts)
     return nil, source.name .. ": empty"
   end
 
-  local windows = ui_windows.open(buffers, resumed_state, opts, function()
+  local windows = ui_windows.open(buffers, opts, function()
     if job ~= nil then
       job:stop()
     end
   end)
+  M._set_mode(buffers, windows, resumed_state, opts)
 
   states.set(buffers, windows)
   if job ~= nil then
@@ -298,6 +297,40 @@ M._get_sorters = function(buffers)
     table.insert(sorters, sorter)
   end
   return sorters
+end
+
+M._set_mode = function(buffers, windows, resumed_state, opts)
+  if resumed_state ~= nil then
+    if resumed_state.windows.list_cursor then
+      local cursor = resumed_state.windows.list_cursor
+      cursor[1] = cursor[1] + opts.offset
+      local line_count = vim.api.nvim_buf_line_count(buffers.list)
+      if line_count < cursor[1] then
+        cursor[1] = line_count
+      elseif cursor[1] < 1 then
+        cursor[1] = 1
+      end
+      vim.api.nvim_win_set_cursor(windows.list, cursor)
+    end
+    if resumed_state.windows.input_cursor then
+      vim.api.nvim_win_set_cursor(windows.input, resumed_state.windows.input_cursor)
+    end
+  end
+
+  local insert = opts.insert
+  if resumed_state ~= nil and resumed_state.windows.active == "list" then
+    insert = false
+  end
+  if insert then
+    vim.api.nvim_set_current_win(windows.input)
+    if resumed_state ~= nil and resumed_state.windows.mode == "n" then
+      vim.api.nvim_command("stopinsert")
+    else
+      vim.api.nvim_command("startinsert")
+    end
+  else
+    vim.api.nvim_set_current_win(windows.list)
+  end
 end
 
 -- for testing
