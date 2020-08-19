@@ -40,19 +40,16 @@ function Collector.update(self, input_lines, filter_names, sorter_names)
   end
 
   do
-    local filters, err = M._get_filters(filter_names, self.opts)
+    local err = self:_update_filters(filter_names)
     if err ~= nil then
       return err
     end
-    self.filters = filters
   end
-
   do
-    local sorters, err = M._get_sorters(sorter_names)
+    local err = self:_update_sorters(sorter_names)
     if err ~= nil then
       return err
     end
-    self.sorters = sorters
   end
 
   for _, item in ipairs(self.items) do
@@ -61,7 +58,7 @@ function Collector.update(self, input_lines, filter_names, sorter_names)
     end
   end
 
-  self.items = M._modify_items(self.all_items, self.filters, input_lines, self.sorters, self.opts)
+  self:_update_items(input_lines)
 
   return nil
 end
@@ -76,6 +73,73 @@ function Collector.stop(self)
   if self.job ~= nil then
     self.job:stop()
   end
+end
+
+function Collector._update_filters(self, names)
+  local new_key = M._to_key(names)
+  if self._filters_key == new_key then
+    return nil
+  end
+
+  local filters = {}
+  for _, name in ipairs(names) do
+    local filter, err = filter_core.create(name, self.opts)
+    if err ~= nil then
+      return err
+    end
+    table.insert(filters, filter)
+  end
+
+  self.filters = filters
+  self._filters_key = new_key
+
+  return nil
+end
+
+function Collector._update_sorters(self, names)
+  local new_key = M._to_key(names)
+  if self._sorters_key == new_key then
+    return nil
+  end
+
+  local sorters = {}
+  for _, name in ipairs(names) do
+    local sorter, err = sorter_core.create(name)
+    if err ~= nil then
+      return err
+    end
+    table.insert(sorters, sorter)
+  end
+
+  self.sorters = sorters
+  self._sorters_key = new_key
+
+  return nil
+end
+
+function Collector._update_items(self, input_lines)
+  -- NOTE: avoid `too many results to unpack`
+  local items = {}
+  for _, item in ipairs(self.all_items) do
+    table.insert(items, item)
+  end
+
+  for i, filter in ipairs(self.filters) do
+    local input_line = input_lines[i]
+    if input_line ~= nil and input_line ~= "" then
+      items = filter:apply(items, input_line, self.opts)
+    end
+  end
+  for _, sorter in ipairs(self.sorters) do
+    items = sorter:apply(items)
+  end
+
+  local filtered = {}
+  for i = 1, self.opts.display_limit, 1 do
+    filtered[i] = items[i]
+  end
+
+  self.items = filtered
 end
 
 M.create = function(source_name, source_opts, opts)
@@ -107,6 +171,9 @@ M.create = function(source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
+
+  local sorters = {}
+  local filters = {}
   local collector = {
     all_items = {},
     job = nil,
@@ -114,58 +181,17 @@ M.create = function(source_name, source_opts, opts)
     original_opts = opts,
     opts = vim.deepcopy(opts),
     items = {},
-    sorters = {},
-    filters = {},
+    sorters = sorters,
+    filters = filters,
+    -- for cache
+    _sorters_key = M._to_key(sorters),
+    _filters_key = M._to_key(filters),
   }
   return setmetatable(collector, Collector), nil
 end
 
-M._modify_items = function(all_items, filters, input_lines, sorters, opts)
-  -- NOTE: avoid `too many results to unpack`
-  local items = {}
-  for _, item in ipairs(all_items) do
-    table.insert(items, item)
-  end
-
-  for i, filter in ipairs(filters) do
-    local input_line = input_lines[i]
-    if input_line ~= nil and input_line ~= "" then
-      items = filter:apply(items, input_line, opts)
-    end
-  end
-  for _, sorter in ipairs(sorters) do
-    items = sorter:apply(items)
-  end
-
-  local filtered = {}
-  for i = 1, opts.display_limit, 1 do
-    filtered[i] = items[i]
-  end
-  return filtered
-end
-
-M._get_filters = function(names, opts)
-  local filters = {}
-  for _, name in ipairs(names) do
-    local filter, err = filter_core.create(name, opts)
-    if err ~= nil then
-      return nil, err
-    end
-    table.insert(filters, filter)
-  end
-  return filters, nil
-end
-
-M._get_sorters = function(names)
-  local sorters = {}
-  for _, name in ipairs(names) do
-    local sorter, err = sorter_core.create(name)
-    if err ~= nil then
-      return nil, err
-    end
-    table.insert(sorters, sorter)
-  end
-  return sorters, nil
+M._to_key = function(names)
+  return table.concat(names, ",")
 end
 
 return M
