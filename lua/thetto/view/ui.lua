@@ -108,17 +108,22 @@ M.open = function(buffers, opts, on_closed)
   }
 end
 
-M.render = function(source, items, all_items_count, buffers, windows, filters, input_lines, sorters, opts)
+M.render = function(collector, buffers, windows, input_lines)
   if not vim.api.nvim_buf_is_valid(buffers.list) then
     return
   end
 
+  local items = collector.items
+  local opts = collector.opts
   local lines = M._head_lines(items, opts.display_limit)
   vim.api.nvim_buf_set_option(buffers.list, "modifiable", true)
   vim.api.nvim_buf_set_lines(buffers.list, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(buffers.list, "modifiable", false)
 
-  M._render_info(buffers.info, items, all_items_count, source.name, sorters)
+  local source = collector.source
+  local filters = collector.filters
+  local sorters = collector.sorters
+  M._render_info(buffers.info, items, #collector.all_items, source.name, sorters)
 
   if vim.api.nvim_win_is_valid(windows.list) and vim.bo.filetype ~= states.list_filetype then
     vim.api.nvim_win_set_cursor(windows.list, {1, 0})
