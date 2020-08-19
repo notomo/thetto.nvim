@@ -167,7 +167,7 @@ M.get = function(bufnr, input_bufnr)
   return setmetatable(raw_state, State), nil
 end
 
-M.recent = function(source_name)
+M.resume = function(source_name)
   local pattern = M.path_pattern
   if source_name ~= nil then
     pattern = ("thetto://%s/thetto"):format(source_name)
@@ -190,7 +190,10 @@ M.recent = function(source_name)
     end
   end
 
-  return recent
+  if recent == nil then
+    return nil, "no source to resume"
+  end
+  return recent, nil
 end
 
 return M

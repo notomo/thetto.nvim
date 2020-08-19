@@ -98,10 +98,11 @@ end
 M.start = function(source_name, source_opts, action_opts, opts)
   local resumed_state
   if opts.resume then
-    resumed_state = states.recent(source_name)
-    if resumed_state == nil then
-      return nil, "no source to resume"
+    local state, err = states.resume(source_name)
+    if err ~= nil then
+      return nil, err
     end
+    resumed_state = state
     source_name = resumed_state.buffers.source_name
   end
 
@@ -111,7 +112,6 @@ M.start = function(source_name, source_opts, action_opts, opts)
   end
 
   local buffers
-  local input_lines = {}
   if resumed_state ~= nil then
     buffers = resumed_state.buffers
   else
@@ -131,6 +131,7 @@ M.start = function(source_name, source_opts, action_opts, opts)
   collector:start_job()
 
   if resumed_state == nil then
+    local input_lines = {}
     ui_windows.render(collector, buffers, windows, input_lines)
   end
 
@@ -140,10 +141,7 @@ end
 M.execute = function(action_name, range, action_opts, args)
   local state, err
   if args.resume then
-    state = states.recent(nil)
-    if state == nil then
-      err = "no source to resume"
-    end
+    state, err = states.resume(nil)
   else
     state, err = states.get(0)
   end
