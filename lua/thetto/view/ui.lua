@@ -123,7 +123,7 @@ M.render = function(collector, buffers, windows, input_lines)
   local source = collector.source
   local filters = collector.filters
   local sorters = collector.sorters
-  M._render_info(buffers.info, items, #collector.all_items, source.name, sorters)
+  M._render_info(collector, buffers.info, items, #collector.all_items, source.name, sorters)
 
   if vim.api.nvim_win_is_valid(windows.list) and vim.bo.filetype ~= states.list_filetype then
     vim.api.nvim_win_set_cursor(windows.list, {1, 0})
@@ -161,7 +161,7 @@ M.render = function(collector, buffers, windows, input_lines)
   end
 end
 
-M._render_info = function(bufnr, items, all_items_count, source_name, sorters)
+M._render_info = function(collector, bufnr, items, all_items_count, source_name, sorters)
   local sorter_info = ""
   local sorter_names = {}
   for _, sorter in ipairs(sorters) do
@@ -171,10 +171,18 @@ M._render_info = function(bufnr, items, all_items_count, source_name, sorters)
     sorter_info = "  sorter=" .. table.concat(sorter_names, ", ")
   end
 
+  local collector_status = ""
+  if not collector:finished() then
+    collector_status = "running"
+  end
+
   local ns = vim.api.nvim_create_namespace("thetto-info-text")
   vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
   local text = ("%s%s  [ %s / %s ]"):format(source_name, sorter_info, vim.tbl_count(items), all_items_count)
-  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {{text, "ThettoInfo"}}, {})
+  vim.api.nvim_buf_set_virtual_text(bufnr, ns, 0, {
+    {text, "ThettoInfo"},
+    {"  " .. collector_status, "Comment"},
+  }, {})
 end
 
 M.close = function(group_name, closed_id, ...)

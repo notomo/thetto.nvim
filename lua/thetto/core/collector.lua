@@ -75,6 +75,13 @@ function Collector.stop(self)
   end
 end
 
+function Collector.finished(self)
+  if self.job == nil then
+    return true
+  end
+  return not self.job:is_running()
+end
+
 function Collector._update_filters(self, names)
   local new_key = M._to_key(names)
   if self._filters_key == new_key then
