@@ -84,27 +84,28 @@ M.parse_args = function(raw_args, default)
   return name, opts, ex_opts, nil
 end
 
+local start_default_opts = {
+  insert = true,
+  resume = false,
+  ignorecase = false,
+  smartcase = true,
+  width = 100,
+  height = 25,
+  pattern = nil,
+  pattern_type = nil,
+  offset = 0,
+  cwd = ".",
+  target = nil,
+  action = nil,
+  display_limit = 100,
+  debounce_ms = 50,
+  filters = {},
+  sorters = {},
+  allow_empty = false,
+}
+
 M.open = function(raw_args)
-  local default_opts = {
-    insert = true,
-    resume = false,
-    ignorecase = false,
-    smartcase = true,
-    width = 100,
-    height = 25,
-    pattern = nil,
-    pattern_type = nil,
-    offset = 0,
-    cwd = ".",
-    target = nil,
-    action = nil,
-    display_limit = 100,
-    debounce_ms = 50,
-    filters = {},
-    sorters = {},
-    allow_empty = false,
-  }
-  local source_name, opts, ex_opts, parse_err = M.parse_args(raw_args, vim.tbl_extend("force", default_opts, custom.opts))
+  local source_name, opts, ex_opts, parse_err = M.parse_args(raw_args, vim.tbl_extend("force", start_default_opts, custom.opts))
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
   end
@@ -115,6 +116,19 @@ M.open = function(raw_args)
 
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
+  local result, err = wraplib.traceback(function()
+    return engine.start(source_name, source_opts, action_opts, opts)
+  end)
+  if err ~= nil then
+    return nil, messagelib.error(err)
+  end
+  return result, nil
+end
+
+M.start = function(source_name, ctx)
+  local source_opts = ctx.source_opts or {}
+  local action_opts = ctx.action_opts or {}
+  local opts = vim.tbl_extend("force", start_default_opts, custom.opts, ctx.opts or {})
   local result, err = wraplib.traceback(function()
     return engine.start(source_name, source_opts, action_opts, opts)
   end)

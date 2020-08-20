@@ -573,4 +573,14 @@ test5]])
     assert.window_count(1)
   end)
 
+  it("start in lua", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    require("thetto/entrypoint/command").start("line", {opts = {insert = false}})
+
+    assert.exists_pattern("test2")
+  end)
+
 end)
