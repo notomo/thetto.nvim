@@ -94,10 +94,12 @@ M.open = function(buffers, opts, on_closed)
 
   local group_name = "theto_closed_" .. buffers.list
   vim.api.nvim_command(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require 'thetto/view/ui'.close(\"%s\", tonumber(vim.fn.expand('<afile>')), %s, %s, %s, %s, %s)"):format(group_name, group_name, list_window, info_window, input_window, sign_window, filter_info_window)
+  local on_win_closed = ("autocmd %s WinClosed * lua require 'thetto/view/ui'.close(\"%s\", %s, tonumber(vim.fn.expand('<afile>')), %s, %s, %s, %s, %s)"):format(group_name, group_name, buffers.list, list_window, info_window, input_window, sign_window, filter_info_window)
   vim.api.nvim_command(on_win_closed)
   vim.api.nvim_command("augroup END")
 
+  local preview_column = column + opts.width
+  local preview_width = vim.o.columns - preview_column - 2
   return {
     list = list_window,
     input = input_window,
@@ -105,6 +107,10 @@ M.open = function(buffers, opts, on_closed)
     sign = sign_window,
     filter_info = filter_info_window,
     origin = origin_window,
+    preview_row = row,
+    preview_column = preview_column,
+    preview_width = preview_width,
+    preview_height = opts.height + 1,
   }
 end
 
@@ -185,7 +191,7 @@ M._render_info = function(collector, bufnr, items, all_items_count, source_name,
   }, {})
 end
 
-M.close = function(group_name, closed_id, ...)
+M.close = function(group_name, list_bufnr, closed_id, ...)
   local ids = {...}
   local ok = false
   for _, id in ipairs(ids) do
@@ -198,6 +204,10 @@ M.close = function(group_name, closed_id, ...)
     return
   end
 
+  local state, err = states.get(list_bufnr)
+  if err == nil then
+    state:close_preview()
+  end
   for _, id in ipairs(ids) do
     M._close(id)
   end

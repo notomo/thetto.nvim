@@ -51,6 +51,7 @@ local base_options = {
   inverse_filter = {quit = false},
   change_filter = {quit = false},
   reverse_sorter = {quit = false},
+  preview = {quit = false},
 }
 
 local base_action_opts = {
