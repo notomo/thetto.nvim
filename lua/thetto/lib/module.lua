@@ -26,10 +26,10 @@ M.find_target = function(name)
   return find("thetto/target/" .. name)
 end
 
-M.cleanup = function(name)
+M.cleanup = function(name, force)
   local dir = name .. "/"
   for key in pairs(package.loaded) do
-    if vim.startswith(key, dir) or key == name then
+    if (vim.startswith(key, dir) or key == name) and (force or key ~= "thetto/core/persist") then
       package.loaded[key] = nil
     end
   end

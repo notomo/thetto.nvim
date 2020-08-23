@@ -18,6 +18,9 @@ describe("process source", function()
 
     helper.sync_execute("kill")
 
+    vim.wait(1000, function()
+      return not sleep:is_running()
+    end)
     assert.is_false(sleep:is_running())
   end)
 

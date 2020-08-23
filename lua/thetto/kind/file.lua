@@ -55,16 +55,16 @@ M.action_vsplit_open = function(_, items)
   end
 end
 
-M.action_preview = function(_, items, state)
+M.action_preview = function(_, items, ctx)
   local item = items[1]
   if item == nil then
     return
   end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 then
-    state:open_preview({bufnr = bufnr})
+    ctx.ui:open_preview({bufnr = bufnr})
   else
-    state:open_preview({path = item.path})
+    ctx.ui:open_preview({path = item.path})
   end
 end
 

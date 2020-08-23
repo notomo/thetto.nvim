@@ -8,7 +8,7 @@ local custom = require("thetto/custom")
 
 local M = {}
 
-M.create = function(source_name, source_opts, opts)
+M.create = function(notifier, source_name, source_opts, opts)
   local origin = modulelib.find_source(source_name)
   if origin == nil then
     return nil, "not found source: " .. source_name
@@ -43,6 +43,10 @@ M.create = function(source_name, source_opts, opts)
   end
 
   source.highlight = origin.highlight or function(_, _, _)
+  end
+
+  source.append = function(items)
+    notifier:send("update_all_items", items)
   end
 
   local filter_names = origin.filters or custom.default_filters or {"substring"}
