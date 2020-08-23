@@ -24,15 +24,9 @@ M.command = function(cmd)
   end
 end
 
-local waiting = false
-
 M.before_each = function()
   M.command("filetype on")
   M.command("syntax enable")
-  waiting = false
-  require("thetto/core/engine")._changed_after = function()
-    waiting = true
-  end
   M.new_directory("")
   vim.api.nvim_set_current_dir(M.test_data_dir)
 end
@@ -45,7 +39,7 @@ M.after_each = function()
   M.command("syntax off")
   print(" ")
 
-  require("thetto/lib/module").cleanup("thetto")
+  require("thetto/lib/module").cleanup("thetto", true)
   M.delete("")
 end
 
@@ -61,54 +55,70 @@ M.set_lines = function(lines)
 end
 
 M.sync_input = function(texts)
-  waiting = false
-  vim.api.nvim_put(texts, "c", true, true)
+  local text = texts[1]
+  local finished = false
+  require("thetto/view/ui")._changed_after = function(input_lines)
+    for _, line in ipairs(input_lines) do
+      if line == text then
+        finished = true
+      end
+    end
+  end
+  vim.api.nvim_put({text}, "c", true, true)
   local ok = vim.wait(1000, function()
-    return waiting
+    return finished
   end, 10)
-  waiting = false
   if not ok then
     assert(false, "wait timeout")
   end
 end
 
 M.sync_open = function(...)
-  waiting = false
-  local job = require("thetto/entrypoint/command").open({...})
-  if job == nil then
+  local collector = require("thetto/entrypoint/command").open({...})
+  if collector.job == nil then
     return
   end
-  local ok = job:wait(1000)
+  local ok = collector.job:wait(1000)
   if not ok then
     assert(false, "job wait timeout")
   end
+
+  local finished = false
+  require("thetto/view/ui")._changed_after = function()
+    finished = collector:finished()
+  end
   ok = vim.wait(1000, function()
-    return waiting
+    return finished
   end, 10)
-  waiting = false
   if not ok then
     assert(false, "wait timeout")
   end
 end
 
 M.sync_execute = function(...)
-  local job = require("thetto/entrypoint/command").execute(0, {8888, 8888}, {...})
-  if job == nil then
+  local collector = require("thetto/entrypoint/command").execute(0, {8888, 8888}, {...})
+  if collector.job == nil then
     return
   end
-  local ok = job:wait(1000)
+  local ok = collector.job:wait(1000)
   if not ok then
     assert(false, "job wait timeout")
   end
 end
 
-M.wait_ui = function()
+M.wait_ui = function(f)
+  local finished = false
+  require("thetto/view/ui")._changed_after = function(_)
+    finished = true
+  end
+
+  f()
+
   local ok = vim.wait(1000, function()
-    return waiting
+    return finished
   end, 10)
-  waiting = false
   if not ok then
-    assert(false, "wait timeout")
+    assert(false, "wait ui timeout")
   end
 end
 

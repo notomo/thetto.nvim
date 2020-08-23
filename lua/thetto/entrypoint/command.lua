@@ -1,7 +1,11 @@
 local engine = require "thetto/core/engine" -- more concrete naming?
+local notifiers = require "thetto/core/notifier"
+local collector_core = require "thetto/core/collector"
 local wraplib = require "thetto/lib/wrap"
 local messagelib = require "thetto/lib/message"
 local custom = require "thetto/custom"
+local uis = require "thetto/view/ui"
+local repository = require("thetto/core/repository")
 
 local M = {}
 
@@ -117,7 +121,7 @@ M.open = function(raw_args)
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()
-    return engine.start(source_name, source_opts, action_opts, opts)
+    return M._start(source_name, source_opts, action_opts, opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
@@ -130,12 +134,44 @@ M.start = function(source_name, ctx)
   local action_opts = ctx.action_opts or {}
   local opts = vim.tbl_extend("force", start_default_opts, custom.opts, ctx.opts or {})
   local result, err = wraplib.traceback(function()
-    return engine.start(source_name, source_opts, action_opts, opts)
+    return M._start(source_name, source_opts, action_opts, opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
   end
   return result, nil
+end
+
+M._start = function(source_name, source_opts, action_opts, opts)
+  local notifier = notifiers.new()
+
+  local collector
+  if opts.resume then
+    c, err = collector_core.resume(source_name)
+    if err ~= nil then
+      return nil, err
+    end
+    collector = c
+    uis.resume(collector)
+  else
+    local c, err = collector_core.create(notifier, source_name, source_opts, action_opts, opts)
+    if err ~= nil then
+      return nil, err
+    end
+    collector = c
+    ui = uis.new(collector, notifier)
+
+    repository.add(source_name, {collector = collector, ui = ui, action_opts = action_opts})
+
+    err = collector:start()
+    if err ~= nil then
+      return nil, err
+    end
+    ui:open()
+    collector:update()
+  end
+
+  return collector, nil
 end
 
 M.execute = function(has_range, raw_range, raw_args)

@@ -1,8 +1,5 @@
 local jobs = require("thetto/lib/job")
-local highlights = require("thetto/view/highlight")
 local modulelib = require("thetto/lib/module")
-local filter_core = require("thetto/core/filter")
-local sorter_core = require("thetto/core/sorter")
 local custom = require("thetto/custom")
 
 local M = {}
@@ -87,38 +84,26 @@ M.create = function(source_name, kind_name, action_name, args)
   kind.default_action = origin.default_action or "echo"
   kind.jobs = jobs
 
-  kind.action_toggle_selection = function(_, items, state)
-    state:toggle_selections(items)
-    highlights.update_selections(state.buffers.list, state.buffers.filtered)
+  kind.action_toggle_selection = function(_, items, ctx)
+    ctx.collector:toggle_selections(items)
   end
 
-  kind.action_toggle_all_selection = function(_, _, state)
-    state:toggle_selections(state.buffers.filtered)
-    highlights.update_selections(state.buffers.list, state.buffers.filtered)
+  kind.action_toggle_all_selection = function(_, _, ctx)
+    ctx.collector:toggle_all_selections()
   end
 
-  kind.action_move_to_input = function(self, _, state)
-    vim.api.nvim_set_current_win(state.windows.input)
-    vim.api.nvim_command("startinsert")
-    if self.action_opts.behavior == "a" then
-      local max_col = vim.fn.col("$")
-      local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
-      if cursor[2] ~= max_col then
-        cursor[2] = cursor[2] + 1
-        vim.api.nvim_win_set_cursor(state.windows.input, cursor)
-      end
-    end
+  kind.action_move_to_input = function(self, _, ctx)
+    ctx.ui:enter("input")
+    ctx.ui:start_insert(self.action_opts.behavior)
   end
 
-  kind.action_move_to_list = function(_, _, state)
-    vim.api.nvim_set_current_win(state.windows.list)
+  kind.action_move_to_list = function(_, _, ctx)
+    ctx.ui:enter("list")
     vim.api.nvim_command("stopinsert")
   end
 
-  kind.action_quit = function(_, _, state)
-    local resume = false
-    local offset = 0
-    state:close(resume, offset)
+  kind.action_quit = function(_, _, ctx)
+    ctx.ui:close()
   end
 
   kind.action_debug_print = function(_, items)
@@ -147,117 +132,29 @@ M.create = function(source_name, kind_name, action_name, args)
     end
   end
 
-  kind.action_add_filter = function(self, _, state)
+  kind.action_add_filter = function(self, _, ctx)
     local filter_name = self.action_opts.name
-    local _, err = filter_core.create(filter_name)
-    if err ~= nil then
-      return nil, err
-    end
-
-    local filter_names = vim.deepcopy(state.buffers.filters)
-    table.insert(filter_names, filter_name)
-    state:update_filters(filter_names)
-
-    vim.api.nvim_buf_set_lines(state.buffers.input, -1, -1, false, {""})
+    ctx.collector:add_filter(filter_name)
   end
 
-  kind.action_remove_filter = function(self, _, state)
-    if #state.buffers.filters == 1 then
-      return nil, "the last filter cannot be removed"
-    end
-
-    local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
-    local filter_name = self.action_opts.name or state.buffers.filters[cursor[1]]
-    local _, err = filter_core.create(filter_name)
-    if err ~= nil then
-      return nil, err
-    end
-
-    local removed_index = nil
-    for i, name in ipairs(state.buffers.filters) do
-      if filter_name == name then
-        removed_index = i
-      end
-    end
-
-    local filter_names = vim.deepcopy(state.buffers.filters)
-    table.remove(filter_names, removed_index)
-    state:update_filters(filter_names)
-
-    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, 0, -1, false)
-    table.remove(lines, removed_index)
-    vim.api.nvim_buf_set_lines(state.buffers.input, 0, -1, false, lines)
+  kind.action_remove_filter = function(self, _, ctx)
+    local filter_name = self.action_opts.name or ctx.ui:current_position_filter().name
+    return nil, ctx.collector:remove_filter(filter_name)
   end
 
-  kind.action_inverse_filter = function(_, _, state)
-    local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
-    local filter_name = state.buffers.filters[cursor[1]]
-    local filter, err = filter_core.create(filter_name)
-    if err ~= nil then
-      return nil, err
-    end
-
-    local index = nil
-    for i, name in ipairs(state.buffers.filters) do
-      if filter_name == name then
-        index = i
-      end
-    end
-    if index == nil then
-      return
-    end
-
-    local filter_names = vim.deepcopy(state.buffers.filters)
-    filter.inverse = not filter.inverse
-    filter_names[index] = filter:get_name()
-    state:update_filters(filter_names)
-    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, cursor[1], cursor[1], false)
-    vim.api.nvim_buf_set_lines(state.buffers.input, cursor[1], cursor[1], false, lines)
+  kind.action_inverse_filter = function(self, _, ctx)
+    local filter_name = self.action_opts.name or ctx.ui:current_position_filter().name
+    ctx.collector:inverse_filter(filter_name)
   end
 
-  kind.action_change_filter = function(self, _, state)
-    if not self.action_opts.name then
-      return nil, "needs filter name to change"
-    end
-
-    local cursor = vim.api.nvim_win_get_cursor(state.windows.input)
-    local filter_name = state.buffers.filters[cursor[1]]
-    local _, err = filter_core.create(filter_name)
-    if err ~= nil then
-      return nil, err
-    end
-
-    local index = nil
-    for i, name in ipairs(state.buffers.filters) do
-      if filter_name == name then
-        index = i
-      end
-    end
-    if index == nil then
-      return
-    end
-
-    local filter_names = vim.deepcopy(state.buffers.filters)
-    filter_names[index] = self.action_opts.name
-    state:update_filters(filter_names)
-    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, cursor[1], cursor[1], false)
-    vim.api.nvim_buf_set_lines(state.buffers.input, cursor[1], cursor[1], false, lines)
+  kind.action_change_filter = function(self, _, ctx)
+    local old_filter_name = ctx.ui:current_position_filter().name
+    return nil, ctx.collector:change_filter(old_filter_name, self.action_opts.name)
   end
 
-  kind.action_reverse_sorter = function(_, _, state)
-    local sorter_names = {}
-    for _, name in ipairs(state.buffers.sorters) do
-      local sorter, err = sorter_core.create(name)
-      if err ~= nil then
-        return nil, err
-      end
-      sorter.reverse = not sorter.reverse
-      table.insert(sorter_names, sorter:get_name())
-    end
-
-    state:update_sorters(sorter_names)
-    local lines = vim.api.nvim_buf_get_lines(state.buffers.input, 0, 0, false)
-    vim.api.nvim_buf_set_lines(state.buffers.input, 0, 0, false, lines)
+  kind.action_reverse_sorter = function(self, _, ctx)
+    local sorter_name = self.action_opts.name or ctx.ui:current_position_sorter().name
+    ctx.collector:reverse_sorter(sorter_name)
   end
 
   local opts = args
