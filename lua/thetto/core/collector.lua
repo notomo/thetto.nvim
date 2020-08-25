@@ -4,7 +4,6 @@ local sorter_core = require "thetto/core/sorter"
 local modulelib = require "thetto/lib/module"
 local inputs = require "thetto/input"
 local wraplib = require "thetto/lib/wrap"
-local repository = require("thetto/core/repository")
 
 local M = {}
 
@@ -334,22 +333,6 @@ end
 
 M._to_key = function(names)
   return table.concat(names, ",")
-end
-
-M.resume = function(source_name)
-  local collector
-  if source_name == nil then
-    local ctx = repository.recent()
-    if ctx ~= nil then
-      collector = ctx.collector
-    end
-  else
-    collector = repository.get(source_name).collector
-  end
-  if collector == nil then
-    return nil, "no collector for resume"
-  end
-  return collector, nil
 end
 
 return M

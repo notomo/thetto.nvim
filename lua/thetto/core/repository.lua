@@ -15,7 +15,15 @@ M.get = function(key)
   return persist[key] or {}
 end
 
-M.recent = function()
+M.resume = function(key)
+  if key ~= nil then
+    local ctx = persist[key]
+    if ctx == nil then
+      return nil, "not found state for resume by: " .. key
+    end
+    return ctx, nil
+  end
+
   local recent = nil
   local recent_time = 0
   for _, ctx in pairs(persist) do
@@ -25,7 +33,11 @@ M.recent = function()
       recent_time = time
     end
   end
-  return recent
+
+  if recent == nil then
+    return nil, "not found state for resume"
+  end
+  return recent, nil
 end
 
 M.delete = function(key)

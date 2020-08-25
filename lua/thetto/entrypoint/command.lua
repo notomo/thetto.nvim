@@ -145,12 +145,11 @@ end
 M._start = function(source_name, source_opts, action_opts, opts)
   local collector
   if opts.resume then
-    c, err = collector_core.resume(source_name)
-    if err ~= nil then
-      return nil, err
+    local ctx = repository.resume(source_name)
+    if ctx ~= nil then
+      collector = ctx.collector
     end
-    collector = c
-    uis.resume(collector)
+    ctx.ui:resume()
   else
     local notifier = notifiers.new()
     local c, err = collector_core.create(notifier, source_name, source_opts, opts)

@@ -8,7 +8,7 @@ local M = {}
 M.execute = function(action_name, range, action_opts, args)
   local ctx
   if args.resume then
-    ctx = repository.recent()
+    ctx = repository.resume()
     ctx.ui:update_offset(args.offset)
   else
     local path = vim.api.nvim_buf_get_name(0)

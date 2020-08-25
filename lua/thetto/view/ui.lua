@@ -185,6 +185,10 @@ function UI._open_windows(self)
   self.preview_height = opts.height + 1
 end
 
+function UI.resume(self)
+  self:_open_windows()
+end
+
 function UI._close_group_name(self)
   return "theto_closed_" .. self.list_bufnr
 end
@@ -420,11 +424,6 @@ M.new = function(collector, notifier)
 
   local ui = setmetatable(tbl, UI)
   return ui
-end
-
-M.resume = function(collector)
-  local ui = repository.get(collector.source.name).ui
-  ui:_open_windows()
 end
 
 M._on_close = function(key, id)
