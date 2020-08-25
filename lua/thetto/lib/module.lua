@@ -29,7 +29,7 @@ end
 M.cleanup = function(name, force)
   local dir = name .. "/"
   for key in pairs(package.loaded) do
-    if (vim.startswith(key, dir) or key == name) and (force or key ~= "thetto/core/persist") then
+    if (vim.startswith(key, dir) or key == name) and (force or key ~= "thetto/lib/_persist") then
       package.loaded[key] = nil
     end
   end

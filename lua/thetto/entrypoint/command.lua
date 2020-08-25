@@ -1,5 +1,5 @@
 local engine = require "thetto/core/engine" -- more concrete naming?
-local notifiers = require "thetto/core/notifier"
+local notifiers = require "thetto/lib/notifier"
 local collector_core = require "thetto/core/collector"
 local wraplib = require "thetto/lib/wrap"
 local messagelib = require "thetto/lib/message"
@@ -159,7 +159,7 @@ M._start = function(source_name, source_opts, action_opts, opts)
     collector = c
     local ui = uis.new(collector, notifier)
 
-    repository.add(source_name, {collector = collector, ui = ui, action_opts = action_opts})
+    repository.set(source_name, {collector = collector, ui = ui, action_opts = action_opts})
 
     err = collector:start()
     if err ~= nil then

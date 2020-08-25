@@ -1,14 +1,14 @@
-local persist = require("thetto/core/persist")
+local persist = require("thetto/lib/_persist")
 
 local M = {}
 
-M.add = function(key, values)
-  local current = persist[key] or {}
+M.set = function(key, values)
+  local new_values = {}
   for k, v in pairs(values) do
-    current[k] = v
+    new_values[k] = v
   end
-  current.updated_at = vim.fn.reltimestr(vim.fn.reltime())
-  persist[key] = current
+  new_values._updated_at = vim.fn.reltimestr(vim.fn.reltime())
+  persist[key] = new_values
 end
 
 M.get = function(key)
@@ -27,7 +27,7 @@ M.resume = function(key)
   local recent = nil
   local recent_time = 0
   for _, ctx in pairs(persist) do
-    local time = tonumber(ctx.updated_at)
+    local time = tonumber(ctx._updated_at)
     if recent_time < time then
       recent = ctx
       recent_time = time
