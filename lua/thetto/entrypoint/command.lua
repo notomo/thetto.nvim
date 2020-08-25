@@ -157,7 +157,7 @@ M._start = function(source_name, source_opts, action_opts, opts)
       return nil, err
     end
     collector = c
-    ui = uis.new(collector, notifier)
+    local ui = uis.new(collector, notifier)
 
     repository.add(source_name, {collector = collector, ui = ui, action_opts = action_opts})
 
