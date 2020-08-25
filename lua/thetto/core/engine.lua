@@ -11,19 +11,18 @@ M.execute = function(action_name, range, action_opts, args)
     ctx = repository.resume()
     ctx.ui:update_offset(args.offset)
   else
-    local path = vim.api.nvim_buf_get_name(0)
-    local source_name = path:match("thetto://(.+)/thetto")
-    if source_name == nil then
-      return nil, "not found source_name"
+    local err
+    ctx, err = repository.get_from_path()
+    if err ~= nil then
+      return nil, "not found state: " .. err
     end
-    ctx = repository.get(source_name)
   end
 
   local collector = ctx.collector
   local source_name = collector.source.name
   local ui = ctx.ui
 
-  local selected_items = ui:selected_items(action_name, range, args.offset)
+  local selected_items = ui:selected_items(action_name, range)
   local item_groups = listlib.group_by(selected_items, function(item)
     return item.kind_name or collector.source.kind_name
   end)
@@ -39,9 +38,9 @@ M.execute = function(action_name, range, action_opts, args)
     else
       kind_name, items = unpack(item_groups[i])
     end
-    local kind, _opts, kind_err = kinds.create(source_name, kind_name, action_name, args)
-    if kind_err ~= nil then
-      return nil, kind_err
+    local kind, _opts, err = kinds.create(source_name, kind_name, action_name, args)
+    if err ~= nil then
+      return nil, err
     end
     opts = _opts
 

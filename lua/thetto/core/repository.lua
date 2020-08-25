@@ -40,6 +40,22 @@ M.resume = function(key)
   return recent, nil
 end
 
+M.get_from_path = function(bufnr)
+  local path = vim.api.nvim_buf_get_name(bufnr or 0)
+  -- this should move to the view module maybe
+  local key = path:match("thetto://(.+)/thetto")
+  if key == nil then
+    return nil, "not matched path: " .. path
+  end
+
+  local ctx = M.get(key)
+  if vim.tbl_isempty(ctx) then
+    return nil, "empty"
+  end
+
+  return ctx, nil
+end
+
 M.delete = function(key)
   persist[key] = nil
 end

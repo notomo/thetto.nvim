@@ -5,12 +5,11 @@ local repository = require("thetto/core/repository")
 local M = {}
 
 M.action = function(_, _, _)
-  local path = vim.api.nvim_buf_get_name(0)
-  local source_name = path:match("thetto://(.+)/thetto")
-  if source_name == nil then
+  local ctx, err = repository.get_from_path()
+  if err ~= nil then
     return ""
   end
-  local ctx = repository.get(source_name)
+
   local collector = ctx.collector
   local ui = ctx.ui
 
@@ -22,7 +21,7 @@ M.action = function(_, _, _)
   end
 
   local kind_name = item.kind_name or collector.source.kind_name
-  local names = kinds.actions(kind_name, source_name)
+  local names = kinds.actions(kind_name, collector.source.name)
   return table.concat(names, "\n")
 end
 

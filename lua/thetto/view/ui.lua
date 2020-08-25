@@ -35,10 +35,9 @@ function UI.open(self)
     if bufnr == -1 then
       goto continue
     end
-    local path = vim.api.nvim_buf_get_name(bufnr)
-    local source_name = path:match("thetto://(.+)/thetto")
-    if source_name ~= nil then
-      M._on_close(source_name, id)
+    local ctx, _ = repository.get_from_path(bufnr)
+    if ctx ~= nil then
+      ctx.ui:close()
     end
     ::continue::
   end
