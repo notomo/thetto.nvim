@@ -10,18 +10,13 @@ M.action = function(_, _, _)
     return ""
   end
 
-  local collector = ctx.collector
-  local ui = ctx.ui
-
-  local action_name = nil
-  local offset = 0
-  local item = ui:selected_items(action_name, {given = false}, offset)
+  local item = ctx.ui:selected_items()[1]
   if item == nil then
     return ""
   end
 
-  local kind_name = item.kind_name or collector.source.kind_name
-  local names = kinds.actions(kind_name, collector.source.name)
+  local kind_name = item.kind_name or ctx.collector.source.kind_name
+  local names = kinds.actions(kind_name, ctx.collector.source.name)
   return table.concat(names, "\n")
 end
 

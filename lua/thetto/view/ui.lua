@@ -332,6 +332,8 @@ function UI.start_insert(self, behavior)
 end
 
 function UI.selected_items(self, action_name, range)
+  range = range or {}
+
   if action_name ~= "toggle_selection" and not vim.tbl_isempty(self.collector.selected) then
     local selected = vim.tbl_values(self.collector.selected)
     table.sort(selected, function(a, b)
