@@ -18,26 +18,27 @@ M.find_action = function(kind, action_opts, action_name, default_action_name, so
 
   local key = action_prefix .. name
   local opts = vim.tbl_extend("force", kind.opts[name] or {}, action_opts)
+  local behavior = vim.tbl_deep_extend("force", {quit = true}, kind.behaviors[name] or {})
 
   local source_action = custom.source_actions[source_name]
   if source_action ~= nil and source_action[key] then
-    return source_action[key], opts, nil
+    return source_action[key], opts, behavior, nil
   end
 
   local kind_action = custom.kind_actions[kind.name]
   if kind_action ~= nil and kind_action[key] then
-    return kind_action[key], opts, nil
+    return kind_action[key], opts, behavior, nil
   end
 
   local action = kind[key]
   if action ~= nil then
-    return action, opts, nil
+    return action, opts, behavior, nil
   end
 
-  return nil, nil, "not found action: " .. name
+  return nil, nil, nil, "not found action: " .. name
 end
 
-local base_options = {
+local base_behaviors = {
   move_to_input = {quit = false},
   move_to_list = {quit = false},
   debug_print = {quit = false},
@@ -61,7 +62,7 @@ local base_action_opts = {
   move_to_input = {behavior = "i"},
 }
 
-M.create = function(source_name, kind_name, action_name, args)
+M.create = function(source_name, kind_name)
   local origin = modulelib.find_kind(kind_name)
   if origin == nil then
     return nil, nil, "not found kind: " .. kind_name
@@ -70,6 +71,7 @@ M.create = function(source_name, kind_name, action_name, args)
 
   local kind = {}
   kind.name = kind_name
+  kind.behaviors = vim.tbl_deep_extend("force", base_behaviors, origin.behaviors or {})
 
   local source_user_opts = {}
   if custom.source_actions ~= nil and custom.source_actions[source_name] ~= nil then
@@ -157,12 +159,7 @@ M.create = function(source_name, kind_name, action_name, args)
     ctx.collector:reverse_sorter(sorter_name)
   end
 
-  local opts = args
-  if base_options[action_name] then
-    opts = vim.tbl_extend("force", args, base_options[action_name])
-  end
-
-  return setmetatable(kind, origin), opts, nil
+  return setmetatable(kind, origin), nil
 end
 
 M.actions = function(kind_name, source_name)

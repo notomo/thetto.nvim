@@ -101,11 +101,11 @@ M.sync_open = function(...)
 end
 
 M.sync_execute = function(...)
-  local collector = require("thetto/entrypoint/command").execute(0, {8888, 8888}, {...})
-  if collector.job == nil then
+  local job = require("thetto/entrypoint/command").execute(0, {8888, 8888}, {...})
+  if job == nil then
     return
   end
-  local ok = collector.job:wait(1000)
+  local ok = job:wait(1000)
   if not ok then
     assert(false, "job wait timeout")
   end

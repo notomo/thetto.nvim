@@ -173,11 +173,7 @@ M._start = function(source_name, source_opts, action_opts, opts)
 end
 
 M.execute = function(has_range, raw_range, raw_args)
-  local action_name, opts, ex_opts, parse_err = M.parse_args(raw_args, {
-    quit = true,
-    resume = false,
-    offset = 0,
-  })
+  local action_name, opts, ex_opts, parse_err = M.parse_args(raw_args, {resume = false, offset = 0})
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
   end

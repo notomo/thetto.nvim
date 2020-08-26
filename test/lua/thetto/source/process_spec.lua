@@ -1,6 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
 local assert = helper.assert
-local command = helper.command
 
 describe("process source", function()
 
@@ -13,8 +12,6 @@ describe("process source", function()
 
     helper.sync_open("process", "--no-insert")
     helper.search("sleep 8")
-
-    command("ThettoDo echo --no-quit")
 
     helper.sync_execute("kill")
 
