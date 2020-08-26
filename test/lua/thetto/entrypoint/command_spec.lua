@@ -178,6 +178,14 @@ hoge]])
     end)
   end)
 
+  it("cannot execute open if there is no items", function()
+    command("Thetto line")
+    helper.sync_input({"hoge"})
+    assert.error_message("not found action: open", function()
+      command("ThettoDo open")
+    end)
+  end)
+
   it("can resume with offset", function()
     helper.set_lines([[
 test1

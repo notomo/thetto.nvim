@@ -27,7 +27,7 @@ M.execute = function(action_name, range, action_opts, opts)
     return item.kind_name or collector.source.kind_name
   end)
   if #item_groups == 0 then
-    table.insert(item_groups, {collector.source.kind_name, {}})
+    table.insert(item_groups, {"base", {}})
   end
 
   local actions = {}
