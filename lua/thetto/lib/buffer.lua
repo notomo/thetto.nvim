@@ -12,12 +12,4 @@ M.force_create = function(name, modify)
   return bufnr
 end
 
-M.find_var = function(bufnr, name)
-  local ok, var = pcall(vim.api.nvim_buf_get_var, bufnr, name)
-  if not ok then
-    return nil
-  end
-  return var
-end
-
 return M

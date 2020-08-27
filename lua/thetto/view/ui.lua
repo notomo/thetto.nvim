@@ -1,6 +1,7 @@
 local highlights = require("thetto/view/highlight")
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
+local filelib = require("thetto/lib/file")
 local repository = require("thetto/core/repository")
 
 local M = {}
@@ -80,16 +81,17 @@ end
 
 function UI._open_windows(self)
   local source = self.collector.source
-  local opts = self.collector.opts
 
   local sign_width = 4
-  local row = vim.o.lines / 2 - ((opts.height + 2) / 2)
-  local column = vim.o.columns / 2 - (opts.width / 2)
+  local height = math.floor(vim.o.lines * 0.5)
+  local width = math.floor(vim.o.columns * 0.6)
+  local row = (vim.o.lines - height) / 2
+  local column = (vim.o.columns - width) / 2
   self.origin_window = vim.api.nvim_get_current_win()
 
   self.list_window = vim.api.nvim_open_win(self.list_bufnr, false, {
-    width = opts.width - sign_width,
-    height = opts.height,
+    width = width - sign_width,
+    height = height,
     relative = "editor",
     row = row,
     col = column + sign_width,
@@ -100,7 +102,7 @@ function UI._open_windows(self)
 
   self.sign_window = vim.api.nvim_open_win(self.sign_bufnr, false, {
     width = sign_width,
-    height = opts.height,
+    height = height,
     relative = "editor",
     row = row,
     col = column,
@@ -112,12 +114,12 @@ function UI._open_windows(self)
   local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._enter('list')"):format(self.sign_bufnr)
   vim.api.nvim_command(on_sign_enter)
 
-  local input_width = opts.width * 0.75
+  local input_width = math.floor(width * 0.75)
   self.input_window = vim.api.nvim_open_win(self.input_bufnr, false, {
     width = input_width,
     height = #self.collector.filters,
     relative = "editor",
-    row = row + opts.height + 1,
+    row = row + height + 1,
     col = column,
     external = false,
     style = "minimal",
@@ -126,10 +128,10 @@ function UI._open_windows(self)
   vim.api.nvim_win_set_option(self.input_window, "winhighlight", "SignColumn:NormalFloat")
 
   self.info_window = vim.api.nvim_open_win(self.info_bufnr, false, {
-    width = opts.width,
+    width = width,
     height = 1,
     relative = "editor",
-    row = row + opts.height,
+    row = row + height,
     col = column,
     external = false,
     style = "minimal",
@@ -140,10 +142,10 @@ function UI._open_windows(self)
   vim.api.nvim_command(on_info_enter)
 
   self.filter_info_window = vim.api.nvim_open_win(self.filter_info_bufnr, false, {
-    width = opts.width - input_width,
+    width = width - input_width,
     height = #self.collector.filters,
     relative = "editor",
-    row = row + opts.height + 1,
+    row = row + height + 1,
     col = column + input_width,
     external = false,
     style = "minimal",
@@ -153,7 +155,7 @@ function UI._open_windows(self)
 
   local group_name = self:_close_group_name()
   vim.api.nvim_command(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require 'thetto/view/ui'._on_close(\"%s\", tonumber(vim.fn.expand('<afile>')))"):format(group_name, source.name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/ui')._on_close(\"%s\", tonumber(vim.fn.expand('<afile>')))"):format(group_name, source.name)
   vim.api.nvim_command(on_win_closed)
   vim.api.nvim_command("augroup END")
 
@@ -176,12 +178,12 @@ function UI._open_windows(self)
     filter_info = self.filter_info_window,
   }
 
-  local preview_column = column + opts.width
-  local preview_width = vim.o.columns - preview_column - 2
+  local preview_width = math.floor((vim.o.columns - width) / 2) - 2
+  local preview_column = width + column + 1
   self.preview_row = row
   self.preview_column = preview_column
   self.preview_width = preview_width
-  self.preview_height = opts.height + 1
+  self.preview_height = height + 1
 end
 
 function UI.resume(self)
@@ -366,23 +368,32 @@ function UI.open_preview(self, open_target)
   self:close_preview()
 
   local height = self.preview_height + #self.collector.filters
-  local bufnr
+  local half_height = height / 2
+
+  local start = 0
+  local row = open_target.row
+  if open_target.row ~= nil and open_target.row > half_height then
+    start = open_target.row - half_height
+    row = half_height
+  end
+
+  local lines = {}
   if open_target.bufnr ~= nil then
-    bufnr = open_target.bufnr
+    local bufnr = open_target.bufnr
+    lines = vim.api.nvim_buf_get_lines(bufnr, start, start + height, false)
   else
-    bufnr = vim.api.nvim_create_buf(false, true)
-    local f = io.open(open_target.path, "r")
-    local lines = {}
-    for _ = 0, height, 1 do
-      local line = f:read()
-      if line == nil then
+    local all = filelib.all(open_target.path)
+    for i = start, start + height, 1 do
+      local line = all[i]
+      if all == nil then
         break
       end
       table.insert(lines, line)
     end
-    io.close(f)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   end
+
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
   self.preview_window = vim.api.nvim_open_win(bufnr, false, {
     width = self.preview_width,
@@ -395,7 +406,19 @@ function UI.open_preview(self, open_target)
     style = "minimal",
   })
   vim.api.nvim_win_set_option(self.preview_window, "scrollbind", false)
-  vim.api.nvim_win_set_option(self.preview_window, "signcolumn", "no")
+
+  if row ~= nil then
+    local ns = vim.api.nvim_create_namespace("thetto-preview")
+    vim.api.nvim_buf_add_highlight(bufnr, ns, "Search", row - 1, 0, -1)
+    vim.api.nvim_win_set_cursor(self.preview_window, {row, 0})
+  end
+end
+
+function UI.opened_preview(self)
+  if self.preview_window == nil then
+    return false
+  end
+  return vim.api.nvim_win_is_valid(self.preview_window)
 end
 
 function UI.close_preview(self)

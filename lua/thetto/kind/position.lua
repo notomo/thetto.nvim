@@ -24,6 +24,15 @@ M.action_vsplit_open = function(_, items)
   end
 end
 
+M.action_preview = function(_, items, ctx)
+  local item = items[1]
+  if item == nil then
+    return
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  ctx.ui:open_preview({bufnr = bufnr, row = item.row})
+end
+
 M.default_action = "open"
 
 return M

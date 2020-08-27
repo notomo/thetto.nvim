@@ -22,6 +22,8 @@ M.behaviors = {
   change_filter = {quit = false},
   reverse_sorter = {quit = false},
   preview = {quit = false},
+  toggle_preview = {quit = false},
+  close_preview = {quit = false},
 }
 
 M.action_toggle_selection = function(_, items, ctx)
@@ -95,6 +97,19 @@ end
 M.action_reverse_sorter = function(self, _, ctx)
   local sorter_name = self.action_opts.name or ctx.ui:current_position_sorter().name
   ctx.collector:reverse_sorter(sorter_name)
+end
+
+M.action_toggle_preview = function(self, items, ctx)
+  if ctx.ui:opened_preview() then
+    ctx.ui:close_preview()
+  else
+    -- TODO: check `not found action`
+    self:action_preview(items, ctx)
+  end
+end
+
+M.action_close_preview = function(_, _, ctx)
+  ctx.ui:close_preview()
 end
 
 M.default_action = "echo"

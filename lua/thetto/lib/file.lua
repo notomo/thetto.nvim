@@ -12,4 +12,14 @@ M.create_if_need = function(file_path)
   return true
 end
 
+M.all = function(path)
+  local f = io.open(path, "r")
+  local lines = {}
+  for line in f:lines() do
+    table.insert(lines, line)
+  end
+  io.close(f)
+  return lines
+end
+
 return M

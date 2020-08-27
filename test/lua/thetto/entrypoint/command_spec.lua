@@ -606,4 +606,19 @@ test2]])
 
     assert.exists_pattern("test1")
   end)
+
+  it("can open and close preview", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    command("Thetto line --no-insert")
+    local count = helper.window_count()
+
+    command("ThettoDo preview")
+    assert.window_count(count + 1)
+
+    command("ThettoDo close_preview")
+    assert.window_count(count)
+  end)
 end)

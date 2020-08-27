@@ -163,12 +163,16 @@ M.path = function(path)
   return M.test_data_dir .. (path or "")
 end
 
+M.window_count = function()
+  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
+end
+
 local vassert = require("vusted.assert")
 local asserts = vassert.asserts
 M.assert = vassert.assert
 
 asserts.create("window_count"):register_eq(function()
-  return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
+  return M.window_count()
 end)
 
 asserts.create("current_line"):register_eq(function()
