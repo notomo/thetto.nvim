@@ -36,10 +36,10 @@ M.collect = function(self, opts)
 end
 
 M.highlight = function(self, bufnr, items)
-  local ns = self.highlights.reset()
+  local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     if item.is_current_branch then
-      vim.api.nvim_buf_add_highlight(bufnr, ns, "Type", i - 1, 0, -1)
+      highlighter:add("Type", i - 1, 0, -1)
     end
   end
 end

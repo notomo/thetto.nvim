@@ -44,8 +44,10 @@ M.collect = function(self)
 end
 
 M.highlight = function(self, bufnr, items)
-  local ns = self.highlights.reset(bufnr)
-  self.highlights.kind(bufnr, items, ns, "directory", "String")
+  local highlighter = self.highlights:reset(bufnr)
+  highlighter:filter("String", items, function(item)
+    return item.kind_name == "directory"
+  end)
 end
 
 M.kind_name = "file"

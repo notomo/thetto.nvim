@@ -43,10 +43,10 @@ M.collect = function()
 end
 
 M.highlight = function(self, bufnr, items)
-  local ns = self.highlights.reset(bufnr)
+  local highlighter = self.highlights:reset(bufnr)
   local end_col = #colored
   for i, item in ipairs(items) do
-    vim.api.nvim_buf_add_highlight(bufnr, ns, item.value, i - 1, 0, end_col)
+    highlighter:add(item.value, i - 1, 0, end_col)
   end
 end
 

@@ -39,9 +39,7 @@ M.highlight = function(self, bufnr, items, input_line, opts)
     return
   end
 
-  local ns = vim.api.nvim_create_namespace("thetto-filter-substring-highlight")
-  vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
-
+  local highlighter = self.highlights:reset(bufnr)
   local texts = to_texts(input_line, opts)
   for i, item in ipairs(items) do
     local offsets = item.column_offsets or {}
@@ -68,7 +66,7 @@ M.highlight = function(self, bufnr, items, input_line, opts)
 
     local offset = offsets[self.key] or 0
     for _, pos in ipairs(positions) do
-      vim.api.nvim_buf_add_highlight(bufnr, ns, "Boolean", i - 1, offset + pos[1] - 1, offset + pos[2])
+      highlighter:add("Boolean", i - 1, offset + pos[1] - 1, offset + pos[2])
     end
   end
 end

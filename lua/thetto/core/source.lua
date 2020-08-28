@@ -1,4 +1,4 @@
-local highlights = require("thetto/view/highlight")
+local highlights = require("thetto/lib/highlight")
 local jobs = require("thetto/lib/job")
 local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
@@ -30,16 +30,26 @@ M.create = function(notifier, source_name, source_opts, opts)
   source.compiled_colors = compiled_colors
 
   source.jobs = jobs
-  source.highlights = highlights
+  source.highlights = highlights.new_factory("thetto-list-highlight")
   source.pathlib = pathlib
   source.filelib = filelib
   source.listlib = listlib
 
+  local label_factory = highlights.new_factory("thetto-sign-highlight")
   source.highlight_sign = origin.highlight_sign or function(self, bufnr, items)
     if #compiled_colors == 0 then
       return
     end
-    self.highlights.color_labels(bufnr, items, self.compiled_colors, self.color_label_key)
+
+    local highlighter = label_factory:reset(bufnr)
+    for i, item in ipairs(items) do
+      for _, color in ipairs(self.compiled_colors) do
+        if color.always or color.regex:match_str(item[self.color_label_key]) then
+          highlighter:set_virtual_text(i - 1, color.chunks, {})
+          break
+        end
+      end
+    end
   end
 
   source.highlight = origin.highlight or function(_, _, _)

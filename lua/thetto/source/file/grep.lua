@@ -66,9 +66,9 @@ M.collect = function(self, opts)
 end
 
 M.highlight = function(self, bufnr, items)
-  local ns = self.highlights.reset(bufnr)
+  local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
-    vim.api.nvim_buf_add_highlight(bufnr, ns, "Comment", i - 1, 0, item.column_offsets.value - 1)
+    highlighter:add("Comment", i - 1, 0, item.column_offsets.value - 1)
   end
 end
 

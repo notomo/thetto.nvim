@@ -1,4 +1,4 @@
-local highlights = require("thetto/view/highlight")
+local highlights = require("thetto/lib/highlight")
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local filelib = require("thetto/lib/file")
@@ -16,17 +16,6 @@ local info_filetype = "thetto-info"
 local filter_info_filetype = "thetto-filter-info"
 
 function UI.open(self)
-  self.notifier:on("update_items", function(input_lines)
-    local err = self:redraw(input_lines)
-    if err ~= nil then
-      return err
-    end
-    M._changed_after(input_lines)
-  end)
-  self.notifier:on("update_selected", function()
-    highlights.update_selections(self.list_bufnr, self.collector.items)
-  end)
-
   local source = self.collector.source
   local opts = self.collector.opts
 
@@ -76,7 +65,26 @@ function UI.open(self)
     vim.api.nvim_buf_set_option(bufnr, "filetype", filter_info_filetype)
   end)
 
+  self.notifier:on("update_items", function(input_lines)
+    local err = self:redraw(input_lines)
+    if err ~= nil then
+      return err
+    end
+    M._changed_after(input_lines)
+  end)
+
+  self.notifier:on("update_selected", function()
+    self:_update_selections_hl()
+  end)
+
   self:_open_windows()
+end
+
+function UI._update_selections_hl(self)
+  local highligher = self._selection_hl_factory:reset(self.list_bufnr)
+  highligher:filter("ThettoSelected", self.collector.items, function(item)
+    return item.selected
+  end)
 end
 
 function UI._open_windows(self)
@@ -219,7 +227,7 @@ function UI.redraw(self, input_lines)
   local source = collector.source
   source:highlight(self.list_bufnr, items)
   source:highlight_sign(self.sign_bufnr, items)
-  highlights.update_selections(self.list_bufnr, items)
+  self:_update_selections_hl()
 
   local filters = collector.filters
   if vim.api.nvim_win_is_valid(self.input_window) then
@@ -408,8 +416,8 @@ function UI.open_preview(self, open_target)
   vim.api.nvim_win_set_option(self.preview_window, "scrollbind", false)
 
   if row ~= nil then
-    local ns = vim.api.nvim_create_namespace("thetto-preview")
-    vim.api.nvim_buf_add_highlight(bufnr, ns, "Search", row - 1, 0, -1)
+    local highlighter = self._preview_hl_factory:create(bufnr)
+    highlighter:add("Search", row - 1, 0, -1)
     vim.api.nvim_win_set_cursor(self.preview_window, {row, 0})
   end
 end
@@ -445,6 +453,9 @@ M.new = function(collector, notifier)
     tbl.active = "list"
     tbl.mode = "n"
   end
+
+  tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
+  tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
 
   local ui = setmetatable(tbl, UI)
   return ui
