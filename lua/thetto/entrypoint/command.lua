@@ -215,10 +215,10 @@ M._execute = function(action_name, range, action_opts, opts)
     table.insert(item_groups, {"base", {}})
   end
 
-  local executor = executors.create(ctx, collector.source.name, action_name, action_opts, collector.opts.action)
+  local executor = executors.create(ctx, collector.source.name, action_opts, collector.opts.action)
   for _, item_group in ipairs(item_groups) do
     local kind_name, items = unpack(item_group)
-    local err = executor:add(kind_name, items)
+    local err = executor:add(action_name, kind_name, items)
     if err ~= nil then
       return nil, err
     end

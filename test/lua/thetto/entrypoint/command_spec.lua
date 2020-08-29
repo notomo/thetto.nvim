@@ -621,4 +621,19 @@ test2]])
     command("ThettoDo close_preview")
     assert.window_count(count)
   end)
+
+  it("can toggle preview", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    command("Thetto line --no-insert")
+    local count = helper.window_count()
+
+    command("ThettoDo toggle_preview")
+    assert.window_count(count + 1)
+
+    command("ThettoDo toggle_preview")
+    assert.window_count(count)
+  end)
 end)

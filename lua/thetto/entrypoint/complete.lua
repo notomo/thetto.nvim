@@ -1,5 +1,6 @@
 local kinds = require("thetto/core/kind")
 local sources = require("thetto/core/source")
+local executors = require("thetto/core/executor")
 local repository = require("thetto/core/repository")
 
 local M = {}
@@ -15,8 +16,9 @@ M.action = function(_, _, _)
     return ""
   end
 
+  local executor = executors.create(ctx, ctx.collector.source.name, {}, ctx.collector.opts.action)
   local kind_name = item.kind_name or ctx.collector.source.kind_name
-  local names = kinds.actions(kind_name, ctx.collector.source.name)
+  local names = kinds.actions(executor, kind_name)
   return table.concat(names, "\n")
 end
 

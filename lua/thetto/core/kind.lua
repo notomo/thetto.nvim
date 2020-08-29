@@ -16,7 +16,10 @@ end
 
 local action_prefix = "action_"
 
-local find_action = function(kind, action_opts, action_name, default_action_name)
+local find_action = function(kind, action_name)
+  local action_opts = kind.executor.action_opts
+  local default_action_name = kind.executor.default_action
+
   local name
   if action_name == "default" and default_action_name ~= nil then
     name = default_action_name
@@ -49,7 +52,7 @@ local find_action = function(kind, action_opts, action_name, default_action_name
   return nil, "not found action: " .. name
 end
 
-M.create = function(source_name, kind_name)
+M.create = function(executor, kind_name)
   local origin
   if kind_name == "base" then
     origin = base
@@ -62,10 +65,13 @@ M.create = function(source_name, kind_name)
     origin.__index = origin
   end
 
+  local source_name = executor.source_name
+
   local kind = {}
   kind.name = kind_name
   kind.source_name = source_name
   kind.jobs = jobs
+  kind.executor = executor
   kind.find_action = find_action
   kind.__index = kind
 
@@ -84,13 +90,14 @@ M.create = function(source_name, kind_name)
   return setmetatable(kind, origin), nil
 end
 
-M.actions = function(kind_name, source_name)
-  local kind = M.create(source_name, kind_name)
+M.actions = function(executor, kind_name)
+  local kind = M.create(executor, kind_name)
   if kind == nil then
     return {}
   end
 
   local names = {}
+  local source_name = executor.source_name
   local kinds = vim.tbl_extend("force", getmetatable(kind), base, custom.source_actions[source_name] or {}, custom.kind_actions[kind_name] or {})
   for key in pairs(kinds) do
     if vim.startswith(key, action_prefix) then

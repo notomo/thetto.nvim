@@ -103,8 +103,7 @@ M.action_toggle_preview = function(self, items, ctx)
   if ctx.ui:opened_preview() then
     ctx.ui:close_preview()
   else
-    -- TODO: check `not found action`
-    self:action_preview(items, ctx)
+    return self.executor:action("preview", self.name, items)
   end
 end
 
