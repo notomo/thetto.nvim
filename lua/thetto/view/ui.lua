@@ -376,32 +376,26 @@ function UI.open_preview(self, open_target)
   self:close_preview()
 
   local height = self.preview_height + #self.collector.filters
-  local half_height = height / 2
+  local half_height = math.floor(height / 2)
 
-  local start = 0
+  local top_row = 1
   local row = open_target.row
   if open_target.row ~= nil and open_target.row > half_height then
-    start = open_target.row - half_height
+    top_row = open_target.row - half_height + 1
     row = half_height
   end
 
-  local lines = {}
+  local lines
   if open_target.bufnr ~= nil then
     local bufnr = open_target.bufnr
-    lines = vim.api.nvim_buf_get_lines(bufnr, start, start + height, false)
+    lines = vim.api.nvim_buf_get_lines(bufnr, top_row - 1, top_row + height - 1, false)
   else
-    local all = filelib.all(open_target.path)
-    for i = start, start + height, 1 do
-      local line = all[i]
-      if all == nil then
-        break
-      end
-      table.insert(lines, line)
-    end
+    lines = filelib.read_lines(open_target.path, top_row, top_row + height)
   end
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
 
   self.preview_window = vim.api.nvim_open_win(bufnr, false, {
     width = self.preview_width,
@@ -417,8 +411,8 @@ function UI.open_preview(self, open_target)
 
   if row ~= nil then
     local highlighter = self._preview_hl_factory:create(bufnr)
-    highlighter:add("Search", row - 1, 0, -1)
-    vim.api.nvim_win_set_cursor(self.preview_window, {row, 0})
+    local range = open_target.range or {s = {column = 0}, e = {column = -1}}
+    highlighter:add("Search", row - 1, range.s.column, range.e.column)
   end
 end
 

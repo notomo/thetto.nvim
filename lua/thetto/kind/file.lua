@@ -9,7 +9,8 @@ local adjust_cursor = function(item)
   if item.row > count then
     row = count
   end
-  vim.api.nvim_win_set_cursor(0, {row, 0})
+  local range = item.range or {s = {column = 0}}
+  vim.api.nvim_win_set_cursor(0, {row, range.s.column})
 end
 
 local get_bufnr = function(item)
@@ -62,9 +63,9 @@ M.action_preview = function(_, items, ctx)
   end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
-    ctx.ui:open_preview({bufnr = bufnr, row = item.row})
+    ctx.ui:open_preview({bufnr = bufnr, row = item.row, range = item.range})
   else
-    ctx.ui:open_preview({path = item.path, row = item.row})
+    ctx.ui:open_preview({path = item.path, row = item.row, range = item.range})
   end
 end
 

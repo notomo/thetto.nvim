@@ -12,11 +12,15 @@ M.create_if_need = function(file_path)
   return true
 end
 
-M.all = function(path)
+M.read_lines = function(path, s, e)
   local f = io.open(path, "r")
   local lines = {}
-  for line in f:lines() do
-    table.insert(lines, line)
+  local read = f:lines()
+  for _ = 1, s - 1, 1 do
+    read() -- skip
+  end
+  for _ = s, e, 1 do
+    table.insert(lines, read())
   end
   io.close(f)
   return lines
