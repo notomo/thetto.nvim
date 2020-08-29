@@ -1,9 +1,9 @@
 local source_core = require("thetto/core/source")
-local filter_core = require "thetto/core/filter"
-local sorter_core = require "thetto/core/sorter"
-local modulelib = require "thetto/lib/module"
-local inputs = require "thetto/input"
-local wraplib = require "thetto/lib/wrap"
+local filter_core = require("thetto/core/filter")
+local sorter_core = require("thetto/core/sorter")
+local modulelib = require("thetto/lib/module")
+local inputs = require("thetto/core/input")
+local wraplib = require("thetto/lib/wrap")
 
 local M = {}
 
@@ -273,9 +273,9 @@ M.create = function(notifier, source_name, source_opts, opts)
   end
 
   if opts.pattern_type ~= nil then
-    local pattern = inputs.get(opts.pattern_type)
-    if pattern == nil then
-      return nil, "not found pattern type: " .. opts.pattern_type
+    local pattern, err = inputs.get(opts.pattern_type)
+    if err ~= nil then
+      return nil, err
     end
     opts.pattern = pattern
   end
