@@ -5,8 +5,18 @@ local base = require("thetto/kind/base")
 
 local M = {}
 
+local Action = function(kind, fn, action_opts, behavior)
+  local tbl = {action_opts = action_opts, behavior = behavior}
+  local action = setmetatable(tbl, kind)
+  action.execute = function(self, items, ctx)
+    return fn(self, items, ctx)
+  end
+  return action
+end
+
 local action_prefix = "action_"
-M.find_action = function(kind, action_opts, action_name, default_action_name, source_name)
+
+local find_action = function(kind, action_opts, action_name, default_action_name)
   local name
   if action_name == "default" and default_action_name ~= nil then
     name = default_action_name
@@ -21,22 +31,22 @@ M.find_action = function(kind, action_opts, action_name, default_action_name, so
   local opts = vim.tbl_extend("force", kind.opts[name] or {}, action_opts)
   local behavior = vim.tbl_deep_extend("force", {quit = true}, kind.behaviors[name] or {})
 
-  local source_action = custom.source_actions[source_name]
+  local source_action = custom.source_actions[kind.source_name]
   if source_action ~= nil and source_action[key] then
-    return source_action[key], opts, behavior, nil
+    return Action(kind, source_action[key], opts, behavior), nil
   end
 
   local kind_action = custom.kind_actions[kind.name]
   if kind_action ~= nil and kind_action[key] then
-    return kind_action[key], opts, behavior, nil
+    return Action(kind, kind_action[key], opts, behavior), nil
   end
 
   local action = kind[key]
   if action ~= nil then
-    return action, opts, behavior, nil
+    return Action(kind, action, opts, behavior), nil
   end
 
-  return nil, nil, nil, "not found action: " .. name
+  return nil, "not found action: " .. name
 end
 
 M.create = function(source_name, kind_name)
@@ -54,7 +64,10 @@ M.create = function(source_name, kind_name)
 
   local kind = {}
   kind.name = kind_name
+  kind.source_name = source_name
   kind.jobs = jobs
+  kind.find_action = find_action
+  kind.__index = kind
 
   kind.behaviors = vim.tbl_deep_extend("force", base.behaviors, origin.behaviors or {})
 

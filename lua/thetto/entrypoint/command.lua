@@ -1,11 +1,12 @@
-local engine = require "thetto/core/engine" -- more concrete naming?
 local notifiers = require "thetto/lib/notifier"
 local collector_core = require "thetto/core/collector"
 local wraplib = require "thetto/lib/wrap"
 local messagelib = require "thetto/lib/message"
+local listlib = require "thetto/lib/list"
 local custom = require "thetto/custom"
 local uis = require "thetto/view/ui"
 local repository = require("thetto/core/repository")
+local executors = require("thetto/core/executor")
 
 local M = {}
 
@@ -183,12 +184,47 @@ M.execute = function(has_range, raw_range, raw_args)
   local range = {first = raw_range[1], last = raw_range[2], given = has_range ~= 0}
   local action_opts = ex_opts.x or {}
   local result, err = wraplib.traceback(function()
-    return engine.execute(action_name, range, action_opts, opts)
+    return M._execute(action_name, range, action_opts, opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
   end
   return result, nil
+end
+
+M._execute = function(action_name, range, action_opts, opts)
+  local ctx
+  if opts.resume then
+    ctx = repository.resume()
+    ctx.ui:update_offset(opts.offset)
+  else
+    local err
+    ctx, err = repository.get_from_path()
+    if err ~= nil then
+      return nil, "not found state: " .. err
+    end
+  end
+
+  local collector = ctx.collector
+  local selected_items = ctx.ui:selected_items(action_name, range)
+
+  local item_groups = listlib.group_by(selected_items, function(item)
+    return item.kind_name or collector.source.kind_name
+  end)
+  if #item_groups == 0 then
+    table.insert(item_groups, {"base", {}})
+  end
+
+  local executor = executors.create(ctx, collector.source.name, action_name, action_opts, collector.opts.action)
+  for _, item_group in ipairs(item_groups) do
+    local kind_name, items = unpack(item_group)
+    local err = executor:add(kind_name, items)
+    if err ~= nil then
+      return nil, err
+    end
+  end
+
+  return executor:batch()
 end
 
 vim.api.nvim_command("doautocmd User ThettoSourceLoad")
