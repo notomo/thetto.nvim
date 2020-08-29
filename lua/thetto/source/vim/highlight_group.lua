@@ -34,10 +34,10 @@ M.collect = function()
       desc = table.concat(factors, " ")
     else
       local link = vim.fn.synIDattr(origin_id, "name")
-      desc = ("xxx %s links to %s"):format(name, link)
+      desc = ("%s %s links to %s"):format(colored, name, link)
     end
 
-    table.insert(items, {desc = desc, value = name})
+    table.insert(items, {desc = desc, value = name, column_offsets = {value = #colored + 1}})
   end
   return items
 end

@@ -24,8 +24,14 @@ M.collect = function()
       modified_marker = "+"
     end
 
-    local desc = ("%s%3d %s"):format(modified_marker, bufnr, name)
-    table.insert(items, {desc = desc, value = name, bufnr = bufnr})
+    local _desc = ("%s%3d "):format(modified_marker, bufnr)
+    local desc = ("%s%s"):format(_desc, name)
+    table.insert(items, {
+      desc = desc,
+      value = name,
+      bufnr = bufnr,
+      column_offsets = {value = #_desc},
+    })
     ::continue::
   end
   return items
