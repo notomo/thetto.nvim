@@ -18,8 +18,12 @@ M.find_kind = function(name)
   return find("thetto/kind/" .. name)
 end
 
-M.find_iteradapter = function(name)
-  return find("thetto/iteradapter/" .. name)
+M.find_filter = function(name)
+  return find("thetto/iteradapter/filter/" .. name)
+end
+
+M.find_sorter = function(name)
+  return find("thetto/iteradapter/sorter/" .. name)
 end
 
 M.find_target = function(name)

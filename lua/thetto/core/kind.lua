@@ -46,7 +46,7 @@ M.create = function(source_name, kind_name)
   else
     local found = modulelib.find_kind(kind_name)
     if found == nil then
-      return nil, nil, "not found kind: " .. kind_name
+      return nil, "not found kind: " .. kind_name
     end
     origin = setmetatable(found, base)
     origin.__index = origin

@@ -123,7 +123,7 @@ function Collector.inverse_filter(self, name)
 
   local filter = self.filters[index]
   filter.inverse = not filter.inverse
-  self._filter_names[index] = filter:get_name()
+  self._filter_names[index] = filter.name
   self:update_filters(self._filter_names)
 end
 
@@ -138,7 +138,7 @@ function Collector.change_filter(self, old, new)
     return nil, ferr
   end
 
-  self._filter_names[index] = filter:get_name()
+  self._filter_names[index] = filter.name
   self:update_filters(self._filter_names)
 end
 
@@ -150,7 +150,7 @@ function Collector.reverse_sorter(self, name)
 
   local sorter = self.sorters[index]
   sorter.reverse = not sorter.reverse
-  self._sorter_names[index] = sorter:get_name()
+  self._sorter_names[index] = sorter.name
   self:update_sorters(self._sorter_names)
 end
 
@@ -203,7 +203,7 @@ function Collector._update_filters(self, names)
       return err
     end
     table.insert(filters, filter)
-    table.insert(new_names, filter:get_name())
+    table.insert(new_names, filter.name)
   end
 
   self.filters = filters
@@ -221,7 +221,7 @@ function Collector._update_sorters(self, names)
       return err
     end
     table.insert(sorters, sorter)
-    table.insert(new_names, sorter:get_name())
+    table.insert(new_names, sorter.name)
   end
 
   self.sorters = sorters

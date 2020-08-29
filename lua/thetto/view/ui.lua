@@ -260,7 +260,7 @@ function UI._redraw_info(self)
   local sorter_info = ""
   local sorter_names = {}
   for _, sorter in ipairs(self.collector.sorters) do
-    table.insert(sorter_names, sorter:get_name())
+    table.insert(sorter_names, sorter.name)
   end
   if #sorter_names > 0 then
     sorter_info = "  sorter=" .. table.concat(sorter_names, ", ")

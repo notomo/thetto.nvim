@@ -26,18 +26,17 @@ M.create = function(filter_name, opts)
     return nil, "not found filter modifier: " .. modifier_name
   end
 
-  local origin = modulelib.find_iteradapter("filter/" .. filter_name)
+  local origin = modulelib.find_filter(filter_name)
   if origin == nil then
     return nil, "not found filter: " .. filter_name
   end
-  origin.__index = origin
 
   local filter = {}
   filter.key = key or origin.key or "value"
   filter.inverse = inverse
   filter.highlights = highlights.new_factory("thetto-filter-highlight-" .. filter_name)
 
-  filter.get_name = function(self)
+  filter._name = function(self)
     local name = ("%s:%s"):format(filter_name, self.key)
     if self.inverse then
       name = "-" .. name
@@ -47,7 +46,6 @@ M.create = function(filter_name, opts)
     end
     return name
   end
-  filter.name = filter:get_name()
 
   if modifier ~= nil then
     filter.to_value = function(self, item)
@@ -59,7 +57,16 @@ M.create = function(filter_name, opts)
     end
   end
 
-  return setmetatable(filter, origin), nil
+  local meta = {
+    __index = function(_, k)
+      if k == "name" then
+        return filter:_name()
+      end
+      return origin[k]
+    end,
+  }
+
+  return setmetatable(filter, meta), nil
 end
 
 return M
