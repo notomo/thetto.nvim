@@ -2,7 +2,6 @@ local jobs = require("thetto/lib/job")
 local modulelib = require("thetto/lib/module")
 local custom = require("thetto/custom")
 local base = require("thetto/kind/base")
-base.__index = base
 
 local M = {}
 

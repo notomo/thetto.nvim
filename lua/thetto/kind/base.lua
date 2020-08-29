@@ -114,4 +114,6 @@ end
 
 M.default_action = "echo"
 
+M.__index = M
+
 return M
