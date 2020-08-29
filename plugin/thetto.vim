@@ -10,8 +10,3 @@ else
     command! -nargs=* -complete=custom,thetto#complete#source Thetto lua require("thetto/entrypoint/command").open({<f-args>})
     command! -nargs=* -range=0 -complete=custom,thetto#complete#action ThettoDo lua require("thetto/entrypoint/command").execute(<count>, {<line1>, <line2>}, {<f-args>})
 endif
-
-highlight default link ThettoSelected Statement
-highlight default link ThettoInfo StatusLine
-highlight default link ThettoColorLabelOthers StatusLine
-highlight default link ThettoColorLabelBackground NormalFloat

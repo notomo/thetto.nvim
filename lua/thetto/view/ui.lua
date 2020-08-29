@@ -133,7 +133,7 @@ function UI._open_windows(self)
     style = "minimal",
   })
   vim.api.nvim_win_set_option(self.input_window, "signcolumn", "yes:1")
-  vim.api.nvim_win_set_option(self.input_window, "winhighlight", "SignColumn:NormalFloat")
+  vim.api.nvim_win_set_option(self.input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput")
 
   self.info_window = vim.api.nvim_open_win(self.info_bufnr, false, {
     width = width,
@@ -412,7 +412,7 @@ function UI.open_preview(self, open_target)
   if row ~= nil then
     local highlighter = self._preview_hl_factory:create(bufnr)
     local range = open_target.range or {s = {column = 0}, e = {column = -1}}
-    highlighter:add("Search", row - 1, range.s.column, range.e.column)
+    highlighter:add("ThettoPreview", row - 1, range.s.column, range.e.column)
   end
 end
 
@@ -450,6 +450,13 @@ M.new = function(collector, notifier)
 
   tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
   tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
+
+  vim.api.nvim_command("highlight default link ThettoSelected Statement")
+  vim.api.nvim_command("highlight default link ThettoPreview Search")
+  vim.api.nvim_command("highlight default link ThettoInfo StatusLine")
+  vim.api.nvim_command("highlight default link ThettoColorLabelOthers StatusLine")
+  vim.api.nvim_command("highlight default link ThettoColorLabelBackground NormalFloat")
+  vim.api.nvim_command("highlight default link ThettoInput NormalFloat")
 
   local ui = setmetatable(tbl, UI)
   return ui

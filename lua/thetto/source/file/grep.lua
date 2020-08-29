@@ -65,10 +65,12 @@ M.collect = function(self, opts)
   return {}, job
 end
 
+vim.api.nvim_command("highlight default link ThettoFileGrepPath Comment")
+
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
-    highlighter:add("Comment", i - 1, 0, item.column_offsets.value - 1)
+    highlighter:add("ThettoFileGrepPath", i - 1, 0, item.column_offsets.value - 1)
   end
 end
 

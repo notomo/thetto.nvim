@@ -34,6 +34,8 @@ M.apply = function(self, items, input_line, opts)
   return filtered
 end
 
+vim.api.nvim_command("highlight default link ThettoFilterSubstringMatch Boolean")
+
 M.highlight = function(self, bufnr, items, input_line, opts)
   if self.inverse then
     return
@@ -66,7 +68,7 @@ M.highlight = function(self, bufnr, items, input_line, opts)
 
     local offset = offsets[self.key] or 0
     for _, pos in ipairs(positions) do
-      highlighter:add("Boolean", i - 1, offset + pos[1] - 1, offset + pos[2])
+      highlighter:add("ThettoFilterSubstringMatch", i - 1, offset + pos[1] - 1, offset + pos[2])
     end
   end
 end

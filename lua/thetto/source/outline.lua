@@ -37,11 +37,14 @@ M.collect = function(self, opts)
   return {}, job
 end
 
+vim.api.nvim_command("highlight default link ThettoOutlineLine Comment")
+vim.api.nvim_command("highlight default link ThettoOutlineType Statement")
+
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
-    highlighter:add("Comment", i - 1, item.column_offsets.line, -1)
-    highlighter:add("Statement", i - 1, item.column_offsets.type, item.column_offsets.line)
+    highlighter:add("ThettoOutlineLine", i - 1, item.column_offsets.line, -1)
+    highlighter:add("ThettoOutlineType", i - 1, item.column_offsets.type, item.column_offsets.line)
   end
 end
 

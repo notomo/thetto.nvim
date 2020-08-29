@@ -35,11 +35,13 @@ M.collect = function(self, opts)
   return {}, job
 end
 
+vim.api.nvim_command("highlight default link ThettoGitActiveBranch Type")
+
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     if item.is_current_branch then
-      highlighter:add("Type", i - 1, 0, -1)
+      highlighter:add("ThettoGitActiveBranch", i - 1, 0, -1)
     end
   end
 end
