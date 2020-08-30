@@ -166,8 +166,13 @@ M._start = function(source_name, source_opts, action_opts, opts)
   if err ~= nil then
     return nil, err
   end
+
   ui:open()
-  collector:update()
+
+  err = collector:update()
+  if err ~= nil then
+    return nil, err
+  end
 
   return collector, nil
 end
@@ -207,10 +212,8 @@ M._execute = function(action_name, range, action_opts, opts)
   end
 
   local selected_items = ctx.ui:selected_items(action_name, range)
-
-  local collector = ctx.collector
   local item_groups = listlib.group_by(selected_items, function(item)
-    return item.kind_name or collector.source.kind_name
+    return item.kind_name or ctx.collector.source.kind_name
   end)
   if #item_groups == 0 then
     table.insert(item_groups, {"base", {}})

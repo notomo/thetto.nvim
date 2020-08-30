@@ -19,7 +19,16 @@ function Executor._action(self, action_name, kind_name, items, action_opts)
     return nil, err
   end
 
-  local action, action_err = kind:find_action(action_name, action_opts)
+  local name
+  if action_name == "default" and self.default_action_name ~= nil then
+    name = self.default_action_name
+  else
+    name = action_name
+  end
+
+  local opts = vim.tbl_extend("force", self.default_action_opts, action_opts or {})
+
+  local action, action_err = kind:find_action(name, opts)
   if action_err ~= nil then
     return nil, action_err
   end
@@ -58,12 +67,12 @@ function Executor.action(self, ctx, action_name, kind_name, items, action_opts)
   return action(ctx)
 end
 
-M.create = function(notifier, source_name, default_action_opts, default_action)
+M.create = function(notifier, source_name, default_action_opts, default_action_name)
   local executor = {
     notifier = notifier,
     source_name = source_name,
     default_action_opts = default_action_opts,
-    default_action = default_action,
+    default_action_name = default_action_name,
     actions = {},
   }
   return setmetatable(executor, Executor)
