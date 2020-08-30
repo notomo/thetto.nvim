@@ -105,6 +105,7 @@ local start_default_opts = {
   filters = {},
   sorters = {},
   allow_empty = false,
+  preview = false,
 }
 
 M.open = function(raw_args)

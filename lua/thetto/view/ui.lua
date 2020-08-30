@@ -186,12 +186,9 @@ function UI._open_windows(self)
     filter_info = self.filter_info_window,
   }
 
-  local preview_width = math.floor((vim.o.columns - width) / 2) - 2
-  local preview_column = width + column + 1
-  self.preview_row = row
-  self.preview_column = preview_column
-  self.preview_width = preview_width
-  self.preview_height = height + 1
+  if self.collector.opts.preview then
+    self:open_preview({})
+  end
 end
 
 function UI.resume(self)
@@ -373,9 +370,8 @@ function UI.selected_items(self, action_name, range)
 end
 
 function UI.open_preview(self, open_target)
-  self:close_preview()
-
-  local height = self.preview_height + #self.collector.filters
+  local list_config = vim.api.nvim_win_get_config(self.list_window)
+  local height = list_config.height + #self.collector.filters + 1
   local half_height = math.floor(height / 2)
 
   local top_row = 1
@@ -387,27 +383,63 @@ function UI.open_preview(self, open_target)
 
   local lines
   if open_target.bufnr ~= nil then
-    local bufnr = open_target.bufnr
-    lines = vim.api.nvim_buf_get_lines(bufnr, top_row - 1, top_row + height - 1, false)
-  else
+    lines = vim.api.nvim_buf_get_lines(open_target.bufnr, top_row - 1, top_row + height - 1, false)
+  elseif open_target.path ~= nil then
     lines = filelib.read_lines(open_target.path, top_row, top_row + height)
+  else
+    lines = {}
   end
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
 
-  self.preview_window = vim.api.nvim_open_win(bufnr, false, {
-    width = self.preview_width,
-    height = height,
+  local input_config = vim.api.nvim_win_get_config(self.input_window)
+  local info_config = vim.api.nvim_win_get_config(self.info_window)
+  local sign_config = vim.api.nvim_win_get_config(self.sign_window)
+  local filter_info_config = vim.api.nvim_win_get_config(self.filter_info_window)
+  local left_column = 7
+  vim.api.nvim_win_set_config(self.list_window, {
     relative = "editor",
-    row = self.preview_row,
-    col = self.preview_column,
-    focusable = false,
-    external = false,
-    style = "minimal",
+    col = left_column + sign_config.width,
+    row = list_config.row,
   })
-  vim.api.nvim_win_set_option(self.preview_window, "scrollbind", false)
+  vim.api.nvim_win_set_config(self.sign_window, {
+    relative = "editor",
+    col = left_column,
+    row = list_config.row,
+  })
+  vim.api.nvim_win_set_config(self.info_window, {
+    relative = "editor",
+    col = left_column,
+    row = info_config.row,
+  })
+  vim.api.nvim_win_set_config(self.input_window, {
+    relative = "editor",
+    col = left_column,
+    row = input_config.row,
+  })
+  vim.api.nvim_win_set_config(self.filter_info_window, {
+    relative = "editor",
+    col = left_column + input_config.width,
+    row = filter_info_config.row,
+  })
+
+  if not self:opened_preview() then
+    self.preview_window = vim.api.nvim_open_win(bufnr, false, {
+      width = vim.o.columns - left_column - input_config.width - filter_info_config.width - 3,
+      height = height,
+      relative = "editor",
+      row = list_config.row,
+      col = left_column + input_config.width + filter_info_config.width + 1,
+      focusable = false,
+      external = false,
+      style = "minimal",
+    })
+    vim.api.nvim_win_set_option(self.preview_window, "scrollbind", false)
+  else
+    vim.api.nvim_win_set_buf(self.preview_window, bufnr)
+  end
 
   if row ~= nil then
     local highlighter = self._preview_hl_factory:create(bufnr)
