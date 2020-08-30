@@ -103,7 +103,7 @@ M.action_toggle_preview = function(self, items, ctx)
   if ctx.ui:opened_preview() then
     ctx.ui:close_preview()
   else
-    return self.executor:action("preview", self.name, items)
+    return self.executor:action(ctx, "preview", self.name, items)
   end
 end
 

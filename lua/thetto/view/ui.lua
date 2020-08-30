@@ -77,6 +77,10 @@ function UI.open(self)
     self:_update_selections_hl()
   end)
 
+  self.notifier:on("close", function()
+    self:close()
+  end)
+
   self:_open_windows()
 end
 

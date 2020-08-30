@@ -108,7 +108,7 @@ local start_default_opts = {
   preview = false,
 }
 
-M.open = function(raw_args)
+M.start_by_excmd = function(raw_args)
   local source_name, opts, ex_opts, parse_err = M.parse_args(raw_args, vim.tbl_extend("force", start_default_opts, custom.opts))
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
@@ -129,10 +129,10 @@ M.open = function(raw_args)
   return result, nil
 end
 
-M.start = function(source_name, ctx)
-  local source_opts = ctx.source_opts or {}
-  local action_opts = ctx.action_opts or {}
-  local opts = vim.tbl_extend("force", start_default_opts, custom.opts, ctx.opts or {})
+M.start = function(source_name, args)
+  local source_opts = args.source_opts or {}
+  local action_opts = args.action_opts or {}
+  local opts = vim.tbl_extend("force", start_default_opts, custom.opts, args.opts or {})
   local result, err = wraplib.traceback(function()
     return M._start(source_name, source_opts, action_opts, opts)
   end)
@@ -143,31 +143,35 @@ M.start = function(source_name, ctx)
 end
 
 M._start = function(source_name, source_opts, action_opts, opts)
-  local collector
   if opts.resume then
-    local ctx = repository.resume(source_name)
-    if ctx ~= nil then
-      collector = ctx.collector
+    local ctx, err = repository.resume(source_name)
+    if err ~= nil then
+      return nil, err
     end
     ctx.ui:resume()
-  else
-    local notifier = notifiers.new()
-    local c, err = collector_core.create(notifier, source_name, source_opts, opts)
-    if err ~= nil then
-      return nil, err
-    end
-    collector = c
-    local ui = uis.new(collector, notifier)
-
-    repository.set(source_name, {collector = collector, ui = ui, action_opts = action_opts})
-
-    err = collector:start()
-    if err ~= nil then
-      return nil, err
-    end
-    ui:open()
-    collector:update()
+    return ctx.collector, nil
   end
+
+  local notifier = notifiers.new()
+  local collector, err = collector_core.create(notifier, source_name, source_opts, opts)
+  if err ~= nil then
+    return nil, err
+  end
+  local ui = uis.new(collector, notifier)
+
+  repository.set(source_name, {
+    collector = collector,
+    ui = ui,
+    action_opts = action_opts,
+    notifier = notifier,
+  })
+
+  err = collector:start()
+  if err ~= nil then
+    return nil, err
+  end
+  ui:open()
+  collector:update()
 
   return collector, nil
 end
@@ -206,9 +210,9 @@ M._execute = function(action_name, range, action_opts, opts)
     end
   end
 
-  local collector = ctx.collector
   local selected_items = ctx.ui:selected_items(action_name, range)
 
+  local collector = ctx.collector
   local item_groups = listlib.group_by(selected_items, function(item)
     return item.kind_name or collector.source.kind_name
   end)
@@ -216,7 +220,8 @@ M._execute = function(action_name, range, action_opts, opts)
     table.insert(item_groups, {"base", {}})
   end
 
-  local executor = executors.create(ctx, collector.source.name, action_opts, collector.opts.action)
+  local _action_opts = vim.tbl_extend("force", ctx.action_opts, action_opts)
+  local executor = executors.create(ctx.notifier, collector.source.name, _action_opts, collector.opts.action)
   for _, item_group in ipairs(item_groups) do
     local kind_name, items = unpack(item_group)
     local err = executor:add(action_name, kind_name, items)
@@ -225,7 +230,7 @@ M._execute = function(action_name, range, action_opts, opts)
     end
   end
 
-  return executor:batch()
+  return executor:batch(ctx)
 end
 
 vim.api.nvim_command("doautocmd User ThettoSourceLoad")

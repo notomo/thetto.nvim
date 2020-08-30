@@ -16,7 +16,7 @@ M.action = function(_, _, _)
     return ""
   end
 
-  local executor = executors.create(ctx, ctx.collector.source.name, {}, ctx.collector.opts.action)
+  local executor = executors.create(ctx.notifier, ctx.collector.source.name, {}, ctx.collector.opts.action)
   local kind_name = item.kind_name or ctx.collector.source.kind_name
   local names = kinds.actions(executor, kind_name)
   return table.concat(names, "\n")

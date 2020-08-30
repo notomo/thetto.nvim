@@ -79,7 +79,7 @@ M.sync_input = function(texts)
 end
 
 M.sync_open = function(...)
-  local collector = require("thetto/entrypoint/command").open({...})
+  local collector = require("thetto/entrypoint/command").start_by_excmd({...})
   if collector.job == nil then
     return
   end
