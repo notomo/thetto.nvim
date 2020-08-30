@@ -16,8 +16,8 @@ end
 
 local action_prefix = "action_"
 
-local find_action = function(kind, action_name)
-  local action_opts = kind.executor.action_opts
+local find_action = function(kind, action_name, current_action_opts)
+  local action_opts = vim.tbl_extend("force", kind.executor.default_action_opts, current_action_opts or {})
   local default_action_name = kind.executor.default_action
 
   local name

@@ -157,14 +157,10 @@ M._start = function(source_name, source_opts, action_opts, opts)
   if err ~= nil then
     return nil, err
   end
+  local executor = executors.create(notifier, source_name, action_opts, opts.action)
   local ui = uis.new(collector, notifier)
 
-  repository.set(source_name, {
-    collector = collector,
-    ui = ui,
-    action_opts = action_opts,
-    notifier = notifier,
-  })
+  repository.set(source_name, {collector = collector, ui = ui, executor = executor})
 
   err = collector:start()
   if err ~= nil then
@@ -220,11 +216,10 @@ M._execute = function(action_name, range, action_opts, opts)
     table.insert(item_groups, {"base", {}})
   end
 
-  local _action_opts = vim.tbl_extend("force", ctx.action_opts, action_opts)
-  local executor = executors.create(ctx.notifier, collector.source.name, _action_opts, collector.opts.action)
+  local executor = ctx.executor
   for _, item_group in ipairs(item_groups) do
     local kind_name, items = unpack(item_group)
-    local err = executor:add(action_name, kind_name, items)
+    local err = executor:add(action_name, kind_name, items, action_opts)
     if err ~= nil then
       return nil, err
     end
