@@ -68,14 +68,14 @@ function Executor.action(self, ctx, action_name, kind_name, items, action_opts)
 end
 
 M.create = function(notifier, source_name, default_action_opts, default_action_name)
-  local executor = {
+  local tbl = {
     notifier = notifier,
     source_name = source_name,
     default_action_opts = default_action_opts,
     default_action_name = default_action_name,
     actions = {},
   }
-  return setmetatable(executor, Executor)
+  return setmetatable(tbl, Executor)
 end
 
 return M

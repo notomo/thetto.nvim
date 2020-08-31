@@ -65,8 +65,15 @@ function UI.open(self)
     vim.api.nvim_buf_set_option(bufnr, "filetype", filter_info_filetype)
   end)
 
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/ui')._on_moved(\"%s\")"):format(self.list_bufnr, source.name)
+  vim.api.nvim_command(on_moved)
+
   self.notifier:on("update_items", function(input_lines)
     local err = self:redraw(input_lines)
+    if err ~= nil then
+      return err
+    end
+    err = self.notifier:send("execute")
     if err ~= nil then
       return err
     end
@@ -189,10 +196,6 @@ function UI._open_windows(self)
     info = self.info_window,
     filter_info = self.filter_info_window,
   }
-
-  if self.collector.opts.preview then
-    self:open_preview({})
-  end
 end
 
 function UI.resume(self)
@@ -523,6 +526,14 @@ M._on_enter = function(key, to)
     return
   end
   ui:enter(to)
+end
+
+M._on_moved = function(key)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  ui.notifier:send("execute")
 end
 
 -- for testing

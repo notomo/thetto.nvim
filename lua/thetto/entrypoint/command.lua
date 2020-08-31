@@ -27,7 +27,7 @@ local start_default_opts = {
   filters = {},
   sorters = {},
   allow_empty = false,
-  preview = false,
+  auto = nil,
 }
 
 M.start_by_excmd = function(raw_args)
@@ -83,11 +83,28 @@ M._start = function(source_name, source_opts, action_opts, opts)
   local executor = executors.create(notifier, source_name, action_opts, opts.action)
   local ui = uis.new(collector, notifier)
 
-  repository.set(source_name, {collector = collector, ui = ui, executor = executor})
+  local ctx = {collector = collector, ui = ui, executor = executor}
+  repository.set(source_name, ctx)
 
   err = collector:start()
   if err ~= nil then
     return nil, err
+  end
+
+  if opts.auto == nil then
+    notifier:on("execute", function()
+    end)
+  else
+    notifier:on("execute", function()
+      local item = ui:selected_items()[1]
+      if item == nil then
+        return nil
+      end
+
+      local kind_name = item.kind_name or collector.source.kind_name
+      local _, exec_err = executor:action(ctx, opts.auto, kind_name, {item}, action_opts)
+      return exec_err
+    end)
   end
 
   ui:open()
