@@ -589,9 +589,12 @@ test5]])
 test1
 test2]])
 
-    require("thetto/entrypoint/command").start("line", {opts = {insert = false}})
+    require("thetto/entrypoint/command").start({source_name = "line", opts = {insert = false}})
 
-    assert.exists_pattern("test2")
+    helper.search("test2")
+    command("ThettoDo open")
+
+    assert.current_line("test2")
   end)
 
   it("can resume current window", function()

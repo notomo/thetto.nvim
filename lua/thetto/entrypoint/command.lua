@@ -36,10 +36,6 @@ M.start_by_excmd = function(raw_args)
     return nil, messagelib.error(parse_err)
   end
 
-  if source_name == nil and not opts.resume then
-    return nil, messagelib.error("no source")
-  end
-
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()
@@ -51,7 +47,8 @@ M.start_by_excmd = function(raw_args)
   return result, nil
 end
 
-M.start = function(source_name, args)
+M.start = function(args)
+  local source_name = args.source_name
   local source_opts = args.source_opts or {}
   local action_opts = args.action_opts or {}
   local opts = vim.tbl_extend("force", start_default_opts, custom.opts, args.opts or {})
@@ -65,6 +62,10 @@ M.start = function(source_name, args)
 end
 
 M._start = function(source_name, source_opts, action_opts, opts)
+  if source_name == nil and not opts.resume then
+    return nil, "no source"
+  end
+
   if opts.resume then
     local ctx, err = repository.resume(source_name)
     if err ~= nil then
