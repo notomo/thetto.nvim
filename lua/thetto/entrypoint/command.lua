@@ -97,12 +97,14 @@ M._start = function(source_name, source_opts, action_opts, opts)
   else
     notifier:on("execute", function()
       local item = ui:selected_items()[1]
-      if item == nil then
-        return nil
+      local items = {}
+      local kind_name = "base"
+      if item ~= nil then
+        items = {item}
+        kind_name = item.kind_name or collector.source.kind_name
       end
 
-      local kind_name = item.kind_name or collector.source.kind_name
-      local _, exec_err = executor:action(ctx, opts.auto, kind_name, {item}, action_opts)
+      local _, exec_err = executor:action(ctx, opts.auto, kind_name, items, action_opts)
       return exec_err
     end)
   end

@@ -99,6 +99,10 @@ M.action_reverse_sorter = function(self, _, ctx)
   ctx.collector:reverse_sorter(sorter_name)
 end
 
+M.action_preview = function(_, _, ctx)
+  return ctx.ui:open_preview({})
+end
+
 M.action_toggle_preview = function(self, items, ctx)
   if ctx.ui:opened_preview() then
     ctx.ui:close_preview()
