@@ -184,14 +184,14 @@ end
 
 function Collector.update_filters(self, names)
   self:_update_filters(names)
-  self:_update_items(self._input_lines)
-  return self.notifier:send("update_items", self._input_lines)
+  self:_update_items(self.input_lines)
+  return self.notifier:send("update_items", self.input_lines)
 end
 
 function Collector.update_sorters(self, names)
   self:_update_sorters(names)
-  self:_update_items(self._input_lines)
-  return self.notifier:send("update_items", self._input_lines)
+  self:_update_items(self.input_lines)
+  return self.notifier:send("update_items", self.input_lines)
 end
 
 function Collector._update_filters(self, names)
@@ -301,7 +301,7 @@ M.create = function(notifier, source_name, source_opts, opts)
     is_finished = false,
     _filter_names = source.filters,
     _sorter_names = source.sorters,
-    _input_lines = {},
+    input_lines = {},
   }
   local collector = setmetatable(collector_tbl, Collector)
 
@@ -315,10 +315,10 @@ M.create = function(notifier, source_name, source_opts, opts)
   end
 
   local update = wraplib.debounce(opts.debounce_ms, function()
-    return collector:update(collector._input_lines)
+    return collector:update(collector.input_lines)
   end)
   notifier:on("update_input", function(lines)
-    collector._input_lines = lines
+    collector.input_lines = lines
     return update()
   end)
   notifier:on("update_all_items", function(items)

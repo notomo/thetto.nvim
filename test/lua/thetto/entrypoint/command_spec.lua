@@ -86,7 +86,9 @@ test22]])
     command("normal! G")
 
     command("ThettoDo quit")
-    command("Thetto --resume")
+    helper.wait_ui(function()
+      command("Thetto --resume")
+    end)
 
     command("ThettoDo move_to_input")
 
@@ -112,7 +114,9 @@ test22]])
     command("ThettoDo quit")
     command("Thetto vim/runtimepath")
     command("ThettoDo quit")
-    command("Thetto line --resume")
+    helper.wait_ui(function()
+      command("Thetto line --resume")
+    end)
 
     assert.filetype("thetto-input")
     assert.current_line("test2")

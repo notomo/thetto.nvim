@@ -12,4 +12,10 @@ M.force_create = function(name, modify)
   return bufnr
 end
 
+M.scratch = function(modify)
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  modify(bufnr)
+  return bufnr
+end
+
 return M

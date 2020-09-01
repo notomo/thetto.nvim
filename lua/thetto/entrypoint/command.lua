@@ -71,7 +71,10 @@ M._start = function(source_name, source_opts, action_opts, opts)
     if err ~= nil then
       return nil, err
     end
-    ctx.ui:resume()
+    err = ctx.ui:resume()
+    if err ~= nil then
+      return nil, err
+    end
     return ctx.collector, nil
   end
 

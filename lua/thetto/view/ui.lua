@@ -10,10 +10,7 @@ local UI = {}
 UI.__index = UI
 
 local input_filetype = "thetto-input"
-local sign_filetype = "thetto-sign"
 local list_filetype = "thetto"
-local info_filetype = "thetto-info"
-local filter_info_filetype = "thetto-filter-info"
 
 function UI.open(self)
   local source = self.collector.source
@@ -35,6 +32,7 @@ function UI.open(self)
   self.input_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, #source.filters))
+    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
   vim.api.nvim_buf_attach(self.input_bufnr, false, {
     on_lines = function()
@@ -46,32 +44,36 @@ function UI.open(self)
     end,
   })
 
-  self.sign_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, sign_filetype), function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "filetype", sign_filetype)
+  self.sign_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, opts.display_limit))
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
 
   self.list_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, list_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", list_filetype)
+    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
 
-  self.info_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, info_filetype), function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "filetype", info_filetype)
+  self.info_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
 
-  self.filter_info_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, filter_info_filetype), function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "filetype", filter_info_filetype)
+  self.filter_info_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
 
   local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/ui')._on_moved(\"%s\")"):format(self.list_bufnr, source.name)
   vim.api.nvim_command(on_moved)
 
-  self.notifier:on("update_items", function(input_lines)
+  self.notifier:on("update_items", function(input_lines, row)
     local err = self:redraw(input_lines)
     if err ~= nil then
       return err
+    end
+    if row ~= nil then
+      vim.api.nvim_win_set_cursor(self.list_window, {row, 0})
     end
     err = self.notifier:send("execute")
     if err ~= nil then
@@ -199,7 +201,9 @@ function UI._open_windows(self)
 end
 
 function UI.resume(self)
-  self:_open_windows()
+  self:open()
+  vim.api.nvim_buf_set_lines(self.input_bufnr, 0, -1, false, self.collector.input_lines)
+  return self.notifier:send("update_items", self.collector.input_lines, self.row)
 end
 
 function UI._close_group_name(self)
@@ -286,7 +290,10 @@ end
 
 function UI.update_offset(self, offset)
   local row = self.row + offset
-  local line_count = vim.api.nvim_buf_line_count(self.list_bufnr)
+  local line_count = #self.collector.items
+  if self.collector.opts.display_limit < line_count then
+    line_count = self.collector.opts.display_limit
+  end
   if line_count < row then
     row = line_count
   elseif row < 1 then
@@ -366,7 +373,7 @@ function UI.selected_items(self, action_name, range)
 
   local index
   local filetype = vim.bo.filetype
-  if filetype == input_filetype or filetype == info_filetype then
+  if filetype == input_filetype then
     index = 1
   elseif vim.bo.filetype == list_filetype then
     index = vim.fn.line(".")
