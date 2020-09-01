@@ -145,7 +145,6 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(self.input_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_option(self.input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput")
 
   self.info_window = vim.api.nvim_open_win(self.info_bufnr, false, {
@@ -157,10 +156,11 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(self.info_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_option(self.info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
   local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('input')"):format(self.info_bufnr)
   vim.api.nvim_command(on_info_enter)
+
+  self:_set_left_padding()
 
   self.filter_info_window = vim.api.nvim_open_win(self.filter_info_bufnr, false, {
     width = width - input_width,
@@ -437,20 +437,18 @@ function UI.open_preview(self, open_target)
     col = left_column,
     row = info_config.row,
   })
-  -- HACK: Does nvim_win_set_config reset signcolumn?
-  vim.api.nvim_win_set_option(self.info_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_config(self.input_window, {
     relative = "editor",
     col = left_column,
     row = input_config.row,
   })
-  -- HACK: Does nvim_win_set_config reset signcolumn?
-  vim.api.nvim_win_set_option(self.input_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_config(self.filter_info_window, {
     relative = "editor",
     col = left_column + input_config.width,
     row = filter_info_config.row,
   })
+
+  self:_set_left_padding()
 
   if not self:opened_preview() then
     self.preview_window = vim.api.nvim_open_win(bufnr, false, {
@@ -494,6 +492,12 @@ function UI._head_lines(items)
     table.insert(lines, item.desc or item.value)
   end
   return lines
+end
+
+-- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
+function UI._set_left_padding(self)
+  vim.api.nvim_win_set_option(self.input_window, "signcolumn", "yes:1")
+  vim.api.nvim_win_set_option(self.info_window, "signcolumn", "yes:1")
 end
 
 M.new = function(collector, notifier)
