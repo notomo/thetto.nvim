@@ -29,8 +29,7 @@ M.action_preview = function(_, items, ctx)
   if item == nil then
     return
   end
-  local bufnr = vim.api.nvim_get_current_buf()
-  ctx.ui:open_preview({bufnr = bufnr, row = item.row})
+  ctx.ui:open_preview({bufnr = item.bufnr, row = item.row})
 end
 
 M.default_action = "open"

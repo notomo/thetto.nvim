@@ -1,7 +1,7 @@
 local M = {}
 
 M.collect = function()
-  local bufnr = 0
+  local bufnr = vim.api.nvim_get_current_buf()
   local kind_name = nil
   local path = vim.api.nvim_buf_get_name(bufnr)
   if not vim.bo.modified and vim.fn.filereadable(path) == 1 then
@@ -13,7 +13,7 @@ M.collect = function()
   local items = {}
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
   for i, line in ipairs(lines) do
-    table.insert(items, {value = line, row = i, kind_name = kind_name, path = path})
+    table.insert(items, {value = line, row = i, kind_name = kind_name, path = path, bufnr = bufnr})
   end
   return items
 end
