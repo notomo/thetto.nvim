@@ -31,7 +31,7 @@ function UI.open(self)
 
   self.input_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, input_filetype), function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, #source.filters))
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, self.collector.input_lines)
     vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
   vim.api.nvim_buf_attach(self.input_bufnr, false, {
@@ -202,7 +202,12 @@ end
 
 function UI.resume(self)
   self:open()
-  vim.api.nvim_buf_set_lines(self.input_bufnr, 0, -1, false, self.collector.input_lines)
+
+  if self.input_cursor ~= nil then
+    vim.api.nvim_win_set_cursor(self.input_window, self.input_cursor)
+    self.input_cursor = nil
+  end
+
   return self.notifier:send("update_items", self.collector.input_lines, self.row)
 end
 
@@ -311,6 +316,10 @@ function UI.close(self)
     end
     self.active = active
     self.mode = vim.api.nvim_get_mode().mode
+  end
+
+  if vim.api.nvim_win_is_valid(self.windows.input) then
+    self.input_cursor = vim.api.nvim_win_get_cursor(self.windows.input)
   end
 
   for _, id in pairs(self.windows) do
@@ -428,11 +437,15 @@ function UI.open_preview(self, open_target)
     col = left_column,
     row = info_config.row,
   })
+  -- HACK: Does nvim_win_set_config reset signcolumn?
+  vim.api.nvim_win_set_option(self.info_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_config(self.input_window, {
     relative = "editor",
     col = left_column,
     row = input_config.row,
   })
+  -- HACK: Does nvim_win_set_config reset signcolumn?
+  vim.api.nvim_win_set_option(self.input_window, "signcolumn", "yes:1")
   vim.api.nvim_win_set_config(self.filter_info_window, {
     relative = "editor",
     col = left_column + input_config.width,
@@ -484,7 +497,13 @@ function UI._head_lines(items)
 end
 
 M.new = function(collector, notifier)
-  local tbl = {collector = collector, notifier = notifier, windows = {}, row = 1}
+  local tbl = {
+    collector = collector,
+    notifier = notifier,
+    windows = {},
+    row = 1,
+    input_cursor = nil,
+  }
 
   if collector.opts.insert then
     tbl.active = "input"

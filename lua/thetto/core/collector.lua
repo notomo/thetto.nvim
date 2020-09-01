@@ -301,7 +301,7 @@ M.create = function(notifier, source_name, source_opts, opts)
     is_finished = false,
     _filter_names = source.filters,
     _sorter_names = source.sorters,
-    input_lines = {},
+    input_lines = vim.fn["repeat"]({""}, #source.filters),
   }
   local collector = setmetatable(collector_tbl, Collector)
 
