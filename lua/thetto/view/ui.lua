@@ -484,6 +484,42 @@ function UI.close_preview(self)
   if self.preview_window ~= nil then
     windowlib.close(self.preview_window)
   end
+
+  if vim.api.nvim_win_is_valid(self.list_window) then
+    local list_config = vim.api.nvim_win_get_config(self.list_window)
+    local column = (vim.o.columns - list_config.width) / 2
+    local input_config = vim.api.nvim_win_get_config(self.input_window)
+    local info_config = vim.api.nvim_win_get_config(self.info_window)
+    local sign_config = vim.api.nvim_win_get_config(self.sign_window)
+    local filter_info_config = vim.api.nvim_win_get_config(self.filter_info_window)
+    vim.api.nvim_win_set_config(self.list_window, {
+      relative = "editor",
+      col = column + sign_config.width,
+      row = list_config.row,
+    })
+    vim.api.nvim_win_set_config(self.sign_window, {
+      relative = "editor",
+      col = column,
+      row = list_config.row,
+    })
+    vim.api.nvim_win_set_config(self.info_window, {
+      relative = "editor",
+      col = column,
+      row = info_config.row,
+    })
+    vim.api.nvim_win_set_config(self.input_window, {
+      relative = "editor",
+      col = column,
+      row = input_config.row,
+    })
+    vim.api.nvim_win_set_config(self.filter_info_window, {
+      relative = "editor",
+      col = column + input_config.width,
+      row = filter_info_config.row,
+    })
+
+    self:_set_left_padding()
+  end
 end
 
 function UI._head_lines(items)
