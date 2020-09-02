@@ -639,4 +639,17 @@ test2]])
     command("ThettoDo toggle_preview")
     assert.window_count(count)
   end)
+
+  it("can focus only input or list", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    command("Thetto line")
+
+    for _, window in ipairs(helper.sub_windows()) do
+      vim.fn.win_gotoid(window)
+      assert.no.filetype("")
+    end
+  end)
 end)

@@ -132,7 +132,7 @@ function UI._open_windows(self)
   })
   vim.api.nvim_win_set_option(self.sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
   vim.api.nvim_win_set_option(self.sign_window, "scrollbind", true)
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._enter('list')"):format(self.sign_bufnr)
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'list')"):format(self.sign_bufnr, source.name)
   vim.api.nvim_command(on_sign_enter)
 
   local input_width = math.floor(width * 0.75)
@@ -157,7 +157,7 @@ function UI._open_windows(self)
     style = "minimal",
   })
   vim.api.nvim_win_set_option(self.info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('input')"):format(self.info_bufnr)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(self.info_bufnr, source.name)
   vim.api.nvim_command(on_info_enter)
 
   self:_set_left_padding()
@@ -171,7 +171,7 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('input')"):format(self.filter_info_bufnr)
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(self.filter_info_bufnr, source.name)
   vim.api.nvim_command(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
