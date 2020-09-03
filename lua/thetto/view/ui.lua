@@ -190,7 +190,12 @@ function UI.redraw(self, input_lines)
   if not vim.api.nvim_buf_is_valid(self.buffers.list) then
     return
   end
+  self:_redraw_list()
+  self:_redraw_info()
+  self:_redraw_input(input_lines)
+end
 
+function UI._redraw_list(self)
   local collector = self.collector
   local items = collector.items
   local opts = collector.opts
@@ -198,8 +203,6 @@ function UI.redraw(self, input_lines)
   vim.api.nvim_buf_set_option(self.buffers.list, "modifiable", true)
   vim.api.nvim_buf_set_lines(self.buffers.list, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(self.buffers.list, "modifiable", false)
-
-  self:_redraw_info()
 
   if vim.api.nvim_win_is_valid(self.windows.list) and vim.bo.filetype ~= list_filetype then
     vim.api.nvim_win_set_cursor(self.windows.list, {1, 0})
@@ -212,8 +215,13 @@ function UI.redraw(self, input_lines)
   source:highlight(self.buffers.list, items)
   source:highlight_sign(self.buffers.sign, items)
   self:_update_selections_hl()
+end
 
-  local filters = collector.filters
+function UI._redraw_input(self, input_lines)
+  local items = self.collector.items
+  local opts = self.collector.opts
+  local filters = self.collector.filters
+
   if vim.api.nvim_win_is_valid(self.windows.input) then
     local input_height = #filters
     vim.api.nvim_win_set_height(self.windows.input, input_height)
