@@ -16,17 +16,11 @@ function UI.open(self)
   local source = self.collector.source
   local opts = self.collector.opts
 
-  local ids = vim.api.nvim_tabpage_list_wins(0)
-  for _, id in ipairs(ids) do
-    local bufnr = vim.fn.winbufnr(id)
-    if bufnr == -1 then
-      goto continue
-    end
+  for bufnr in bufferlib.in_tabpage(0) do
     local ctx, _ = repository.get_from_path(bufnr)
     if ctx ~= nil then
       ctx.ui:close()
     end
-    ::continue::
   end
 
   local input_bufnr = bufferlib.scratch(function(bufnr)
