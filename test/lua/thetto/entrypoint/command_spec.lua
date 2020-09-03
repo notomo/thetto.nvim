@@ -26,6 +26,26 @@ describe("thetto", function()
     assert.window_count(6)
   end)
 
+  it("should exist same source only one", function()
+    command("Thetto line")
+    command("tabedit")
+    command("Thetto line")
+
+    assert.window_count(6)
+  end)
+
+  it("can resume even if opened", function()
+    command("Thetto line")
+    command("tabedit")
+
+    local current = vim.api.nvim_get_current_win()
+    command("Thetto --resume")
+    assert.window_count(6)
+
+    command("ThettoDo quit")
+    assert.window(current)
+  end)
+
   it("can filter by substring", function()
     require("thetto/custom").default_sorters = {"length"}
     helper.set_lines([[

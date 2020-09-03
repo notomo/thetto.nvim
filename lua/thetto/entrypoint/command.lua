@@ -66,6 +66,11 @@ M._start = function(source_name, source_opts, action_opts, opts)
     return nil, "no source"
   end
 
+  local old_ctx = repository.get(source_name)
+  if old_ctx.ui ~= nil then
+    old_ctx.ui:close()
+  end
+
   if opts.resume then
     local ctx, err = repository.resume(source_name)
     if err ~= nil then

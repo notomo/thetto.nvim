@@ -166,6 +166,7 @@ function UI._update_selections_hl(self)
 end
 
 function UI.resume(self)
+  self:close()
   self:open()
 
   if self.input_cursor ~= nil then
@@ -283,6 +284,8 @@ function UI.update_offset(self, offset)
 end
 
 function UI.close(self)
+  local current_window = vim.api.nvim_get_current_win()
+
   if vim.api.nvim_win_is_valid(self.windows.list) then
     self.row = vim.api.nvim_win_get_cursor(self.windows.list)[1]
     local active = "input"
@@ -303,7 +306,9 @@ function UI.close(self)
   self:close_preview()
   vim.api.nvim_command("autocmd! " .. self:_close_group_name())
 
-  if vim.api.nvim_win_is_valid(self.origin_window) then
+  if vim.api.nvim_win_is_valid(current_window) then
+    vim.api.nvim_set_current_win(current_window)
+  elseif vim.api.nvim_win_is_valid(self.origin_window) then
     vim.api.nvim_set_current_win(self.origin_window)
   end
 
@@ -368,6 +373,10 @@ function UI.selected_items(self, action_name, range)
 end
 
 function UI.open_preview(self, open_target)
+  if not vim.api.nvim_win_is_valid(self.windows.list) then
+    return
+  end
+
   local list_config = vim.api.nvim_win_get_config(self.windows.list)
   local height = list_config.height + #self.collector.filters + 1
   local half_height = math.floor(height / 2)

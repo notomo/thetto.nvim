@@ -188,6 +188,10 @@ local vassert = require("vusted.assert")
 local asserts = vassert.asserts
 M.assert = vassert.assert
 
+asserts.create("window"):register_eq(function()
+  return vim.api.nvim_get_current_win()
+end)
+
 asserts.create("window_count"):register_eq(function()
   return M.window_count()
 end)
