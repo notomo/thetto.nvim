@@ -29,79 +29,44 @@ function UI.open(self)
     ::continue::
   end
 
-  self.input_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, input_filetype), function(bufnr)
+  local input_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source.name, input_filetype))
     vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, self.collector.input_lines)
-    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+    vim.api.nvim_buf_attach(bufnr, false, {
+      on_lines = function()
+        local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+        return self.notifier:send("update_input", input_lines)
+      end,
+      on_detach = function()
+        return self.notifier:send("finish")
+      end,
+    })
   end)
-  vim.api.nvim_buf_attach(self.input_bufnr, false, {
-    on_lines = function()
-      local input_lines = vim.api.nvim_buf_get_lines(self.input_bufnr, 0, -1, true)
-      return self.notifier:send("update_input", input_lines)
-    end,
-    on_detach = function()
-      return self.notifier:send("finish")
-    end,
-  })
-
-  self.sign_bufnr = bufferlib.scratch(function(bufnr)
+  local sign_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, opts.display_limit))
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
-
-  self.list_bufnr = bufferlib.force_create(("thetto://%s/%s"):format(source.name, list_filetype), function(bufnr)
+  local list_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source.name, list_filetype))
     vim.api.nvim_buf_set_option(bufnr, "filetype", list_filetype)
-    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
   end)
-
-  self.info_bufnr = bufferlib.scratch(function(bufnr)
+  local info_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+  end)
+  local filter_info_bufnr = bufferlib.scratch(function(_)
   end)
 
-  self.filter_info_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
-  end)
+  self.buffers = {
+    list = list_bufnr,
+    sign = sign_bufnr,
+    input = input_bufnr,
+    info = info_bufnr,
+    filter_info = filter_info_bufnr,
+  }
 
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/ui')._on_moved(\"%s\")"):format(self.list_bufnr, source.name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/ui')._on_moved(\"%s\")"):format(list_bufnr, source.name)
   vim.api.nvim_command(on_moved)
-
-  self.notifier:on("update_items", function(input_lines, row)
-    local err = self:redraw(input_lines)
-    if err ~= nil then
-      return err
-    end
-    if row ~= nil then
-      vim.api.nvim_win_set_cursor(self.list_window, {row, 0})
-    end
-    err = self.notifier:send("execute")
-    if err ~= nil then
-      return err
-    end
-    M._changed_after(input_lines)
-  end)
-
-  self.notifier:on("update_selected", function()
-    self:_update_selections_hl()
-  end)
-
-  self.notifier:on("close", function()
-    self:close()
-  end)
-
-  self:_open_windows()
-end
-
-function UI._update_selections_hl(self)
-  local highligher = self._selection_hl_factory:reset(self.list_bufnr)
-  highligher:filter("ThettoSelected", self.collector.items, function(item)
-    return item.selected
-  end)
-end
-
-function UI._open_windows(self)
-  local source = self.collector.source
 
   local sign_width = 4
   local height = math.floor(vim.o.lines * 0.5)
@@ -110,7 +75,7 @@ function UI._open_windows(self)
   local column = (vim.o.columns - width) / 2
   self.origin_window = vim.api.nvim_get_current_win()
 
-  self.list_window = vim.api.nvim_open_win(self.list_bufnr, false, {
+  local list_window = vim.api.nvim_open_win(list_bufnr, false, {
     width = width - sign_width,
     height = height,
     relative = "editor",
@@ -119,9 +84,9 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(self.list_window, "scrollbind", true)
+  vim.api.nvim_win_set_option(list_window, "scrollbind", true)
 
-  self.sign_window = vim.api.nvim_open_win(self.sign_bufnr, false, {
+  local sign_window = vim.api.nvim_open_win(sign_bufnr, false, {
     width = sign_width,
     height = height,
     relative = "editor",
@@ -130,13 +95,13 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(self.sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
-  vim.api.nvim_win_set_option(self.sign_window, "scrollbind", true)
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'list')"):format(self.sign_bufnr, source.name)
+  vim.api.nvim_win_set_option(sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
+  vim.api.nvim_win_set_option(sign_window, "scrollbind", true)
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'list')"):format(sign_bufnr, source.name)
   vim.api.nvim_command(on_sign_enter)
 
   local input_width = math.floor(width * 0.75)
-  self.input_window = vim.api.nvim_open_win(self.input_bufnr, false, {
+  local input_window = vim.api.nvim_open_win(input_bufnr, false, {
     width = input_width,
     height = #self.collector.filters,
     relative = "editor",
@@ -145,9 +110,9 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(self.input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput")
+  vim.api.nvim_win_set_option(input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput")
 
-  self.info_window = vim.api.nvim_open_win(self.info_bufnr, false, {
+  local info_window = vim.api.nvim_open_win(info_bufnr, false, {
     width = width,
     height = 1,
     relative = "editor",
@@ -156,13 +121,11 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(self.info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(self.info_bufnr, source.name)
+  vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(info_bufnr, source.name)
   vim.api.nvim_command(on_info_enter)
 
-  self:_set_left_padding()
-
-  self.filter_info_window = vim.api.nvim_open_win(self.filter_info_bufnr, false, {
+  local filter_info_window = vim.api.nvim_open_win(filter_info_bufnr, false, {
     width = width - input_width,
     height = #self.collector.filters,
     relative = "editor",
@@ -171,7 +134,7 @@ function UI._open_windows(self)
     external = false,
     style = "minimal",
   })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(self.filter_info_bufnr, source.name)
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(filter_info_bufnr, source.name)
   vim.api.nvim_command(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
@@ -181,9 +144,9 @@ function UI._open_windows(self)
   vim.api.nvim_command("augroup END")
 
   if self.active == "input" then
-    vim.api.nvim_set_current_win(self.input_window)
+    vim.api.nvim_set_current_win(input_window)
   else
-    vim.api.nvim_set_current_win(self.list_window)
+    vim.api.nvim_set_current_win(list_window)
   end
   if self.mode == "n" then
     vim.api.nvim_command("stopinsert")
@@ -192,19 +155,27 @@ function UI._open_windows(self)
   end
 
   self.windows = {
-    list = self.list_window,
-    sign = self.sign_window,
-    input = self.input_window,
-    info = self.info_window,
-    filter_info = self.filter_info_window,
+    list = list_window,
+    sign = sign_window,
+    input = input_window,
+    info = info_window,
+    filter_info = filter_info_window,
   }
+  self:_set_left_padding()
+end
+
+function UI._update_selections_hl(self)
+  local highligher = self._selection_hl_factory:reset(self.buffers.list)
+  highligher:filter("ThettoSelected", self.collector.items, function(item)
+    return item.selected
+  end)
 end
 
 function UI.resume(self)
   self:open()
 
   if self.input_cursor ~= nil then
-    vim.api.nvim_win_set_cursor(self.input_window, self.input_cursor)
+    vim.api.nvim_win_set_cursor(self.windows.input, self.input_cursor)
     self.input_cursor = nil
   end
 
@@ -212,11 +183,11 @@ function UI.resume(self)
 end
 
 function UI._close_group_name(self)
-  return "theto_closed_" .. self.list_bufnr
+  return "theto_closed_" .. self.buffers.list
 end
 
 function UI.redraw(self, input_lines)
-  if not vim.api.nvim_buf_is_valid(self.list_bufnr) then
+  if not vim.api.nvim_buf_is_valid(self.buffers.list) then
     return
   end
 
@@ -224,30 +195,30 @@ function UI.redraw(self, input_lines)
   local items = collector.items
   local opts = collector.opts
   local lines = self._head_lines(items, opts.display_limit)
-  vim.api.nvim_buf_set_option(self.list_bufnr, "modifiable", true)
-  vim.api.nvim_buf_set_lines(self.list_bufnr, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(self.list_bufnr, "modifiable", false)
+  vim.api.nvim_buf_set_option(self.buffers.list, "modifiable", true)
+  vim.api.nvim_buf_set_lines(self.buffers.list, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(self.buffers.list, "modifiable", false)
 
   self:_redraw_info()
 
-  if vim.api.nvim_win_is_valid(self.list_window) and vim.bo.filetype ~= list_filetype then
-    vim.api.nvim_win_set_cursor(self.list_window, {1, 0})
-    if vim.api.nvim_win_is_valid(self.sign_window) then
-      vim.api.nvim_win_set_cursor(self.sign_window, {1, 0})
+  if vim.api.nvim_win_is_valid(self.windows.list) and vim.bo.filetype ~= list_filetype then
+    vim.api.nvim_win_set_cursor(self.windows.list, {1, 0})
+    if vim.api.nvim_win_is_valid(self.windows.sign) then
+      vim.api.nvim_win_set_cursor(self.windows.sign, {1, 0})
     end
   end
 
   local source = collector.source
-  source:highlight(self.list_bufnr, items)
-  source:highlight_sign(self.sign_bufnr, items)
+  source:highlight(self.buffers.list, items)
+  source:highlight_sign(self.buffers.sign, items)
   self:_update_selections_hl()
 
   local filters = collector.filters
-  if vim.api.nvim_win_is_valid(self.input_window) then
+  if vim.api.nvim_win_is_valid(self.windows.input) then
     local input_height = #filters
-    vim.api.nvim_win_set_height(self.input_window, input_height)
-    vim.api.nvim_win_set_height(self.filter_info_window, input_height)
-    vim.api.nvim_buf_set_lines(self.filter_info_bufnr, 0, -1, false, vim.fn["repeat"]({""}, input_height))
+    vim.api.nvim_win_set_height(self.windows.input, input_height)
+    vim.api.nvim_win_set_height(self.windows.filter_info, input_height)
+    vim.api.nvim_buf_set_lines(self.buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, input_height))
   end
 
   local ns = vim.api.nvim_create_namespace("thetto-input-filter-info")
@@ -255,17 +226,19 @@ function UI.redraw(self, input_lines)
   for i, filter in ipairs(filters) do
     local input_line = input_lines[i] or ""
     if filter.highlight ~= nil and input_line ~= "" then
-      filter:highlight(self.list_bufnr, items, input_line, opts)
+      filter:highlight(self.buffers.list, items, input_line, opts)
     end
     local filter_info = ("[%s]"):format(filter.name)
-    vim.api.nvim_buf_set_virtual_text(self.filter_info_bufnr, ns, i - 1, {{filter_info, "Comment"}}, {})
+    vim.api.nvim_buf_set_virtual_text(self.buffers.filter_info, ns, i - 1, {
+      {filter_info, "Comment"},
+    }, {})
   end
 
   local line_count_diff = #filters - #input_lines
   if line_count_diff > 0 then
-    vim.api.nvim_buf_set_lines(self.input_bufnr, #filters - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
+    vim.api.nvim_buf_set_lines(self.buffers.input, #filters - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
   elseif line_count_diff < 0 then
-    vim.api.nvim_buf_set_lines(self.input_bufnr, #filters, -1, false, {})
+    vim.api.nvim_buf_set_lines(self.buffers.input, #filters, -1, false, {})
   end
 end
 
@@ -285,9 +258,9 @@ function UI._redraw_info(self)
   end
 
   local ns = vim.api.nvim_create_namespace("thetto-info-text")
-  vim.api.nvim_buf_clear_namespace(self.info_bufnr, ns, 0, -1)
+  vim.api.nvim_buf_clear_namespace(self.buffers.info, ns, 0, -1)
   local text = ("%s%s  [ %s / %s ]"):format(self.collector.source.name, sorter_info, vim.tbl_count(self.collector.items), #self.collector.all_items)
-  vim.api.nvim_buf_set_virtual_text(self.info_bufnr, ns, 0, {
+  vim.api.nvim_buf_set_virtual_text(self.buffers.info, ns, 0, {
     {text, "ThettoInfo"},
     {"  " .. collector_status, "Comment"},
   }, {})
@@ -340,12 +313,12 @@ function UI.enter(self, to)
 end
 
 function UI.current_position_filter(self)
-  local cursor = vim.api.nvim_win_get_cursor(self.input_window)
+  local cursor = vim.api.nvim_win_get_cursor(self.windows.input)
   return self.collector.filters[cursor[1]]
 end
 
 function UI.current_position_sorter(self)
-  local cursor = vim.api.nvim_win_get_cursor(self.input_window)
+  local cursor = vim.api.nvim_win_get_cursor(self.windows.input)
   return self.collector.sorters[cursor[1]]
 end
 
@@ -353,10 +326,10 @@ function UI.start_insert(self, behavior)
   vim.api.nvim_command("startinsert")
   if behavior == "a" then
     local max_col = vim.fn.col("$")
-    local cursor = vim.api.nvim_win_get_cursor(self.input_window)
+    local cursor = vim.api.nvim_win_get_cursor(self.windows.input)
     if cursor[2] ~= max_col then
       cursor[2] = cursor[2] + 1
-      vim.api.nvim_win_set_cursor(self.input_window, cursor)
+      vim.api.nvim_win_set_cursor(self.windows.input, cursor)
     end
   end
 end
@@ -393,7 +366,7 @@ function UI.selected_items(self, action_name, range)
 end
 
 function UI.open_preview(self, open_target)
-  local list_config = vim.api.nvim_win_get_config(self.list_window)
+  local list_config = vim.api.nvim_win_get_config(self.windows.list)
   local height = list_config.height + #self.collector.filters + 1
   local half_height = math.floor(height / 2)
 
@@ -417,32 +390,32 @@ function UI.open_preview(self, open_target)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
 
-  local input_config = vim.api.nvim_win_get_config(self.input_window)
-  local info_config = vim.api.nvim_win_get_config(self.info_window)
-  local sign_config = vim.api.nvim_win_get_config(self.sign_window)
-  local filter_info_config = vim.api.nvim_win_get_config(self.filter_info_window)
+  local input_config = vim.api.nvim_win_get_config(self.windows.input)
+  local info_config = vim.api.nvim_win_get_config(self.windows.info)
+  local sign_config = vim.api.nvim_win_get_config(self.windows.sign)
+  local filter_info_config = vim.api.nvim_win_get_config(self.windows.filter_info)
   local left_column = 7
-  vim.api.nvim_win_set_config(self.list_window, {
+  vim.api.nvim_win_set_config(self.windows.list, {
     relative = "editor",
     col = left_column + sign_config.width,
     row = list_config.row,
   })
-  vim.api.nvim_win_set_config(self.sign_window, {
+  vim.api.nvim_win_set_config(self.windows.sign, {
     relative = "editor",
     col = left_column,
     row = list_config.row,
   })
-  vim.api.nvim_win_set_config(self.info_window, {
+  vim.api.nvim_win_set_config(self.windows.info, {
     relative = "editor",
     col = left_column,
     row = info_config.row,
   })
-  vim.api.nvim_win_set_config(self.input_window, {
+  vim.api.nvim_win_set_config(self.windows.input, {
     relative = "editor",
     col = left_column,
     row = input_config.row,
   })
-  vim.api.nvim_win_set_config(self.filter_info_window, {
+  vim.api.nvim_win_set_config(self.windows.filter_info, {
     relative = "editor",
     col = left_column + input_config.width,
     row = filter_info_config.row,
@@ -485,34 +458,34 @@ function UI.close_preview(self)
     windowlib.close(self.preview_window)
   end
 
-  if vim.api.nvim_win_is_valid(self.list_window) then
-    local list_config = vim.api.nvim_win_get_config(self.list_window)
+  if vim.api.nvim_win_is_valid(self.windows.list) then
+    local list_config = vim.api.nvim_win_get_config(self.windows.list)
     local column = (vim.o.columns - list_config.width) / 2
-    local input_config = vim.api.nvim_win_get_config(self.input_window)
-    local info_config = vim.api.nvim_win_get_config(self.info_window)
-    local sign_config = vim.api.nvim_win_get_config(self.sign_window)
-    local filter_info_config = vim.api.nvim_win_get_config(self.filter_info_window)
-    vim.api.nvim_win_set_config(self.list_window, {
+    local input_config = vim.api.nvim_win_get_config(self.windows.input)
+    local info_config = vim.api.nvim_win_get_config(self.windows.info)
+    local sign_config = vim.api.nvim_win_get_config(self.windows.sign)
+    local filter_info_config = vim.api.nvim_win_get_config(self.windows.filter_info)
+    vim.api.nvim_win_set_config(self.windows.list, {
       relative = "editor",
       col = column + sign_config.width,
       row = list_config.row,
     })
-    vim.api.nvim_win_set_config(self.sign_window, {
+    vim.api.nvim_win_set_config(self.windows.sign, {
       relative = "editor",
       col = column,
       row = list_config.row,
     })
-    vim.api.nvim_win_set_config(self.info_window, {
+    vim.api.nvim_win_set_config(self.windows.info, {
       relative = "editor",
       col = column,
       row = info_config.row,
     })
-    vim.api.nvim_win_set_config(self.input_window, {
+    vim.api.nvim_win_set_config(self.windows.input, {
       relative = "editor",
       col = column,
       row = input_config.row,
     })
-    vim.api.nvim_win_set_config(self.filter_info_window, {
+    vim.api.nvim_win_set_config(self.windows.filter_info, {
       relative = "editor",
       col = column + input_config.width,
       row = filter_info_config.row,
@@ -532,8 +505,8 @@ end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function UI._set_left_padding(self)
-  vim.api.nvim_win_set_option(self.input_window, "signcolumn", "yes:1")
-  vim.api.nvim_win_set_option(self.info_window, "signcolumn", "yes:1")
+  vim.api.nvim_win_set_option(self.windows.input, "signcolumn", "yes:1")
+  vim.api.nvim_win_set_option(self.windows.info, "signcolumn", "yes:1")
 end
 
 M.new = function(collector, notifier)
@@ -541,6 +514,7 @@ M.new = function(collector, notifier)
     collector = collector,
     notifier = notifier,
     windows = {},
+    buffers = {},
     row = 1,
     input_cursor = nil,
   }
@@ -563,8 +537,32 @@ M.new = function(collector, notifier)
   vim.api.nvim_command("highlight default link ThettoColorLabelBackground NormalFloat")
   vim.api.nvim_command("highlight default link ThettoInput NormalFloat")
 
-  local ui = setmetatable(tbl, UI)
-  return ui
+  local self = setmetatable(tbl, UI)
+
+  self.notifier:on("update_items", function(input_lines, row)
+    local err = self:redraw(input_lines)
+    if err ~= nil then
+      return err
+    end
+    if row ~= nil then
+      vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
+    end
+    err = self.notifier:send("execute")
+    if err ~= nil then
+      return err
+    end
+    M._changed_after(input_lines)
+  end)
+
+  self.notifier:on("update_selected", function()
+    self:_update_selections_hl()
+  end)
+
+  self.notifier:on("close", function()
+    self:close()
+  end)
+
+  return self
 end
 
 M._on_close = function(key, id)
