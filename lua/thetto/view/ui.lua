@@ -1,7 +1,5 @@
-local highlights = require("thetto/lib/highlight")
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
-local filelib = require("thetto/lib/file")
 local repository = require("thetto/core/repository")
 local window_groups = require("thetto/view/window_group")
 
@@ -9,9 +7,6 @@ local M = {}
 
 local UI = {}
 UI.__index = UI
-
-local input_filetype = "thetto-input"
-local list_filetype = "thetto"
 
 function UI.open(self)
   local source = self.collector.source
@@ -24,42 +19,8 @@ function UI.open(self)
     end
   end
 
-  local input_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source.name, input_filetype))
-    vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, self.collector.input_lines)
-    vim.api.nvim_buf_attach(bufnr, false, {
-      on_lines = function()
-        local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
-        return self.notifier:send("update_input", input_lines)
-      end,
-      on_detach = function()
-        return self.notifier:send("finish")
-      end,
-    })
-  end)
-  local sign_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, opts.display_limit))
-    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-  end)
-  local list_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source.name, list_filetype))
-    vim.api.nvim_buf_set_option(bufnr, "filetype", list_filetype)
-  end)
-  local info_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-  end)
-  local filter_info_bufnr = bufferlib.scratch(function(_)
-  end)
-
   self.origin_window = vim.api.nvim_get_current_win()
-  self.windows = window_groups.open({
-    list = list_bufnr,
-    sign = sign_bufnr,
-    input = input_bufnr,
-    info = info_bufnr,
-    filter_info = filter_info_bufnr,
-  }, source.name)
+  self.windows = window_groups.open(self.notifier, source.name, self.collector.input_lines, opts.display_limit)
 
   self:enter(self.active)
 
@@ -120,7 +81,6 @@ function UI.close(self)
   if self.windows ~= nil then
     self.windows:close()
   end
-  self:close_preview()
 
   if vim.api.nvim_win_is_valid(current_window) then
     vim.api.nvim_set_current_win(current_window)
@@ -168,7 +128,7 @@ function UI.selected_items(self, action_name, range)
     return selected
   end
 
-  if range.given and vim.bo.filetype == list_filetype then
+  if range.given and self.windows:is_current("list") then
     local items = {}
     for i = range.first, range.last, 1 do
       table.insert(items, self.collector.items[i])
@@ -177,10 +137,9 @@ function UI.selected_items(self, action_name, range)
   end
 
   local index
-  local filetype = vim.bo.filetype
-  if filetype == input_filetype then
+  if self.windows:is_current("input") then
     index = 1
-  elseif vim.bo.filetype == list_filetype then
+  elseif self.windows:is_current("list") then
     index = vim.fn.line(".")
   else
     index = self.row
@@ -189,80 +148,23 @@ function UI.selected_items(self, action_name, range)
 end
 
 function UI.open_preview(self, open_target)
-  if not vim.api.nvim_win_is_valid(self.windows.list) then
-    return
-  end
-
-  local list_config = vim.api.nvim_win_get_config(self.windows.list)
-  local height = list_config.height + #self.collector.filters + 1
-  local half_height = math.floor(height / 2)
-
-  local top_row = 1
-  local row = open_target.row
-  if open_target.row ~= nil and open_target.row > half_height then
-    top_row = open_target.row - half_height + 1
-    row = half_height
-  end
-
-  local lines
-  if open_target.bufnr ~= nil then
-    lines = vim.api.nvim_buf_get_lines(open_target.bufnr, top_row - 1, top_row + height - 1, false)
-  elseif open_target.path ~= nil then
-    lines = filelib.read_lines(open_target.path, top_row, top_row + height)
-  else
-    lines = {}
-  end
-
-  local bufnr = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
-
-  local left_column = 7
-  local window = self.windows:move_to(left_column)
-
-  if not self:opened_preview() then
-    self.preview_window = vim.api.nvim_open_win(bufnr, false, {
-      width = vim.o.columns - left_column - window.width - 3,
-      height = height,
-      relative = "editor",
-      row = list_config.row,
-      col = left_column + window.width + 1,
-      focusable = false,
-      external = false,
-      style = "minimal",
-    })
-    vim.api.nvim_win_set_option(self.preview_window, "scrollbind", false)
-  else
-    vim.api.nvim_win_set_buf(self.preview_window, bufnr)
-  end
-
-  if row ~= nil then
-    local highlighter = self._preview_hl_factory:create(bufnr)
-    local range = open_target.range or {s = {column = 0}, e = {column = -1}}
-    highlighter:add("ThettoPreview", row - 1, range.s.column, range.e.column)
-  end
+  self.windows:open_sidecar(self.collector, open_target)
 end
 
 function UI.opened_preview(self)
-  if self.preview_window == nil then
-    return false
-  end
-  return vim.api.nvim_win_is_valid(self.preview_window)
+  return self.windows:opened_sidecar()
 end
 
 function UI.close_preview(self)
-  if self.preview_window ~= nil then
-    windowlib.close(self.preview_window)
-    self.windows:reset_position()
-  end
+  self.windows:close_sidecar()
 end
 
 M.new = function(collector, notifier)
   local tbl = {
     collector = collector,
     notifier = notifier,
-    windows = {},
     row = 1,
+    windows = nil,
     input_cursor = nil,
   }
 
@@ -273,9 +175,6 @@ M.new = function(collector, notifier)
     tbl.active = "list"
     tbl.mode = "n"
   end
-
-  tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
-  vim.api.nvim_command("highlight default link ThettoPreview Search")
 
   local self = setmetatable(tbl, UI)
 

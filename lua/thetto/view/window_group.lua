@@ -1,5 +1,10 @@
 local windowlib = require("thetto/lib/window")
+local bufferlib = require("thetto/lib/buffer")
+local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
+
+local input_filetype = "thetto-input"
+local list_filetype = "thetto"
 
 local get_width = function()
   return math.floor(vim.o.columns * 0.6)
@@ -13,6 +18,81 @@ local M = {}
 
 local WindowGroup = {}
 WindowGroup.__index = WindowGroup
+
+function WindowGroup.is_current(self, name)
+  local bufnr = self.buffers[name]
+  return vim.api.nvim_get_current_buf() == bufnr
+end
+
+function WindowGroup.open_sidecar(self, collector, open_target)
+  if not vim.api.nvim_win_is_valid(self.list) then
+    return
+  end
+
+  local list_config = vim.api.nvim_win_get_config(self.list)
+  local height = list_config.height + #collector.filters + 1
+  local half_height = math.floor(height / 2)
+
+  local top_row = 1
+  local row = open_target.row
+  if open_target.row ~= nil and open_target.row > half_height then
+    top_row = open_target.row - half_height + 1
+    row = half_height
+  end
+
+  local lines
+  if open_target.bufnr ~= nil then
+    lines = vim.api.nvim_buf_get_lines(open_target.bufnr, top_row - 1, top_row + height - 1, false)
+  elseif open_target.path ~= nil then
+    lines = filelib.read_lines(open_target.path, top_row, top_row + height)
+  else
+    lines = {}
+  end
+
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+
+  local left_column = 7
+  self:move_to(left_column)
+
+  if not self:opened_sidecar() then
+    local width = get_width()
+    self.sidecar = vim.api.nvim_open_win(bufnr, false, {
+      width = vim.o.columns - left_column - width - 3,
+      height = height,
+      relative = "editor",
+      row = list_config.row,
+      col = left_column + width + 1,
+      focusable = false,
+      external = false,
+      style = "minimal",
+    })
+    vim.api.nvim_win_set_option(self.sidecar, "scrollbind", false)
+  else
+    vim.api.nvim_win_set_buf(self.sidecar, bufnr)
+  end
+
+  if row ~= nil then
+    local highlighter = self._preview_hl_factory:create(bufnr)
+    local range = open_target.range or {s = {column = 0}, e = {column = -1}}
+    highlighter:add("ThettoPreview", row - 1, range.s.column, range.e.column)
+  end
+end
+
+function WindowGroup.opened_sidecar(self)
+  if self.sidecar == nil then
+    return false
+  end
+  return vim.api.nvim_win_is_valid(self.sidecar)
+end
+
+function WindowGroup.close_sidecar(self)
+  if self.sidecar ~= nil then
+    windowlib.close(self.sidecar)
+    self:reset_position()
+  end
+end
 
 function WindowGroup.redraw_selections(self, collector)
   local highligher = self._selection_hl_factory:reset(self.buffers.list)
@@ -34,6 +114,7 @@ function WindowGroup.close(self)
   for _, id in pairs(self.windows) do
     windowlib.close(id)
   end
+  self:close_sidecar()
   vim.api.nvim_command("autocmd! " .. self:_close_group_name())
 end
 
@@ -70,8 +151,6 @@ function WindowGroup.move_to(self, left_column)
   })
 
   self:_set_left_padding()
-
-  return {width = input_config.width + filter_info_config.width}
 end
 
 function WindowGroup.reset_position(self)
@@ -90,7 +169,42 @@ function WindowGroup.redraw(self, collector, input_lines)
   self:_redraw_input(collector, input_lines)
 end
 
-function WindowGroup._open(self)
+function WindowGroup._open(self, default_input_lines)
+  local input_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, input_filetype))
+    vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
+    vim.api.nvim_buf_attach(bufnr, false, {
+      on_lines = function()
+        local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+        return self.notifier:send("update_input", input_lines)
+      end,
+      on_detach = function()
+        return self.notifier:send("finish")
+      end,
+    })
+  end)
+  local sign_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, self._display_limit))
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  end)
+  local list_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, list_filetype))
+    vim.api.nvim_buf_set_option(bufnr, "filetype", list_filetype)
+  end)
+  local info_bufnr = bufferlib.scratch(function(bufnr)
+    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+  end)
+  local filter_info_bufnr = bufferlib.scratch(function(_)
+  end)
+  self.buffers = {
+    input = input_bufnr,
+    sign = sign_bufnr,
+    list = list_bufnr,
+    info = info_bufnr,
+    filter_info = filter_info_bufnr,
+  }
+
   local sign_width = 4
   local height = math.floor(vim.o.lines * 0.5)
   local width = get_width()
@@ -275,12 +389,13 @@ function WindowGroup._head_lines(items)
   return lines
 end
 
-M.open = function(buffers, source_name)
-  local tbl = {buffers = buffers, source_name = source_name}
+M.open = function(notifier, source_name, default_input_lines, display_limit)
+  local tbl = {notifier = notifier, source_name = source_name, _display_limit = display_limit}
   tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
+  tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
 
   local window_group = setmetatable(tbl, WindowGroup)
-  window_group:_open()
+  window_group:_open(default_input_lines)
   return window_group
 end
 
@@ -289,5 +404,6 @@ vim.api.nvim_command("highlight default link ThettoInfo StatusLine")
 vim.api.nvim_command("highlight default link ThettoColorLabelOthers StatusLine")
 vim.api.nvim_command("highlight default link ThettoColorLabelBackground NormalFloat")
 vim.api.nvim_command("highlight default link ThettoInput NormalFloat")
+vim.api.nvim_command("highlight default link ThettoPreview Search")
 
 return M
