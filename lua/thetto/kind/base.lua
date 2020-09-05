@@ -61,8 +61,11 @@ M.action_echo = function(_, items)
 end
 
 M.action_yank = function(self, items)
-  for _, item in ipairs(items) do
-    local value = item[self.action_opts.key]
+  local values = vim.tbl_map(function(item)
+    return item[self.action_opts.key]
+  end, items)
+  local value = table.concat(values, "\n")
+  if value ~= "" then
     vim.fn.setreg(self.action_opts.register, value)
     print("yank: " .. value)
   end

@@ -361,9 +361,9 @@ test3]])
     command("Thetto line --no-insert")
     helper.search("test2")
 
-    command("ThettoDo yank")
+    command("1,2ThettoDo yank")
 
-    assert.register_value("+", "test2")
+    assert.register_value("+", "test1\ntest2")
   end)
 
   it("can open with action opts", function()
