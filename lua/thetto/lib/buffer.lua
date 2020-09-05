@@ -19,7 +19,7 @@ M.in_tabpage = function(tabpage_index)
       i = i + 1
       local bufnr = vim.fn.winbufnr(id)
       if vim.api.nvim_buf_is_valid(bufnr) then
-        return bufnr
+        return bufnr, id
       end
     end
   end

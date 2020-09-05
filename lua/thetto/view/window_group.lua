@@ -2,6 +2,7 @@ local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
+local repository = require("thetto/core/repository")
 
 local input_filetype = "thetto-input"
 local list_filetype = "thetto"
@@ -22,6 +23,10 @@ WindowGroup.__index = WindowGroup
 function WindowGroup.is_current(self, name)
   local bufnr = self.buffers[name]
   return vim.api.nvim_get_current_buf() == bufnr
+end
+
+function WindowGroup.enter(self, to)
+  windowlib.enter(self[to])
 end
 
 function WindowGroup.open_sidecar(self, collector, open_target)
@@ -242,7 +247,7 @@ function WindowGroup._open(self, default_input_lines)
   })
   vim.api.nvim_win_set_option(sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
   vim.api.nvim_win_set_option(sign_window, "scrollbind", true)
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'list')"):format(self.buffers.sign, self.source_name)
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, self.source_name)
   vim.api.nvim_command(on_sign_enter)
 
   local lines = vim.api.nvim_buf_get_lines(self.buffers.input, 0, -1, false)
@@ -268,7 +273,7 @@ function WindowGroup._open(self, default_input_lines)
     style = "minimal",
   })
   vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(self.buffers.info, self.source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, self.source_name)
   vim.api.nvim_command(on_info_enter)
 
   local filter_info_window = vim.api.nvim_open_win(self.buffers.filter_info, false, {
@@ -280,12 +285,12 @@ function WindowGroup._open(self, default_input_lines)
     external = false,
     style = "minimal",
   })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/ui')._on_enter('%s', 'input')"):format(self.buffers.filter_info, self.source_name)
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, self.source_name)
   vim.api.nvim_command(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
   vim.api.nvim_command(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/ui')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, self.source_name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, self.source_name)
   vim.api.nvim_command(on_win_closed)
   vim.api.nvim_command("augroup END")
 
@@ -298,7 +303,7 @@ function WindowGroup._open(self, default_input_lines)
 
   self:_set_left_padding()
 
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/ui')._on_moved(\"%s\")"):format(self.buffers.list, self.source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self.source_name)
   vim.api.nvim_command(on_moved)
 end
 
@@ -406,6 +411,34 @@ M.open = function(notifier, source_name, default_input_lines, display_limit)
   local window_group = setmetatable(tbl, WindowGroup)
   window_group:_open(default_input_lines)
   return window_group
+end
+
+M._on_close = function(key, id)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  if not ui.windows:has(id) then
+    return
+  end
+
+  ui:close()
+end
+
+M._on_enter = function(key, to)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  ui:enter(to)
+end
+
+M._on_moved = function(key)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  ui.notifier:send("execute")
 end
 
 vim.api.nvim_command("highlight default link ThettoSelected Statement")

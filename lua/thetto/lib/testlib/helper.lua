@@ -168,18 +168,12 @@ M.window_count = function()
 end
 
 M.sub_windows = function()
-  local ids = vim.api.nvim_tabpage_list_wins(0)
   local windows = {}
-  for _, id in ipairs(ids) do
-    local bufnr = vim.fn.winbufnr(id)
-    if bufnr == -1 then
-      goto continue
-    end
+  for bufnr, id in require("thetto/lib/buffer").in_tabpage(0) do
     local config = vim.api.nvim_win_get_config(id)
     if config.relative ~= "" and vim.bo[bufnr].filetype == "" then
       table.insert(windows, id)
     end
-    ::continue::
   end
   return windows
 end

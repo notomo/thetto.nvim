@@ -56,8 +56,4 @@ M.get_from_path = function(bufnr)
   return ctx, nil
 end
 
-M.delete = function(key)
-  persist[key] = nil
-end
-
 return M

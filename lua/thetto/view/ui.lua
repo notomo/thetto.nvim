@@ -1,4 +1,3 @@
-local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local repository = require("thetto/core/repository")
 local window_groups = require("thetto/view/window_group")
@@ -94,7 +93,7 @@ function UI.close(self)
 end
 
 function UI.enter(self, to)
-  windowlib.enter(self.windows[to])
+  self.windows:enter(to)
 end
 
 function UI.current_position_filter(self)
@@ -204,34 +203,6 @@ M.new = function(collector, notifier)
   end)
 
   return self
-end
-
-M._on_close = function(key, id)
-  local ui = repository.get(key).ui
-  if ui == nil then
-    return
-  end
-  if not ui.windows:has(id) then
-    return
-  end
-
-  ui:close()
-end
-
-M._on_enter = function(key, to)
-  local ui = repository.get(key).ui
-  if ui == nil then
-    return
-  end
-  ui:enter(to)
-end
-
-M._on_moved = function(key)
-  local ui = repository.get(key).ui
-  if ui == nil then
-    return
-  end
-  ui.notifier:send("execute")
 end
 
 -- for testing

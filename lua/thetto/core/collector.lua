@@ -331,8 +331,4 @@ M.create = function(notifier, source_name, source_opts, opts)
   return collector, nil
 end
 
-M._to_key = function(names)
-  return table.concat(names, ",")
-end
-
 return M
