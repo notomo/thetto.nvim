@@ -49,6 +49,6 @@ M.collect = function(self, opts)
   return items
 end
 
-M.kind_name = "substitute"
+M.kind_name = "vim/substitute"
 
 return M
