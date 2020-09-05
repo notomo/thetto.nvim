@@ -53,7 +53,7 @@ function WindowGroup.open_sidecar(self, collector, open_target)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
 
-  local left_column = 7
+  local left_column = 2
   self:move_to(left_column)
 
   if not self:opened_sidecar() then
@@ -208,7 +208,7 @@ function WindowGroup._open(self, default_input_lines)
   local sign_width = 4
   local height = math.floor(vim.o.lines * 0.5)
   local width = get_width()
-  local row = (vim.o.lines - height) / 2
+  local row = (vim.o.lines - height - #default_input_lines) / 2
   local column = get_column()
 
   local list_window = vim.api.nvim_open_win(self.buffers.list, false, {
@@ -247,7 +247,7 @@ function WindowGroup._open(self, default_input_lines)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput")
+  vim.api.nvim_win_set_option(input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput")
 
   local info_window = vim.api.nvim_open_win(self.buffers.info, false, {
     width = width,
