@@ -30,12 +30,13 @@ local start_default_opts = {
   auto = nil,
 }
 
-M.start_by_excmd = function(raw_args)
+M.start_by_excmd = function(has_range, raw_range, raw_args)
   local source_name, opts, ex_opts, parse_err = cmdparse.args(raw_args, vim.tbl_extend("force", start_default_opts, custom.opts))
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
   end
 
+  opts.range = {first = raw_range[1], last = raw_range[2], given = has_range ~= 0}
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()

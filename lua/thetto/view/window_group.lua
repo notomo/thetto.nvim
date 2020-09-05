@@ -45,6 +45,8 @@ function WindowGroup.open_sidecar(self, collector, open_target)
     lines = vim.api.nvim_buf_get_lines(open_target.bufnr, top_row - 1, top_row + height - 1, false)
   elseif open_target.path ~= nil then
     lines = filelib.read_lines(open_target.path, top_row, top_row + height)
+  elseif open_target.lines ~= nil then
+    lines = open_target.lines
   else
     lines = {}
   end
@@ -71,6 +73,13 @@ function WindowGroup.open_sidecar(self, collector, open_target)
     vim.api.nvim_win_set_option(self.sidecar, "scrollbind", false)
   else
     vim.api.nvim_win_set_buf(self.sidecar, bufnr)
+  end
+
+  if open_target.execute ~= nil then
+    local origin = vim.api.nvim_get_current_win()
+    vim.api.nvim_set_current_win(self.sidecar)
+    open_target.execute()
+    vim.api.nvim_set_current_win(origin)
   end
 
   if row ~= nil then
