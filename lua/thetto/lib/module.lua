@@ -8,6 +8,18 @@ local find = function(path)
   return module
 end
 
+local function set_base(target, base)
+  local meta = getmetatable(target)
+  if meta == nil then
+    return setmetatable(target, base)
+  end
+  if target == meta then
+    return target
+  end
+  return setmetatable(target, set_base(meta, base))
+end
+M.set_base = set_base
+
 -- for app
 
 M.find_source = function(name)

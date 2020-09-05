@@ -1,4 +1,5 @@
 local M = {}
+M.__index = M
 
 local adjust_cursor = function(item)
   if item.row == nil then

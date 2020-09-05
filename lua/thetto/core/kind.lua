@@ -53,7 +53,7 @@ M.create = function(executor, kind_name)
     if found == nil then
       return nil, "not found kind: " .. kind_name
     end
-    origin = setmetatable(found, base)
+    origin = modulelib.set_base(found, base)
     origin.__index = origin
   end
 
