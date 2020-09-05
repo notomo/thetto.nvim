@@ -416,6 +416,11 @@ tes]])
       command("Thetto outline")
     end)
     assert.window_count(1)
+
+    -- should be the same error
+    assert.error_message("outline: empty", function()
+      command("Thetto outline")
+    end)
   end)
 
   it("can custom default opts", function()

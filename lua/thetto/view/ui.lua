@@ -62,6 +62,10 @@ function UI.update_offset(self, offset)
 end
 
 function UI.close(self)
+  if self.windows == nil then
+    return
+  end
+
   local current_window = vim.api.nvim_get_current_win()
 
   if vim.api.nvim_win_is_valid(self.windows.list) then
@@ -78,9 +82,7 @@ function UI.close(self)
     self.input_cursor = vim.api.nvim_win_get_cursor(self.windows.input)
   end
 
-  if self.windows ~= nil then
-    self.windows:close()
-  end
+  self.windows:close()
 
   if vim.api.nvim_win_is_valid(current_window) then
     vim.api.nvim_set_current_win(current_window)
