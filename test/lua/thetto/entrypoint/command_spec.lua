@@ -677,4 +677,18 @@ test2]])
       assert.no.filetype("")
     end
   end)
+
+  it("can execute action automatically", function()
+    helper.set_lines([[
+test_auto_1
+test_auto_2]])
+
+    command("Thetto line --auto=debug_print --no-insert")
+    helper.wait_ui(function()
+      command("normal! j")
+    end)
+
+    assert.exists_message("test_auto_1")
+    assert.exists_message("test_auto_2")
+  end)
 end)
