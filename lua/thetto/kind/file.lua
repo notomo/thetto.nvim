@@ -64,9 +64,9 @@ M.action_preview = function(_, items, ctx)
   end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
-    ctx.ui:open_preview({bufnr = bufnr, row = item.row, range = item.range})
+    ctx.ui:open_preview(item, {bufnr = bufnr, row = item.row, range = item.range})
   else
-    ctx.ui:open_preview({path = item.path, row = item.row, range = item.range})
+    ctx.ui:open_preview(item, {path = item.path, row = item.row, range = item.range})
   end
 end
 

@@ -667,6 +667,22 @@ test2]])
     assert.window_count(count)
   end)
 
+  it("toggle_preview can execute continuously", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    command("Thetto line --no-insert")
+    local count = helper.window_count()
+
+    command("ThettoDo toggle_preview")
+    assert.window_count(count + 1)
+
+    command("normal! j")
+    command("ThettoDo toggle_preview")
+    assert.window_count(count + 1)
+  end)
+
   it("can focus only input or list", function()
     helper.set_lines([[
 test1

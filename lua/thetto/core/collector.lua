@@ -315,7 +315,7 @@ M.create = function(notifier, source_name, source_opts, opts)
   end
 
   self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function(bufnr)
-    if bufnr ~= nil then
+    if bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr) then
       local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
       self.input_lines = input_lines
     end

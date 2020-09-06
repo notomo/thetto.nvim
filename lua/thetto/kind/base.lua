@@ -103,11 +103,11 @@ M.action_reverse_sorter = function(self, _, ctx)
 end
 
 M.action_preview = function(_, _, ctx)
-  return ctx.ui:open_preview({})
+  return ctx.ui:open_preview(nil, {})
 end
 
 M.action_toggle_preview = function(self, items, ctx)
-  if ctx.ui:opened_preview() then
+  if ctx.ui:exists_same_preview(items) then
     ctx.ui:close_preview()
   else
     return self.executor:action(ctx, "preview", self.name, items)

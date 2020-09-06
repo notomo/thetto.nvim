@@ -156,12 +156,12 @@ function UI._selected_items(self, action_name, range)
   return {self.collector.items[index]}
 end
 
-function UI.open_preview(self, open_target)
-  self.windows:open_sidecar(self.collector, open_target)
+function UI.open_preview(self, item, open_target)
+  self.windows:open_sidecar(self.collector, item, open_target)
 end
 
-function UI.opened_preview(self)
-  return self.windows:opened_sidecar()
+function UI.exists_same_preview(self, items)
+  return self.windows:exists_same_sidecar(items[1])
 end
 
 function UI.close_preview(self)

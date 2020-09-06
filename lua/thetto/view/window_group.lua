@@ -29,7 +29,7 @@ function WindowGroup.enter(self, to)
   windowlib.enter(self[to])
 end
 
-function WindowGroup.open_sidecar(self, collector, open_target)
+function WindowGroup.open_sidecar(self, collector, item, open_target)
   if not vim.api.nvim_win_is_valid(self.list) then
     return
   end
@@ -80,6 +80,12 @@ function WindowGroup.open_sidecar(self, collector, open_target)
     vim.api.nvim_win_set_buf(self.sidecar, bufnr)
   end
 
+  local index
+  if item then
+    index = item.index
+  end
+  self._sidecar_index = index
+
   if open_target.execute ~= nil then
     local origin = vim.api.nvim_get_current_win()
     vim.api.nvim_set_current_win(self.sidecar)
@@ -95,15 +101,21 @@ function WindowGroup.open_sidecar(self, collector, open_target)
 end
 
 function WindowGroup.opened_sidecar(self)
-  if self.sidecar == nil then
+  return self.sidecar ~= nil and vim.api.nvim_win_is_valid(self.sidecar)
+end
+
+function WindowGroup.exists_same_sidecar(self, item)
+  if not self:opened_sidecar() then
     return false
   end
-  return vim.api.nvim_win_is_valid(self.sidecar)
+  return item ~= nil and item.index == self._sidecar_index
 end
 
 function WindowGroup.close_sidecar(self)
   if self.sidecar ~= nil then
     windowlib.close(self.sidecar)
+    self.sidecar = nil
+    self._sidecar_index = nil
     self:reset_position()
   end
 end

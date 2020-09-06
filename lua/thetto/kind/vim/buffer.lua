@@ -25,7 +25,7 @@ M.action_preview = function(_, items, ctx)
   if item == nil or not vim.api.nvim_buf_is_loaded(item.bufnr) then
     return
   end
-  ctx.ui:open_preview({bufnr = item.bufnr})
+  ctx.ui:open_preview(item, {bufnr = item.bufnr})
 end
 
 M.default_action = "open"
