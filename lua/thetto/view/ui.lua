@@ -1,6 +1,7 @@
 local bufferlib = require("thetto/lib/buffer")
 local repository = require("thetto/core/repository")
 local window_groups = require("thetto/view/window_group")
+local listlib = require("thetto/lib/list")
 
 local M = {}
 
@@ -118,9 +119,18 @@ function UI.start_insert(self, behavior)
   end
 end
 
-function UI.selected_items(self, action_name, range)
-  range = range or {}
+function UI.current_item_groups(self, action_name, range)
+  local items = self:_selected_items(action_name, range)
+  local item_groups = listlib.group_by(items, function(item)
+    return item.kind_name or self.collector.source.kind_name
+  end)
+  if #item_groups == 0 then
+    table.insert(item_groups, {"base", {}})
+  end
+  return item_groups
+end
 
+function UI._selected_items(self, action_name, range)
   if action_name ~= "toggle_selection" and not vim.tbl_isempty(self.collector.selected) then
     local selected = vim.tbl_values(self.collector.selected)
     table.sort(selected, function(a, b)
@@ -129,7 +139,7 @@ function UI.selected_items(self, action_name, range)
     return selected
   end
 
-  if range.given and self.windows:is_current("list") then
+  if range ~= nil and self.windows:is_current("list") then
     local items = {}
     for i = range.first, range.last, 1 do
       table.insert(items, self.collector.items[i])

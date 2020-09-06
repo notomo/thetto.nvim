@@ -18,7 +18,7 @@ M.collect = function(self, opts)
   for name, c in pairs(M.commands) do
     local range_part = self.opts.range
     local range = nil
-    if opts.range.given then
+    if opts.range ~= nil then
       range_part = ("%d,%d"):format(opts.range.first, opts.range.last)
       range = opts.range
     end

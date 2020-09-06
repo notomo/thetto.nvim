@@ -2,7 +2,6 @@ local notifiers = require("thetto/lib/notifier")
 local collector_core = require("thetto/core/collector")
 local wraplib = require("thetto/lib/wrap")
 local messagelib = require("thetto/lib/message")
-local listlib = require("thetto/lib/list")
 local custom = require("thetto/custom")
 local uis = require("thetto/view/ui")
 local repository = require("thetto/core/repository")
@@ -36,7 +35,12 @@ M.start_by_excmd = function(has_range, raw_range, raw_args)
     return nil, messagelib.error(parse_err)
   end
 
-  opts.range = {first = raw_range[1], last = raw_range[2], given = has_range ~= 0}
+  local range = nil
+  if has_range ~= 0 then
+    range = {first = raw_range[1], last = raw_range[2]}
+  end
+  opts.range = range
+
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()
@@ -105,14 +109,8 @@ M._start = function(source_name, source_opts, action_opts, opts)
     end)
   else
     notifier:on("execute", function()
-      local item = ui:selected_items()[1]
-      local items = {}
-      local kind_name = "base"
-      if item ~= nil then
-        items = {item}
-        kind_name = item.kind_name or collector.source.kind_name
-      end
-
+      local item_group = ui:current_item_groups()[1]
+      local kind_name, items = unpack(item_group)
       local _, exec_err = executor:action(ctx, opts.auto, kind_name, items, action_opts)
       return exec_err
     end)
@@ -138,7 +136,11 @@ M.execute = function(has_range, raw_range, raw_args)
     action_name = "default"
   end
 
-  local range = {first = raw_range[1], last = raw_range[2], given = has_range ~= 0}
+  local range = nil
+  if has_range ~= 0 then
+    range = {first = raw_range[1], last = raw_range[2]}
+  end
+
   local action_opts = ex_opts.x or {}
   local result, err = wraplib.traceback(function()
     return M._execute(action_name, range, action_opts, opts)
@@ -162,14 +164,7 @@ M._execute = function(action_name, range, action_opts, opts)
     end
   end
 
-  local selected_items = ctx.ui:selected_items(action_name, range)
-  local item_groups = listlib.group_by(selected_items, function(item)
-    return item.kind_name or ctx.collector.source.kind_name
-  end)
-  if #item_groups == 0 then
-    table.insert(item_groups, {"base", {}})
-  end
-
+  local item_groups = ctx.ui:current_item_groups(action_name, range)
   local executor = ctx.executor
   for _, item_group in ipairs(item_groups) do
     local kind_name, items = unpack(item_group)

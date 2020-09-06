@@ -10,12 +10,8 @@ M.action = function(_, _, _)
     return ""
   end
 
-  local item = ctx.ui:selected_items()[1]
-  if item == nil then
-    return ""
-  end
-
-  local kind_name = item.kind_name or ctx.collector.source.kind_name
+  local item_group = ctx.ui:current_item_groups()[1]
+  local kind_name, _ = unpack(item_group)
   local names = kinds.actions(ctx.executor, kind_name)
   return table.concat(names, "\n")
 end
