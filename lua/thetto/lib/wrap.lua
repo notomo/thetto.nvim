@@ -2,12 +2,15 @@ local M = {}
 
 M.debounce = function(ms, f)
   local timer = nil
-  return function()
+  return function(...)
     if timer == nil then
       timer = vim.loop.new_timer()
     end
     timer:stop()
-    timer:start(ms, 0, vim.schedule_wrap(f))
+    local args = {...}
+    timer:start(ms, 0, vim.schedule_wrap(function()
+      f(unpack(args))
+    end))
   end
 end
 

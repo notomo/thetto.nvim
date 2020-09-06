@@ -67,17 +67,20 @@ M.create = function(executor, kind_name)
   kind.find_action = find_action
   kind.__index = kind
 
-  kind.behaviors = vim.tbl_deep_extend("force", base.behaviors, origin.behaviors or {})
-
   local source_user_opts = {}
+  local source_user_behaviors = {}
   if custom.source_actions ~= nil and custom.source_actions[source_name] ~= nil then
     source_user_opts = custom.source_actions[source_name].opts or {}
+    source_user_behaviors = custom.source_actions[source_name].behaviors or {}
   end
   local user_opts = {}
+  local user_behaviors = {}
   if custom.kind_actions ~= nil and custom.kind_actions[kind_name] ~= nil then
     user_opts = custom.kind_actions[kind_name].opts or {}
+    user_behaviors = custom.kind_actions[kind_name].behaviors or {}
   end
   kind.opts = vim.tbl_deep_extend("force", base.opts, origin.opts or {}, user_opts, source_user_opts)
+  kind.behaviors = vim.tbl_deep_extend("force", base.behaviors, origin.behaviors or {}, user_behaviors, source_user_behaviors)
 
   return setmetatable(kind, origin), nil
 end

@@ -27,8 +27,8 @@ function Collector.start(self)
   return nil
 end
 
-function Collector.update(self, input_lines)
-  input_lines = input_lines or {}
+function Collector.update(self)
+  local input_lines = self.input_lines
   self.opts = vim.deepcopy(self.original_opts)
   if not self.opts.ignorecase and self.opts.smartcase and table.concat(input_lines, ""):find("[A-Z]") then
     self.opts.ignorecase = false
@@ -161,7 +161,7 @@ function Collector._update_all_items(self, items)
   end
   vim.list_extend(self.all_items, items)
 
-  local err = self.notifier:send("update_input")
+  local err = self._update_with_debounce()
   if err ~= nil then
     return err
   end
@@ -303,32 +303,35 @@ M.create = function(notifier, source_name, source_opts, opts)
     _sorter_names = source.sorters,
     input_lines = vim.fn["repeat"]({""}, #source.filters),
   }
-  local collector = setmetatable(collector_tbl, Collector)
+  local self = setmetatable(collector_tbl, Collector)
 
-  err = collector:_update_filters(source.filters)
+  err = self:_update_filters(source.filters)
   if err ~= nil then
     return nil, err
   end
-  err = collector:_update_sorters(source.sorters)
+  err = self:_update_sorters(source.sorters)
   if err ~= nil then
     return nil, err
   end
 
-  local update = wraplib.debounce(opts.debounce_ms, function()
-    return collector:update(collector.input_lines)
+  self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function(bufnr)
+    if bufnr ~= nil then
+      local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+      self.input_lines = input_lines
+    end
+    return self:update()
   end)
-  notifier:on("update_input", function(lines)
-    collector.input_lines = lines
-    return update()
+  notifier:on("update_input", function(bufnr)
+    return self._update_with_debounce(bufnr)
   end)
   notifier:on("update_all_items", function(items)
-    return collector:_update_all_items(items)
+    return self:_update_all_items(items)
   end)
   notifier:on("finish", function()
-    return collector:stop()
+    return self:stop()
   end)
 
-  return collector, nil
+  return self, nil
 end
 
 return M

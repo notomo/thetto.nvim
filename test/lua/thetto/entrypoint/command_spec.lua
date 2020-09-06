@@ -522,7 +522,9 @@ test3]])
     require("thetto/custom").default_filters = {"substring", "-substring"}
 
     command("Thetto line")
-    command("normal! dd")
+    helper.wait_ui(function()
+      command("normal! dd")
+    end)
 
     assert.line_count(2)
   end)
@@ -679,16 +681,25 @@ test2]])
   end)
 
   it("can execute action automatically", function()
+    local value = nil
+    local actions = require("thetto/custom").source_actions
+    actions["line"] = {
+      action_hoge = function(_, items)
+        value = items[1].value
+      end,
+      behaviors = {hoge = {quit = false}},
+    }
+
     helper.set_lines([[
 test_auto_1
 test_auto_2]])
 
-    command("Thetto line --auto=debug_print --no-insert")
-    helper.wait_ui(function()
-      command("normal! j")
-    end)
+    command("Thetto line --auto=hoge --no-insert")
+    assert.equals("test_auto_1", value)
 
-    assert.exists_message("test_auto_1")
-    assert.exists_message("test_auto_2")
+    command("ThettoDo move_to_input")
+    helper.sync_input({"test_auto_2"})
+
+    assert.equals("test_auto_2", value)
   end)
 end)

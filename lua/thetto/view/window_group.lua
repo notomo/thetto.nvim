@@ -183,15 +183,14 @@ function WindowGroup.redraw(self, collector, input_lines)
   self:_redraw_input(collector, input_lines)
 end
 
-function WindowGroup._open(self, default_input_lines)
+function WindowGroup._open(self, default_input_lines, active)
   local input_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, input_filetype))
     vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = function()
-        local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
-        return self.notifier:send("update_input", input_lines)
+        return self.notifier:send("update_input", bufnr)
       end,
       on_detach = function()
         return self.notifier:send("finish")
@@ -303,6 +302,8 @@ function WindowGroup._open(self, default_input_lines)
 
   self:_set_left_padding()
 
+  self:enter(active)
+
   local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self.source_name)
   vim.api.nvim_command(on_moved)
 end
@@ -403,13 +404,13 @@ function WindowGroup._head_lines(items)
   return lines
 end
 
-M.open = function(notifier, source_name, default_input_lines, display_limit)
+M.open = function(notifier, source_name, default_input_lines, display_limit, active)
   local tbl = {notifier = notifier, source_name = source_name, _display_limit = display_limit}
   tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
   tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
 
   local window_group = setmetatable(tbl, WindowGroup)
-  window_group:_open(default_input_lines)
+  window_group:_open(default_input_lines, active)
   return window_group
 end
 

@@ -20,9 +20,7 @@ function UI.open(self)
   end
 
   self.origin_window = vim.api.nvim_get_current_win()
-  self.windows = window_groups.open(self.notifier, source.name, self.collector.input_lines, opts.display_limit)
-
-  self:enter(self.active)
+  self.windows = window_groups.open(self.notifier, source.name, self.collector.input_lines, opts.display_limit, self.active)
 
   if self.mode == "n" then
     vim.api.nvim_command("stopinsert")
