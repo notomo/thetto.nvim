@@ -341,17 +341,14 @@ function WindowGroup._redraw_input(self, collector, input_lines)
     vim.api.nvim_buf_set_lines(self.buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, input_height))
   end
 
-  local ns = vim.api.nvim_create_namespace("thetto-input-filter-info")
-  input_lines = input_lines or {}
+  local highlighter = self._info_hl_factory:reset(self.buffers.filter_info)
   for i, filter in ipairs(filters) do
     local input_line = input_lines[i] or ""
     if filter.highlight ~= nil and input_line ~= "" then
       filter:highlight(self.buffers.list, items, input_line, opts)
     end
     local filter_info = ("[%s]"):format(filter.name)
-    vim.api.nvim_buf_set_virtual_text(self.buffers.filter_info, ns, i - 1, {
-      {filter_info, "Comment"},
-    }, {})
+    highlighter:set_virtual_text(i - 1, {{filter_info, "Comment"}})
   end
 
   local line_count_diff = #filters - #input_lines
@@ -377,13 +374,9 @@ function WindowGroup._redraw_info(self, collector)
     collector_status = "running"
   end
 
-  local ns = vim.api.nvim_create_namespace("thetto-info-text")
-  vim.api.nvim_buf_clear_namespace(self.buffers.info, ns, 0, -1)
   local text = ("%s%s  [ %s / %s ]"):format(collector.source.name, sorter_info, vim.tbl_count(collector.items), #collector.all_items)
-  vim.api.nvim_buf_set_virtual_text(self.buffers.info, ns, 0, {
-    {text, "ThettoInfo"},
-    {"  " .. collector_status, "Comment"},
-  }, {})
+  local highlighter = self._info_hl_factory:reset(self.buffers.info)
+  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. collector_status, "Comment"}})
 end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
@@ -408,6 +401,8 @@ M.open = function(notifier, source_name, default_input_lines, display_limit, act
   local tbl = {notifier = notifier, source_name = source_name, _display_limit = display_limit}
   tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
   tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
+  tbl._info_hl_factory = highlights.new_factory("thetto-info-text")
+  tbl._filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info")
 
   local window_group = setmetatable(tbl, WindowGroup)
   window_group:_open(default_input_lines, active)

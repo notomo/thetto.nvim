@@ -18,7 +18,7 @@ M.highlight_sign = function(self, bufnr, items)
   for i, item in ipairs(items) do
     for _, color in ipairs(self.compiled_colors) do
       if color.always or color.regex:match_str(item[self.color_label_key]) then
-        highlighter:set_virtual_text(i - 1, color.chunks, {})
+        highlighter:set_virtual_text(i - 1, color.chunks)
         break
       end
     end
