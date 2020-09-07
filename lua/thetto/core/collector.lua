@@ -269,7 +269,7 @@ M.create = function(notifier, source_name, source_opts, opts)
     if target == nil then
       return nil, "not found target: " .. opts.target
     end
-    opts.cwd = target.cwd()
+    opts.cwd = target.cwd(opts.target_patterns)
   end
 
   if opts.pattern_type ~= nil then

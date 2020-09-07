@@ -20,6 +20,7 @@ local start_default_opts = {
   offset = 0,
   cwd = ".",
   target = nil,
+  target_patterns = {},
   action = nil,
   display_limit = 100,
   debounce_ms = 50,

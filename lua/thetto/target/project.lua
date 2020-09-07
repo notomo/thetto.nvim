@@ -1,16 +1,15 @@
+local upward_target = require("thetto/target/upward")
+
 local M = {}
 
 M.root_patterns = {".git"}
 
-M.cwd = function()
-  for _, pattern in ipairs(M.root_patterns) do
-    local found = vim.fn.finddir(pattern, ".;")
-    if found ~= nil then
-      local root = vim.fn.fnamemodify(found, ":p:h:h")
-      return root
-    end
+M.cwd = function(target_patterns)
+  local patterns = M.root_patterns
+  if #target_patterns > 0 then
+    patterns = target_patterns
   end
-  return "."
+  return upward_target.cwd(patterns)
 end
 
 return M

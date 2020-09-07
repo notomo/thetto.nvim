@@ -25,6 +25,12 @@ test:
 build:
 	echo 2
 ]])
+
+    helper.new_directory("sub")
+    helper.new_file("sub/Makefile", [[
+sub_test:
+	echo 1
+]])
   end)
   after_each(helper.after_each)
 
@@ -41,6 +47,13 @@ build:
     command("ThettoDo")
 
     assert.tab_count(2)
+  end)
+
+  it("can use the nearest upward Makefile", function()
+    helper.cd("sub")
+    command("Thetto make/target --no-insert --target=upward --target-patterns=Makefile")
+
+    assert.exists_pattern("sub_test")
   end)
 
 end)

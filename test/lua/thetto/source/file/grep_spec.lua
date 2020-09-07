@@ -42,7 +42,8 @@ foo]])
   end)
 
   it("can show grep results in project dir", function()
-    helper.new_file("0_root_pattern", [[hoge in root_pattern]])
+    helper.new_directory("0_root_pattern")
+    helper.new_file("0_root_pattern/in_root_pattern", [[hoge in root_pattern]])
 
     require("thetto/target/project").root_patterns = {"0_root_pattern"}
 
