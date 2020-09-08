@@ -285,17 +285,4 @@ asserts.create("completion_contains"):register(function(self)
   end
 end)
 
-asserts.create("virtual_text"):register(function(self)
-  return function(_, args)
-    local expected = args[1]
-    local bufnr = vim.api.nvim_get_current_buf()
-    local line = vim.fn.line(".") - 1
-    local chunk = vim.api.nvim_buf_get_virtual_text(bufnr, line)[1]
-    local actual = chunk[1]
-    self:set_positive(("virtual_text should be %s, but actual: %s"):format(expected, actual))
-    self:set_negative(("virtual_text should not be %s, but actual: %s"):format(expected, actual))
-    return expected == actual
-  end
-end)
-
 return M
