@@ -1,3 +1,5 @@
+local setup = require("thetto/setup/file/mru")
+
 local M = {}
 
 M.ignore_pattern = "^$"
@@ -5,7 +7,7 @@ M.ignore_pattern = "^$"
 M.collect = function(self)
   local items = {}
 
-  local paths = {}
+  local paths = setup.get()
   for _, bufnr in ipairs(vim.fn.range(vim.fn.bufnr("$"), 1, -1)) do
     if not vim.api.nvim_buf_is_valid(bufnr) then
       goto continue

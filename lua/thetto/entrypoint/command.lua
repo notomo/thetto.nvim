@@ -7,6 +7,7 @@ local uis = require("thetto/view/ui")
 local repository = require("thetto/core/repository")
 local executors = require("thetto/core/executor")
 local cmdparse = require("thetto/lib/cmdparse")
+local modulelib = require("thetto/lib/module")
 
 local M = {}
 
@@ -176,6 +177,22 @@ M._execute = function(action_name, range, action_opts, opts)
   end
 
   return executor:batch(ctx)
+end
+
+M.setup = function(raw_args)
+  local setup_name, _, _, parse_err = cmdparse.args(raw_args, {})
+  if parse_err ~= nil then
+    return nil, messagelib.error(parse_err)
+  end
+
+  local setup = modulelib.find_setup(setup_name)
+  local result, err = wraplib.traceback(function()
+    return setup.start()
+  end)
+  if err ~= nil then
+    return nil, messagelib.error(err)
+  end
+  return result, nil
 end
 
 vim.api.nvim_command("doautocmd User ThettoSourceLoad")

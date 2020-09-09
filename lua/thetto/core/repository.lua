@@ -1,4 +1,4 @@
-local persist = require("thetto/lib/_persist")
+local persist = require("thetto/lib/_persist")("repository")
 
 local M = {}
 

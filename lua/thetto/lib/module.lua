@@ -42,6 +42,10 @@ M.find_target = function(name)
   return find("thetto/target/" .. name)
 end
 
+M.find_setup = function(name)
+  return find("thetto/setup/" .. name)
+end
+
 M.cleanup = function(name, force)
   local dir = name .. "/"
   for key in pairs(package.loaded) do
