@@ -32,9 +32,9 @@ end
 M.opts = {expr = nil}
 
 M.collect = function(self, opts)
-  local git_root = self.filelib.find_upward_dir(".git")
-  if git_root == nil then
-    return {}, nil
+  local git_root, err = self.filelib.find_git_root()
+  if err ~= nil then
+    return {}, nil, err
   end
 
   local path

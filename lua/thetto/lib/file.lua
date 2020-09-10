@@ -44,4 +44,12 @@ M.find_upward_dir = function(child_pattern)
   return nil
 end
 
+M.find_git_root = function()
+  local git_root = M.find_upward_dir(".git")
+  if git_root == nil then
+    return nil, "not found .git"
+  end
+  return git_root, nil
+end
+
 return M

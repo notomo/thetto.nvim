@@ -11,7 +11,13 @@ local Collector = {}
 Collector.__index = Collector
 
 function Collector.start(self)
-  self.all_items, self.job = self.source:collect(self.opts)
+  local all_items, job, err = self.source:collect(self.opts)
+  if err ~= nil then
+    return err
+  end
+  self.all_items = all_items
+  self.job = job
+
   for i, item in ipairs(self.all_items) do
     item.index = i
   end

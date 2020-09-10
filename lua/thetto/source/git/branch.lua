@@ -3,6 +3,11 @@ local M = {}
 M.opts = {all = false}
 
 M.collect = function(self, opts)
+  local _, err = self.filelib.find_git_root()
+  if err ~= nil then
+    return {}, nil, err
+  end
+
   local cmd = {"git", "branch", "--format", "%(refname:short)"}
   if self.opts.all then
     table.insert(cmd, "--all")
