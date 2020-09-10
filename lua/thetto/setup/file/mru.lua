@@ -1,4 +1,5 @@
 local paths = require("thetto/lib/_persist")("setup/file/mru")
+local listlib = require("thetto/lib/list")
 
 local M = {}
 
@@ -26,13 +27,12 @@ M._add = function(bufnr)
   if path == "" then
     return
   end
-  if vim.tbl_contains(paths, path) then
-    return
-  end
 
-  if #paths > M.limit then
+  local removed = listlib.remove(paths, path)
+  if not removed and #paths > M.limit then
     table.remove(paths, 1)
   end
+
   table.insert(paths, path)
 end
 
