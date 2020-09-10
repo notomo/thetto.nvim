@@ -97,6 +97,9 @@ function WindowGroup.open_sidecar(self, collector, item, open_target)
     local highlighter = self._preview_hl_factory:create(bufnr)
     local range = open_target.range or {s = {column = 0}, e = {column = -1}}
     highlighter:add("ThettoPreview", row - 1, range.s.column, range.e.column)
+    if vim.fn.getbufline(bufnr, row)[1] == "" then
+      highlighter:set_virtual_text(row - 1, {{"(empty)", "ThettoPreview"}})
+    end
   end
 end
 
