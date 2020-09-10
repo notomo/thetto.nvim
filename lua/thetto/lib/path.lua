@@ -20,6 +20,10 @@ M.parse_with_row = function(line)
   return path, tonumber(row), matched_line
 end
 
+M.join = function(...)
+  return table.concat({...}, "/")
+end
+
 -- for app
 
 M.user_data_path = function(file_name)
