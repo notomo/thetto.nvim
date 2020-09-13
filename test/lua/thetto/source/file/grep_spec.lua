@@ -74,4 +74,19 @@ foo]])
     assert.current_line("foo")
   end)
 
+  it("can grep interactively", function()
+    local collector = helper.sync_open("file/grep", "--no-insert", "--filters=interactive")
+
+    assert.current_line("")
+
+    command("ThettoDo move_to_input")
+    helper.sync_input({"hoge"})
+    assert.is_true(collector:wait())
+    helper.wait_ui(function()
+      command("ThettoDo move_to_list")
+    end)
+
+    assert.current_line("target:1 hoge")
+  end)
+
 end)

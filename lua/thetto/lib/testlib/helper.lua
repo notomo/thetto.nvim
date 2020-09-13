@@ -82,7 +82,7 @@ M.sync_open = function(...)
   local _range = nil
   local collector = require("thetto/entrypoint/command").start_by_excmd(0, _range, {...})
   if collector.job == nil then
-    return
+    return collector
   end
   local ok = collector.job:wait(1000)
   if not ok then
@@ -99,6 +99,8 @@ M.sync_open = function(...)
   if not ok then
     assert(false, "wait timeout")
   end
+
+  return collector
 end
 
 M.sync_execute = function(...)

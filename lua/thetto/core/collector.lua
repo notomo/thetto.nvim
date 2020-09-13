@@ -34,6 +34,13 @@ function Collector.start(self)
   return nil
 end
 
+function Collector.wait(self, ms)
+  ms = ms or 1000
+  return vim.wait(ms, function()
+    return self:finished()
+  end, 10)
+end
+
 function Collector.update(self)
   local input_lines = self.input_lines
   local pattern = self.opts.pattern
@@ -177,7 +184,6 @@ function Collector._update_all_items(self, items)
   if err ~= nil then
     return err
   end
-  self.is_finished = self.job ~= nil and not self.job:is_running()
   return nil
 end
 
@@ -191,7 +197,7 @@ function Collector.finished(self)
   if self.job == nil then
     return true
   end
-  return self.is_finished
+  return not self.job:is_running()
 end
 
 function Collector.update_filters(self, names)
@@ -325,8 +331,6 @@ M.create = function(notifier, source_name, source_opts, opts)
     return nil, err
   end
 
-  local filters = {}
-  local sorters = {}
   local collector_tbl = {
     all_items = {},
     job = nil,
@@ -335,13 +339,12 @@ M.create = function(notifier, source_name, source_opts, opts)
     opts = vim.deepcopy(opts),
     items = {},
     selected = {},
-    filters = filters,
-    sorters = sorters,
+    filters = {},
+    sorters = {},
     notifier = notifier,
-    is_finished = false,
+    input_lines = vim.fn["repeat"]({""}, #source.filters),
     _filter_names = source.filters,
     _sorter_names = source.sorters,
-    input_lines = vim.fn["repeat"]({""}, #source.filters),
   }
   local self = setmetatable(collector_tbl, Collector)
 
