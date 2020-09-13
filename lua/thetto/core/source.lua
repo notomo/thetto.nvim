@@ -8,6 +8,8 @@ local base = require("thetto/source/base")
 
 local M = {}
 
+M.errors = {skip_empty_pattern = "skip_empty_pattern"}
+
 M.create = function(notifier, source_name, source_opts, opts)
   local origin
   if source_name == "base" then
@@ -30,6 +32,7 @@ M.create = function(notifier, source_name, source_opts, opts)
   source.pathlib = pathlib
   source.filelib = filelib
   source.listlib = listlib
+  source.errors = M.errors
 
   if #opts.filters ~= 0 then
     source.filters = opts.filters

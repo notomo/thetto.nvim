@@ -35,6 +35,7 @@ M.create = function(filter_name, opts)
   filter.key = key or origin.key or "value"
   filter.inverse = inverse
   filter.highlights = highlights.new_factory("thetto-filter-highlight-" .. filter_name)
+  filter.is_interactive = filter_name == "interactive"
 
   filter._name = function(self)
     local name = ("%s:%s"):format(filter_name, self.key)

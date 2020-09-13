@@ -12,7 +12,7 @@ Collector.__index = Collector
 
 function Collector.start(self)
   local all_items, job, err = self.source:collect(self.opts)
-  if err ~= nil then
+  if err ~= nil and err ~= source_core.errors.skip_empty_pattern then
     return err
   end
   self.all_items = all_items
@@ -22,7 +22,8 @@ function Collector.start(self)
     item.index = i
   end
 
-  if self.job == nil and #self.all_items == 0 and not self.opts.allow_empty then
+  local interactive_skip_empty = self.opts.interactive and err == source_core.errors.skip_empty_pattern
+  if not interactive_skip_empty and self.job == nil and #self.all_items == 0 and not self.opts.allow_empty then
     return self.source.name .. ": empty"
   end
 
@@ -35,7 +36,12 @@ end
 
 function Collector.update(self)
   local input_lines = self.input_lines
+  local pattern = self.opts.pattern
+  local interactive = self.opts.interactive
+
   self.opts = vim.deepcopy(self.original_opts)
+  self.opts.pattern = pattern
+  self.opts.interactive = interactive
   if not self.opts.ignorecase and self.opts.smartcase and table.concat(input_lines, ""):find("[A-Z]") then
     self.opts.ignorecase = false
   else
@@ -171,7 +177,7 @@ function Collector._update_all_items(self, items)
   if err ~= nil then
     return err
   end
-  self.is_finished = not self.job:is_running()
+  self.is_finished = self.job ~= nil and not self.job:is_running()
   return nil
 end
 
@@ -214,6 +220,10 @@ function Collector._update_filters(self, names)
 
   self.filters = filters
   self._filter_names = new_names
+
+  self.opts.interactive = #(vim.tbl_filter(function(filter)
+    return filter.is_interactive
+  end, self.filters)) > 0
 
   return nil
 end
@@ -259,6 +269,30 @@ function Collector._update_items(self, input_lines)
   end
 
   self.items = filtered
+
+  if not self.opts.interactive then
+    return
+  end
+
+  local input = nil
+  for i, filter in ipairs(self.filters) do
+    if filter.is_interactive then
+      input = input_lines[i]
+      break
+    end
+  end
+
+  if self.opts.pattern == input then
+    return
+  end
+  self.opts.pattern = input
+
+  self:stop()
+
+  local err = self:start()
+  if err ~= nil then
+    return err
+  end
 end
 
 M.create = function(notifier, source_name, source_opts, opts)
@@ -327,6 +361,7 @@ M.create = function(notifier, source_name, source_opts, opts)
     end
     return self:update()
   end)
+
   notifier:on("update_input", function(bufnr)
     return self._update_with_debounce(bufnr)
   end)

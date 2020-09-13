@@ -7,9 +7,15 @@ M.recursive_opt = "-r"
 M.separator = "--"
 
 M.collect = function(self, opts)
-  local pattern = opts.pattern or vim.fn.input("Pattern: ")
-  if pattern == "" then
-    return {}, nil
+  local pattern = opts.pattern
+  if not opts.interactive and pattern == nil then
+    pattern = vim.fn.input("Pattern: ")
+  end
+  if pattern == nil or pattern == "" then
+    if opts.interactive then
+      self.append({})
+    end
+    return {}, nil, self.errors.skip_empty_pattern
   end
 
   local paths = opts.cwd
