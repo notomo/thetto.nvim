@@ -18,6 +18,10 @@ end
 
 M.read_lines = function(path, s, e)
   local f = io.open(path, "r")
+  if f == nil then
+    return {}
+  end
+
   local lines = {}
   local read = f:lines()
   for _ = 1, s - 1, 1 do
@@ -28,6 +32,14 @@ M.read_lines = function(path, s, e)
   end
   io.close(f)
   return lines
+end
+
+M.write_lines = function(path, lines)
+  local f = io.open(path, "w")
+  for _, line in ipairs(lines) do
+    f:write(line .. "\n")
+  end
+  f:close()
 end
 
 M.find_upward_dir = function(child_pattern)

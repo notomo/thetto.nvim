@@ -2,8 +2,6 @@ local setup = require("thetto/setup/file/mru")
 
 local M = {}
 
-M.ignore_pattern = "^$"
-
 M.collect = function(self)
   local items = {}
 
@@ -26,14 +24,9 @@ M.collect = function(self)
   paths = self.listlib.unique(paths)
 
   local home = os.getenv("HOME")
-  local regex = vim.regex(M.ignore_pattern)
-  for _, path in ipairs(paths) do
-    if regex:match_str(path) or vim.fn.filereadable(path) == 0 then
-      goto continue
-    end
+  for _, path in ipairs(vim.tbl_filter(setup.validate_fn(), paths)) do
     local value = path:gsub(home, "~")
     table.insert(items, {value = value, path = path})
-    ::continue::
   end
   return items
 end
