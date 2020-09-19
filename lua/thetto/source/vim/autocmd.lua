@@ -117,6 +117,6 @@ M.collect = function()
   return items
 end
 
-M.kind_name = "file"
+M.kind_name = "vim/autocmd"
 
 return M

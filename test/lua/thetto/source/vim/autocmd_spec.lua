@@ -20,4 +20,24 @@ describe("vim/autocmd source", function()
     assert.tab_count(2)
   end)
 
+  it("can delete autocmd", function()
+    command("augroup target_group")
+    command("autocmd VimResume <buffer> echomsg 'target_autocmd'")
+    command("augroup END")
+
+    command("Thetto vim/autocmd")
+    helper.sync_input({"target_autocmd"})
+
+    command("ThettoDo move_to_list")
+    helper.search("target_autocmd")
+
+    command("ThettoDo delete_group")
+
+    command("Thetto vim/autocmd")
+    helper.sync_input({"target_autocmd"})
+    command("ThettoDo move_to_list")
+
+    assert.no.exists_pattern("target_autocmd")
+  end)
+
 end)
