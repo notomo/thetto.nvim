@@ -1,5 +1,6 @@
 local jobs = require("thetto/lib/job")
 local modulelib = require("thetto/lib/module")
+local filelib = require("thetto/lib/file")
 local custom = require("thetto/custom")
 local base = require("thetto/kind/base")
 
@@ -63,6 +64,7 @@ M.create = function(executor, kind_name)
   kind.name = kind_name
   kind.source_name = source_name
   kind.jobs = jobs
+  kind.filelib = filelib
   kind.executor = executor
   kind.find_action = find_action
   kind.__index = kind

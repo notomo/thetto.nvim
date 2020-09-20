@@ -29,6 +29,7 @@ local start_default_opts = {
   sorters = {},
   allow_empty = false,
   auto = nil,
+  immediately = false,
 }
 
 M.start_by_excmd = function(has_range, raw_range, raw_args)
@@ -125,6 +126,13 @@ M._start = function(source_name, source_opts, action_opts, opts)
     return nil, err
   end
 
+  if opts.immediately then
+    local _, exec_err = M._execute(opts.action, nil, action_opts, {})
+    if exec_err ~= nil then
+      return exec_err
+    end
+  end
+
   return collector, nil
 end
 
@@ -132,10 +140,6 @@ M.execute = function(has_range, raw_range, raw_args)
   local action_name, opts, ex_opts, parse_err = cmdparse.args(raw_args, {resume = false, offset = 0})
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
-  end
-
-  if action_name == nil then
-    action_name = "default"
   end
 
   local range = nil
@@ -164,6 +168,10 @@ M._execute = function(action_name, range, action_opts, opts)
     if err ~= nil then
       return nil, "not found state: " .. err
     end
+  end
+
+  if action_name == nil then
+    action_name = "default"
   end
 
   local item_groups = ctx.ui:current_item_groups(action_name, range)
