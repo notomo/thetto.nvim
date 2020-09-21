@@ -12,7 +12,8 @@ local get_root = function(name)
 end
 
 M.root = get_root("thetto.nvim")
-M.test_data_dir = M.root .. "/test/test_data/"
+M.test_data_path = "test/test_data/"
+M.test_data_dir = M.root .. "/" .. M.test_data_path
 
 M.command = function(cmd)
   local _, err = pcall(vim.api.nvim_command, cmd)
