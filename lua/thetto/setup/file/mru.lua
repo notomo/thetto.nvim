@@ -1,4 +1,4 @@
-local paths = require("thetto/lib/_persist")("setup/file/mru")
+local persist = require("thetto/lib/_persist")("setup/file/mru")
 local listlib = require("thetto/lib/list")
 local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
@@ -13,7 +13,7 @@ local group_name = "thetto_setup_file_mru"
 
 M.start = function()
   local stored_paths = filelib.read_lines(store_file_path, 0, M.limit)
-  paths = vim.tbl_filter(M.validate_fn, stored_paths)
+  persist.paths = vim.tbl_filter(M.validate_fn, stored_paths)
 
   vim.api.nvim_command(("augroup %s"):format(group_name))
   vim.api.nvim_command("autocmd!")
@@ -25,7 +25,7 @@ M.start = function()
 end
 
 M.get = function()
-  return vim.fn.reverse(paths)
+  return vim.fn.reverse(persist.paths or {})
 end
 
 M.validate_fn = function()
@@ -50,12 +50,12 @@ M._add = function(bufnr)
     return
   end
 
-  local removed = listlib.remove(paths, path)
-  if not removed and #paths > M.limit then
-    table.remove(paths, 1)
+  local removed = listlib.remove(persist.paths, path)
+  if not removed and #persist.paths > M.limit then
+    table.remove(persist.paths, 1)
   end
 
-  table.insert(paths, path)
+  table.insert(persist.paths, path)
 end
 
 M._save = function()
