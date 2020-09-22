@@ -26,11 +26,11 @@ end
 local Parser = {}
 Parser.__index = Parser
 
-function Parser.new()
+function Parser.new(home)
   local parser = {}
   parser.autocmd = nil
   parser.autocmds = {}
-  parser.home = os.getenv("HOME")
+  parser.home = home
   return setmetatable(parser, Parser)
 end
 
@@ -96,13 +96,13 @@ function Parser.eat(self, output)
   error(err)
 end
 
-M.collect = function()
+M.collect = function(self)
   local result = vim.api.nvim_exec("verbose autocmd", true)
   local outputs = vim.split(result, "\n", true)
   table.remove(outputs, 1)
 
   local items = {}
-  local parser = Parser.new()
+  local parser = Parser.new(self.pathlib.home())
   for _, output in ipairs(outputs) do
     parser:eat(output)
   end

@@ -1,8 +1,8 @@
 local M = {}
 
-M.collect = function()
+M.collect = function(self)
   local items = {}
-  local home = os.getenv("HOME")
+  local home = self.pathlib.home()
   local paths = vim.api.nvim_list_runtime_paths()
   for _, path in ipairs(paths) do
     local value = path:gsub(home, "~")

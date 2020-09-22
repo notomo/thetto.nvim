@@ -23,7 +23,7 @@ M.collect = function(self)
   vim.list_extend(paths, vim.v.oldfiles)
   paths = self.listlib.unique(paths)
 
-  local home = os.getenv("HOME")
+  local home = self.pathlib.home()
   for _, path in ipairs(vim.tbl_filter(setup.validate_fn(), paths)) do
     local value = path:gsub(home, "~")
     table.insert(items, {value = value, path = path})

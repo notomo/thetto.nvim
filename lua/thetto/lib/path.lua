@@ -24,13 +24,21 @@ M.join = function(...)
   return table.concat({...}, "/")
 end
 
-if vim.fn.has("win32") then
+if vim.fn.has("win32") == 1 then
   M.adjust_sep = function(path)
     return path:gsub("\\", "/")
+  end
+
+  M.home = function()
+    return os.getenv("USERPROFILE")
   end
 else
   M.adjust_sep = function(path)
     return path
+  end
+
+  M.home = function()
+    return os.getenv("HOME")
   end
 end
 

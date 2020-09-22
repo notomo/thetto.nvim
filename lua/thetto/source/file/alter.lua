@@ -29,7 +29,7 @@ M._to_items = function(self, patterns, path)
   table.remove(candidates, index)
 
   local items = {}
-  local home = os.getenv("HOME")
+  local home = self.pathlib.home()
   for _, pattern in ipairs(candidates) do
     local format_pattern, count = pattern:gsub("%%", "%%s")
     if count ~= #matches then
