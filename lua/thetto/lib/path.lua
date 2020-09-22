@@ -24,6 +24,16 @@ M.join = function(...)
   return table.concat({...}, "/")
 end
 
+if vim.fn.has("win32") then
+  M.adjust_sep = function(path)
+    return path:gsub("\\", "/")
+  end
+else
+  M.adjust_sep = function(path)
+    return path
+  end
+end
+
 -- for app
 
 M.user_data_path = function(file_name)
