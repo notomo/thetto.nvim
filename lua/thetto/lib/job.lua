@@ -24,6 +24,17 @@ function Job.is_running(self)
   return self.handle ~= nil and self.handle:is_active()
 end
 
+local _adjust
+if vim.fn.has("win32") == 1 then
+  _adjust = function(data)
+    return data:gsub("\r", "")
+  end
+else
+  _adjust = function(data)
+    return data
+  end
+end
+
 function Job.start(self)
   self.stdin = vim.loop.new_pipe(false)
   self.stdout = vim.loop.new_pipe(false)
@@ -43,8 +54,9 @@ function Job.start(self)
 
   self.stdout:read_start(vim.schedule_wrap(function(err, data)
     if self.stdout_buffered and data ~= nil then
-      self.stdout_output = self.stdout_output .. data
-      self.all_output = self.all_output .. data
+      local adjusted = _adjust(data)
+      self.stdout_output = self.stdout_output .. adjusted
+      self.all_output = self.all_output .. adjusted
     end
     if self.on_stdout then
       self:on_stdout(err, data)
@@ -53,8 +65,9 @@ function Job.start(self)
 
   self.stderr:read_start(vim.schedule_wrap(function(err, data)
     if self.stderr_buffered and data ~= nil then
-      self.stderr_output = self.stderr_output .. data
-      self.all_output = self.all_output .. data
+      local adjusted = _adjust(data)
+      self.stderr_output = self.stderr_output .. adjusted
+      self.all_output = self.all_output .. adjusted
     end
     if self.on_stderr then
       self:on_stderr(err, data)
@@ -87,6 +100,9 @@ function Job.stop(self)
 end
 
 function Job.parse_output(data)
+  if data ~= nil then
+    data = _adjust(data)
+  end
   return vim.split(data, "\n", true)
 end
 

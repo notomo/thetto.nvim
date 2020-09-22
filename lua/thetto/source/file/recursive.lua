@@ -1,22 +1,28 @@
 local M = {}
 
-M.get_command = function(path, max_depth)
-  return {
-    "find",
-    "-L",
-    path,
-    "-maxdepth",
-    max_depth,
-    "-type",
-    "d",
-    "-name",
-    ".git",
-    "-prune",
-    "-o",
-    "-type",
-    "f",
-    "-print",
-  }
+if vim.fn.has("win32") == 1 then
+  M.get_command = function(path, _)
+    return {"where", "/R", path, "*"}
+  end
+else
+  M.get_command = function(path, max_depth)
+    return {
+      "find",
+      "-L",
+      path,
+      "-maxdepth",
+      max_depth,
+      "-type",
+      "d",
+      "-name",
+      ".git",
+      "-prune",
+      "-o",
+      "-type",
+      "f",
+      "-print",
+    }
+  end
 end
 
 M.opts = {max_depth = 100}
