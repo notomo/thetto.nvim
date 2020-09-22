@@ -29,7 +29,7 @@ M.action_preview = function(self, items, ctx)
   local preview_item = vim.deepcopy(item)
   preview_item.range_part = ("1,%d"):format(#lines)
 
-  ctx.ui:open_preview({
+  ctx.ui:open_preview(preview_item, {
     lines = lines,
     execute = function()
       M.action_execute(self, {preview_item})
