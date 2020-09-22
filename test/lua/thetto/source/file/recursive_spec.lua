@@ -32,4 +32,14 @@ describe("file/recursive source", function()
     assert.exists_pattern("root_pattern/in_root_pattern")
   end)
 
+  it("shows error if command does not exist", function()
+    require("thetto/source/file/recursive").get_command = function()
+      return {"not_exists_cmd"}
+    end
+
+    assert.error_message("not_exists_cmd", function()
+      command("Thetto file/recursive")
+    end)
+  end)
+
 end)

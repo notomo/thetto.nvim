@@ -28,7 +28,10 @@ function Collector.start(self)
   end
 
   if self.job ~= nil then
-    self.job:start()
+    local joberr = self.job:start()
+    if joberr ~= nil then
+      return joberr
+    end
   end
 
   return nil

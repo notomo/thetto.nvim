@@ -82,6 +82,9 @@ end
 M.sync_open = function(...)
   local _range = nil
   local collector = require("thetto/entrypoint/command").start_by_excmd(0, _range, {...})
+  if collector == nil then
+    return
+  end
   if collector.job == nil then
     return collector
   end

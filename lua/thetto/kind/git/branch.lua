@@ -15,7 +15,7 @@ M.action_checkout = function(self, items)
   table.insert(cmd, item.value)
 
   local job = self.jobs.new(cmd, {on_exit = self.jobs.print_output})
-  job:start()
+  return nil, job:start()
 end
 
 M.action_delete = function(self, items)
@@ -36,7 +36,7 @@ M.action_delete = function(self, items)
     on_exit = self.jobs.print_stdout,
     on_stderr = self.jobs.print_stderr,
   })
-  job:start()
+  return nil, job:start()
 end
 
 M.default_action = "checkout"

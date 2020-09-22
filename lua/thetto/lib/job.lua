@@ -51,6 +51,9 @@ function Job.start(self)
   self.handle, self.pid = vim.loop.spawn(self.command, opts, vim.schedule_wrap(function(code, signal)
     self:_shutdown(code, signal)
   end))
+  if type(self.pid) ~= "number" then
+    return self.pid .. ": " .. self.command
+  end
 
   self.stdout:read_start(vim.schedule_wrap(function(err, data)
     if self.stdout_buffered and data ~= nil then

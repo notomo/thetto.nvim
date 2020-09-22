@@ -21,7 +21,10 @@ M.collect = function(self, opts)
     on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,
   })
-  get_current_job:start()
+  local joberr = get_current_job:start()
+  if joberr ~= nil then
+    return nil, nil, joberr
+  end
   get_current_job:wait(1000)
 
   local job = self.jobs.new(cmd, {

@@ -12,9 +12,12 @@ M.action_kill = function(self, items)
   table.insert(cmd, table.concat(pids, " "))
 
   local job = self.jobs.new(cmd, {on_exit = self.jobs.print_output})
-  job:start()
+  local err = job:start()
+  if err ~= nil then
+    return nil, err
+  end
 
-  return job
+  return job, nil
 end
 
 return M
