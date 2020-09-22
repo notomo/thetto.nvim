@@ -4,10 +4,25 @@ M.collect = function(self)
   local cmd = {"ps", "--no-headers", "faxo", "pid,user,command"}
   local remove_header = function(_)
   end
-  if vim.fn.has("mac") then
+  local to_item = function(output)
+      local splitted = vim.split(output:gsub("^%s+", ""), "%s")
+      return {value = output, pid = splitted[1]}
+  end
+  if vim.fn.has("mac") == 1 then
     cmd = {"ps", "-axo", "pid,user,command"}
     remove_header = function(outputs)
       table.remove(outputs, 1)
+    end
+  elseif vim.fn.has("win32") == 1 then
+    cmd = {"tasklist", "/NH", "/FO", "CSV"}
+    remove_header = function(outputs)
+      table.remove(outputs, 1)
+    end
+    to_item = function(output)
+      local splitted = vim.split(output:gsub("^%s+", ""), "\",\"")
+      local pid = splitted[2]
+      local value = ("%s %d"):format(splitted[1]:sub(2), pid)
+      return {value = value, pid = pid}
     end
   end
 
@@ -17,8 +32,7 @@ M.collect = function(self)
       local outputs = job_self:get_stdout()
       remove_header(outputs)
       for _, output in ipairs(outputs) do
-        local splitted = vim.split(output:gsub("^%s+", ""), "%s")
-        table.insert(items, {value = output, pid = splitted[1]})
+        table.insert(items, to_item(output))
       end
       self.append(items)
     end,
