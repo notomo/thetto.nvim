@@ -33,7 +33,7 @@ end
 
 M.kind_name = "directory"
 
-M._modify_path = function(self, path)
+M._modify_path = function(_, path)
   return path .. "/"
 end
 

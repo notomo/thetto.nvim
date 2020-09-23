@@ -363,7 +363,7 @@ function WindowGroup._redraw_input(self, collector, input_lines)
       filter:highlight(self.buffers.list, items, input_line, opts)
     end
     local filter_info = ("[%s]"):format(filter.name)
-    highlighter:set_virtual_text(i - 1, {{filter_info, "Comment"}})
+    highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}})
   end
 
   local line_count_diff = #filters - #input_lines
@@ -458,5 +458,6 @@ vim.api.nvim_command("highlight default link ThettoColorLabelOthers StatusLine")
 vim.api.nvim_command("highlight default link ThettoColorLabelBackground NormalFloat")
 vim.api.nvim_command("highlight default link ThettoInput NormalFloat")
 vim.api.nvim_command("highlight default link ThettoPreview Search")
+vim.api.nvim_command("highlight default link ThettoFilterInfo Comment")
 
 return M

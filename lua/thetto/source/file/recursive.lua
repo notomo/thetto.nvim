@@ -78,7 +78,7 @@ end
 
 M.kind_name = "file"
 
-M._modify_path = function(self, path)
+M._modify_path = function(_, path)
   return path
 end
 
