@@ -45,7 +45,7 @@ M.after_each = function()
   M.command("syntax off")
   print(" ")
 
-  require("thetto/lib/module").cleanup("thetto", true)
+  require("thetto/lib/module").cleanup()
   M.delete("")
 end
 

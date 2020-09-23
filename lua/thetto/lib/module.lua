@@ -46,10 +46,11 @@ M.find_setup = function(name)
   return find("thetto/setup/" .. name)
 end
 
-M.cleanup = function(name, force)
-  local dir = name .. "/"
+local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
+M.cleanup = function()
+  local dir = plugin_name .. "/"
   for key in pairs(package.loaded) do
-    if (vim.startswith(key, dir) or key == name) and (force or key ~= "thetto/lib/_persist") then
+    if (vim.startswith(key, dir) or key == plugin_name) and key ~= "thetto/lib/_persist" then
       package.loaded[key] = nil
     end
   end
