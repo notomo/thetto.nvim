@@ -1,9 +1,9 @@
 local M = {}
 
 M.relative_modifier = function(base_path)
-  local pattern = "^" .. base_path:gsub("([^%w])", "%%%1") .. "/"
+  local pattern = "^" .. M.adjust_sep(base_path):gsub("([^%w])", "%%%1") .. "/"
   return function(path)
-    return path:gsub(pattern, "", 1)
+    return M.adjust_sep(path):gsub(pattern, "", 1)
   end
 end
 

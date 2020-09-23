@@ -79,7 +79,7 @@ end
 M.kind_name = "file"
 
 M._modify_path = function(self, path)
-  return self.pathlib.adjust_sep(path)
+  return path
 end
 
 return M
