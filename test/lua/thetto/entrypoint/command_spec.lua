@@ -718,4 +718,14 @@ test_auto_2]])
 
     assert.equals("test_auto_2", value)
   end)
+
+  it("action shows error if it is executed on empty", function()
+    command("Thetto line")
+    helper.sync_input({"hoge"})
+
+    assert.error_message("not found action: open", function()
+      command("ThettoDo open")
+    end)
+  end)
+
 end)

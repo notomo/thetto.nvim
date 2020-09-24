@@ -13,7 +13,7 @@ local function set_base(target, base)
   if meta == nil then
     return setmetatable(target, base)
   end
-  if target == meta then
+  if target == base or target == meta then
     return target
   end
   return setmetatable(target, set_base(meta, base))

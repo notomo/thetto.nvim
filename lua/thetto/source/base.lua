@@ -33,5 +33,6 @@ M.kind_name = "base"
 M.opts = {}
 
 M.__index = M
+setmetatable(M, {})
 
 return M
