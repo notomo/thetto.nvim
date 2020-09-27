@@ -360,16 +360,19 @@ M.create = function(notifier, source_name, source_opts, opts)
     return nil, err
   end
 
-  self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function(bufnr)
-    if bufnr ~= nil and vim.api.nvim_buf_is_valid(bufnr) then
-      local input_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+  self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
+    if self._input_bufnr ~= nil and vim.api.nvim_buf_is_valid(self._input_bufnr) then
+      local input_lines = vim.api.nvim_buf_get_lines(self._input_bufnr, 0, -1, true)
       self.input_lines = input_lines
     end
     return self:update()
   end)
 
-  notifier:on("update_input", function(bufnr)
-    return self._update_with_debounce(bufnr)
+  notifier:on("setup_input", function(bufnr)
+    self._input_bufnr = bufnr
+  end)
+  notifier:on("update_input", function()
+    return self._update_with_debounce()
   end)
   notifier:on("update_all_items", function(items)
     return self:_update_all_items(items)

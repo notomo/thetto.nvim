@@ -203,9 +203,10 @@ function WindowGroup._open(self, default_input_lines, active)
     vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, input_filetype))
     vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
+    self.notifier:send("setup_input", bufnr)
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = function()
-        return self.notifier:send("update_input", bufnr)
+        return self.notifier:send("update_input")
       end,
       on_detach = function()
         return self.notifier:send("finish")
