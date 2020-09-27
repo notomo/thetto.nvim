@@ -26,4 +26,16 @@ describe("vim/buffer source", function()
     assert.file_name("foo")
   end)
 
+  it("can show terminal buffers", function()
+    local bufnr = vim.api.nvim_create_buf(true, true)
+    vim.api.nvim_buf_set_name(bufnr, "foo")
+
+    vim.fn.termopen({"echo", "1111"})
+
+    command("Thetto vim/buffer --x-buftype=terminal --no-insert")
+
+    assert.exists_pattern("term://")
+    assert.no.exists_pattern("foo")
+  end)
+
 end)

@@ -1,15 +1,18 @@
 local M = {}
 
-M.collect = function()
+M.opts = {buftype = nil}
+
+M.collect = function(self)
   local items = {}
   local bufnrs = vim.api.nvim_list_bufs()
   for _, bufnr in ipairs(bufnrs) do
     if not vim.api.nvim_buf_is_valid(bufnr) then
       goto continue
     end
-
-    local listed = vim.api.nvim_buf_get_option(bufnr, "buflisted")
-    if listed == 0 then
+    if not vim.bo[bufnr].buflisted then
+      goto continue
+    end
+    if self.opts.buftype ~= nil and vim.bo[bufnr].buftype ~= self.opts.buftype then
       goto continue
     end
 
@@ -18,9 +21,8 @@ M.collect = function()
       name = "(None)"
     end
 
-    local modified = vim.api.nvim_buf_get_option(bufnr, "modified")
     local modified_marker = " "
-    if modified then
+    if vim.bo[bufnr].modified then
       modified_marker = "+"
     end
 
