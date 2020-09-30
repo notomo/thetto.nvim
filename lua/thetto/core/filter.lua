@@ -32,9 +32,13 @@ M.create = function(filter_name, opts)
   end
 
   local filter = {}
-  filter.key = key or origin.key or "value"
+  filter._key = key or origin.key or "value"
+  if key ~= "" and modifier ~= nil then
+    filter.key = ("%s:%s"):format(key, modifier_name)
+  else
+    filter.key = filter._key
+  end
   filter.inverse = inverse
-  filter.highlights = highlights.new_factory("thetto-filter-highlight-" .. filter_name)
   filter.is_interactive = filter_name == "interactive"
 
   filter._name = function(self)
@@ -48,13 +52,15 @@ M.create = function(filter_name, opts)
     return name
   end
 
+  filter.highlights = highlights.new_factory("thetto-filter-highlight-" .. filter:_name())
+
   if modifier ~= nil then
     filter.to_value = function(self, item)
-      return modifier(item[self.key], opts)
+      return modifier(item[self._key], opts)
     end
   else
     filter.to_value = function(self, item)
-      return item[self.key]
+      return item[self._key]
     end
   end
 

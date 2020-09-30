@@ -50,7 +50,7 @@ M.collect = function(self, opts)
           value = matched_line,
           path = path,
           row = row,
-          column_offsets = {value = #label + 1},
+          column_offsets = {["path:relative"] = 0, value = #label + 1},
         })
         ::continue::
       end
