@@ -1,6 +1,6 @@
 local M = {}
 
-M._load = function(self, path)
+M._load = function(self, path, cwd)
   if not self.filelib.readable(path) then
     return {}
   end
@@ -8,10 +8,19 @@ M._load = function(self, path)
   local items = {}
   local row = 1
   local f = io.open(path, "r")
+  local to_relative = self.pathlib.relative_modifier(cwd)
   for line in f:lines() do
     local target = vim.fn.matchstr(line, "\\v^\\zs\\S*\\ze:[^=]*$")
     if not (target == "" or target == ".PHONY" or target:find(":") ~= nil) then
-      table.insert(items, {value = target, path = path, row = row})
+      local path_row = ("%s:%d"):format(to_relative(path), row)
+      local desc = ("%s %s"):format(path_row, target)
+      table.insert(items, {
+        desc = desc,
+        value = target,
+        path = path,
+        row = row,
+        column_offsets = {value = #path_row + 1},
+      })
     end
     row = row + 1
   end
@@ -27,9 +36,18 @@ M.collect = function(self, opts)
 
   local items = {}
   for _, p in ipairs(vim.list_extend({path}, paths)) do
-    items = vim.list_extend(items, M._load(self, p))
+    items = vim.list_extend(items, M._load(self, p, opts.cwd))
   end
   return items
+end
+
+vim.api.nvim_command("highlight default link ThettoMakeTargetPath Comment")
+
+M.highlight = function(self, bufnr, items)
+  local highlighter = self.highlights:reset(bufnr)
+  for i, item in ipairs(items) do
+    highlighter:add("ThettoMakeTargetPath", i - 1, 0, item.column_offsets.value - 1)
+  end
 end
 
 M.kind_name = "make/target"

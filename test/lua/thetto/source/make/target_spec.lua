@@ -37,8 +37,8 @@ sub_test:
   it("can show makefile targets", function()
     command("Thetto make/target --no-insert")
 
-    assert.exists_pattern("test")
-    assert.exists_pattern("build")
+    assert.exists_pattern("Makefile:6 test")
+    assert.exists_pattern("test.mk:1 build")
     assert.no.exists_pattern("TEST")
     assert.no.exists_pattern("invalid")
     assert.no.exists_pattern(".PHONY")
@@ -53,7 +53,7 @@ sub_test:
     helper.cd("sub")
     command("Thetto make/target --no-insert --target=upward --target-patterns=Makefile")
 
-    assert.exists_pattern("sub_test")
+    assert.exists_pattern("Makefile:1 sub_test")
   end)
 
 end)
