@@ -59,7 +59,7 @@ M._add = function(bufnr)
 end
 
 M._save = function()
-  filelib.write_lines(store_file_path, M.get())
+  filelib.write_lines(store_file_path, persist.paths or {})
 end
 
 return M
