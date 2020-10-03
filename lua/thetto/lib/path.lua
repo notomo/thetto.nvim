@@ -32,6 +32,8 @@ if vim.fn.has("win32") == 1 then
   M.home = function()
     return os.getenv("USERPROFILE")
   end
+
+  M.env_separator = ";"
 else
   M.adjust_sep = function(path)
     return path
@@ -40,6 +42,8 @@ else
   M.home = function()
     return os.getenv("HOME")
   end
+
+  M.env_separator = ":"
 end
 
 -- for app
