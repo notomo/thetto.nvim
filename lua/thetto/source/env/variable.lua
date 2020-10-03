@@ -1,17 +1,13 @@
 local M = {}
 
 M.collect = function(self)
-  -- use `vim.fn.getcompletion("*", "environment")`?
-  local job = self.jobs.new({"env"}, {
-    on_exit = function(job_self)
-      local items = {}
-      for _, output in ipairs(job_self:get_stdout()) do
-        table.insert(items, {value = output})
-      end
-      self.append(items)
-    end,
-  })
-  return {}, job
+  local names = vim.fn.getcompletion("*", "environment")
+  local items = {}
+  for _, name in ipairs(names) do
+    local value = ("%s=%s"):format(name, os.getenv(name))
+    table.insert(items, {value = value})
+  end
+  return items
 end
 
 M.kind_name = "word"

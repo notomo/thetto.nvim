@@ -10,7 +10,7 @@ describe("env/variable source", function()
   it("can show environment variables", function()
     helper.sync_open("env/variable", "--no-insert")
 
-    helper.search("HOME=")
+    helper.search("^HOME=")
 
     command("ThettoDo")
 
