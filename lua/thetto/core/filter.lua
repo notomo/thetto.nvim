@@ -42,7 +42,7 @@ M.create = function(filter_name, opts)
   filter.is_interactive = filter_name == "interactive"
 
   filter._name = function(self)
-    local name = ("%s:%s"):format(filter_name, self.key)
+    local name = ("%s:%s"):format(filter_name, self._key)
     if self.inverse then
       name = "-" .. name
     end
