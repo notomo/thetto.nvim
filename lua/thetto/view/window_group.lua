@@ -322,6 +322,9 @@ function WindowGroup._open(self, default_input_lines, active)
 
   local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self.source_name)
   vim.api.nvim_command(on_moved)
+
+  local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self.buffers.list)
+  vim.api.nvim_command(on_moved_i)
 end
 
 function WindowGroup._redraw_list(self, collector)
