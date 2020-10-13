@@ -3,6 +3,7 @@ local bufferlib = require("thetto/lib/buffer")
 local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
 local repository = require("thetto/core/repository")
+local vim = vim
 
 local input_filetype = "thetto-input"
 local list_filetype = "thetto"

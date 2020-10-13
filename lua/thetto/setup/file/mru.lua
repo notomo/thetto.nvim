@@ -2,6 +2,7 @@ local persist = require("thetto/lib/_persist")("setup/file/mru")
 local listlib = require("thetto/lib/list")
 local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
+local vim = vim
 
 local M = {}
 

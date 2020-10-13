@@ -1,3 +1,5 @@
+local vim = vim
+
 local M = {}
 
 if vim.fn.has("win32") == 1 then

@@ -1,3 +1,5 @@
+local vim = vim
+
 local M = {}
 
 local to_texts = function(input_line, opts)

@@ -1,10 +1,12 @@
+local vim = vim
+
 local M = {}
 
 M.opts = {ignore = {}}
 
 M.collect = function(self, opts)
   local file_path = vim.api.nvim_buf_get_name(0)
-  if vim.fn.filereadable(file_path) ~= 1 then
+  if not self.filelib.readable(file_path) then
     return {}, nil
   end
 

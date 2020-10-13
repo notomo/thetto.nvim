@@ -2,6 +2,7 @@ local bufferlib = require("thetto/lib/buffer")
 local repository = require("thetto/core/repository")
 local window_groups = require("thetto/view/window_group")
 local listlib = require("thetto/lib/list")
+local vim = vim
 
 local M = {}
 

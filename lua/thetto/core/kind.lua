@@ -3,6 +3,7 @@ local modulelib = require("thetto/lib/module")
 local filelib = require("thetto/lib/file")
 local custom = require("thetto/custom")
 local base = require("thetto/kind/base")
+local vim = vim
 
 local M = {}
 

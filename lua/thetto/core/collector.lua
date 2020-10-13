@@ -4,6 +4,7 @@ local sorter_core = require("thetto/core/sorter")
 local modulelib = require("thetto/lib/module")
 local inputs = require("thetto/core/input")
 local wraplib = require("thetto/lib/wrap")
+local vim = vim
 
 local M = {}
 
