@@ -17,7 +17,7 @@ function Job._shutdown(self, code, signal)
     self.timer:stop()
   end
   self:stop()
-  if self.on_exit then
+  if self.on_exit and not self.discarded then
     self:on_exit(code, signal)
   end
 end
@@ -63,7 +63,7 @@ function Job.start(self)
       self.stdout_output = self.stdout_output .. adjusted
       self.all_output = self.all_output .. adjusted
     end
-    if self.on_stdout then
+    if self.on_stdout and not self.discarded then
       self:on_stdout(err, data)
     end
   end))
@@ -74,7 +74,7 @@ function Job.start(self)
       self.stderr_output = self.stderr_output .. adjusted
       self.all_output = self.all_output .. adjusted
     end
-    if self.on_stderr then
+    if self.on_stderr and not self.discarded then
       self:on_stderr(err, data)
     end
   end))
@@ -82,12 +82,17 @@ function Job.start(self)
   if self.on_interval then
     self.timer = vim.loop.new_timer()
     self.timer:start(self.interval_ms, 0, vim.schedule_wrap(function()
-      self:on_interval()
       if self:is_running() then
+        self:on_interval()
         self.timer:again()
       end
     end))
   end
+end
+
+function Job.discard(self)
+  self.discarded = true
+  self:stop()
 end
 
 function Job.stop(self)
@@ -169,6 +174,7 @@ M.new = function(cmd_and_args, opts)
   end
 
   job.all_output = ""
+  job.discarded = false
 
   job.on_interval = opts.on_interval
   job.interval_ms = opts.interval_ms or 1000
