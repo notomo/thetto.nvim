@@ -191,6 +191,12 @@ function Collector._update_all_items(self, items)
   return nil
 end
 
+function Collector.discard(self)
+  if self.job ~= nil then
+    self.job:discard()
+  end
+end
+
 function Collector.stop(self)
   if self.job ~= nil then
     self.job:stop()
@@ -297,7 +303,7 @@ function Collector._update_items(self, input_lines)
   end
   self.opts.pattern = input
 
-  self:stop()
+  self:discard()
 
   local err = self:start()
   if err ~= nil then
@@ -379,7 +385,7 @@ M.create = function(notifier, source_name, source_opts, opts)
     return self:_update_all_items(items)
   end)
   notifier:on("finish", function()
-    return self:stop()
+    return self:discard()
   end)
 
   return self, nil

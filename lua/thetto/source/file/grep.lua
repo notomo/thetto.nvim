@@ -29,39 +29,59 @@ M.collect = function(self, opts)
   end
 
   local to_relative = self.pathlib.relative_modifier(opts.cwd)
-  local buffered_items = {}
+  local stack = {}
+  local timer = vim.loop.new_timer()
   local job = self.jobs.new(cmd, {
     on_stdout = function(job_self, _, data)
       if data == nil then
         return
       end
 
-      local outputs = job_self.parse_output(data)
-      for _, output in ipairs(outputs) do
-        local path, row, matched_line = self.pathlib.parse_with_row(output)
-        if path == nil then
-          goto continue
-        end
-        local relative_path = to_relative(path)
-        local label = ("%s:%d"):format(relative_path, row)
-        local desc = ("%s %s"):format(label, matched_line)
-        table.insert(buffered_items, {
-          desc = desc,
-          value = matched_line,
-          path = path,
-          row = row,
-          column_offsets = {["path:relative"] = 0, value = #label + 1},
-        })
-        ::continue::
+      table.insert(stack, job_self.iter_output(data))
+      if timer:is_active() then
+        return
       end
-    end,
-    on_exit = function(_)
-      self.append(buffered_items)
-      buffered_items = {}
-    end,
-    on_interval = function(_)
-      self.append(buffered_items)
-      buffered_items = {}
+
+      timer:start(0, 50, vim.schedule_wrap(function()
+        if job_self.discarded then
+          timer:stop()
+          return
+        end
+        local items = {}
+        local co = table.remove(stack)
+        if co == nil then
+          timer:stop()
+          return
+        end
+        for _ = 0, 1000 do
+          local ok, output = coroutine.resume(co)
+          if not ok or output == nil then
+            if #stack == 0 then
+              timer:stop()
+            end
+            self.append(items)
+            return
+          end
+
+          local path, row, matched_line = self.pathlib.parse_with_row(output)
+          if path == nil then
+            goto continue
+          end
+          local relative_path = to_relative(path)
+          local label = ("%s:%d"):format(relative_path, row)
+          local desc = ("%s %s"):format(label, matched_line)
+          table.insert(items, {
+            desc = desc,
+            value = matched_line,
+            path = path,
+            row = row,
+            column_offsets = {["path:relative"] = 0, value = #label + 1},
+          })
+          ::continue::
+        end
+        table.insert(stack, co)
+        self.append(items)
+      end))
     end,
     stdout_buffered = false,
     stderr_buffered = false,
