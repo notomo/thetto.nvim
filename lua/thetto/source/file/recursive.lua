@@ -31,9 +31,28 @@ M.opts = {max_depth = 100}
 
 M.collect = function(self, opts)
   local cmd = self.get_command(opts.cwd, self.opts.max_depth)
-  local buffered_items = {}
-  local prev_last = nil
   local to_relative = self.pathlib.relative_modifier(opts.cwd)
+
+  local items = {}
+  local item_appender = self.jobs.loop(opts.debounce_ms, function(co)
+    for _ = 0, self.chunk_max_count do
+      local ok, path = coroutine.resume(co)
+      if not ok or path == nil then
+        break
+      end
+      if path == "" or path == opts.cwd then
+        goto continue
+      end
+
+      local relative_path = self:_modify_path(to_relative(path))
+      table.insert(items, {value = relative_path, path = path})
+      ::continue::
+    end
+    self.append(items)
+    items = {}
+  end)
+
+  local prev_last = nil
   local job = self.jobs.new(cmd, {
     on_stdout = function(job_self, _, data)
       if data == nil then
@@ -52,23 +71,9 @@ M.collect = function(self, opts)
         table.remove(outputs, #outputs)
       end
 
-      for _, path in ipairs(outputs) do
-        if path == "" or path == opts.cwd then
-          goto continue
-        end
-
-        local relative_path = self:_modify_path(to_relative(path))
-        table.insert(buffered_items, {value = relative_path, path = path})
-        ::continue::
-      end
+      item_appender(job_self, outputs)
     end,
     on_exit = function(_)
-      self.append(buffered_items)
-      buffered_items = {}
-    end,
-    on_interval = function(_)
-      self.append(buffered_items)
-      buffered_items = {}
     end,
     stdout_buffered = false,
     stderr_buffered = false,

@@ -31,6 +31,7 @@ M.filters = custom.default_filters or {"substring"}
 M.sorters = custom.default_sorters or {}
 M.kind_name = "base"
 M.opts = {}
+M.chunk_max_count = 10000
 
 M.__index = M
 setmetatable(M, {})

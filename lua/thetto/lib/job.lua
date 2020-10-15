@@ -13,9 +13,6 @@ local close = function(handle)
 end
 
 function Job._shutdown(self, code, signal)
-  if self.on_interval then
-    self.timer:stop()
-  end
   self:stop()
   if self.on_exit and not self.discarded then
     self:on_exit(code, signal)
@@ -78,16 +75,6 @@ function Job.start(self)
       self:on_stderr(err, data)
     end
   end))
-
-  if self.on_interval then
-    self.timer = vim.loop.new_timer()
-    self.timer:start(self.interval_ms, 0, vim.schedule_wrap(function()
-      if self:is_running() then
-        self:on_interval()
-        self.timer:again()
-      end
-    end))
-  end
 end
 
 function Job.discard(self)
@@ -99,14 +86,46 @@ function Job.stop(self)
   self.stdout:read_stop()
   self.stderr:read_stop()
 
-  if self.on_interval then
-    self.timer:stop()
-  end
-
   close(self.stdin)
   close(self.stderr)
   close(self.stdout)
   close(self.handle)
+end
+
+local create_co = function(outputs)
+  return coroutine.create(function()
+    for _, o in ipairs(outputs) do
+      coroutine.yield(o)
+    end
+  end)
+end
+
+M.loop = function(ms, f)
+  local current = nil
+  local next_outputs = nil
+  local timer = vim.loop.new_timer()
+  return function(job, outputs)
+    if timer:is_active() then
+      vim.list_extend(next_outputs or {}, outputs)
+      return
+    end
+    current = create_co(outputs)
+
+    timer:start(0, ms, vim.schedule_wrap(function()
+      if job.discarded then
+        return timer:stop()
+      end
+
+      f(current)
+
+      if next_outputs == nil then
+        timer:stop()
+      else
+        current = create_co(next_outputs)
+        next_outputs = nil
+      end
+    end))
+  end
 end
 
 function Job.parse_output(data)
@@ -175,9 +194,6 @@ M.new = function(cmd_and_args, opts)
 
   job.all_output = ""
   job.discarded = false
-
-  job.on_interval = opts.on_interval
-  job.interval_ms = opts.interval_ms or 1000
 
   return setmetatable(job, Job)
 end
