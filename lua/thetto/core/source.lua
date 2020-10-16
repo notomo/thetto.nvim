@@ -33,6 +33,7 @@ M.create = function(notifier, source_name, source_opts, opts)
   source.filelib = filelib
   source.listlib = listlib
   source.errors = M.errors
+  source.ctx = {}
 
   if #opts.filters ~= 0 then
     source.filters = opts.filters
@@ -47,8 +48,11 @@ M.create = function(notifier, source_name, source_opts, opts)
   end
   source.compiled_colors = compiled_colors
 
-  source.append = function(items)
+  source.append = function(items, source_ctx)
     notifier:send("update_all_items", items)
+    if source_ctx ~= nil then
+      source.ctx = source_ctx
+    end
   end
 
   return setmetatable(source, origin), nil
