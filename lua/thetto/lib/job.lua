@@ -102,11 +102,11 @@ end
 
 M.loop = function(ms, f)
   local current = nil
-  local next_outputs = nil
+  local next_outputs = {}
   local timer = vim.loop.new_timer()
   return function(job, outputs)
     if timer:is_active() then
-      vim.list_extend(next_outputs or {}, outputs)
+      vim.list_extend(next_outputs, outputs)
       return
     end
     current = create_co(outputs)
@@ -118,11 +118,12 @@ M.loop = function(ms, f)
 
       f(current)
 
-      if next_outputs == nil then
+      local status = coroutine.status(current)
+      if #next_outputs == 0 and not job:is_running() and status == "dead" then
         timer:stop()
-      else
+      elseif #next_outputs ~= 0 and status == "dead" then
         current = create_co(next_outputs)
-        next_outputs = nil
+        next_outputs = {}
       end
     end))
   end
