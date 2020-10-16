@@ -89,4 +89,10 @@ foo]])
     assert.current_line("target:1 hoge")
   end)
 
+  it("can grep with camelcase pattern", function()
+    helper.sync_open("file/grep", "--no-insert", "--ignorecase", "--pattern=Foo")
+
+    assert.exists_pattern("foo")
+  end)
+
 end)
