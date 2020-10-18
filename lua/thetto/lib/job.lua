@@ -116,7 +116,10 @@ M.loop = function(ms, f)
         return timer:stop()
       end
 
-      f(current)
+      local ok = pcall(f, current)
+      if not ok then
+        return timer:stop()
+      end
 
       local status = coroutine.status(current)
       if #next_outputs == 0 and not job:is_running() and status == "dead" then
