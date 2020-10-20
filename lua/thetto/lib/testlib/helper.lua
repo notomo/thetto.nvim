@@ -65,7 +65,7 @@ M.sync_input = function(texts)
   local finished = false
   require("thetto/view/ui")._changed_after = function(input_lines)
     for _, line in ipairs(input_lines) do
-      if line == text then
+      if vim.endswith(line, text) then
         finished = true
       end
     end

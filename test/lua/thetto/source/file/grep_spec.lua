@@ -89,6 +89,19 @@ foo]])
     assert.current_line("target:1 hoge")
   end)
 
+  it("can grep no result pattern interactively", function()
+    local collector = helper.sync_open("file/grep", "--filters=interactive")
+
+    helper.sync_input({"hoge"})
+    helper.sync_input({"bar"})
+    helper.wait_ui(function()
+      command("ThettoDo move_to_list")
+    end)
+
+    assert.current_line("")
+    assert.is_true(collector:wait())
+  end)
+
   it("can grep with camelcase pattern", function()
     helper.sync_open("file/grep", "--no-insert", "--ignorecase", "--pattern=Foo")
 

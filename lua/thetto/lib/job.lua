@@ -133,9 +133,10 @@ M.loop = function(ms, f)
 end
 
 function Job.parse_output(data)
-  if data ~= nil then
-    data = _adjust(data)
+  if data == nil then
+    return {}
   end
+  data = _adjust(data)
   return vim.split(data, "\n", true)
 end
 

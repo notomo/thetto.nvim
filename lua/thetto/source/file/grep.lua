@@ -59,9 +59,6 @@ M.collect = function(self, opts)
 
   local job = self.jobs.new(cmd, {
     on_stdout = function(job_self, _, data)
-      if data == nil then
-        return
-      end
       local outputs = job_self.parse_output(data)
       item_appender(job_self, outputs)
     end,
