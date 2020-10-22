@@ -108,4 +108,12 @@ foo]])
     assert.exists_pattern("foo")
   end)
 
+  it("can show grep results with including :digits: text", function()
+    helper.new_file("file", [[  test :111:  ]])
+
+    helper.sync_open("file/grep", "--no-insert", "--pattern=test")
+
+    assert.exists_pattern("file:1   test :111:  ")
+  end)
+
 end)

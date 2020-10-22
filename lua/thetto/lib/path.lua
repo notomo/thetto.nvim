@@ -12,11 +12,16 @@ M.to_relative = function(path, base_path)
 end
 
 M.parse_with_row = function(line)
-  local path, row = line:match("(.*):(%d+):")
-  if not path then
+  local row = line:match(":(%d+):")
+  if not row then
     return
   end
-  local matched_line = line:sub(#path + #row + #(":") * 2 + 1)
+
+  local row_pattern = (":%s:"):format(row)
+  local row_index = line:find(row_pattern)
+
+  local path = line:sub(1, row_index - 1)
+  local matched_line = line:sub(row_index + #row_pattern)
   return path, tonumber(row), matched_line
 end
 
