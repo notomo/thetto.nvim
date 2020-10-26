@@ -88,7 +88,9 @@ M.highlight = function(self, bufnr, items)
       -- NOTICE: support only ignorecase
       -- NOTICE: support only the first occurrence
       local s, e = (item.value:lower()):find(pattern, 1, true)
-      highlighter:add("ThettoFileGrepMatch", i - 1, item.column_offsets.value + s - 1, item.column_offsets.value + e)
+      if s ~= nil then
+        highlighter:add("ThettoFileGrepMatch", i - 1, item.column_offsets.value + s - 1, item.column_offsets.value + e)
+      end
     end
   end
 end
