@@ -1,3 +1,5 @@
+vim.api.nvim_command("doautocmd User ThettoSourceLoad")
+
 local notifiers = require("thetto/lib/notifier")
 local collector_core = require("thetto/core/collector")
 local wraplib = require("thetto/lib/wrap")
@@ -202,7 +204,5 @@ M.setup = function(raw_args)
   end
   return result, nil
 end
-
-vim.api.nvim_command("doautocmd User ThettoSourceLoad")
 
 return M
