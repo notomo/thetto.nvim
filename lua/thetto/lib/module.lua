@@ -20,6 +20,16 @@ local function set_base(target, base)
 end
 M.set_base = set_base
 
+local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
+M.cleanup = function()
+  local dir = plugin_name .. "/"
+  for key in pairs(package.loaded) do
+    if (vim.startswith(key, dir) or key == plugin_name) then
+      package.loaded[key] = nil
+    end
+  end
+end
+
 -- for app
 
 M.find_source = function(name)
@@ -44,17 +54,6 @@ end
 
 M.find_setup = function(name)
   return find("thetto/setup/" .. name)
-end
-
-local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
-M.cleanup = function()
-  local dir = plugin_name .. "/"
-  for key in pairs(package.loaded) do
-    if (vim.startswith(key, dir) or key == plugin_name) and key ~= "thetto/lib/_persist" then
-      package.loaded[key] = nil
-    end
-  end
-  vim.api.nvim_command("doautocmd User ThettoSourceLoad")
 end
 
 return M

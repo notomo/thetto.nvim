@@ -1,4 +1,4 @@
-local persist = require("thetto/lib/_persist")("setup/file/mru")
+local persist = {paths = {}}
 local listlib = require("thetto/lib/list")
 local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
@@ -26,7 +26,7 @@ M.start = function()
 end
 
 M.get = function()
-  return vim.fn.reverse(persist.paths or {})
+  return vim.fn.reverse(persist.paths)
 end
 
 M.validate_fn = function()
@@ -60,7 +60,7 @@ M._add = function(bufnr)
 end
 
 M._save = function()
-  filelib.write_lines(store_file_path, persist.paths or {})
+  filelib.write_lines(store_file_path, persist.paths)
 end
 
 return M
