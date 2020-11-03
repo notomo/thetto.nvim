@@ -1,17 +1,11 @@
 local M = {}
 
-local get_root = function(name)
-  local suffix = "/lua/%?.lua"
-  local target = ("%s%s$"):format(name, suffix)
-  for _, path in ipairs(vim.split(package.path, ";")) do
-    if path:find(target) then
-      return path:sub(1, #path - #suffix + 1)
-    end
-  end
-  error("project root directory not found")
+local root, find_err = require("thetto/lib/path").find_root("thetto/*.lua")
+if find_err ~= nil then
+  error(find_err)
 end
+M.root = root
 
-M.root = get_root("thetto.nvim")
 M.test_data_path = "test/test_data/"
 M.test_data_dir = M.root .. "/" .. M.test_data_path
 
