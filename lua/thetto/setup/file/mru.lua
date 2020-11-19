@@ -6,7 +6,7 @@ local vim = vim
 
 local M = {}
 
-M.limit = 100
+M.limit = 500
 M.ignore_pattern = "^$"
 
 local store_file_path = pathlib.user_data_path("setup_file_mru.txt")
