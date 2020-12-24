@@ -18,7 +18,7 @@ M.action_delete = function(self, items)
   end
 
   local cmd = {"git", "tag", "--delete"}
-  table.insert(cmd, table.concat(branches, " "))
+  vim.list_extend(cmd, branches)
 
   local job = self.jobs.new(cmd, {
     on_exit = self.jobs.print_stdout,

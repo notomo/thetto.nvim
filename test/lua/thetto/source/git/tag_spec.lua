@@ -15,11 +15,15 @@ describe("git/branch source", function()
   end)
 
   it("can delete tag", function()
-    vim.fn.system({"git", "tag", "tag-source-test"})
+    vim.fn.system({"git", "tag", "tag-source-test1"})
+    vim.fn.system({"git", "tag", "tag-source-test2"})
 
     helper.sync_open("git/tag", "--no-insert")
 
-    helper.search("tag-source-test")
+    helper.search("tag-source-test1")
+    helper.sync_execute("toggle_selection")
+    helper.search("tag-source-test2")
+    helper.sync_execute("toggle_selection")
     helper.sync_execute("delete")
 
     helper.sync_open("git/tag", "--no-insert")

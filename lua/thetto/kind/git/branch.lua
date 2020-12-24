@@ -30,7 +30,7 @@ M.action_delete = function(self, items)
   else
     table.insert(cmd, "--delete")
   end
-  table.insert(cmd, table.concat(branches, " "))
+  vim.list_extend(cmd, branches)
 
   local job = self.jobs.new(cmd, {
     on_exit = self.jobs.print_stdout,
