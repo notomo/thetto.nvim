@@ -27,7 +27,8 @@ describe("git/branch source", function()
     helper.sync_execute("delete")
 
     helper.sync_open("git/tag", "--no-insert")
-    assert.no.exists_pattern("tag-source-test")
+    assert.no.exists_pattern("tag-source-test1")
+    assert.no.exists_pattern("tag-source-test2")
   end)
 
 end)
