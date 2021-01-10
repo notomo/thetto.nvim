@@ -220,6 +220,10 @@ asserts.create("file_name"):register_eq(function()
   return vim.fn.fnamemodify(vim.fn.bufname("%"), ":t")
 end)
 
+asserts.create("dir_name"):register_eq(function()
+  return vim.fn.fnamemodify(vim.fn.bufname("%"), ":h:t")
+end)
+
 asserts.create("filetype"):register_eq(function()
   return vim.bo.filetype
 end)

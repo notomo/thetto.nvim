@@ -20,14 +20,18 @@ describe("alter source", function()
   end)
 
   it("can show alternative files including new files", function()
-    require("thetto/source/file/alter").opts.pattern_groups = {{"%_test.lua", "%.lua"}}
+    require("thetto/source/file/alter").opts.pattern_groups = {{"%/from/%_test.lua", "%/to/%.lua"}}
 
-    helper.new_file("file_test.lua")
-    command("edit file_test.lua")
+    helper.new_directory("from")
+    helper.new_directory("from/dir")
+    helper.new_file("from/file_test.lua")
+    command("edit ./from/file_test.lua")
 
     command("Thetto file/alter --no-insert --x-allow-new --immediately")
+    command("write")
 
     assert.file_name("file.lua")
+    assert.dir_name("to")
   end)
 
 end)
