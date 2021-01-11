@@ -1,4 +1,5 @@
 local bufferlib = require("thetto/lib/buffer")
+local cursorlib = require("thetto/lib/cursor")
 local repository = require("thetto/core/repository")
 local window_groups = require("thetto/view/window_group")
 local listlib = require("thetto/lib/list")
@@ -27,6 +28,13 @@ function UI.open(self)
     vim.api.nvim_command("stopinsert")
   else
     vim.api.nvim_command("startinsert")
+  end
+end
+
+function UI.scroll(self, offset)
+  if offset ~= 0 then
+    self:update_offset(offset)
+    cursorlib.set_row(self.row, self.windows.list, self.windows.buffers.list)
   end
 end
 

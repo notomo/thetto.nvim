@@ -127,6 +127,7 @@ M._start = function(source_name, source_opts, action_opts, opts)
   if err ~= nil then
     return nil, err
   end
+  ui:scroll(opts.offset)
 
   if opts.immediately then
     local _, exec_err = M._execute(opts.action, nil, action_opts, {})

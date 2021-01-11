@@ -19,6 +19,17 @@ describe("thetto", function()
     assert.filetype("thetto-input")
   end)
 
+  it("can scroll ui by offset", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    command("Thetto line --no-insert --offset=10")
+
+    assert.current_line("test3")
+  end)
+
   it("should exist only one in a tab", function()
     command("Thetto line")
     command("Thetto vim/runtimepath")
