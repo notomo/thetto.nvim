@@ -16,13 +16,13 @@ M.start = function()
   local stored_paths = filelib.read_lines(store_file_path, 0, M.limit)
   persist.paths = vim.tbl_filter(M.validate_fn, stored_paths)
 
-  vim.api.nvim_command(("augroup %s"):format(group_name))
-  vim.api.nvim_command("autocmd!")
+  vim.cmd(("augroup %s"):format(group_name))
+  vim.cmd("autocmd!")
   local on_buf_enter = ("autocmd %s BufEnter * lua require('thetto/setup/file/mru')._add(vim.fn.expand('<abuf>'))"):format(group_name)
-  vim.api.nvim_command(on_buf_enter)
+  vim.cmd(on_buf_enter)
   local on_quit_pre = ("autocmd %s QuitPre * lua require('thetto/setup/file/mru')._save()"):format(group_name)
-  vim.api.nvim_command(on_quit_pre)
-  vim.api.nvim_command("augroup END")
+  vim.cmd(on_quit_pre)
+  vim.cmd("augroup END")
 end
 
 M.get = function()

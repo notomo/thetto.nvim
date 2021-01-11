@@ -38,7 +38,7 @@ M.apply = function(self, items, input_line, opts)
   return filtered
 end
 
-vim.api.nvim_command("highlight default link ThettoFilterRegexMatch Boolean")
+vim.cmd("highlight default link ThettoFilterRegexMatch Boolean")
 
 M.highlight = function(self, bufnr, items, input_line, opts)
   if self.inverse then

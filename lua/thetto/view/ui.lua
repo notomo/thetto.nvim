@@ -25,9 +25,9 @@ function UI.open(self)
   self.windows = window_groups.open(self.notifier, source.name, self.collector.input_lines, opts.display_limit, self.active)
 
   if self.mode == "n" then
-    vim.api.nvim_command("stopinsert")
+    vim.cmd("stopinsert")
   else
-    vim.api.nvim_command("startinsert")
+    vim.cmd("startinsert")
   end
 end
 
@@ -115,7 +115,7 @@ function UI.current_position_sorter(self)
 end
 
 function UI.start_insert(self, behavior)
-  vim.api.nvim_command("startinsert")
+  vim.cmd("startinsert")
   if behavior == "a" then
     local max_col = vim.fn.col("$")
     local cursor = vim.api.nvim_win_get_cursor(self.windows.input)

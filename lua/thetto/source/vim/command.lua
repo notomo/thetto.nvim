@@ -20,7 +20,7 @@ M.collect = function()
   return items
 end
 
-vim.api.nvim_command("highlight default link ThettoVimCommandDefinition Comment")
+vim.cmd("highlight default link ThettoVimCommandDefinition Comment")
 
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)

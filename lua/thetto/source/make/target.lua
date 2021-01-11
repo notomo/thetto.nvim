@@ -41,7 +41,7 @@ M.collect = function(self, opts)
   return items
 end
 
-vim.api.nvim_command("highlight default link ThettoMakeTargetPath Comment")
+vim.cmd("highlight default link ThettoMakeTargetPath Comment")
 
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)

@@ -2,20 +2,20 @@ local M = {}
 
 M.action_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("help " .. item.value)
-    vim.api.nvim_command("only")
+    vim.cmd("help " .. item.value)
+    vim.cmd("only")
   end
 end
 
 M.action_tab_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("tab help " .. item.value)
+    vim.cmd("tab help " .. item.value)
   end
 end
 
 M.action_vsplit_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("vertical help " .. item.value)
+    vim.cmd("vertical help " .. item.value)
   end
 end
 

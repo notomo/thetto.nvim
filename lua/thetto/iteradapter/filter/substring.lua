@@ -36,7 +36,7 @@ M.apply = function(self, items, input_line, opts)
   return filtered
 end
 
-vim.api.nvim_command("highlight default link ThettoFilterSubstringMatch Boolean")
+vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
 
 M.highlight = function(self, bufnr, items, input_line, opts)
   if self.inverse then

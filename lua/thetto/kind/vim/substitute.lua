@@ -1,13 +1,13 @@
 local M = {}
 
 M.after = function(_, _)
-  vim.api.nvim_command("nohlsearch")
+  vim.cmd("nohlsearch")
 end
 
 M.action_execute = function(_, items)
   for _, item in ipairs(items) do
     local cmd = item.range_part .. item.excmd
-    vim.api.nvim_command(cmd)
+    vim.cmd(cmd)
     M.after(item.value, cmd)
   end
 end

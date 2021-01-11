@@ -1,5 +1,4 @@
 local helper = require("thetto/lib/testlib/helper")
-local assert = helper.assert
 
 describe("process source", function()
 

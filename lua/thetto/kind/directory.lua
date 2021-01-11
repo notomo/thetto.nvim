@@ -5,23 +5,23 @@ end
 
 M.action_cd = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("lcd " .. item.path)
+    vim.cmd("lcd " .. item.path)
     M.after(item.path)
   end
 end
 
 M.action_tab_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("tabedit")
-    vim.api.nvim_command("lcd " .. item.path)
+    vim.cmd("tabedit")
+    vim.cmd("lcd " .. item.path)
     M.after(item.path)
   end
 end
 
 M.action_vsplit_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command("vsplit")
-    vim.api.nvim_command("lcd " .. item.path)
+    vim.cmd("vsplit")
+    vim.cmd("lcd " .. item.path)
     M.after(item.path)
   end
 end
@@ -31,7 +31,7 @@ M.action_enter = function(_, items)
   if item == nil then
     return
   end
-  vim.api.nvim_command("Thetto file/in_dir --cwd=" .. item.path)
+  vim.cmd("Thetto file/in_dir --cwd=" .. item.path)
 end
 
 M.action_open = M.action_cd

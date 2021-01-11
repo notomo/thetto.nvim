@@ -2,7 +2,7 @@ local M = {}
 
 M.action_execute = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_command(item.value)
+    vim.cmd(item.value)
   end
 end
 

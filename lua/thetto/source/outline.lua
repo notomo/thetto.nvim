@@ -39,8 +39,8 @@ M.collect = function(self, opts)
   return {}, job
 end
 
-vim.api.nvim_command("highlight default link ThettoOutlineLine Comment")
-vim.api.nvim_command("highlight default link ThettoOutlineType Statement")
+vim.cmd("highlight default link ThettoOutlineLine Comment")
+vim.cmd("highlight default link ThettoOutlineType Statement")
 
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)

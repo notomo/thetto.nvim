@@ -41,7 +41,7 @@ end
 
 M.action_move_to_list = function(_, _, ctx)
   ctx.ui:enter("list")
-  vim.api.nvim_command("stopinsert")
+  vim.cmd("stopinsert")
 end
 
 M.action_quit = function(_, _, ctx)

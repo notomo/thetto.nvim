@@ -1,4 +1,4 @@
-vim.api.nvim_command("doautocmd User ThettoSourceLoad")
+vim.cmd("doautocmd User ThettoSourceLoad")
 
 local notifiers = require("thetto/lib/notifier")
 local collector_core = require("thetto/core/collector")

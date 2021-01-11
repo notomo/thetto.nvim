@@ -59,7 +59,7 @@ function WindowGroup.open_sidecar(self, collector, item, open_target)
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(bufnr, "bufhidden", "wipe")
+  vim.bo[bufnr].bufhidden = "wipe"
 
   local left_column = 2
   self:move_to(left_column)
@@ -76,7 +76,7 @@ function WindowGroup.open_sidecar(self, collector, item, open_target)
       external = false,
       style = "minimal",
     })
-    vim.api.nvim_win_set_option(self.sidecar, "scrollbind", false)
+    vim.wo[self.sidecar].scrollbind = false
   else
     vim.api.nvim_win_set_buf(self.sidecar, bufnr)
   end
@@ -145,7 +145,7 @@ function WindowGroup.close(self)
     windowlib.close(id)
   end
   self:close_sidecar()
-  vim.api.nvim_command("autocmd! " .. self:_close_group_name())
+  vim.cmd("autocmd! " .. self:_close_group_name())
 end
 
 function WindowGroup.move_to(self, left_column)
@@ -202,7 +202,7 @@ end
 function WindowGroup._open(self, default_input_lines, active)
   local input_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, input_filetype))
-    vim.api.nvim_buf_set_option(bufnr, "filetype", input_filetype)
+    vim.bo[bufnr].filetype = input_filetype
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
     self.notifier:send("setup_input", bufnr)
     vim.api.nvim_buf_attach(bufnr, false, {
@@ -216,14 +216,14 @@ function WindowGroup._open(self, default_input_lines, active)
   end)
   local sign_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, self._display_limit))
-    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+    vim.bo[bufnr].modifiable = false
   end)
   local list_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, list_filetype))
-    vim.api.nvim_buf_set_option(bufnr, "filetype", list_filetype)
+    vim.bo[bufnr].filetype = list_filetype
   end)
   local info_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+    vim.bo[bufnr].modifiable = false
   end)
   local filter_info_bufnr = bufferlib.scratch(function(_)
   end)
@@ -250,7 +250,7 @@ function WindowGroup._open(self, default_input_lines, active)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(list_window, "scrollbind", true)
+  vim.wo[list_window].scrollbind = true
 
   local sign_window = vim.api.nvim_open_win(self.buffers.sign, false, {
     width = sign_width,
@@ -261,10 +261,10 @@ function WindowGroup._open(self, default_input_lines, active)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(sign_window, "winhighlight", "Normal:ThettoColorLabelBackground")
-  vim.api.nvim_win_set_option(sign_window, "scrollbind", true)
+  vim.wo[sign_window].winhighlight = "Normal:ThettoColorLabelBackground"
+  vim.wo[sign_window].scrollbind = true
   local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, self.source_name)
-  vim.api.nvim_command(on_sign_enter)
+  vim.cmd(on_sign_enter)
 
   local lines = vim.api.nvim_buf_get_lines(self.buffers.input, 0, -1, false)
   local input_width = math.floor(width * 0.75)
@@ -277,7 +277,7 @@ function WindowGroup._open(self, default_input_lines, active)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(input_window, "winhighlight", "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput")
+  vim.wo[input_window].winhighlight = "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput"
 
   local info_window = vim.api.nvim_open_win(self.buffers.info, false, {
     width = width,
@@ -288,9 +288,9 @@ function WindowGroup._open(self, default_input_lines, active)
     external = false,
     style = "minimal",
   })
-  vim.api.nvim_win_set_option(info_window, "winhighlight", "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo")
+  vim.wo[info_window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
   local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, self.source_name)
-  vim.api.nvim_command(on_info_enter)
+  vim.cmd(on_info_enter)
 
   local filter_info_window = vim.api.nvim_open_win(self.buffers.filter_info, false, {
     width = width - input_width,
@@ -302,13 +302,13 @@ function WindowGroup._open(self, default_input_lines, active)
     style = "minimal",
   })
   local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, self.source_name)
-  vim.api.nvim_command(on_filter_info_enter)
+  vim.cmd(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
-  vim.api.nvim_command(("augroup %s"):format(group_name))
+  vim.cmd(("augroup %s"):format(group_name))
   local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, self.source_name)
-  vim.api.nvim_command(on_win_closed)
-  vim.api.nvim_command("augroup END")
+  vim.cmd(on_win_closed)
+  vim.cmd("augroup END")
 
   self.list = list_window
   self.sign = sign_window
@@ -322,19 +322,19 @@ function WindowGroup._open(self, default_input_lines, active)
   self:enter(active)
 
   local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self.source_name)
-  vim.api.nvim_command(on_moved)
+  vim.cmd(on_moved)
 
   local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self.buffers.list)
-  vim.api.nvim_command(on_moved_i)
+  vim.cmd(on_moved_i)
 end
 
 function WindowGroup._redraw_list(self, collector)
   local items = collector.items
   local opts = collector.opts
   local lines = self._head_lines(items, opts.display_limit)
-  vim.api.nvim_buf_set_option(self.buffers.list, "modifiable", true)
+  vim.bo[self.buffers.list].modifiable = true
   vim.api.nvim_buf_set_lines(self.buffers.list, 0, -1, false, lines)
-  vim.api.nvim_buf_set_option(self.buffers.list, "modifiable", false)
+  vim.bo[self.buffers.list].modifiable = false
 
   if vim.api.nvim_win_is_valid(self.list) and vim.api.nvim_get_current_buf() ~= self.buffers.list then
     vim.api.nvim_win_set_cursor(self.list, {1, 0})
@@ -401,8 +401,8 @@ end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function WindowGroup._set_left_padding(self)
-  vim.api.nvim_win_set_option(self.input, "signcolumn", "yes:1")
-  vim.api.nvim_win_set_option(self.info, "signcolumn", "yes:1")
+  vim.wo[self.input].signcolumn = "yes:1"
+  vim.wo[self.info].signcolumn = "yes:1"
 end
 
 function WindowGroup._close_group_name(self)
@@ -457,12 +457,12 @@ M._on_moved = function(key)
   ui.notifier:send("execute")
 end
 
-vim.api.nvim_command("highlight default link ThettoSelected Statement")
-vim.api.nvim_command("highlight default link ThettoInfo StatusLine")
-vim.api.nvim_command("highlight default link ThettoColorLabelOthers StatusLine")
-vim.api.nvim_command("highlight default link ThettoColorLabelBackground NormalFloat")
-vim.api.nvim_command("highlight default link ThettoInput NormalFloat")
-vim.api.nvim_command("highlight default link ThettoPreview Search")
-vim.api.nvim_command("highlight default link ThettoFilterInfo Comment")
+vim.cmd("highlight default link ThettoSelected Statement")
+vim.cmd("highlight default link ThettoInfo StatusLine")
+vim.cmd("highlight default link ThettoColorLabelOthers StatusLine")
+vim.cmd("highlight default link ThettoColorLabelBackground NormalFloat")
+vim.cmd("highlight default link ThettoInput NormalFloat")
+vim.cmd("highlight default link ThettoPreview Search")
+vim.cmd("highlight default link ThettoFilterInfo Comment")
 
 return M

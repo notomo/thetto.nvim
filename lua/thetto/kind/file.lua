@@ -23,9 +23,9 @@ M.action_open = function(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.api.nvim_command("buffer " .. bufnr)
+      vim.cmd("buffer " .. bufnr)
     else
-      vim.api.nvim_command("edit " .. item.path)
+      vim.cmd("edit " .. item.path)
     end
     adjust_cursor(item)
   end
@@ -35,10 +35,10 @@ M.action_tab_open = function(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.api.nvim_command("tabedit")
-      vim.api.nvim_command("buffer " .. bufnr)
+      vim.cmd("tabedit")
+      vim.cmd("buffer " .. bufnr)
     else
-      vim.api.nvim_command("tabedit " .. item.path)
+      vim.cmd("tabedit " .. item.path)
     end
     adjust_cursor(item)
   end
@@ -48,10 +48,10 @@ M.action_vsplit_open = function(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.api.nvim_command("vsplit")
-      vim.api.nvim_command("buffer " .. bufnr)
+      vim.cmd("vsplit")
+      vim.cmd("buffer " .. bufnr)
     else
-      vim.api.nvim_command("vsplit" .. item.path)
+      vim.cmd("vsplit" .. item.path)
     end
     adjust_cursor(item)
   end
@@ -96,7 +96,7 @@ M.action_directory_enter = function(_, items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h")
-  vim.api.nvim_command("Thetto file/in_dir --cwd=" .. path)
+  vim.cmd("Thetto file/in_dir --cwd=" .. path)
 end
 
 M.default_action = "open"

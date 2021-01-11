@@ -10,7 +10,7 @@ M.test_data_path = "test/test_data/"
 M.test_data_dir = M.root .. "/" .. M.test_data_path
 
 M.command = function(cmd)
-  local _, err = pcall(vim.api.nvim_command, cmd)
+  local _, err = pcall(vim.cmd, cmd)
   if err then
     local info = debug.getinfo(2)
     local pos = ("%s:%d"):format(info.source, info.currentline)
@@ -180,9 +180,7 @@ M.sub_windows = function()
   return windows
 end
 
-local vassert = require("vusted.assert")
-local asserts = vassert.asserts
-M.assert = vassert.assert
+local asserts = require("vusted.assert").asserts
 
 asserts.create("window"):register_eq(function()
   return vim.api.nvim_get_current_win()

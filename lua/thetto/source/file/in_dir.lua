@@ -31,7 +31,7 @@ M.collect = function(_, opts)
   return items
 end
 
-vim.api.nvim_command("highlight default link ThettoFileInDirDirectory String")
+vim.cmd("highlight default link ThettoFileInDirDirectory String")
 
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)

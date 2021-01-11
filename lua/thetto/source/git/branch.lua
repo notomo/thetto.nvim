@@ -43,7 +43,7 @@ M.collect = function(self, opts)
   return {}, job
 end
 
-vim.api.nvim_command("highlight default link ThettoGitActiveBranch Type")
+vim.cmd("highlight default link ThettoGitActiveBranch Type")
 
 M.highlight = function(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)

@@ -1,5 +1,4 @@
 local helper = require("thetto/lib/testlib/helper")
-local assert = helper.assert
 local command = helper.command
 
 local _cursor = 8888

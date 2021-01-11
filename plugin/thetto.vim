@@ -10,6 +10,6 @@ command! -nargs=* ThettoSetup lua require("thetto/entrypoint/command").setup({<f
 if get(g:, 'thetto_debug', v:false)
     augroup thetto_dev
         autocmd!
-        execute 'autocmd BufWritePost' expand('<sfile>:p:h:h') .. '/*' 'lua require("thetto/lib/module").cleanup()'
+        execute 'autocmd BufWritePost' expand('<sfile>:p:h:h') .. '/lua/*' 'lua require("thetto/lib/module").cleanup()'
     augroup END
 endif
