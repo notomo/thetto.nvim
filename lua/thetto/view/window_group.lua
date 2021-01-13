@@ -34,6 +34,9 @@ function WindowGroup.open_sidecar(self, collector, item, open_target)
   if not vim.api.nvim_win_is_valid(self.list) then
     return
   end
+  if open_target.bufnr ~= nil and not vim.api.nvim_buf_is_valid(open_target.bufnr) then
+    return
+  end
 
   local list_config = vim.api.nvim_win_get_config(self.list)
   local height = list_config.height + #collector.filters + 1
