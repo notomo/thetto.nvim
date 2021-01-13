@@ -7,7 +7,7 @@ describe("lua/loaded source", function()
   after_each(helper.after_each)
 
   it("can show loaded packages", function()
-    package.loaded["thetto/lua_loaded_test"] = {}
+    package.loaded["thetto/lua_loaded_test"] = helper
     command("Thetto lua/loaded --pattern=lua_loaded_test")
 
     command("ThettoDo move_to_list")
@@ -15,7 +15,7 @@ describe("lua/loaded source", function()
   end)
 
   it("can unload a package", function()
-    package.loaded["thetto/lua_unload_test"] = {}
+    package.loaded["thetto/lua_unload_test"] = helper
     command("Thetto lua/loaded --pattern=lua_unload_test")
 
     command("ThettoDo move_to_list")
