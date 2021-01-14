@@ -21,6 +21,7 @@ M.behaviors = {
   inverse_filter = {quit = false},
   change_filter = {quit = false},
   reverse_sorter = {quit = false},
+  toggle_sorter = {quit = false},
   preview = {quit = false},
   toggle_preview = {quit = false},
   close_preview = {quit = false},
@@ -100,6 +101,11 @@ end
 M.action_reverse_sorter = function(self, _, ctx)
   local sorter_name = self.action_opts.name or ctx.ui:current_position_sorter().name
   ctx.collector:reverse_sorter(sorter_name)
+end
+
+M.action_toggle_sorter = function(self, _, ctx)
+  local sorter_name = self.action_opts.name
+  return nil, ctx.collector:toggle_sorter(sorter_name)
 end
 
 M.action_preview = function(_, _, ctx)

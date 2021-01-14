@@ -177,6 +177,34 @@ function Collector.reverse_sorter(self, name)
   self:update_sorters(self._sorter_names)
 end
 
+function Collector.toggle_sorter(self, name)
+  if name == nil then
+    return "need sorter name"
+  end
+
+  local sorter, err = sorter_core.create(name)
+  if err ~= nil then
+    return err
+  end
+
+  local index = nil
+  for i, n in ipairs(self._sorter_names) do
+    if n == sorter.name then
+      index = i
+      break
+    end
+  end
+
+  if index ~= nil then
+    table.remove(self._sorter_names, index)
+    self:update_sorters(self._sorter_names)
+    return
+  end
+
+  table.insert(self._sorter_names, sorter.name)
+  self:update_sorters(self._sorter_names)
+end
+
 function Collector._update_all_items(self, items)
   local len = #self.all_items
   for i, item in ipairs(items) do

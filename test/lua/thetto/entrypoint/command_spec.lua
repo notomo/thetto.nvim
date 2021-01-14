@@ -557,6 +557,38 @@ tes]])
     assert.current_line("tes")
   end)
 
+  it("can add sorter by toggle_sorter", function()
+    helper.set_lines([[
+te
+t
+tes]])
+
+    command("Thetto line --no-insert")
+
+    helper.wait_ui(function()
+      command("ThettoDo toggle_sorter --x-name=length")
+    end)
+
+    assert.current_line("t")
+  end)
+
+  it("can remove sorter by toggle_sorter", function()
+    require("thetto/custom").default_sorters = {"length"}
+
+    helper.set_lines([[
+te
+t
+tes]])
+
+    command("Thetto line --no-insert")
+
+    helper.wait_ui(function()
+      command("ThettoDo toggle_sorter --x-name=length")
+    end)
+
+    assert.current_line("te")
+  end)
+
   it("can move to input with behavior as `i`", function()
     require("thetto/custom").default_filters = {"substring", "-substring"}
 
