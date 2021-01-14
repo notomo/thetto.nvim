@@ -1,6 +1,6 @@
 local source_core = require("thetto/core/source")
 local filter_core = require("thetto/core/filter")
-local sorter_core = require("thetto/core/sorter")
+local Sorters = require("thetto/core/sorter").Sorters
 local modulelib = require("thetto/lib/module")
 local inputs = require("thetto/core/input")
 local wraplib = require("thetto/lib/wrap")
@@ -111,19 +111,6 @@ function Collector._target_filter_index(self, names, name)
   return nil, "not found filter: " .. name
 end
 
-function Collector._target_sorter_index(_, names, name)
-  local sorter, err = sorter_core.create(name)
-  if err ~= nil then
-    return nil, err
-  end
-  for i, n in ipairs(names) do
-    if n == sorter.name then
-      return i, nil
-    end
-  end
-  return nil, "not found sorter: " .. name
-end
-
 function Collector.remove_filter(self, name)
   if #self._filter_names <= 1 then
     return "the last filter cannot be removed"
@@ -166,43 +153,25 @@ function Collector.change_filter(self, old, new)
 end
 
 function Collector.reverse_sorter(self, name)
-  local index, err = self:_target_sorter_index(self._sorter_names, name)
+  local sorters, err = self.sorters:reverse(name)
   if err ~= nil then
     return err
   end
-
-  local sorter = self.sorters[index]
-  sorter.reverse = not sorter.reverse
-  self._sorter_names[index] = sorter.name
-  self:update_sorters(self._sorter_names)
+  self:_update_sorters(sorters)
 end
 
 function Collector.toggle_sorter(self, name)
-  if name == nil then
-    return "need sorter name"
-  end
-
-  local sorter, err = sorter_core.create(name)
+  local sorters, err = self.sorters:toggle(name)
   if err ~= nil then
     return err
   end
+  self:_update_sorters(sorters)
+end
 
-  local index = nil
-  for i, n in ipairs(self._sorter_names) do
-    if n == sorter.name then
-      index = i
-      break
-    end
-  end
-
-  if index ~= nil then
-    table.remove(self._sorter_names, index)
-    self:update_sorters(self._sorter_names)
-    return
-  end
-
-  table.insert(self._sorter_names, sorter.name)
-  self:update_sorters(self._sorter_names)
+function Collector._update_sorters(self, sorters)
+  self.sorters = sorters
+  self:_update_items(self.input_lines)
+  return self.notifier:send("update_items", self.input_lines)
 end
 
 function Collector._update_all_items(self, items)
@@ -244,12 +213,6 @@ function Collector.update_filters(self, names)
   return self.notifier:send("update_items", self.input_lines)
 end
 
-function Collector.update_sorters(self, names)
-  self:_update_sorters(names)
-  self:_update_items(self.input_lines)
-  return self.notifier:send("update_items", self.input_lines)
-end
-
 function Collector._update_filters(self, names)
   local filters = {}
   local new_names = {}
@@ -272,24 +235,6 @@ function Collector._update_filters(self, names)
   return nil
 end
 
-function Collector._update_sorters(self, names)
-  local sorters = {}
-  local new_names = {}
-  for _, name in ipairs(names) do
-    local sorter, err = sorter_core.create(name)
-    if err ~= nil then
-      return err
-    end
-    table.insert(sorters, sorter)
-    table.insert(new_names, sorter.name)
-  end
-
-  self.sorters = sorters
-  self._sorter_names = new_names
-
-  return nil
-end
-
 function Collector._update_items(self, input_lines)
   -- NOTE: avoid `too many results to unpack`
   local items = {}
@@ -303,7 +248,7 @@ function Collector._update_items(self, input_lines)
       items = filter:apply(items, input_line, self.opts)
     end
   end
-  for _, sorter in ipairs(self.sorters) do
+  for _, sorter in self.sorters:iter() do
     items = sorter:apply(items)
   end
 
@@ -369,6 +314,11 @@ M.create = function(notifier, source_name, source_opts, opts)
     return nil, err
   end
 
+  local sorters, serr = Sorters.new(source.sorters)
+  if serr ~= nil then
+    return nil, serr
+  end
+
   local collector_tbl = {
     all_items = {},
     job = nil,
@@ -378,19 +328,14 @@ M.create = function(notifier, source_name, source_opts, opts)
     items = {},
     selected = {},
     filters = {},
-    sorters = {},
+    sorters = sorters,
     notifier = notifier,
     input_lines = vim.fn["repeat"]({""}, #source.filters),
     _filter_names = source.filters,
-    _sorter_names = source.sorters,
   }
   local self = setmetatable(collector_tbl, Collector)
 
   err = self:_update_filters(source.filters)
-  if err ~= nil then
-    return nil, err
-  end
-  err = self:_update_sorters(source.sorters)
   if err ~= nil then
     return nil, err
   end

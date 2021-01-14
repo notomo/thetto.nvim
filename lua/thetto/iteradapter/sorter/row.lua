@@ -1,7 +1,7 @@
 local M = {}
 
 M.apply = function(self, items)
-  if self.reverse then
+  if self.reversed then
     table.sort(items, function(a, b)
       return a.row > b.row
     end)
