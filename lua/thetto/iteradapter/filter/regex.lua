@@ -25,7 +25,7 @@ M.apply = function(self, items, input_line, opts)
 
     local ok = true
     for _, regex in ipairs(regexes) do
-      if (regex:match_str(value) ~= nil) == self.inverse then
+      if (regex:match_str(value) ~= nil) == self.inversed then
         ok = false
         break
       end
@@ -41,7 +41,7 @@ end
 vim.cmd("highlight default link ThettoFilterRegexMatch Boolean")
 
 M.highlight = function(self, bufnr, items, input_line, opts)
-  if self.inverse then
+  if self.inversed then
     return
   end
 

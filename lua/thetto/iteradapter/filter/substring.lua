@@ -23,7 +23,7 @@ M.apply = function(self, items, input_line, opts)
 
     local ok = true
     for _, text in ipairs(texts) do
-      if (value:find(text, 1, true) ~= nil) == self.inverse then
+      if (value:find(text, 1, true) ~= nil) == self.inversed then
         ok = false
         break
       end
@@ -39,7 +39,7 @@ end
 vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
 
 M.highlight = function(self, bufnr, items, input_line, opts)
-  if self.inverse then
+  if self.inversed then
     return
   end
 

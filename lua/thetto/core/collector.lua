@@ -1,5 +1,5 @@
 local source_core = require("thetto/core/source")
-local filter_core = require("thetto/core/filter")
+local Filter = require("thetto/core/filter").Filter
 local Sorters = require("thetto/core/sorter").Sorters
 local modulelib = require("thetto/lib/module")
 local inputs = require("thetto/core/input")
@@ -99,7 +99,7 @@ function Collector.add_filter(self, name)
 end
 
 function Collector._target_filter_index(self, names, name)
-  local filter, err = filter_core.create(name, self.opts)
+  local filter, err = Filter.parse(name, self.opts)
   if err ~= nil then
     return nil, err
   end
@@ -143,7 +143,7 @@ function Collector.change_filter(self, old, new)
     return err
   end
 
-  local filter, ferr = filter_core.create(new, self.opts)
+  local filter, ferr = Filter.parse(new, self.opts)
   if ferr ~= nil then
     return nil, ferr
   end
@@ -217,7 +217,7 @@ function Collector._update_filters(self, names)
   local filters = {}
   local new_names = {}
   for _, name in ipairs(names) do
-    local filter, err = filter_core.create(name, self.opts)
+    local filter, err = Filter.parse(name, self.opts)
     if err ~= nil then
       return err
     end
