@@ -356,16 +356,16 @@ function WindowGroup._redraw_input(self, collector, input_lines)
   local items = collector.items
   local opts = collector.opts
   local filters = collector.filters
+  local height = collector.filters:length()
 
   if vim.api.nvim_win_is_valid(self.input) then
-    local input_height = #filters
-    vim.api.nvim_win_set_height(self.input, input_height)
-    vim.api.nvim_win_set_height(self.filter_info, input_height)
-    vim.api.nvim_buf_set_lines(self.buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, input_height))
+    vim.api.nvim_win_set_height(self.input, height)
+    vim.api.nvim_win_set_height(self.filter_info, height)
+    vim.api.nvim_buf_set_lines(self.buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, height))
   end
 
   local highlighter = self._info_hl_factory:reset(self.buffers.filter_info)
-  for i, filter in ipairs(filters) do
+  for i, filter in filters:iter() do
     local input_line = input_lines[i] or ""
     if filter.highlight ~= nil and input_line ~= "" then
       filter:highlight(self.buffers.list, items, input_line, opts)
@@ -374,11 +374,11 @@ function WindowGroup._redraw_input(self, collector, input_lines)
     highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}})
   end
 
-  local line_count_diff = #filters - #input_lines
+  local line_count_diff = height - #input_lines
   if line_count_diff > 0 then
-    vim.api.nvim_buf_set_lines(self.buffers.input, #filters - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
+    vim.api.nvim_buf_set_lines(self.buffers.input, height - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
   elseif line_count_diff < 0 then
-    vim.api.nvim_buf_set_lines(self.buffers.input, #filters, -1, false, {})
+    vim.api.nvim_buf_set_lines(self.buffers.input, height, -1, false, {})
   end
 end
 

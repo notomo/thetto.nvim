@@ -1,5 +1,5 @@
 local source_core = require("thetto/core/source")
-local Filter = require("thetto/core/filter").Filter
+local Filters = require("thetto/core/filter").Filters
 local Sorters = require("thetto/core/sorter").Sorters
 local modulelib = require("thetto/lib/module")
 local inputs = require("thetto/core/input")
@@ -94,62 +94,42 @@ function Collector.toggle_all_selections(self)
 end
 
 function Collector.add_filter(self, name)
-  table.insert(self._filter_names, name)
-  self:update_filters(self._filter_names)
-end
-
-function Collector._target_filter_index(self, names, name)
-  local filter, err = Filter.parse(name, self.opts)
+  local filters, err = self.filters:add(name, self.opts)
   if err ~= nil then
-    return nil, err
+    return err
   end
-  for i, n in ipairs(names) do
-    if n == filter.name then
-      return i, nil
-    end
-  end
-  return nil, "not found filter: " .. name
+  self:_update_filters(filters)
 end
 
 function Collector.remove_filter(self, name)
-  if #self._filter_names <= 1 then
-    return "the last filter cannot be removed"
-  end
-
-  local index, err = self:_target_filter_index(self._filter_names, name)
+  local filters, err = self.filters:remove(name, self.opts)
   if err ~= nil then
     return err
   end
-
-  table.remove(self._filter_names, index)
-  self:update_filters(self._filter_names)
+  self:_update_filters(filters)
 end
 
 function Collector.inverse_filter(self, name)
-  local index, err = self:_target_filter_index(self._filter_names, name)
+  local filters, err = self.filters:inverse(name, self.opts)
   if err ~= nil then
     return err
   end
-
-  local filter = self.filters[index]
-  filter.inverse = not filter.inverse
-  self._filter_names[index] = filter.name
-  self:update_filters(self._filter_names)
+  self:_update_filters(filters)
 end
 
 function Collector.change_filter(self, old, new)
-  local index, err = self:_target_filter_index(self._filter_names, old)
+  local filters, err = self.filters:change(old, new, self.opts)
   if err ~= nil then
     return err
   end
+  self:_update_filters(filters)
+end
 
-  local filter, ferr = Filter.parse(new, self.opts)
-  if ferr ~= nil then
-    return nil, ferr
-  end
-
-  self._filter_names[index] = filter.name
-  self:update_filters(self._filter_names)
+function Collector._update_filters(self, filters)
+  self.filters = filters
+  self.opts.interactive = self.filters:has_interactive()
+  self:_update_items(self.input_lines)
+  return self.notifier:send("update_items", self.input_lines)
 end
 
 function Collector.reverse_sorter(self, name)
@@ -207,34 +187,6 @@ function Collector.finished(self)
   return not self.job:is_running()
 end
 
-function Collector.update_filters(self, names)
-  self:_update_filters(names)
-  self:_update_items(self.input_lines)
-  return self.notifier:send("update_items", self.input_lines)
-end
-
-function Collector._update_filters(self, names)
-  local filters = {}
-  local new_names = {}
-  for _, name in ipairs(names) do
-    local filter, err = Filter.parse(name, self.opts)
-    if err ~= nil then
-      return err
-    end
-    table.insert(filters, filter)
-    table.insert(new_names, filter.name)
-  end
-
-  self.filters = filters
-  self._filter_names = new_names
-
-  self.opts.interactive = #(vim.tbl_filter(function(filter)
-    return filter.is_interactive
-  end, self.filters)) > 0
-
-  return nil
-end
-
 function Collector._update_items(self, input_lines)
   -- NOTE: avoid `too many results to unpack`
   local items = {}
@@ -242,7 +194,7 @@ function Collector._update_items(self, input_lines)
     table.insert(items, item)
   end
 
-  for i, filter in ipairs(self.filters) do
+  for i, filter in self.filters:iter() do
     local input_line = input_lines[i]
     if input_line ~= nil and input_line ~= "" then
       items = filter:apply(items, input_line, self.opts)
@@ -264,7 +216,7 @@ function Collector._update_items(self, input_lines)
   end
 
   local input = nil
-  for i, filter in ipairs(self.filters) do
+  for i, filter in self.filters:iter() do
     if filter.is_interactive then
       input = input_lines[i]
       break
@@ -314,6 +266,10 @@ M.create = function(notifier, source_name, source_opts, opts)
     return nil, err
   end
 
+  local filters, ferr = Filters.new(source.filters, opts)
+  if ferr ~= nil then
+    return nil, ferr
+  end
   local sorters, serr = Sorters.new(source.sorters)
   if serr ~= nil then
     return nil, serr
@@ -327,18 +283,13 @@ M.create = function(notifier, source_name, source_opts, opts)
     opts = vim.deepcopy(opts),
     items = {},
     selected = {},
-    filters = {},
+    filters = filters,
     sorters = sorters,
     notifier = notifier,
     input_lines = vim.fn["repeat"]({""}, #source.filters),
-    _filter_names = source.filters,
   }
   local self = setmetatable(collector_tbl, Collector)
-
-  err = self:_update_filters(source.filters)
-  if err ~= nil then
-    return nil, err
-  end
+  self.opts.interactive = self.filters:has_interactive()
 
   self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
     if self._input_bufnr ~= nil and vim.api.nvim_buf_is_valid(self._input_bufnr) then

@@ -91,6 +91,14 @@ function Filter.to_value(self, item)
   return self.modifier.f(item[self._key], self._opts)
 end
 
+function Filter.inverse(self)
+  return Filter.new(self.short_name, self._opts, not self.inversed, self._key, self.modifier)
+end
+
+function Filter.__eq(self, filter)
+  return self.short_name == filter.short_name and self.inversed == filter.inversed and self.key == filter.key
+end
+
 function Filter._name(self)
   local name = ("%s:%s"):format(self.short_name, self._key)
   if self.inversed then
@@ -107,6 +115,120 @@ function Filter.__index(self, k)
     return Filter._name(self)
   end
   return rawget(Filter, k) or self._origin[k]
+end
+
+local Filters = {}
+Filters.__index = Filters
+M.Filters = Filters
+
+function Filters.new(names, opts)
+  vim.validate({names = {names, "table"}, opts = {opts, "table"}})
+  local filters = {}
+  for _, name in ipairs(names) do
+    local filter, err = Filter.parse(name, opts)
+    if err ~= nil then
+      return nil, err
+    end
+    table.insert(filters, filter)
+  end
+
+  local tbl = {_filters = filters}
+  return setmetatable(tbl, Filters)
+end
+
+function Filters.__index(self, k)
+  if type(k) == "number" then
+    return self._filters[k]
+  end
+  return Filters[k]
+end
+
+local DISABLED_FILTER_ERR = "filter is disabled: "
+
+function Filters._find(self, name, opts)
+  local f, err = Filter.parse(name, opts)
+  if err ~= nil then
+    return nil, nil, err
+  end
+  for i, filter in ipairs(self._filters) do
+    if filter == f then
+      return filter, i, nil
+    end
+  end
+  return nil, nil, DISABLED_FILTER_ERR .. name
+end
+
+function Filters._names(self)
+  return vim.tbl_map(function(filter)
+    return filter.name
+  end, self._filters)
+end
+
+function Filters.inverse(self, name, opts)
+  local filter, index, err = self:_find(name, opts)
+  if err ~= nil then
+    return nil, err
+  end
+
+  local names = self:_names()
+  names[index] = filter:inverse().name
+
+  return Filters.new(names, opts), nil
+end
+
+function Filters.add(self, name, opts)
+  local filter, err = Filter.parse(name, opts)
+  if err ~= nil then
+    return nil, err
+  end
+  local names = self:_names()
+  table.insert(names, filter.name)
+  return Filters.new(names, opts), nil
+end
+
+function Filters.remove(self, name, opts)
+  if #self._filters <= 1 then
+    return nil, "the last filter cannot be removed"
+  end
+
+  local _, index, err = self:_find(name, opts)
+  if err ~= nil then
+    return nil, err
+  end
+
+  local names = self:_names()
+  table.remove(names, index)
+  return Filters.new(names, opts), nil
+end
+
+function Filters.change(self, old, new, opts)
+  local _, index, err = self:_find(old, opts)
+  if err ~= nil then
+    return nil, err
+  end
+
+  local filter, ferr = Filter.parse(new, opts)
+  if ferr ~= nil then
+    return nil, ferr
+  end
+
+  local names = self:_names()
+  names[index] = filter.name
+  return Filters.new(names, opts), nil
+end
+
+function Filters.has_interactive(self)
+  return #(vim.tbl_filter(function(filter)
+    return filter.is_interactive
+  end, self._filters)) > 0
+end
+
+function Filters.iter(self)
+  return next, self._filters, nil
+end
+
+function Filters.length(self)
+  return #self._filters
 end
 
 return M
