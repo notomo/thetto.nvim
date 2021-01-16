@@ -1,5 +1,13 @@
+local M = {}
+
 local Notifier = {}
 Notifier.__index = Notifier
+M.Notifier = Notifier
+
+function Notifier.new()
+  local notifier = {callbacks = {}}
+  return setmetatable(notifier, Notifier)
+end
 
 function Notifier.send(self, method, ...)
   local callback = self.callbacks[method]
@@ -11,13 +19,6 @@ end
 
 function Notifier.on(self, method, callback)
   self.callbacks[method] = callback
-end
-
-local M = {}
-
-M.new = function()
-  local notifier = {callbacks = {}}
-  return setmetatable(notifier, Notifier)
 end
 
 return M

@@ -10,6 +10,87 @@ local M = {}
 
 local Collector = {}
 Collector.__index = Collector
+M.Collector = Collector
+
+function Collector.new(notifier, source_name, source_opts, opts)
+  opts.cwd = vim.fn.expand(opts.cwd)
+  if opts.cwd == "." then
+    opts.cwd = vim.fn.fnamemodify(".", ":p")
+  end
+  if opts.cwd ~= "/" and vim.endswith(opts.cwd, "/") then
+    opts.cwd = opts.cwd:sub(1, #opts.cwd - 1)
+  end
+
+  if opts.target ~= nil then
+    local target = modulelib.find_target(opts.target)
+    if target == nil then
+      return nil, "not found target: " .. opts.target
+    end
+    opts.cwd = target.cwd(opts.target_patterns)
+  end
+
+  if opts.pattern_type ~= nil then
+    local pattern, err = inputs.get(opts.pattern_type)
+    if err ~= nil then
+      return nil, err
+    end
+    opts.pattern = pattern
+  end
+
+  local source, err = source_core.create(notifier, source_name, source_opts, opts)
+  if err ~= nil then
+    return nil, err
+  end
+
+  local filters, ferr = Filters.new(source.filters, opts)
+  if ferr ~= nil then
+    return nil, ferr
+  end
+
+  local sorters, serr = Sorters.new(source.sorters)
+  if serr ~= nil then
+    return nil, serr
+  end
+
+  local tbl = {
+    all_items = {},
+    job = nil,
+    source = source,
+    original_opts = opts,
+    opts = vim.deepcopy(opts),
+    items = {},
+    selected = {},
+    filters = filters,
+    sorters = sorters,
+    notifier = notifier,
+    input_lines = vim.fn["repeat"]({""}, #source.filters),
+  }
+  local self = setmetatable(tbl, Collector)
+  self.opts.interactive = self.filters:has_interactive()
+
+  self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
+    if self._input_bufnr ~= nil and vim.api.nvim_buf_is_valid(self._input_bufnr) then
+      local input_lines = vim.api.nvim_buf_get_lines(self._input_bufnr, 0, -1, true)
+      self.input_lines = input_lines
+    end
+    return self:update()
+  end)
+
+  notifier:on("setup_input", function(bufnr)
+    self._input_bufnr = bufnr
+  end)
+  notifier:on("update_input", function()
+    return self._update_with_debounce()
+  end)
+  notifier:on("update_all_items", function(items)
+    return self:_update_all_items(items)
+  end)
+  notifier:on("finish", function()
+    return self:discard()
+  end)
+
+  return self, nil
+end
 
 function Collector.start(self)
   local all_items, job, err = self.source:collect(self.opts)
@@ -234,85 +315,6 @@ function Collector._update_items(self, input_lines)
   if err ~= nil then
     return err
   end
-end
-
-M.create = function(notifier, source_name, source_opts, opts)
-  opts.cwd = vim.fn.expand(opts.cwd)
-  if opts.cwd == "." then
-    opts.cwd = vim.fn.fnamemodify(".", ":p")
-  end
-  if opts.cwd ~= "/" and vim.endswith(opts.cwd, "/") then
-    opts.cwd = opts.cwd:sub(1, #opts.cwd - 1)
-  end
-
-  if opts.target ~= nil then
-    local target = modulelib.find_target(opts.target)
-    if target == nil then
-      return nil, "not found target: " .. opts.target
-    end
-    opts.cwd = target.cwd(opts.target_patterns)
-  end
-
-  if opts.pattern_type ~= nil then
-    local pattern, err = inputs.get(opts.pattern_type)
-    if err ~= nil then
-      return nil, err
-    end
-    opts.pattern = pattern
-  end
-
-  local source, err = source_core.create(notifier, source_name, source_opts, opts)
-  if err ~= nil then
-    return nil, err
-  end
-
-  local filters, ferr = Filters.new(source.filters, opts)
-  if ferr ~= nil then
-    return nil, ferr
-  end
-  local sorters, serr = Sorters.new(source.sorters)
-  if serr ~= nil then
-    return nil, serr
-  end
-
-  local collector_tbl = {
-    all_items = {},
-    job = nil,
-    source = source,
-    original_opts = opts,
-    opts = vim.deepcopy(opts),
-    items = {},
-    selected = {},
-    filters = filters,
-    sorters = sorters,
-    notifier = notifier,
-    input_lines = vim.fn["repeat"]({""}, #source.filters),
-  }
-  local self = setmetatable(collector_tbl, Collector)
-  self.opts.interactive = self.filters:has_interactive()
-
-  self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
-    if self._input_bufnr ~= nil and vim.api.nvim_buf_is_valid(self._input_bufnr) then
-      local input_lines = vim.api.nvim_buf_get_lines(self._input_bufnr, 0, -1, true)
-      self.input_lines = input_lines
-    end
-    return self:update()
-  end)
-
-  notifier:on("setup_input", function(bufnr)
-    self._input_bufnr = bufnr
-  end)
-  notifier:on("update_input", function()
-    return self._update_with_debounce()
-  end)
-  notifier:on("update_all_items", function(items)
-    return self:_update_all_items(items)
-  end)
-  notifier:on("finish", function()
-    return self:discard()
-  end)
-
-  return self, nil
 end
 
 return M

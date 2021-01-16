@@ -1,9 +1,21 @@
-local kinds = require "thetto/core/kind"
+local kinds = require("thetto/core/kind")
 
 local M = {}
 
 local Executor = {}
 Executor.__index = Executor
+M.Executor = Executor
+
+function Executor.new(notifier, source_name, default_action_opts, default_action_name)
+  local tbl = {
+    notifier = notifier,
+    source_name = source_name,
+    default_action_opts = default_action_opts,
+    default_action_name = default_action_name,
+    actions = {},
+  }
+  return setmetatable(tbl, Executor)
+end
 
 function Executor.add(self, action_name, kind_name, items, action_opts)
   local action, err = self:_action(action_name, kind_name, items, action_opts)
@@ -65,17 +77,6 @@ function Executor.action(self, ctx, action_name, kind_name, items, action_opts)
     return nil, err
   end
   return action(ctx)
-end
-
-M.create = function(notifier, source_name, default_action_opts, default_action_name)
-  local tbl = {
-    notifier = notifier,
-    source_name = source_name,
-    default_action_opts = default_action_opts,
-    default_action_name = default_action_name,
-    actions = {},
-  }
-  return setmetatable(tbl, Executor)
 end
 
 return M

@@ -4,8 +4,8 @@ local pathlib = require("thetto/lib/path")
 
 local M = {}
 
-local FilterModifier = {}
-FilterModifier.__index = FilterModifier
+local Modifier = {}
+Modifier.__index = Modifier
 
 local modifiers = {
   relative = function(value, opts)
@@ -13,7 +13,7 @@ local modifiers = {
   end,
 }
 
-function FilterModifier.new(name)
+function Modifier.new(name)
   local f = function(value, _)
     return value
   end
@@ -24,7 +24,7 @@ function FilterModifier.new(name)
     end
   end
   local tbl = {f = f, name = name}
-  return setmetatable(tbl, FilterModifier)
+  return setmetatable(tbl, Modifier)
 end
 
 local Filter = {}
@@ -79,7 +79,7 @@ function Filter.parse(name, opts)
   local key = args[2]
 
   local mod_name = args[3]
-  local modifier, err = FilterModifier.new(mod_name)
+  local modifier, err = Modifier.new(mod_name)
   if err ~= nil then
     return nil, err
   end

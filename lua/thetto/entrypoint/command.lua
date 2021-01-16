@@ -1,13 +1,13 @@
 vim.cmd("doautocmd User ThettoSourceLoad")
 
-local notifiers = require("thetto/lib/notifier")
-local collector_core = require("thetto/core/collector")
+local Notifier = require("thetto/lib/notifier").Notifier
+local Collector = require("thetto/core/collector").Collector
+local Executor = require("thetto/core/executor").Executor
+local UI = require("thetto/view/ui").UI
 local wraplib = require("thetto/lib/wrap")
 local messagelib = require("thetto/lib/message")
 local custom = require("thetto/custom")
-local uis = require("thetto/view/ui")
 local repository = require("thetto/core/repository")
-local executors = require("thetto/core/executor")
 local cmdparse = require("thetto/lib/cmdparse")
 local modulelib = require("thetto/lib/module")
 
@@ -93,13 +93,13 @@ M._start = function(source_name, source_opts, action_opts, opts)
     return ctx.collector, nil
   end
 
-  local notifier = notifiers.new()
-  local collector, err = collector_core.create(notifier, source_name, source_opts, opts)
+  local notifier = Notifier.new()
+  local collector, err = Collector.new(notifier, source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
-  local executor = executors.create(notifier, source_name, action_opts, opts.action)
-  local ui = uis.new(collector, notifier)
+  local executor = Executor.new(notifier, source_name, action_opts, opts.action)
+  local ui = UI.new(collector, notifier)
 
   local ctx = {collector = collector, ui = ui, executor = executor}
   repository.set(source_name, ctx)

@@ -9,6 +9,52 @@ local M = {}
 
 local UI = {}
 UI.__index = UI
+M.UI = UI
+
+function UI.new(collector, notifier)
+  local tbl = {
+    collector = collector,
+    notifier = notifier,
+    row = 1,
+    windows = nil,
+    input_cursor = nil,
+  }
+
+  if collector.opts.insert then
+    tbl.active = "input"
+    tbl.mode = "i"
+  else
+    tbl.active = "list"
+    tbl.mode = "n"
+  end
+
+  local self = setmetatable(tbl, UI)
+
+  self.notifier:on("update_items", function(input_lines, row)
+    local err = self:redraw(input_lines)
+    if err ~= nil then
+      return err
+    end
+    if row ~= nil then
+      vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
+    end
+    err = self.notifier:send("execute")
+    if err ~= nil then
+      return err
+    end
+    M._changed_after(input_lines)
+  end)
+
+  self.notifier:on("update_selected", function()
+    self.windows:redraw_selections(self.collector)
+  end)
+
+  self.notifier:on("close", function()
+    self:close()
+  end)
+
+  return self
+end
 
 function UI.open(self)
   local source = self.collector.source
@@ -175,51 +221,6 @@ end
 
 function UI.close_preview(self)
   self.windows:close_sidecar()
-end
-
-M.new = function(collector, notifier)
-  local tbl = {
-    collector = collector,
-    notifier = notifier,
-    row = 1,
-    windows = nil,
-    input_cursor = nil,
-  }
-
-  if collector.opts.insert then
-    tbl.active = "input"
-    tbl.mode = "i"
-  else
-    tbl.active = "list"
-    tbl.mode = "n"
-  end
-
-  local self = setmetatable(tbl, UI)
-
-  self.notifier:on("update_items", function(input_lines, row)
-    local err = self:redraw(input_lines)
-    if err ~= nil then
-      return err
-    end
-    if row ~= nil then
-      vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
-    end
-    err = self.notifier:send("execute")
-    if err ~= nil then
-      return err
-    end
-    M._changed_after(input_lines)
-  end)
-
-  self.notifier:on("update_selected", function()
-    self.windows:redraw_selections(self.collector)
-  end)
-
-  self.notifier:on("close", function()
-    self:close()
-  end)
-
-  return self
 end
 
 -- for testing
