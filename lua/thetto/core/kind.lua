@@ -7,16 +7,21 @@ local vim = vim
 
 local M = {}
 
-local Action = function(kind, fn, action_opts, behavior)
-  local tbl = {action_opts = action_opts, behavior = behavior}
-  local action = setmetatable(tbl, kind)
-  action.execute = function(self, items, ctx)
-    return fn(self, items, ctx)
-  end
-  return action
+local Action = {}
+Action.PREFIX = "action_"
+
+function Action.new(kind, fn, action_opts, behavior)
+  local tbl = {action_opts = action_opts, behavior = behavior, _kind = kind, _fn = fn}
+  return setmetatable(tbl, Action)
 end
 
-local action_prefix = "action_"
+function Action.execute(self, items, ctx)
+  return self:_fn(items, ctx)
+end
+
+function Action.__index(self, k)
+  return rawget(Action, k) or self._kind[k]
+end
 
 local Kind = {}
 M.Kind = Kind
@@ -67,23 +72,23 @@ function Kind.find_action(self, action_name, action_opts)
     name = self.default_action
   end
 
-  local key = action_prefix .. name
+  local key = Action.PREFIX .. name
   local opts = vim.tbl_extend("force", self.opts[name] or {}, action_opts)
   local behavior = vim.tbl_deep_extend("force", {quit = true}, self.behaviors[name] or {})
 
   local source_action = custom.source_actions[self.source_name]
   if source_action ~= nil and source_action[key] then
-    return Action(self, source_action[key], opts, behavior), nil
+    return Action.new(self, source_action[key], opts, behavior), nil
   end
 
   local kind_action = custom.kind_actions[self.name]
   if kind_action ~= nil and kind_action[key] then
-    return Action(self, kind_action[key], opts, behavior), nil
+    return Action.new(self, kind_action[key], opts, behavior), nil
   end
 
   local action = self[key]
   if action ~= nil then
-    return Action(self, action, opts, behavior), nil
+    return Action.new(self, action, opts, behavior), nil
   end
 
   return nil, "not found action: " .. name
@@ -93,8 +98,8 @@ function Kind.actions(self)
   local names = {}
   local actions = vim.tbl_extend("force", self._origin, base, custom.source_actions[self.source_name] or {}, custom.kind_actions[self.name] or {})
   for key in pairs(actions) do
-    if vim.startswith(key, action_prefix) then
-      local action_name = key:gsub("^" .. action_prefix, "")
+    if vim.startswith(key, Action.PREFIX) then
+      local action_name = key:gsub("^" .. Action.PREFIX, "")
       table.insert(names, action_name)
     end
   end
