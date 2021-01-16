@@ -1,4 +1,4 @@
-local kinds = require("thetto/core/kind")
+local Kind = require("thetto/core/kind").Kind
 
 local M = {}
 
@@ -26,7 +26,7 @@ function Executor.add(self, action_name, kind_name, items, action_opts)
 end
 
 function Executor._action(self, action_name, kind_name, items, action_opts)
-  local kind, err = kinds.create(self, kind_name)
+  local kind, err = Kind.new(self, kind_name)
   if err ~= nil then
     return nil, err
   end
