@@ -48,7 +48,7 @@ M.collect = function(self, opts)
       table.insert(items, {value = relative_path, path = path})
       ::continue::
     end
-    self.append(items)
+    self:append(items)
     items = {}
   end)
 

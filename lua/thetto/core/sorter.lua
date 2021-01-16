@@ -1,4 +1,5 @@
 local modulelib = require("thetto/lib/module")
+local vim = vim
 
 local M = {}
 

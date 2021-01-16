@@ -1,4 +1,4 @@
-local source_core = require("thetto/core/source")
+local Source = require("thetto/core/source").Source
 local Filters = require("thetto/core/filter").Filters
 local Sorters = require("thetto/core/sorter").Sorters
 local modulelib = require("thetto/lib/module")
@@ -37,7 +37,7 @@ function Collector.new(notifier, source_name, source_opts, opts)
     opts.pattern = pattern
   end
 
-  local source, err = source_core.create(notifier, source_name, source_opts, opts)
+  local source, err = Source.new(notifier, source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
@@ -94,7 +94,7 @@ end
 
 function Collector.start(self)
   local all_items, job, err = self.source:collect(self.opts)
-  if err ~= nil and err ~= source_core.errors.skip_empty_pattern then
+  if err ~= nil and err ~= Source.errors.skip_empty_pattern then
     return err
   end
   self.all_items = all_items
@@ -104,7 +104,7 @@ function Collector.start(self)
     item.index = i
   end
 
-  local interactive_skip_empty = self.opts.interactive and err == source_core.errors.skip_empty_pattern
+  local interactive_skip_empty = self.opts.interactive and err == Source.errors.skip_empty_pattern
   if not interactive_skip_empty and self.job == nil and #self.all_items == 0 and not self.opts.allow_empty then
     return self.source.name .. ": empty"
   end

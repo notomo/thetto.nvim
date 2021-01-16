@@ -54,7 +54,7 @@ M.collect = function(self, opts)
           path = path or self.pathlib.join(git_root, hunk.path),
         })
       end
-      self.append(items)
+      self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,

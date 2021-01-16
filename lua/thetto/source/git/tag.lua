@@ -19,7 +19,7 @@ M.collect = function(self, opts)
       for _, output in ipairs(job_self:get_stdout()) do
         table.insert(items, {value = output})
       end
-      self.append(items)
+      self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,

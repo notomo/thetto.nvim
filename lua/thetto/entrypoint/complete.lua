@@ -1,5 +1,5 @@
 local kinds = require("thetto/core/kind")
-local sources = require("thetto/core/source")
+local Source = require("thetto/core/source").Source
 local repository = require("thetto/core/repository")
 
 local M = {}
@@ -17,8 +17,7 @@ M.action = function(_, _, _)
 end
 
 M.source = function(_, _, _)
-  local names = sources.names()
-  return table.concat(names, "\n")
+  return table.concat(Source.all_names(), "\n")
 end
 
 return M

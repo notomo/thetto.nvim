@@ -20,7 +20,7 @@ M.collect = function(self, _)
         local value = ("%2s %s"):format(status, path)
         table.insert(items, {value = value, path = abs_path, kind_name = kind_name})
       end
-      self.append(items)
+      self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
     cwd = git_root,

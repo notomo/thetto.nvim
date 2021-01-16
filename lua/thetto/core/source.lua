@@ -5,68 +5,77 @@ local filelib = require("thetto/lib/file")
 local listlib = require("thetto/lib/list")
 local modulelib = require("thetto/lib/module")
 local base = require("thetto/source/base")
+local vim = vim
 
 local M = {}
 
-M.errors = {skip_empty_pattern = "skip_empty_pattern"}
+local Source = {}
+Source.__index = Source
+M.Source = Source
 
-M.create = function(notifier, source_name, source_opts, opts)
-  local origin
-  if source_name == "base" then
-    origin = base
-  else
-    local found = modulelib.find_source(source_name)
-    if found == nil then
-      return nil, "not found source: " .. source_name
-    end
-    origin = setmetatable(found, base)
-    origin.__index = origin
+Source.errors = {skip_empty_pattern = "skip_empty_pattern"}
+Source.jobs = jobs
+Source.pathlib = pathlib
+Source.filelib = filelib
+Source.listlib = listlib
+
+function Source.new(notifier, name, source_opts, opts)
+  vim.validate({
+    notifier = {notifier, "table"},
+    name = {name, "string"},
+    source_opts = {source_opts, "table"},
+    opts = {opts, "table"},
+  })
+
+  local origin = modulelib.find_source(name)
+  if origin == nil then
+    return nil, "not found source: " .. name
   end
 
-  local source = {}
-  source.name = source_name
-  source.opts = vim.tbl_extend("force", origin.opts, source_opts)
-  source.jobs = jobs
-  source.highlights = highlights.new_factory("thetto-list-highlight")
-  source.sign_highlights = highlights.new_factory("thetto-sign-highlight")
-  source.pathlib = pathlib
-  source.filelib = filelib
-  source.listlib = listlib
-  source.errors = M.errors
-  source.ctx = {}
-
+  local filters
   if #opts.filters ~= 0 then
-    source.filters = opts.filters
+    filters = opts.filters
   end
+
+  local sorters
   if #opts.sorters ~= 0 then
-    source.sorters = opts.sorters
+    sorters = opts.sorters
   end
 
-  local compiled_colors = {}
-  for _, color in ipairs(origin.colors) do
-    table.insert(compiled_colors, {regex = vim.regex(color.pattern), chunks = color.chunks})
-  end
-  source.compiled_colors = compiled_colors
-
-  source.append = function(items, source_ctx)
-    notifier:send("update_all_items", items)
-    if source_ctx ~= nil then
-      source.ctx = source_ctx
-    end
-  end
-
-  return setmetatable(source, origin), nil
+  local tbl = {
+    name = name,
+    opts = vim.tbl_extend("force", origin.opts or base.opts, source_opts),
+    highlights = highlights.new_factory("thetto-list-highlight"),
+    sign_highlights = highlights.new_factory("thetto-sign-highlight"),
+    filters = filters,
+    sorters = sorters,
+    compiled_colors = vim.tbl_map(function(color)
+      return {regex = vim.regex(color.pattern), chunks = color.chunks}
+    end, origin.colors or base.colors),
+    ctx = {},
+    _notifier = notifier,
+    _origin = origin,
+  }
+  return setmetatable(tbl, Source)
 end
 
-M.names = function()
-  local names = {}
-  local paths = vim.api.nvim_get_runtime_file("lua/thetto/source/**/*.lua", true)
-  for _, path in ipairs(paths) do
-    local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/source/", true)[2]
-    local name = source_file:sub(1, #source_file - 4)
-    table.insert(names, name)
+function Source.__index(self, k)
+  return rawget(Source, k) or self._origin[k] or base[k]
+end
+
+function Source.append(self, items, source_ctx)
+  self._notifier:send("update_all_items", items)
+  if source_ctx ~= nil then
+    self.ctx = source_ctx
   end
-  return names
+end
+
+function Source.all_names()
+  local paths = vim.api.nvim_get_runtime_file("lua/thetto/source/**/*.lua", true)
+  return vim.tbl_map(function(path)
+    local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/source/", true)[2]
+    return source_file:sub(1, #source_file - 4)
+  end, paths)
 end
 
 return M

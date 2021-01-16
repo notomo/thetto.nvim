@@ -1,6 +1,7 @@
 local highlights = require("thetto/lib/highlight")
 local modulelib = require("thetto/lib/module")
 local pathlib = require("thetto/lib/path")
+local vim = vim
 
 local M = {}
 

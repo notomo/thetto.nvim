@@ -33,7 +33,4 @@ M.kind_name = "base"
 M.opts = {}
 M.chunk_max_count = 10000
 
-M.__index = M
-setmetatable(M, {})
-
 return M

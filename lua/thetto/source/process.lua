@@ -5,8 +5,8 @@ M.collect = function(self)
   local remove_header = function(_)
   end
   local to_item = function(output)
-      local splitted = vim.split(output:gsub("^%s+", ""), "%s")
-      return {value = output, pid = splitted[1]}
+    local splitted = vim.split(output:gsub("^%s+", ""), "%s")
+    return {value = output, pid = splitted[1]}
   end
   if vim.fn.has("mac") == 1 then
     cmd = {"ps", "-axo", "pid,user,command"}
@@ -34,7 +34,7 @@ M.collect = function(self)
       for _, output in ipairs(outputs) do
         table.insert(items, to_item(output))
       end
-      self.append(items)
+      self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
   })

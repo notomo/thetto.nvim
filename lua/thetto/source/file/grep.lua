@@ -13,7 +13,7 @@ M.collect = function(self, opts)
   end
   if pattern == nil or pattern == "" then
     if opts.interactive then
-      self.append({})
+      self:append({})
     end
     return {}, nil, self.errors.skip_empty_pattern
   end
@@ -53,7 +53,7 @@ M.collect = function(self, opts)
       })
       ::continue::
     end
-    self.append(items, {pattern = pattern})
+    self:append(items, {pattern = pattern})
     items = {}
   end)
 

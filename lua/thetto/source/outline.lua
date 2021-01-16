@@ -30,7 +30,7 @@ M.collect = function(self, opts)
         })
         ::continue::
       end
-      self.append(items)
+      self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
     cwd = opts.cwd,
