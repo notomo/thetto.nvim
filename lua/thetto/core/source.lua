@@ -32,23 +32,13 @@ function Source.new(notifier, name, source_opts, opts)
     return nil, "not found source: " .. name
   end
 
-  local filters
-  if #opts.filters ~= 0 then
-    filters = opts.filters
-  end
-
-  local sorters
-  if #opts.sorters ~= 0 then
-    sorters = opts.sorters
-  end
-
   local tbl = {
     name = name,
     opts = vim.tbl_extend("force", origin.opts or base.opts, source_opts),
     highlights = highlights.new_factory("thetto-list-highlight"),
     sign_highlights = highlights.new_factory("thetto-sign-highlight"),
-    filters = filters,
-    sorters = sorters,
+    filters = nil,
+    sorters = nil,
     compiled_colors = vim.tbl_map(function(color)
       return {regex = vim.regex(color.pattern), chunks = color.chunks}
     end, origin.colors or base.colors),
@@ -56,6 +46,13 @@ function Source.new(notifier, name, source_opts, opts)
     _notifier = notifier,
     _origin = origin,
   }
+  if #opts.filters ~= 0 then
+    tbl.filters = opts.filters
+  end
+  if #opts.sorters ~= 0 then
+    tbl.sorters = opts.sorters
+  end
+
   return setmetatable(tbl, Source)
 end
 

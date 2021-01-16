@@ -23,7 +23,7 @@ end
 
 M.args = function(raw_args, default)
   local name = nil
-  local opts = vim.deepcopy(default)
+  local opts = vim.deepcopy(default or {})
   local ex_opts = {x = {}, xx = {}}
 
   for _, arg in ipairs(raw_args) do

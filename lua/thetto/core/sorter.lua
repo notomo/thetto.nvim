@@ -20,19 +20,17 @@ function Sorter.new(name, reversed)
 end
 
 function Sorter.parse(name)
-  local reversed = false
   if vim.startswith(name, "-") then
-    reversed = true
-    name = name:sub(2)
+    return Sorter.new(name:sub(2), true)
   end
-  return Sorter.new(name, reversed)
+  return Sorter.new(name, false)
 end
 
 function Sorter.reverse(self)
   return Sorter.new(self.short_name, not self.reversed)
 end
 
-function Sorter._full_name(self)
+function Sorter._name(self)
   if self.reversed then
     return "-" .. self.short_name
   end
@@ -41,7 +39,7 @@ end
 
 function Sorter.__index(self, k)
   if k == "name" then
-    return Sorter._full_name(self)
+    return Sorter._name(self)
   end
   return rawget(Sorter, k) or self._origin[k]
 end
@@ -96,7 +94,6 @@ function Sorters.reverse(self, name)
 
   local names = self:_names()
   names[index] = sorter:reverse().name
-
   return Sorters.new(names), nil
 end
 

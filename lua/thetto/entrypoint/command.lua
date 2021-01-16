@@ -3,39 +3,18 @@ vim.cmd("doautocmd User ThettoSourceLoad")
 local Notifier = require("thetto/lib/notifier").Notifier
 local Collector = require("thetto/core/collector").Collector
 local Executor = require("thetto/core/executor").Executor
+local Options = require("thetto/core/option").Options
 local UI = require("thetto/view/ui").UI
 local wraplib = require("thetto/lib/wrap")
 local messagelib = require("thetto/lib/message")
-local custom = require("thetto/custom")
 local repository = require("thetto/core/repository")
 local cmdparse = require("thetto/lib/cmdparse")
 local modulelib = require("thetto/lib/module")
 
 local M = {}
 
-local start_default_opts = {
-  insert = true,
-  resume = false,
-  ignorecase = false,
-  smartcase = true,
-  pattern = nil,
-  pattern_type = nil,
-  offset = 0,
-  cwd = ".",
-  target = nil,
-  target_patterns = {},
-  action = nil,
-  display_limit = 100,
-  debounce_ms = 50,
-  filters = {},
-  sorters = {},
-  allow_empty = false,
-  auto = nil,
-  immediately = false,
-}
-
 M.start_by_excmd = function(has_range, raw_range, raw_args)
-  local source_name, opts, ex_opts, parse_err = cmdparse.args(raw_args, vim.tbl_extend("force", start_default_opts, custom.opts))
+  local source_name, raw_opts, ex_opts, parse_err = cmdparse.args(raw_args, Options.default_empty())
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
   end
@@ -44,12 +23,12 @@ M.start_by_excmd = function(has_range, raw_range, raw_args)
   if has_range ~= 0 then
     range = {first = raw_range[1], last = raw_range[2]}
   end
-  opts.range = range
+  raw_opts.range = range
 
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()
-    return M._start(source_name, source_opts, action_opts, opts)
+    return M._start(source_name, source_opts, action_opts, Options.new(raw_opts))
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
@@ -61,7 +40,7 @@ M.start = function(args)
   local source_name = args.source_name
   local source_opts = args.source_opts or {}
   local action_opts = args.action_opts or {}
-  local opts = vim.tbl_extend("force", start_default_opts, custom.opts, args.opts or {})
+  local opts = Options.new(args.opts or {})
   local result, err = wraplib.traceback(function()
     return M._start(source_name, source_opts, action_opts, opts)
   end)

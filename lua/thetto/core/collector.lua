@@ -1,8 +1,6 @@
 local Source = require("thetto/core/source").Source
 local Filters = require("thetto/core/filter").Filters
 local Sorters = require("thetto/core/sorter").Sorters
-local modulelib = require("thetto/lib/module")
-local inputs = require("thetto/core/input")
 local wraplib = require("thetto/lib/wrap")
 local vim = vim
 
@@ -13,30 +11,6 @@ Collector.__index = Collector
 M.Collector = Collector
 
 function Collector.new(notifier, source_name, source_opts, opts)
-  opts.cwd = vim.fn.expand(opts.cwd)
-  if opts.cwd == "." then
-    opts.cwd = vim.fn.fnamemodify(".", ":p")
-  end
-  if opts.cwd ~= "/" and vim.endswith(opts.cwd, "/") then
-    opts.cwd = opts.cwd:sub(1, #opts.cwd - 1)
-  end
-
-  if opts.target ~= nil then
-    local target = modulelib.find_target(opts.target)
-    if target == nil then
-      return nil, "not found target: " .. opts.target
-    end
-    opts.cwd = target.cwd(opts.target_patterns)
-  end
-
-  if opts.pattern_type ~= nil then
-    local pattern, err = inputs.get(opts.pattern_type)
-    if err ~= nil then
-      return nil, err
-    end
-    opts.pattern = pattern
-  end
-
   local source, err = Source.new(notifier, source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
