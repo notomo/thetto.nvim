@@ -6,7 +6,7 @@ if find_err ~= nil then
 end
 M.root = root
 
-M.test_data_path = "test/test_data/"
+M.test_data_path = "spec/test_data/"
 M.test_data_dir = M.root .. "/" .. M.test_data_path
 
 M.command = function(cmd)

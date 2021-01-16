@@ -7,7 +7,7 @@
 # - find
 
 test:
-	vusted ./test --shuffle -v
-	@# vusted ./test --shuffle -v --seed=SEED
+	vusted --shuffle -v
+	@# vusted --shuffle -v --seed=SEED
 
 .PHONY: test
