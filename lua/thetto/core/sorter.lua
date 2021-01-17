@@ -4,7 +4,6 @@ local vim = vim
 local M = {}
 
 local Sorter = {}
-Sorter.__index = Sorter
 M.Sorter = Sorter
 
 function Sorter.new(name, reversed)
@@ -45,7 +44,6 @@ function Sorter.__index(self, k)
 end
 
 local Sorters = {}
-Sorters.__index = Sorters
 M.Sorters = Sorters
 
 function Sorters.new(names)

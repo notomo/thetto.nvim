@@ -29,7 +29,6 @@ function Modifier.new(name)
 end
 
 local Filter = {}
-Filter.__index = Filter
 M.Filter = Filter
 
 function Filter.new(name, opts, inversed, key, modifier)
@@ -119,7 +118,6 @@ function Filter.__index(self, k)
 end
 
 local Filters = {}
-Filters.__index = Filters
 M.Filters = Filters
 
 function Filters.new(names, opts)

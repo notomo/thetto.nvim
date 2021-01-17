@@ -6,9 +6,8 @@ local Executor = {}
 Executor.__index = Executor
 M.Executor = Executor
 
-function Executor.new(notifier, source_name, default_action_opts, default_action_name)
+function Executor.new(source_name, default_action_opts, default_action_name)
   local tbl = {
-    notifier = notifier,
     source_name = source_name,
     default_action_opts = default_action_opts,
     default_action_name = default_action_name,
@@ -47,7 +46,7 @@ function Executor._action(self, action_name, kind_name, items, action_opts)
 
   return function(ctx)
     if action.behavior.quit then
-      self.notifier:send("close")
+      ctx.ui:close()
     end
     return action:execute(items, ctx)
   end, nil

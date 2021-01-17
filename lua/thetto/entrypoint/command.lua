@@ -77,7 +77,7 @@ M._start = function(source_name, source_opts, action_opts, opts)
   if err ~= nil then
     return nil, err
   end
-  local executor = Executor.new(notifier, source_name, action_opts, opts.action)
+  local executor = Executor.new(source_name, action_opts, opts.action)
   local ui = UI.new(collector, notifier)
 
   local ctx = {collector = collector, ui = ui, executor = executor}

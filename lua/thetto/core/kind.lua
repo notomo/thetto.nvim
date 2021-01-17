@@ -94,7 +94,7 @@ function Kind.find_action(self, action_name, action_opts)
   return nil, "not found action: " .. name
 end
 
-function Kind.actions(self)
+function Kind.action_names(self)
   local names = {}
   local actions = vim.tbl_extend("force", self._origin, base, custom.source_actions[self.source_name] or {}, custom.kind_actions[self.name] or {})
   for key in pairs(actions) do

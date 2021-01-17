@@ -17,7 +17,7 @@ M.action = function(_, _, _)
     return ""
   end
 
-  return table.concat(kind:actions(), "\n")
+  return table.concat(kind:action_names(), "\n")
 end
 
 M.source = function(_, _, _)

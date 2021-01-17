@@ -49,10 +49,6 @@ function UI.new(collector, notifier)
     self.windows:redraw_selections(self.collector)
   end)
 
-  self.notifier:on("close", function()
-    self:close()
-  end)
-
   return self
 end
 

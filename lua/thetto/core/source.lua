@@ -10,7 +10,6 @@ local vim = vim
 local M = {}
 
 local Source = {}
-Source.__index = Source
 M.Source = Source
 
 Source.errors = {skip_empty_pattern = "skip_empty_pattern"}
