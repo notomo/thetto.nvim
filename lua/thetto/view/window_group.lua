@@ -39,7 +39,7 @@ function WindowGroup.open_sidecar(self, collector, item, open_target)
   end
 
   local list_config = vim.api.nvim_win_get_config(self.list)
-  local height = list_config.height + #collector.filters + 1
+  local height = list_config.height + collector.filters:length() + 1
   local half_height = math.floor(height / 2)
 
   local top_row = 1
