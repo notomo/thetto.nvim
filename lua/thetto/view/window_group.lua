@@ -397,7 +397,7 @@ function WindowGroup._redraw_info(self, collector)
     collector_status = "running"
   end
 
-  local text = ("%s%s  [ %s / %s ]"):format(collector.source.name, sorter_info, vim.tbl_count(collector.items), #collector.all_items)
+  local text = ("%s%s  [ %s / %s ]"):format(collector.source.name, sorter_info, vim.tbl_count(collector.items), collector.result:count())
   local highlighter = self._info_hl_factory:reset(self.buffers.info)
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. collector_status, "Comment"}})
 end

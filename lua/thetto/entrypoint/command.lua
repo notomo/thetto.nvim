@@ -88,9 +88,9 @@ M._start = function(source_name, source_opts, action_opts, raw_opts)
   local ctx = {collector = collector, ui = ui, executor = executor}
   repository.set(source_name, ctx)
 
-  err = collector:start()
-  if err ~= nil then
-    return nil, err
+  local start_err = collector:start()
+  if start_err ~= nil then
+    return nil, start_err
   end
 
   if opts.auto == nil then

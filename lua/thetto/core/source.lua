@@ -4,6 +4,7 @@ local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
 local listlib = require("thetto/lib/list")
 local modulelib = require("thetto/lib/module")
+local SourceResult = require("thetto/core/source_result").SourceResult
 local base = require("thetto/source/base")
 local vim = vim
 
@@ -64,6 +65,26 @@ function Source.append(self, items, source_ctx)
   if source_ctx ~= nil then
     self.ctx = source_ctx
   end
+end
+
+function Source.collect(self, opts)
+  local all_items, job, err = self._origin.collect(self, opts)
+  if err ~= nil and err ~= Source.errors.skip_empty_pattern then
+    return nil, err
+  end
+
+  local empty_is_err = not ((opts.interactive and err == Source.errors.skip_empty_pattern) or opts.allow_empty)
+  local result, res_err = SourceResult.new(self.name, all_items, job, empty_is_err)
+  if res_err ~= nil then
+    return nil, res_err
+  end
+
+  local start_err = result:start()
+  if start_err ~= nil then
+    return nil, start_err
+  end
+
+  return result, nil
 end
 
 function Source.all_names()

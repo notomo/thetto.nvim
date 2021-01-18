@@ -79,10 +79,7 @@ M.sync_open = function(...)
   if collector == nil then
     return
   end
-  if collector.job == nil then
-    return collector
-  end
-  local ok = collector.job:wait(1000)
+  local ok = collector:wait(1000)
   if not ok then
     assert(false, "job wait timeout")
   end

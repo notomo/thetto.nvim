@@ -7,7 +7,7 @@ describe("env/variable source", function()
   after_each(helper.after_each)
 
   it("can show environment variables", function()
-    helper.sync_open("env/variable", "--no-insert")
+    command("Thetto env/variable --no-insert")
 
     helper.search("^HOME=")
 

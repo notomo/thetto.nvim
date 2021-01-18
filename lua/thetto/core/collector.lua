@@ -1,4 +1,5 @@
 local Source = require("thetto/core/source").Source
+local SourceResult = require("thetto/core/source_result").SourceResult
 local Filters = require("thetto/core/filter").Filters
 local Sorters = require("thetto/core/sorter").Sorters
 local wraplib = require("thetto/lib/wrap")
@@ -27,8 +28,7 @@ function Collector.new(notifier, source_name, source_opts, opts)
   end
 
   local tbl = {
-    all_items = {},
-    job = nil,
+    result = SourceResult.new(source.name),
     source = source,
     original_opts = opts,
     opts = vim.deepcopy(opts),
@@ -67,37 +67,28 @@ function Collector.new(notifier, source_name, source_opts, opts)
 end
 
 function Collector.start(self)
-  local all_items, job, err = self.source:collect(self.opts)
-  if err ~= nil and err ~= Source.errors.skip_empty_pattern then
+  local result, err = self.source:collect(self.opts)
+  if err ~= nil then
     return err
   end
-  self.all_items = all_items
-  self.job = job
-
-  for i, item in ipairs(self.all_items) do
-    item.index = i
-  end
-
-  local interactive_skip_empty = self.opts.interactive and err == Source.errors.skip_empty_pattern
-  if not interactive_skip_empty and self.job == nil and #self.all_items == 0 and not self.opts.allow_empty then
-    return self.source.name .. ": empty"
-  end
-
-  if self.job ~= nil then
-    local joberr = self.job:start()
-    if joberr ~= nil then
-      return joberr
-    end
-  end
-
+  self.result = result
   return nil
 end
 
 function Collector.wait(self, ms)
-  ms = ms or 1000
-  return vim.wait(ms, function()
-    return self:finished()
-  end, 10)
+  return self.result:wait(ms)
+end
+
+function Collector.discard(self)
+  return self.result:discard()
+end
+
+function Collector.stop(self)
+  return self.result:stop()
+end
+
+function Collector.finished(self)
+  return self.result:finished()
 end
 
 function Collector.update(self)
@@ -114,12 +105,7 @@ function Collector.update(self)
     self.opts.ignorecase = true
   end
 
-  for _, item in ipairs(self.items) do
-    if item.selected ~= nil then
-      self.all_items[item.index].selected = item.selected
-    end
-  end
-
+  self.result:apply_selected(self.items)
   self:_update_items(input_lines)
 
   return self.notifier:send("update_items", input_lines)
@@ -210,12 +196,7 @@ function Collector._update_sorters(self, sorters)
 end
 
 function Collector._update_all_items(self, items)
-  local len = #self.all_items
-  for i, item in ipairs(items) do
-    item.index = len + i
-  end
-  vim.list_extend(self.all_items, items)
-
+  self.result:append(items)
   local err = self._update_with_debounce()
   if err ~= nil then
     return err
@@ -223,29 +204,10 @@ function Collector._update_all_items(self, items)
   return nil
 end
 
-function Collector.discard(self)
-  if self.job ~= nil then
-    self.job:discard()
-  end
-end
-
-function Collector.stop(self)
-  if self.job ~= nil then
-    self.job:stop()
-  end
-end
-
-function Collector.finished(self)
-  if self.job == nil then
-    return true
-  end
-  return not self.job:is_running()
-end
-
 function Collector._update_items(self, input_lines)
   -- NOTE: avoid `too many results to unpack`
   local items = {}
-  for _, item in ipairs(self.all_items) do
+  for _, item in self.result:iter() do
     table.insert(items, item)
   end
 
