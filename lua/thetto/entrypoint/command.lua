@@ -28,7 +28,7 @@ M.start_by_excmd = function(has_range, raw_range, raw_args)
   local source_opts = ex_opts.x or {}
   local action_opts = ex_opts.xx or {}
   local result, err = wraplib.traceback(function()
-    return M._start(source_name, source_opts, action_opts, Options.new(raw_opts))
+    return M._start(source_name, source_opts, action_opts, raw_opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
@@ -40,9 +40,9 @@ M.start = function(args)
   local source_name = args.source_name
   local source_opts = args.source_opts or {}
   local action_opts = args.action_opts or {}
-  local opts = Options.new(args.opts or {})
+  local raw_opts = args.opts or {}
   local result, err = wraplib.traceback(function()
-    return M._start(source_name, source_opts, action_opts, opts)
+    return M._start(source_name, source_opts, action_opts, raw_opts)
   end)
   if err ~= nil then
     return nil, messagelib.error(err)
@@ -50,7 +50,12 @@ M.start = function(args)
   return result, nil
 end
 
-M._start = function(source_name, source_opts, action_opts, opts)
+M._start = function(source_name, source_opts, action_opts, raw_opts)
+  local opts, opts_err = Options.new(raw_opts)
+  if opts_err ~= nil then
+    return nil, opts_err
+  end
+
   if source_name == nil and not opts.resume then
     return nil, "no source"
   end
