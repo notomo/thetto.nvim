@@ -42,25 +42,26 @@ function Collector.new(notifier, source_name, source_opts, opts)
   local self = setmetatable(tbl, Collector)
   self.opts.interactive = self.filters:has_interactive()
 
-  self._update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
-    if self._input_bufnr ~= nil and vim.api.nvim_buf_is_valid(self._input_bufnr) then
-      local input_lines = vim.api.nvim_buf_get_lines(self._input_bufnr, 0, -1, true)
-      self.input_lines = input_lines
-    end
+  self.update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
     return self:update()
   end)
 
-  notifier:on("setup_input", function(bufnr)
-    self._input_bufnr = bufnr
-  end)
-  notifier:on("update_input", function()
-    return self._update_with_debounce()
-  end)
   notifier:on("update_all_items", function(items)
     return self:_update_all_items(items)
   end)
 
   return self, nil
+end
+
+function Collector.attach(self, input_bufnr)
+  vim.validate({input_bufnr = {input_bufnr, "number"}})
+  self.update_with_debounce = wraplib.debounce(self.opts.debounce_ms, function()
+    if vim.api.nvim_buf_is_valid(input_bufnr) then
+      local input_lines = vim.api.nvim_buf_get_lines(input_bufnr, 0, -1, true)
+      self.input_lines = input_lines
+    end
+    return self:update()
+  end)
 end
 
 function Collector.start(self)
@@ -194,7 +195,7 @@ end
 
 function Collector._update_all_items(self, items)
   self.result:append(items)
-  local err = self._update_with_debounce()
+  local err = self:update_with_debounce()
   if err ~= nil then
     return err
   end

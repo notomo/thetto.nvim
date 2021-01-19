@@ -207,10 +207,10 @@ function WindowGroup._open(self, default_input_lines, active)
     vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, input_filetype))
     vim.bo[bufnr].filetype = input_filetype
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
-    self.notifier:send("setup_input", bufnr)
+    self._collector:attach(bufnr)
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = function()
-        return self.notifier:send("update_input")
+        return self._collector:update_with_debounce()
       end,
       on_detach = function()
         return self._collector:discard()
@@ -420,13 +420,8 @@ function WindowGroup._head_lines(items)
   return lines
 end
 
-M.open = function(notifier, collector, source_name, default_input_lines, display_limit, active)
-  local tbl = {
-    notifier = notifier,
-    _collector = collector,
-    source_name = source_name,
-    _display_limit = display_limit,
-  }
+M.open = function(collector, source_name, default_input_lines, display_limit, active)
+  local tbl = {_collector = collector, source_name = source_name, _display_limit = display_limit}
   tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
   tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
   tbl._info_hl_factory = highlights.new_factory("thetto-info-text")
