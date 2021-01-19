@@ -11,7 +11,7 @@ local Collector = {}
 Collector.__index = Collector
 M.Collector = Collector
 
-function Collector.new(notifier, source_name, source_opts, opts)
+function Collector.new(source_name, source_opts, opts)
   local source, err = Source.new(source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
@@ -36,7 +36,6 @@ function Collector.new(notifier, source_name, source_opts, opts)
     selected = {},
     filters = filters,
     sorters = sorters,
-    notifier = notifier,
     input_lines = vim.fn["repeat"]({""}, #source.filters),
   }
   local self = setmetatable(tbl, Collector)
@@ -46,18 +45,34 @@ function Collector.new(notifier, source_name, source_opts, opts)
     return self:update()
   end)
 
+  self._send_redraw_event = function()
+  end
+
+  self._send_redraw_selection_event = function()
+  end
+
   return self, nil
 end
 
 function Collector.attach(self, input_bufnr)
   vim.validate({input_bufnr = {input_bufnr, "number"}})
-  self.update_with_debounce = wraplib.debounce(self.opts.debounce_ms, function()
+  local on_input = function()
     if vim.api.nvim_buf_is_valid(input_bufnr) then
-      local input_lines = vim.api.nvim_buf_get_lines(input_bufnr, 0, -1, true)
-      self.input_lines = input_lines
+      self.input_lines = vim.api.nvim_buf_get_lines(input_bufnr, 0, -1, true)
     end
     return self:update()
-  end)
+  end
+  self.update_with_debounce = wraplib.debounce(self.opts.debounce_ms, on_input)
+end
+
+function Collector.attach_ui(self, ui)
+  vim.validate({ui = {ui, "table"}})
+  self._send_redraw_event = function(_, input_lines)
+    return ui:redraw(input_lines)
+  end
+  self._send_redraw_selection_event = function()
+    return ui.windows:redraw_selections(self)
+  end
 end
 
 function Collector.start(self)
@@ -91,26 +106,6 @@ function Collector.finished(self)
   return self.result:finished()
 end
 
-function Collector.update(self)
-  local input_lines = self.input_lines
-  local pattern = self.opts.pattern
-  local interactive = self.opts.interactive
-
-  self.opts = vim.deepcopy(self.original_opts)
-  self.opts.pattern = pattern
-  self.opts.interactive = interactive
-  if not self.opts.ignorecase and self.opts.smartcase and table.concat(input_lines, ""):find("[A-Z]") then
-    self.opts.ignorecase = false
-  else
-    self.opts.ignorecase = true
-  end
-
-  self.result:apply_selected(self.items)
-  self:_update_items(input_lines)
-
-  return self.notifier:send("update_items", input_lines)
-end
-
 function Collector.toggle_selections(self, items)
   for _, item in ipairs(items) do
     local key = tostring(item.index)
@@ -127,7 +122,7 @@ function Collector.toggle_selections(self, items)
       end
     end
   end
-  self.notifier:send("update_selected")
+  self:_send_redraw_selection_event()
 end
 
 function Collector.toggle_all_selections(self)
@@ -170,7 +165,7 @@ function Collector._update_filters(self, filters)
   self.filters = filters
   self.opts.interactive = self.filters:has_interactive()
   self:_update_items(self.input_lines)
-  return self.notifier:send("update_items", self.input_lines)
+  return self:_send_redraw_event(self.input_lines)
 end
 
 function Collector.reverse_sorter(self, name)
@@ -192,7 +187,27 @@ end
 function Collector._update_sorters(self, sorters)
   self.sorters = sorters
   self:_update_items(self.input_lines)
-  return self.notifier:send("update_items", self.input_lines)
+  return self:_send_redraw_event(self.input_lines)
+end
+
+function Collector.update(self)
+  local input_lines = self.input_lines
+  local pattern = self.opts.pattern
+  local interactive = self.opts.interactive
+
+  self.opts = vim.deepcopy(self.original_opts)
+  self.opts.pattern = pattern
+  self.opts.interactive = interactive
+  if not self.opts.ignorecase and self.opts.smartcase and table.concat(input_lines, ""):find("[A-Z]") then
+    self.opts.ignorecase = false
+  else
+    self.opts.ignorecase = true
+  end
+
+  self.result:apply_selected(self.items)
+  self:_update_items(input_lines)
+
+  return self:_send_redraw_event(input_lines)
 end
 
 function Collector._update_items(self, input_lines)

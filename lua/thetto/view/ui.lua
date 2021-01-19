@@ -28,28 +28,7 @@ function UI.new(collector, notifier)
     tbl.mode = "n"
   end
 
-  local self = setmetatable(tbl, UI)
-
-  self.notifier:on("update_items", function(input_lines, row)
-    local err = self:redraw(input_lines)
-    if err ~= nil then
-      return err
-    end
-    if row ~= nil then
-      vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
-    end
-    err = self.notifier:send("execute")
-    if err ~= nil then
-      return err
-    end
-    M._changed_after(input_lines)
-  end)
-
-  self.notifier:on("update_selected", function()
-    self.windows:redraw_selections(self.collector)
-  end)
-
-  return self
+  return setmetatable(tbl, UI)
 end
 
 function UI.open(self)
@@ -65,6 +44,7 @@ function UI.open(self)
 
   self.origin_window = vim.api.nvim_get_current_win()
   self.windows = WindowGroup.open(self.collector, source.name, self.collector.input_lines, opts.display_limit, self.active)
+  self.collector:attach_ui(self)
 
   if self.mode == "n" then
     vim.cmd("stopinsert")
@@ -89,11 +69,19 @@ function UI.resume(self)
     self.input_cursor = nil
   end
 
-  return self.notifier:send("update_items", self.collector.input_lines, self.row)
+  return self:redraw(self.collector.input_lines, self.row)
 end
 
-function UI.redraw(self, input_lines)
+function UI.redraw(self, input_lines, row)
   self.windows:redraw(input_lines)
+  if row ~= nil then
+    vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
+  end
+  local err = self.notifier:send("execute")
+  if err ~= nil then
+    return err
+  end
+  M._changed_after(input_lines)
 end
 
 function UI.update_offset(self, offset)

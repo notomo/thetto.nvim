@@ -78,7 +78,7 @@ M._start = function(source_name, source_opts, action_opts, raw_opts)
   end
 
   local notifier = Notifier.new()
-  local collector, err = Collector.new(notifier, source_name, source_opts, opts)
+  local collector, err = Collector.new(source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
