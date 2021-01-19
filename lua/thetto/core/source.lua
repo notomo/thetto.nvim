@@ -19,9 +19,8 @@ Source.pathlib = pathlib
 Source.filelib = filelib
 Source.listlib = listlib
 
-function Source.new(notifier, name, source_opts, opts)
+function Source.new(name, source_opts, opts)
   vim.validate({
-    notifier = {notifier, "table"},
     name = {name, "string"},
     source_opts = {source_opts, "table"},
     opts = {opts, "table"},
@@ -43,7 +42,6 @@ function Source.new(notifier, name, source_opts, opts)
       return {regex = vim.regex(color.pattern), chunks = color.chunks}
     end, origin.colors or base.colors),
     ctx = {},
-    _notifier = notifier,
     _origin = origin,
   }
   if #opts.filters ~= 0 then
@@ -60,14 +58,17 @@ function Source.__index(self, k)
   return rawget(Source, k) or self._origin[k] or base[k]
 end
 
-function Source.append(self, items, source_ctx)
-  self._notifier:send("update_all_items", items)
-  if source_ctx ~= nil then
-    self.ctx = source_ctx
+function Source.collect(self, opts, append)
+  self.append = function(_, items, source_ctx)
+    local err = append(items)
+    if err ~= nil then
+      return err
+    end
+    if source_ctx ~= nil then
+      self.ctx = source_ctx
+    end
   end
-end
 
-function Source.collect(self, opts)
   local all_items, job, err = self._origin.collect(self, opts)
   if err ~= nil and err ~= Source.errors.skip_empty_pattern then
     return nil, err

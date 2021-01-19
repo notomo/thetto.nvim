@@ -12,7 +12,7 @@ Collector.__index = Collector
 M.Collector = Collector
 
 function Collector.new(notifier, source_name, source_opts, opts)
-  local source, err = Source.new(notifier, source_name, source_opts, opts)
+  local source, err = Source.new(source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
@@ -46,10 +46,6 @@ function Collector.new(notifier, source_name, source_opts, opts)
     return self:update()
   end)
 
-  notifier:on("update_all_items", function(items)
-    return self:_update_all_items(items)
-  end)
-
   return self, nil
 end
 
@@ -65,11 +61,17 @@ function Collector.attach(self, input_bufnr)
 end
 
 function Collector.start(self)
-  local result, err = self.source:collect(self.opts)
+  local on_update_job = function(items)
+    self.result:append(items)
+    return self:update_with_debounce()
+  end
+
+  local result, err = self.source:collect(self.opts, on_update_job)
   if err ~= nil then
     return err
   end
   self.result = result
+
   return nil
 end
 
@@ -191,15 +193,6 @@ function Collector._update_sorters(self, sorters)
   self.sorters = sorters
   self:_update_items(self.input_lines)
   return self.notifier:send("update_items", self.input_lines)
-end
-
-function Collector._update_all_items(self, items)
-  self.result:append(items)
-  local err = self:update_with_debounce()
-  if err ~= nil then
-    return err
-  end
-  return nil
 end
 
 function Collector._update_items(self, input_lines)
