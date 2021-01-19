@@ -59,9 +59,6 @@ function Collector.new(notifier, source_name, source_opts, opts)
   notifier:on("update_all_items", function(items)
     return self:_update_all_items(items)
   end)
-  notifier:on("finish", function()
-    return self:discard()
-  end)
 
   return self, nil
 end

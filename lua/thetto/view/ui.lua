@@ -64,7 +64,7 @@ function UI.open(self)
   end
 
   self.origin_window = vim.api.nvim_get_current_win()
-  self.windows = window_groups.open(self.notifier, source.name, self.collector.input_lines, opts.display_limit, self.active)
+  self.windows = window_groups.open(self.notifier, self.collector, source.name, self.collector.input_lines, opts.display_limit, self.active)
 
   if self.mode == "n" then
     vim.cmd("stopinsert")
@@ -93,7 +93,7 @@ function UI.resume(self)
 end
 
 function UI.redraw(self, input_lines)
-  self.windows:redraw(self.collector, input_lines)
+  self.windows:redraw(input_lines)
 end
 
 function UI.update_offset(self, offset)
@@ -139,7 +139,7 @@ function UI.close(self)
     vim.api.nvim_set_current_win(self.origin_window)
   end
 
-  self.notifier:send("finish")
+  self.collector:discard()
 end
 
 function UI.enter(self, to)

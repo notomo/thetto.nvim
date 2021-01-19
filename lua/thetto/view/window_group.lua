@@ -193,13 +193,13 @@ function WindowGroup.reset_position(self)
   self:move_to(get_column())
 end
 
-function WindowGroup.redraw(self, collector, input_lines)
+function WindowGroup.redraw(self, input_lines)
   if not vim.api.nvim_buf_is_valid(self.buffers.list) then
     return
   end
-  self:_redraw_list(collector)
-  self:_redraw_info(collector)
-  self:_redraw_input(collector, input_lines)
+  self:_redraw_list(self._collector)
+  self:_redraw_info(self._collector)
+  self:_redraw_input(self._collector, input_lines)
 end
 
 function WindowGroup._open(self, default_input_lines, active)
@@ -213,7 +213,7 @@ function WindowGroup._open(self, default_input_lines, active)
         return self.notifier:send("update_input")
       end,
       on_detach = function()
-        return self.notifier:send("finish")
+        return self._collector:discard()
       end,
     })
   end)
@@ -420,8 +420,13 @@ function WindowGroup._head_lines(items)
   return lines
 end
 
-M.open = function(notifier, source_name, default_input_lines, display_limit, active)
-  local tbl = {notifier = notifier, source_name = source_name, _display_limit = display_limit}
+M.open = function(notifier, collector, source_name, default_input_lines, display_limit, active)
+  local tbl = {
+    notifier = notifier,
+    _collector = collector,
+    source_name = source_name,
+    _display_limit = display_limit,
+  }
   tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
   tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
   tbl._info_hl_factory = highlights.new_factory("thetto-info-text")
