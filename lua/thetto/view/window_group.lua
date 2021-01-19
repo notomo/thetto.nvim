@@ -20,6 +20,23 @@ local M = {}
 
 local WindowGroup = {}
 WindowGroup.__index = WindowGroup
+M.WindowGroup = WindowGroup
+
+function WindowGroup.open(collector, source_name, default_input_lines, display_limit, active)
+  local tbl = {
+    _collector = collector,
+    source_name = source_name,
+    _display_limit = display_limit,
+    _selection_hl_factory = highlights.new_factory("thetto-selection-highlight"),
+    _preview_hl_factory = highlights.new_factory("thetto-preview"),
+    _info_hl_factory = highlights.new_factory("thetto-info-text"),
+    _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
+  }
+
+  local window_group = setmetatable(tbl, WindowGroup)
+  window_group:_open(default_input_lines, active)
+  return window_group
+end
 
 function WindowGroup.is_current(self, name)
   local bufnr = self.buffers[name]
@@ -30,7 +47,7 @@ function WindowGroup.enter(self, to)
   windowlib.enter(self[to])
 end
 
-function WindowGroup.open_sidecar(self, collector, item, open_target)
+function WindowGroup.open_sidecar(self, item, open_target)
   if not vim.api.nvim_win_is_valid(self.list) then
     return
   end
@@ -39,7 +56,7 @@ function WindowGroup.open_sidecar(self, collector, item, open_target)
   end
 
   local list_config = vim.api.nvim_win_get_config(self.list)
-  local height = list_config.height + collector.filters:length() + 1
+  local height = list_config.height + self._collector.filters:length() + 1
   local half_height = math.floor(height / 2)
 
   local top_row = 1
@@ -127,9 +144,9 @@ function WindowGroup.close_sidecar(self)
   end
 end
 
-function WindowGroup.redraw_selections(self, collector)
+function WindowGroup.redraw_selections(self)
   local highligher = self._selection_hl_factory:reset(self.buffers.list)
-  highligher:filter("ThettoSelected", collector.items, function(item)
+  highligher:filter("ThettoSelected", self._collector.items, function(item)
     return item.selected
   end)
 end
@@ -197,9 +214,9 @@ function WindowGroup.redraw(self, input_lines)
   if not vim.api.nvim_buf_is_valid(self.buffers.list) then
     return
   end
-  self:_redraw_list(self._collector)
-  self:_redraw_info(self._collector)
-  self:_redraw_input(self._collector, input_lines)
+  self:_redraw_list()
+  self:_redraw_info()
+  self:_redraw_input(input_lines)
 end
 
 function WindowGroup._open(self, default_input_lines, active)
@@ -331,9 +348,9 @@ function WindowGroup._open(self, default_input_lines, active)
   vim.cmd(on_moved_i)
 end
 
-function WindowGroup._redraw_list(self, collector)
-  local items = collector.items
-  local opts = collector.opts
+function WindowGroup._redraw_list(self)
+  local items = self._collector.items
+  local opts = self._collector.opts
   local lines = self._head_lines(items, opts.display_limit)
   vim.bo[self.buffers.list].modifiable = true
   vim.api.nvim_buf_set_lines(self.buffers.list, 0, -1, false, lines)
@@ -346,17 +363,17 @@ function WindowGroup._redraw_list(self, collector)
     end
   end
 
-  local source = collector.source
+  local source = self._collector.source
   source:highlight(self.buffers.list, items)
   source:highlight_sign(self.buffers.sign, items)
-  self:redraw_selections(collector)
+  self:redraw_selections()
 end
 
-function WindowGroup._redraw_input(self, collector, input_lines)
-  local items = collector.items
-  local opts = collector.opts
-  local filters = collector.filters
-  local height = collector.filters:length()
+function WindowGroup._redraw_input(self, input_lines)
+  local items = self._collector.items
+  local opts = self._collector.opts
+  local filters = self._collector.filters
+  local height = self._collector.filters:length()
 
   if vim.api.nvim_win_is_valid(self.input) then
     vim.api.nvim_win_set_height(self.input, height)
@@ -382,10 +399,10 @@ function WindowGroup._redraw_input(self, collector, input_lines)
   end
 end
 
-function WindowGroup._redraw_info(self, collector)
+function WindowGroup._redraw_info(self)
   local sorter_info = ""
   local sorter_names = {}
-  for _, sorter in ipairs(collector.sorters) do
+  for _, sorter in ipairs(self._collector.sorters) do
     table.insert(sorter_names, sorter.name)
   end
   if #sorter_names > 0 then
@@ -393,11 +410,11 @@ function WindowGroup._redraw_info(self, collector)
   end
 
   local collector_status = ""
-  if not collector:finished() then
+  if not self._collector:finished() then
     collector_status = "running"
   end
 
-  local text = ("%s%s  [ %s / %s ]"):format(collector.source.name, sorter_info, vim.tbl_count(collector.items), collector.result:count())
+  local text = ("%s%s  [ %s / %s ]"):format(self._collector.source.name, sorter_info, vim.tbl_count(self._collector.items), self._collector.result:count())
   local highlighter = self._info_hl_factory:reset(self.buffers.info)
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. collector_status, "Comment"}})
 end
@@ -418,18 +435,6 @@ function WindowGroup._head_lines(items)
     table.insert(lines, item.desc or item.value)
   end
   return lines
-end
-
-M.open = function(collector, source_name, default_input_lines, display_limit, active)
-  local tbl = {_collector = collector, source_name = source_name, _display_limit = display_limit}
-  tbl._selection_hl_factory = highlights.new_factory("thetto-selection-highlight")
-  tbl._preview_hl_factory = highlights.new_factory("thetto-preview")
-  tbl._info_hl_factory = highlights.new_factory("thetto-info-text")
-  tbl._filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info")
-
-  local window_group = setmetatable(tbl, WindowGroup)
-  window_group:_open(default_input_lines, active)
-  return window_group
 end
 
 M._on_close = function(key, id)

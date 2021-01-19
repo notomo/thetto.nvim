@@ -1,7 +1,7 @@
 local bufferlib = require("thetto/lib/buffer")
 local cursorlib = require("thetto/lib/cursor")
 local repository = require("thetto/core/repository")
-local window_groups = require("thetto/view/window_group")
+local WindowGroup = require("thetto/view/window_group").WindowGroup
 local listlib = require("thetto/lib/list")
 local vim = vim
 
@@ -64,7 +64,7 @@ function UI.open(self)
   end
 
   self.origin_window = vim.api.nvim_get_current_win()
-  self.windows = window_groups.open(self.collector, source.name, self.collector.input_lines, opts.display_limit, self.active)
+  self.windows = WindowGroup.open(self.collector, source.name, self.collector.input_lines, opts.display_limit, self.active)
 
   if self.mode == "n" then
     vim.cmd("stopinsert")
@@ -208,7 +208,7 @@ function UI._selected_items(self, action_name, range)
 end
 
 function UI.open_preview(self, item, open_target)
-  self.windows:open_sidecar(self.collector, item, open_target)
+  self.windows:open_sidecar(item, open_target)
 end
 
 function UI.exists_same_preview(self, items)
