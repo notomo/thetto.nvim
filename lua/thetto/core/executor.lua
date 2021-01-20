@@ -78,4 +78,19 @@ function Executor.action(self, ctx, action_name, kind_name, items, action_opts)
   return action(ctx)
 end
 
+function Executor.auto(self, ctx, action_name, action_opts)
+  vim.validate({action_name = {action_name, "string", true}})
+
+  if action_name == nil then
+    return function()
+    end
+  end
+
+  return function(item_group)
+    local kind_name, items = unpack(item_group)
+    local _, err = self:action(ctx, action_name, kind_name, items, action_opts)
+    return err
+  end
+end
+
 return M

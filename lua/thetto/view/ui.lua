@@ -11,14 +11,8 @@ local UI = {}
 UI.__index = UI
 M.UI = UI
 
-function UI.new(collector, notifier)
-  local tbl = {
-    collector = collector,
-    notifier = notifier,
-    row = 1,
-    windows = nil,
-    input_cursor = nil,
-  }
+function UI.new(collector)
+  local tbl = {collector = collector, row = 1, windows = nil, input_cursor = nil}
 
   if collector.opts.insert then
     tbl.active = "input"
@@ -31,7 +25,9 @@ function UI.new(collector, notifier)
   return setmetatable(tbl, UI)
 end
 
-function UI.open(self)
+function UI.open(self, on_move)
+  vim.validate({on_move = {on_move, "function"}})
+
   local source = self.collector.source
   local opts = self.collector.opts
 
@@ -45,6 +41,7 @@ function UI.open(self)
   self.origin_window = vim.api.nvim_get_current_win()
   self.windows = WindowGroup.open(self.collector, source.name, self.collector.input_lines, opts.display_limit, self.active)
   self.collector:attach_ui(self)
+  self._on_move = on_move
 
   if self.mode == "n" then
     vim.cmd("stopinsert")
@@ -62,7 +59,7 @@ end
 
 function UI.resume(self)
   self:close()
-  self:open()
+  self:open(self._on_move)
 
   if self.input_cursor ~= nil then
     vim.api.nvim_win_set_cursor(self.windows.input, self.input_cursor)
@@ -77,11 +74,16 @@ function UI.redraw(self, input_lines, row)
   if row ~= nil then
     vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
   end
-  local err = self.notifier:send("execute")
+  local err = self:on_move()
   if err ~= nil then
     return err
   end
   M._changed_after(input_lines)
+end
+
+function UI.on_move(self)
+  local item_group = self:current_item_groups()[1]
+  return self._on_move(item_group)
 end
 
 function UI.update_offset(self, offset)

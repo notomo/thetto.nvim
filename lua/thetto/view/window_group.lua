@@ -462,7 +462,7 @@ M._on_moved = function(key)
   if ui == nil then
     return
   end
-  ui.notifier:send("execute")
+  ui:on_move()
 end
 
 vim.cmd("highlight default link ThettoSelected Statement")

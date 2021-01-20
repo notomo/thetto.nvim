@@ -30,6 +30,8 @@ Kind.jobs = jobs
 Kind.filelib = filelib
 
 function Kind.new(executor, name)
+  vim.validate({executor = {executor, "table"}, name = {name, "string"}})
+
   local origin = modulelib.find_kind(name)
   if origin == nil then
     return nil, "not found kind: " .. name
