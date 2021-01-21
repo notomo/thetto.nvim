@@ -146,7 +146,7 @@ end
 
 function WindowGroup.redraw_selections(self)
   local highligher = self._selection_hl_factory:reset(self.buffers.list)
-  highligher:filter("ThettoSelected", self._collector.items, function(item)
+  highligher:filter("ThettoSelected", self._collector.items:values(), function(item)
     return item.selected
   end)
 end
@@ -349,7 +349,7 @@ function WindowGroup._open(self, default_input_lines, active)
 end
 
 function WindowGroup._redraw_list(self)
-  local items = self._collector.items
+  local items = self._collector.items:values()
   local opts = self._collector.opts
   local lines = self._head_lines(items, opts.display_limit)
   vim.bo[self.buffers.list].modifiable = true
@@ -370,7 +370,7 @@ function WindowGroup._redraw_list(self)
 end
 
 function WindowGroup._redraw_input(self, input_lines)
-  local items = self._collector.items
+  local items = self._collector.items:values()
   local opts = self._collector.opts
   local filters = self._collector.filters
   local height = self._collector.filters:length()
@@ -414,7 +414,7 @@ function WindowGroup._redraw_info(self)
     collector_status = "running"
   end
 
-  local text = ("%s%s  [ %s / %s ]"):format(self._collector.source.name, sorter_info, vim.tbl_count(self._collector.items), self._collector.result:count())
+  local text = ("%s%s  [ %s / %s ]"):format(self._collector.source.name, sorter_info, self._collector.items:length(), self._collector.result:count())
   local highlighter = self._info_hl_factory:reset(self.buffers.info)
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. collector_status, "Comment"}})
 end

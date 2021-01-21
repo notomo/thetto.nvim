@@ -1,5 +1,6 @@
 local Source = require("thetto/core/source").Source
 local SourceResult = require("thetto/core/source_result").SourceResult
+local Items = require("thetto/core/item").Items
 local Filters = require("thetto/core/filter").Filters
 local Sorters = require("thetto/core/sorter").Sorters
 local wraplib = require("thetto/lib/wrap")
@@ -32,12 +33,12 @@ function Collector.new(source_name, source_opts, opts)
     source = source,
     original_opts = opts,
     opts = vim.deepcopy(opts),
-    items = {},
     selected = {},
     filters = filters,
     sorters = sorters,
     input_lines = vim.fn["repeat"]({""}, #source.filters),
   }
+  tbl.items = Items.new(tbl.result, tbl.input_lines, filters, sorters, tbl.opts)
   local self = setmetatable(tbl, Collector)
   self.opts.interactive = self.filters:has_interactive()
 
@@ -115,7 +116,7 @@ function Collector.toggle_selections(self, items)
       self.selected[key] = item
     end
 
-    for _, filtered_item in ipairs(self.items) do
+    for _, filtered_item in self.items:iter() do
       if filtered_item.index == item.index then
         filtered_item.selected = not filtered_item.selected
         break
@@ -126,7 +127,7 @@ function Collector.toggle_selections(self, items)
 end
 
 function Collector.toggle_all_selections(self)
-  self:toggle_selections(self.items)
+  self:toggle_selections(self.items:values())
 end
 
 function Collector.add_filter(self, name)
@@ -211,28 +212,7 @@ function Collector.update(self)
 end
 
 function Collector._update_items(self, input_lines)
-  -- NOTE: avoid `too many results to unpack`
-  local items = {}
-  for _, item in self.result:iter() do
-    table.insert(items, item)
-  end
-
-  for i, filter in self.filters:iter() do
-    local input_line = input_lines[i]
-    if input_line ~= nil and input_line ~= "" then
-      items = filter:apply(items, input_line, self.opts)
-    end
-  end
-  for _, sorter in self.sorters:iter() do
-    items = sorter:apply(items)
-  end
-
-  local filtered = {}
-  for i = 1, self.opts.display_limit, 1 do
-    filtered[i] = items[i]
-  end
-
-  self.items = filtered
+  self.items = Items.new(self.result, input_lines, self.filters, self.sorters, self.opts)
 
   if not self.opts.interactive then
     return

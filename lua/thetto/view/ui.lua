@@ -88,7 +88,7 @@ end
 
 function UI.update_offset(self, offset)
   local row = self.row + offset
-  local line_count = #self.collector.items
+  local line_count = self.collector.items:length()
   if self.collector.opts.display_limit < line_count then
     line_count = self.collector.opts.display_limit
   end

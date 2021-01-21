@@ -93,7 +93,7 @@ function SourceResult.append(self, items)
 end
 
 function SourceResult.apply_selected(self, items)
-  for _, item in ipairs(items) do
+  for _, item in items:iter() do
     if item.selected ~= nil then
       self._all_items[item.index].selected = item.selected
     end
