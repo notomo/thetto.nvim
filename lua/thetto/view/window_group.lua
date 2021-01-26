@@ -402,7 +402,7 @@ end
 function WindowGroup._redraw_info(self)
   local sorter_info = ""
   local sorter_names = {}
-  for _, sorter in ipairs(self._collector.sorters) do
+  for _, sorter in self._collector.sorters:iter() do
     table.insert(sorter_names, sorter.name)
   end
   if #sorter_names > 0 then
