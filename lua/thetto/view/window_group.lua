@@ -22,10 +22,9 @@ local WindowGroup = {}
 WindowGroup.__index = WindowGroup
 M.WindowGroup = WindowGroup
 
-function WindowGroup.open(collector, source_name, default_input_lines, display_limit, active)
+function WindowGroup.open(collector, active)
   local tbl = {
-    _source_name = source_name,
-    _display_limit = display_limit,
+    _display_limit = collector.opts.display_limit,
     _selection_hl_factory = highlights.new_factory("thetto-selection-highlight"),
     _preview_hl_factory = highlights.new_factory("thetto-preview"),
     _info_hl_factory = highlights.new_factory("thetto-info-text"),
@@ -33,16 +32,15 @@ function WindowGroup.open(collector, source_name, default_input_lines, display_l
     _filter_height = 0,
   }
 
-  local window_group = setmetatable(tbl, WindowGroup)
-  window_group:_open(collector, default_input_lines, active)
-  return window_group
-end
+  local self = setmetatable(tbl, WindowGroup)
 
-function WindowGroup._open(self, collector, default_input_lines, active)
+  local source_name = collector.source.name
+  local input_lines = collector.input_lines
+
   local input_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self._source_name, input_filetype))
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source_name, input_filetype))
     vim.bo[bufnr].filetype = input_filetype
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, input_lines)
     collector:attach(bufnr)
     vim.api.nvim_buf_attach(bufnr, false, {
       on_lines = function()
@@ -58,7 +56,7 @@ function WindowGroup._open(self, collector, default_input_lines, active)
     vim.bo[bufnr].modifiable = false
   end)
   local list_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self._source_name, list_filetype))
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source_name, list_filetype))
     vim.bo[bufnr].filetype = list_filetype
   end)
   local info_bufnr = bufferlib.scratch(function(bufnr)
@@ -77,7 +75,7 @@ function WindowGroup._open(self, collector, default_input_lines, active)
   local sign_width = 4
   local height = math.floor(vim.o.lines * 0.5)
   local width = get_width()
-  local row = (vim.o.lines - height - #default_input_lines) / 2
+  local row = (vim.o.lines - height - #input_lines) / 2
   local column = get_column()
 
   local list_window = vim.api.nvim_open_win(self.buffers.list, false, {
@@ -102,7 +100,7 @@ function WindowGroup._open(self, collector, default_input_lines, active)
   })
   vim.wo[sign_window].winhighlight = "Normal:ThettoColorLabelBackground"
   vim.wo[sign_window].scrollbind = true
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, self._source_name)
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, source_name)
   vim.cmd(on_sign_enter)
 
   local lines = vim.api.nvim_buf_get_lines(self.buffers.input, 0, -1, false)
@@ -128,7 +126,7 @@ function WindowGroup._open(self, collector, default_input_lines, active)
     style = "minimal",
   })
   vim.wo[info_window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, self._source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, source_name)
   vim.cmd(on_info_enter)
 
   local filter_info_window = vim.api.nvim_open_win(self.buffers.filter_info, false, {
@@ -140,12 +138,12 @@ function WindowGroup._open(self, collector, default_input_lines, active)
     external = false,
     style = "minimal",
   })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, self._source_name)
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, source_name)
   vim.cmd(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
   vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, self._source_name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
@@ -160,11 +158,13 @@ function WindowGroup._open(self, collector, default_input_lines, active)
 
   self:enter(active)
 
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self._source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, source_name)
   vim.cmd(on_moved)
 
   local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self.buffers.list)
   vim.cmd(on_moved_i)
+
+  return self
 end
 
 function WindowGroup.is_current(self, name)
@@ -346,15 +346,14 @@ function WindowGroup.redraw(self, draw_ctx)
 
   local items = draw_ctx.items
   local source = draw_ctx.source
-  local opts = draw_ctx.opts
 
-  self:_redraw_list(items, source, opts.display_limit)
+  self:_redraw_list(items, source)
   self:_redraw_info(source, items, draw_ctx.sorters, draw_ctx.finished, draw_ctx.result_count)
-  self:_redraw_input(draw_ctx.input_lines, items, draw_ctx.filters, opts)
+  self:_redraw_input(draw_ctx.input_lines, items, draw_ctx.filters, draw_ctx.opts)
 end
 
-function WindowGroup._redraw_list(self, items, source, display_limit)
-  local lines = self._head_lines(items, display_limit)
+function WindowGroup._redraw_list(self, items, source)
+  local lines = self._head_lines(items, self._display_limit)
   vim.bo[self.buffers.list].modifiable = true
   vim.api.nvim_buf_set_lines(self.buffers.list, 0, -1, false, lines)
   vim.bo[self.buffers.list].modifiable = false

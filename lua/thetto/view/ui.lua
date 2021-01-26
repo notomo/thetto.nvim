@@ -28,9 +28,6 @@ end
 function UI.open(self, on_move)
   vim.validate({on_move = {on_move, "function"}})
 
-  local source = self._collector.source
-  local opts = self._collector.opts
-
   for bufnr in bufferlib.in_tabpage(0) do
     local ctx, _ = repository.get_from_path(bufnr)
     if ctx ~= nil then
@@ -39,7 +36,7 @@ function UI.open(self, on_move)
   end
 
   self._origin_window = vim.api.nvim_get_current_win()
-  self._windows = WindowGroup.open(self._collector, source.name, self._collector.input_lines, opts.display_limit, self._active)
+  self._windows = WindowGroup.open(self._collector, self._active)
   self._collector:attach_ui(self)
   self._on_move = on_move
 
