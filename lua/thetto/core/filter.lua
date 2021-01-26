@@ -230,4 +230,8 @@ function Filters.length(self)
   return #self._filters
 end
 
+function Filters.values(self)
+  return self._filters
+end
+
 return M

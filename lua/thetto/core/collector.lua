@@ -72,7 +72,7 @@ function Collector.attach_ui(self, ui)
     return ui:redraw(input_lines)
   end
   self._send_redraw_selection_event = function()
-    return ui:redraw_selections()
+    return ui:redraw_selections(self.items:values())
   end
 end
 

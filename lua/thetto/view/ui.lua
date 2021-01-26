@@ -70,7 +70,17 @@ function UI.resume(self)
 end
 
 function UI.redraw(self, input_lines, row)
-  self._windows:redraw(input_lines)
+  local draw_ctx = {
+    filters = self._collector.filters:values(),
+    sorters = self._collector.sorters:values(),
+    source = self._collector.source,
+    result_count = self._collector.result:count(),
+    finished = self._collector:finished(),
+    opts = self._collector.opts,
+    items = self._collector.items:values(),
+    input_lines = input_lines,
+  }
+  self._windows:redraw(draw_ctx)
   if row ~= nil then
     vim.api.nvim_win_set_cursor(self._windows.list, {row, 0})
   end
@@ -213,8 +223,8 @@ function UI.has_window(self, id)
   return self._windows:has(id)
 end
 
-function UI.redraw_selections(self)
-  return self._windows:redraw_selections()
+function UI.redraw_selections(self, items)
+  return self._windows:redraw_selections(items)
 end
 
 -- for testing

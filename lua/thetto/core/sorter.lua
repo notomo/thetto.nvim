@@ -125,4 +125,8 @@ function Sorters.iter(self)
   return next, self._sorters, nil
 end
 
+function Sorters.values(self)
+  return self._sorters
+end
+
 return M
