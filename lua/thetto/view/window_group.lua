@@ -149,11 +149,11 @@ function WindowGroup.open(collector, active)
   vim.cmd("augroup END")
 
   self.list = list_window
-  self.sign = sign_window
+  self._sign = sign_window
   self.input = input_window
-  self.info = info_window
-  self.filter_info = filter_info_window
-  self._windows = {self.list, self.sign, self.input, self.info, self.filter_info}
+  self._info = info_window
+  self._filter_info = filter_info_window
+  self._windows = {self.list, self._sign, self.input, self._info, self._filter_info}
 
   self:_set_left_padding()
 
@@ -301,20 +301,20 @@ end
 function WindowGroup.move_to(self, left_column)
   local list_config = vim.api.nvim_win_get_config(self.list)
   local input_config = vim.api.nvim_win_get_config(self.input)
-  local info_config = vim.api.nvim_win_get_config(self.info)
-  local sign_config = vim.api.nvim_win_get_config(self.sign)
-  local filter_info_config = vim.api.nvim_win_get_config(self.filter_info)
+  local info_config = vim.api.nvim_win_get_config(self._info)
+  local sign_config = vim.api.nvim_win_get_config(self._sign)
+  local filter_info_config = vim.api.nvim_win_get_config(self._filter_info)
   vim.api.nvim_win_set_config(self.list, {
     relative = "editor",
     col = left_column + sign_config.width,
     row = list_config.row,
   })
-  vim.api.nvim_win_set_config(self.sign, {
+  vim.api.nvim_win_set_config(self._sign, {
     relative = "editor",
     col = left_column,
     row = list_config.row,
   })
-  vim.api.nvim_win_set_config(self.info, {
+  vim.api.nvim_win_set_config(self._info, {
     relative = "editor",
     col = left_column,
     row = info_config.row,
@@ -324,7 +324,7 @@ function WindowGroup.move_to(self, left_column)
     col = left_column,
     row = input_config.row,
   })
-  vim.api.nvim_win_set_config(self.filter_info, {
+  vim.api.nvim_win_set_config(self._filter_info, {
     relative = "editor",
     col = left_column + input_config.width,
     row = filter_info_config.row,
@@ -365,8 +365,8 @@ function WindowGroup._redraw_list(self, items, source)
 
   if vim.api.nvim_win_is_valid(self.list) and vim.api.nvim_get_current_buf() ~= self._buffers.list then
     vim.api.nvim_win_set_cursor(self.list, {1, 0})
-    if vim.api.nvim_win_is_valid(self.sign) then
-      vim.api.nvim_win_set_cursor(self.sign, {1, 0})
+    if vim.api.nvim_win_is_valid(self._sign) then
+      vim.api.nvim_win_set_cursor(self._sign, {1, 0})
     end
   end
 
@@ -380,7 +380,7 @@ function WindowGroup._redraw_input(self, input_lines, items, filters, opts)
 
   if vim.api.nvim_win_is_valid(self.input) then
     vim.api.nvim_win_set_height(self.input, height)
-    vim.api.nvim_win_set_height(self.filter_info, height)
+    vim.api.nvim_win_set_height(self._filter_info, height)
     vim.api.nvim_buf_set_lines(self._buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, height))
     self._filter_height = height
   end
@@ -426,7 +426,7 @@ end
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function WindowGroup._set_left_padding(self)
   vim.wo[self.input].signcolumn = "yes:1"
-  vim.wo[self.info].signcolumn = "yes:1"
+  vim.wo[self._info].signcolumn = "yes:1"
 end
 
 function WindowGroup._close_group_name(self)
