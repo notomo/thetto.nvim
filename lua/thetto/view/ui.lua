@@ -12,14 +12,14 @@ UI.__index = UI
 M.UI = UI
 
 function UI.new(collector)
-  local tbl = {collector = collector, row = 1, windows = nil, input_cursor = nil}
+  local tbl = {_collector = collector, _row = 1, _windows = nil, _input_cursor = nil}
 
   if collector.opts.insert then
-    tbl.active = "input"
-    tbl.mode = "i"
+    tbl._active = "input"
+    tbl._mode = "i"
   else
-    tbl.active = "list"
-    tbl.mode = "n"
+    tbl._active = "list"
+    tbl._mode = "n"
   end
 
   return setmetatable(tbl, UI)
@@ -28,8 +28,8 @@ end
 function UI.open(self, on_move)
   vim.validate({on_move = {on_move, "function"}})
 
-  local source = self.collector.source
-  local opts = self.collector.opts
+  local source = self._collector.source
+  local opts = self._collector.opts
 
   for bufnr in bufferlib.in_tabpage(0) do
     local ctx, _ = repository.get_from_path(bufnr)
@@ -38,12 +38,12 @@ function UI.open(self, on_move)
     end
   end
 
-  self.origin_window = vim.api.nvim_get_current_win()
-  self.windows = WindowGroup.open(self.collector, source.name, self.collector.input_lines, opts.display_limit, self.active)
-  self.collector:attach_ui(self)
+  self._origin_window = vim.api.nvim_get_current_win()
+  self._windows = WindowGroup.open(self._collector, source.name, self._collector.input_lines, opts.display_limit, self._active)
+  self._collector:attach_ui(self)
   self._on_move = on_move
 
-  if self.mode == "n" then
+  if self._mode == "n" then
     vim.cmd("stopinsert")
   else
     vim.cmd("startinsert")
@@ -53,7 +53,7 @@ end
 function UI.scroll(self, offset)
   if offset ~= 0 then
     self:update_offset(offset)
-    cursorlib.set_row(self.row, self.windows.list, self.windows.buffers.list)
+    cursorlib.set_row(self._row, self._windows.list, self._windows.buffers.list)
   end
 end
 
@@ -61,18 +61,18 @@ function UI.resume(self)
   self:close()
   self:open(self._on_move)
 
-  if self.input_cursor ~= nil then
-    vim.api.nvim_win_set_cursor(self.windows.input, self.input_cursor)
-    self.input_cursor = nil
+  if self._input_cursor ~= nil then
+    vim.api.nvim_win_set_cursor(self._windows.input, self._input_cursor)
+    self._input_cursor = nil
   end
 
-  return self:redraw(self.collector.input_lines, self.row)
+  return self:redraw(self._collector.input_lines, self._row)
 end
 
 function UI.redraw(self, input_lines, row)
-  self.windows:redraw(input_lines)
+  self._windows:redraw(input_lines)
   if row ~= nil then
-    vim.api.nvim_win_set_cursor(self.windows.list, {row, 0})
+    vim.api.nvim_win_set_cursor(self._windows.list, {row, 0})
   end
   local err = self:on_move()
   if err ~= nil then
@@ -87,73 +87,73 @@ function UI.on_move(self)
 end
 
 function UI.update_offset(self, offset)
-  local row = self.row + offset
-  local line_count = self.collector.items:length()
-  if self.collector.opts.display_limit < line_count then
-    line_count = self.collector.opts.display_limit
+  local row = self._row + offset
+  local line_count = self._collector.items:length()
+  if self._collector.opts.display_limit < line_count then
+    line_count = self._collector.opts.display_limit
   end
   if line_count < row then
     row = line_count
   elseif row < 1 then
     row = 1
   end
-  self.row = row
+  self._row = row
 end
 
 function UI.close(self)
-  if self.windows == nil then
+  if self._windows == nil then
     return
   end
 
   local current_window = vim.api.nvim_get_current_win()
 
-  if vim.api.nvim_win_is_valid(self.windows.list) then
-    self.row = vim.api.nvim_win_get_cursor(self.windows.list)[1]
+  if vim.api.nvim_win_is_valid(self._windows.list) then
+    self._row = vim.api.nvim_win_get_cursor(self._windows.list)[1]
     local active = "input"
-    if vim.api.nvim_get_current_win() == self.windows.list then
+    if vim.api.nvim_get_current_win() == self._windows.list then
       active = "list"
     end
-    self.active = active
-    self.mode = vim.api.nvim_get_mode().mode
+    self._active = active
+    self._mode = vim.api.nvim_get_mode().mode
   end
 
-  if vim.api.nvim_win_is_valid(self.windows.input) then
-    self.input_cursor = vim.api.nvim_win_get_cursor(self.windows.input)
+  if vim.api.nvim_win_is_valid(self._windows.input) then
+    self._input_cursor = vim.api.nvim_win_get_cursor(self._windows.input)
   end
 
-  self.windows:close()
+  self._windows:close()
 
   if vim.api.nvim_win_is_valid(current_window) then
     vim.api.nvim_set_current_win(current_window)
-  elseif vim.api.nvim_win_is_valid(self.origin_window) then
-    vim.api.nvim_set_current_win(self.origin_window)
+  elseif vim.api.nvim_win_is_valid(self._origin_window) then
+    vim.api.nvim_set_current_win(self._origin_window)
   end
 
-  self.collector:discard()
+  self._collector:discard()
 end
 
 function UI.enter(self, to)
-  self.windows:enter(to)
+  self._windows:enter(to)
 end
 
 function UI.current_position_filter(self)
-  local cursor = vim.api.nvim_win_get_cursor(self.windows.input)
-  return self.collector.filters[cursor[1]]
+  local cursor = vim.api.nvim_win_get_cursor(self._windows.input)
+  return self._collector.filters[cursor[1]]
 end
 
 function UI.current_position_sorter(self)
-  local cursor = vim.api.nvim_win_get_cursor(self.windows.input)
-  return self.collector.sorters[cursor[1]]
+  local cursor = vim.api.nvim_win_get_cursor(self._windows.input)
+  return self._collector.sorters[cursor[1]]
 end
 
 function UI.start_insert(self, behavior)
   vim.cmd("startinsert")
   if behavior == "a" then
     local max_col = vim.fn.col("$")
-    local cursor = vim.api.nvim_win_get_cursor(self.windows.input)
+    local cursor = vim.api.nvim_win_get_cursor(self._windows.input)
     if cursor[2] ~= max_col then
       cursor[2] = cursor[2] + 1
-      vim.api.nvim_win_set_cursor(self.windows.input, cursor)
+      vim.api.nvim_win_set_cursor(self._windows.input, cursor)
     end
   end
 end
@@ -161,7 +161,7 @@ end
 function UI.current_item_groups(self, action_name, range)
   local items = self:_selected_items(action_name, range)
   local item_groups = listlib.group_by(items, function(item)
-    return item.kind_name or self.collector.source.kind_name
+    return item.kind_name or self._collector.source.kind_name
   end)
   if #item_groups == 0 then
     table.insert(item_groups, {"base", {}})
@@ -170,43 +170,51 @@ function UI.current_item_groups(self, action_name, range)
 end
 
 function UI._selected_items(self, action_name, range)
-  if action_name ~= "toggle_selection" and not vim.tbl_isempty(self.collector.selected) then
-    local selected = vim.tbl_values(self.collector.selected)
+  if action_name ~= "toggle_selection" and not vim.tbl_isempty(self._collector.selected) then
+    local selected = vim.tbl_values(self._collector.selected)
     table.sort(selected, function(a, b)
       return a.index < b.index
     end)
     return selected
   end
 
-  if range ~= nil and self.windows:is_current("list") then
+  if range ~= nil and self._windows:is_current("list") then
     local items = {}
     for i = range.first, range.last, 1 do
-      table.insert(items, self.collector.items[i])
+      table.insert(items, self._collector.items[i])
     end
     return items
   end
 
   local index
-  if self.windows:is_current("input") then
+  if self._windows:is_current("input") then
     index = 1
-  elseif self.windows:is_current("list") then
+  elseif self._windows:is_current("list") then
     index = vim.fn.line(".")
   else
-    index = self.row
+    index = self._row
   end
-  return {self.collector.items[index]}
+  return {self._collector.items[index]}
 end
 
 function UI.open_preview(self, item, open_target)
-  self.windows:open_sidecar(item, open_target)
+  self._windows:open_sidecar(item, open_target)
 end
 
 function UI.exists_same_preview(self, items)
-  return self.windows:exists_same_sidecar(items[1])
+  return self._windows:exists_same_sidecar(items[1])
 end
 
 function UI.close_preview(self)
-  self.windows:close_sidecar()
+  self._windows:close_sidecar()
+end
+
+function UI.has_window(self, id)
+  return self._windows:has(id)
+end
+
+function UI.redraw_selections(self)
+  return self._windows:redraw_selections()
 end
 
 -- for testing

@@ -25,7 +25,7 @@ M.WindowGroup = WindowGroup
 function WindowGroup.open(collector, source_name, default_input_lines, display_limit, active)
   local tbl = {
     _collector = collector,
-    source_name = source_name,
+    _source_name = source_name,
     _display_limit = display_limit,
     _selection_hl_factory = highlights.new_factory("thetto-selection-highlight"),
     _preview_hl_factory = highlights.new_factory("thetto-preview"),
@@ -152,7 +152,7 @@ function WindowGroup.redraw_selections(self)
 end
 
 function WindowGroup.has(self, window_id)
-  for _, id in ipairs(self.windows) do
+  for _, id in ipairs(self._windows) do
     if window_id == id then
       return true
     end
@@ -161,7 +161,7 @@ function WindowGroup.has(self, window_id)
 end
 
 function WindowGroup.close(self)
-  for _, id in pairs(self.windows) do
+  for _, id in pairs(self._windows) do
     windowlib.close(id)
   end
   self:close_sidecar()
@@ -221,7 +221,7 @@ end
 
 function WindowGroup._open(self, default_input_lines, active)
   local input_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, input_filetype))
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self._source_name, input_filetype))
     vim.bo[bufnr].filetype = input_filetype
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, default_input_lines)
     self._collector:attach(bufnr)
@@ -239,7 +239,7 @@ function WindowGroup._open(self, default_input_lines, active)
     vim.bo[bufnr].modifiable = false
   end)
   local list_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self.source_name, list_filetype))
+    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(self._source_name, list_filetype))
     vim.bo[bufnr].filetype = list_filetype
   end)
   local info_bufnr = bufferlib.scratch(function(bufnr)
@@ -283,7 +283,7 @@ function WindowGroup._open(self, default_input_lines, active)
   })
   vim.wo[sign_window].winhighlight = "Normal:ThettoColorLabelBackground"
   vim.wo[sign_window].scrollbind = true
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, self.source_name)
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, self._source_name)
   vim.cmd(on_sign_enter)
 
   local lines = vim.api.nvim_buf_get_lines(self.buffers.input, 0, -1, false)
@@ -309,7 +309,7 @@ function WindowGroup._open(self, default_input_lines, active)
     style = "minimal",
   })
   vim.wo[info_window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, self.source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, self._source_name)
   vim.cmd(on_info_enter)
 
   local filter_info_window = vim.api.nvim_open_win(self.buffers.filter_info, false, {
@@ -321,12 +321,12 @@ function WindowGroup._open(self, default_input_lines, active)
     external = false,
     style = "minimal",
   })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, self.source_name)
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, self._source_name)
   vim.cmd(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
   vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, self.source_name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, self._source_name)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
@@ -335,13 +335,13 @@ function WindowGroup._open(self, default_input_lines, active)
   self.input = input_window
   self.info = info_window
   self.filter_info = filter_info_window
-  self.windows = {self.list, self.sign, self.input, self.info, self.filter_info}
+  self._windows = {self.list, self.sign, self.input, self.info, self.filter_info}
 
   self:_set_left_padding()
 
   self:enter(active)
 
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self.source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, self._source_name)
   vim.cmd(on_moved)
 
   local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self.buffers.list)
@@ -442,7 +442,7 @@ M._on_close = function(key, id)
   if ui == nil then
     return
   end
-  if not ui.windows:has(id) then
+  if not ui:has_window(id) then
     return
   end
 
