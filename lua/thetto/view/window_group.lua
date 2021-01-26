@@ -1,4 +1,5 @@
 local windowlib = require("thetto/lib/window")
+local cursorlib = require("thetto/lib/cursor")
 local bufferlib = require("thetto/lib/buffer")
 local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
@@ -64,7 +65,7 @@ function WindowGroup.open(collector, active)
   end)
   local filter_info_bufnr = bufferlib.scratch(function(_)
   end)
-  self.buffers = {
+  self._buffers = {
     input = input_bufnr,
     sign = sign_bufnr,
     list = list_bufnr,
@@ -78,7 +79,7 @@ function WindowGroup.open(collector, active)
   local row = (vim.o.lines - height - #input_lines) / 2
   local column = get_column()
 
-  local list_window = vim.api.nvim_open_win(self.buffers.list, false, {
+  local list_window = vim.api.nvim_open_win(self._buffers.list, false, {
     width = width - sign_width,
     height = height,
     relative = "editor",
@@ -89,7 +90,7 @@ function WindowGroup.open(collector, active)
   })
   vim.wo[list_window].scrollbind = true
 
-  local sign_window = vim.api.nvim_open_win(self.buffers.sign, false, {
+  local sign_window = vim.api.nvim_open_win(self._buffers.sign, false, {
     width = sign_width,
     height = height,
     relative = "editor",
@@ -100,12 +101,12 @@ function WindowGroup.open(collector, active)
   })
   vim.wo[sign_window].winhighlight = "Normal:ThettoColorLabelBackground"
   vim.wo[sign_window].scrollbind = true
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self.buffers.sign, source_name)
+  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self._buffers.sign, source_name)
   vim.cmd(on_sign_enter)
 
-  local lines = vim.api.nvim_buf_get_lines(self.buffers.input, 0, -1, false)
+  local lines = vim.api.nvim_buf_get_lines(self._buffers.input, 0, -1, false)
   local input_width = math.floor(width * 0.75)
-  local input_window = vim.api.nvim_open_win(self.buffers.input, false, {
+  local input_window = vim.api.nvim_open_win(self._buffers.input, false, {
     width = input_width,
     height = #lines,
     relative = "editor",
@@ -116,7 +117,7 @@ function WindowGroup.open(collector, active)
   })
   vim.wo[input_window].winhighlight = "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput"
 
-  local info_window = vim.api.nvim_open_win(self.buffers.info, false, {
+  local info_window = vim.api.nvim_open_win(self._buffers.info, false, {
     width = width,
     height = 1,
     relative = "editor",
@@ -126,10 +127,10 @@ function WindowGroup.open(collector, active)
     style = "minimal",
   })
   vim.wo[info_window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.info, source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self._buffers.info, source_name)
   vim.cmd(on_info_enter)
 
-  local filter_info_window = vim.api.nvim_open_win(self.buffers.filter_info, false, {
+  local filter_info_window = vim.api.nvim_open_win(self._buffers.filter_info, false, {
     width = width - input_width,
     height = #lines,
     relative = "editor",
@@ -138,7 +139,7 @@ function WindowGroup.open(collector, active)
     external = false,
     style = "minimal",
   })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self.buffers.filter_info, source_name)
+  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self._buffers.filter_info, source_name)
   vim.cmd(on_filter_info_enter)
 
   local group_name = self:_close_group_name()
@@ -158,17 +159,17 @@ function WindowGroup.open(collector, active)
 
   self:enter(active)
 
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self.buffers.list, source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self._buffers.list, source_name)
   vim.cmd(on_moved)
 
-  local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self.buffers.list)
+  local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self._buffers.list)
   vim.cmd(on_moved_i)
 
   return self
 end
 
 function WindowGroup.is_current(self, name)
-  local bufnr = self.buffers[name]
+  local bufnr = self._buffers[name]
   return vim.api.nvim_get_current_buf() == bufnr
 end
 
@@ -274,7 +275,7 @@ function WindowGroup.close_sidecar(self)
 end
 
 function WindowGroup.redraw_selections(self, items)
-  local highligher = self._selection_hl_factory:reset(self.buffers.list)
+  local highligher = self._selection_hl_factory:reset(self._buffers.list)
   highligher:filter("ThettoSelected", items, function(item)
     return item.selected
   end)
@@ -339,8 +340,12 @@ function WindowGroup.reset_position(self)
   self:move_to(get_column())
 end
 
+function WindowGroup.set_row(self, row)
+  cursorlib.set_row(row, self.list, self._buffers.list)
+end
+
 function WindowGroup.redraw(self, draw_ctx)
-  if not vim.api.nvim_buf_is_valid(self.buffers.list) then
+  if not vim.api.nvim_buf_is_valid(self._buffers.list) then
     return
   end
 
@@ -354,19 +359,19 @@ end
 
 function WindowGroup._redraw_list(self, items, source)
   local lines = self._head_lines(items, self._display_limit)
-  vim.bo[self.buffers.list].modifiable = true
-  vim.api.nvim_buf_set_lines(self.buffers.list, 0, -1, false, lines)
-  vim.bo[self.buffers.list].modifiable = false
+  vim.bo[self._buffers.list].modifiable = true
+  vim.api.nvim_buf_set_lines(self._buffers.list, 0, -1, false, lines)
+  vim.bo[self._buffers.list].modifiable = false
 
-  if vim.api.nvim_win_is_valid(self.list) and vim.api.nvim_get_current_buf() ~= self.buffers.list then
+  if vim.api.nvim_win_is_valid(self.list) and vim.api.nvim_get_current_buf() ~= self._buffers.list then
     vim.api.nvim_win_set_cursor(self.list, {1, 0})
     if vim.api.nvim_win_is_valid(self.sign) then
       vim.api.nvim_win_set_cursor(self.sign, {1, 0})
     end
   end
 
-  source:highlight(self.buffers.list, items)
-  source:highlight_sign(self.buffers.sign, items)
+  source:highlight(self._buffers.list, items)
+  source:highlight_sign(self._buffers.sign, items)
   self:redraw_selections(items)
 end
 
@@ -376,15 +381,15 @@ function WindowGroup._redraw_input(self, input_lines, items, filters, opts)
   if vim.api.nvim_win_is_valid(self.input) then
     vim.api.nvim_win_set_height(self.input, height)
     vim.api.nvim_win_set_height(self.filter_info, height)
-    vim.api.nvim_buf_set_lines(self.buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, height))
+    vim.api.nvim_buf_set_lines(self._buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, height))
     self._filter_height = height
   end
 
-  local highlighter = self._info_hl_factory:reset(self.buffers.filter_info)
+  local highlighter = self._info_hl_factory:reset(self._buffers.filter_info)
   for i, filter in ipairs(filters) do
     local input_line = input_lines[i] or ""
     if filter.highlight ~= nil and input_line ~= "" then
-      filter:highlight(self.buffers.list, items, input_line, opts)
+      filter:highlight(self._buffers.list, items, input_line, opts)
     end
     local filter_info = ("[%s]"):format(filter.name)
     highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}})
@@ -392,9 +397,9 @@ function WindowGroup._redraw_input(self, input_lines, items, filters, opts)
 
   local line_count_diff = height - #input_lines
   if line_count_diff > 0 then
-    vim.api.nvim_buf_set_lines(self.buffers.input, height - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
+    vim.api.nvim_buf_set_lines(self._buffers.input, height - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
   elseif line_count_diff < 0 then
-    vim.api.nvim_buf_set_lines(self.buffers.input, height, -1, false, {})
+    vim.api.nvim_buf_set_lines(self._buffers.input, height, -1, false, {})
   end
 end
 
@@ -414,7 +419,7 @@ function WindowGroup._redraw_info(self, source, items, sorters, finished, result
   end
 
   local text = ("%s%s  [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
-  local highlighter = self._info_hl_factory:reset(self.buffers.info)
+  local highlighter = self._info_hl_factory:reset(self._buffers.info)
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. status, "Comment"}})
 end
 
@@ -425,7 +430,7 @@ function WindowGroup._set_left_padding(self)
 end
 
 function WindowGroup._close_group_name(self)
-  return "theto_closed_" .. self.buffers.list
+  return "theto_closed_" .. self._buffers.list
 end
 
 function WindowGroup._head_lines(items)

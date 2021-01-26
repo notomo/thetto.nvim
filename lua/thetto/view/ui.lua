@@ -1,5 +1,4 @@
 local bufferlib = require("thetto/lib/buffer")
-local cursorlib = require("thetto/lib/cursor")
 local repository = require("thetto/core/repository")
 local WindowGroup = require("thetto/view/window_group").WindowGroup
 local listlib = require("thetto/lib/list")
@@ -50,7 +49,7 @@ end
 function UI.scroll(self, offset)
   if offset ~= 0 then
     self:update_offset(offset)
-    cursorlib.set_row(self._row, self._windows.list, self._windows.buffers.list)
+    self._windows:set_row(self._row)
   end
 end
 
