@@ -1,7 +1,7 @@
 local M = {}
 
 M.close = function(id)
-  if id == "" then
+  if not id then
     return
   end
   if not vim.api.nvim_win_is_valid(id) then
@@ -11,7 +11,7 @@ M.close = function(id)
 end
 
 M.enter = function(id)
-  if id == "" then
+  if not id then
     return
   end
   if not vim.api.nvim_win_is_valid(id) then

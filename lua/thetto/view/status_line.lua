@@ -1,5 +1,6 @@
 local bufferlib = require("thetto/lib/buffer")
 local highlights = require("thetto/lib/highlight")
+local repository = require("thetto/core/repository")
 
 local M = {}
 
@@ -22,7 +23,7 @@ function StatusLine.new(source_name, width, height, row, column)
     style = "minimal",
   })
   vim.wo[window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(bufnr, source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/status_line')._on_enter('%s', 'input')"):format(bufnr, source_name)
   vim.cmd(on_info_enter)
 
   local tbl = {
@@ -64,6 +65,14 @@ end
 
 function StatusLine.set_left_padding(self)
   vim.wo[self.window].signcolumn = "yes:1"
+end
+
+M._on_enter = function(key, to)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  ui:enter(to)
 end
 
 return M

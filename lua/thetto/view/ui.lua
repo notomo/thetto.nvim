@@ -208,7 +208,7 @@ function UI.open_preview(self, item, open_target)
 end
 
 function UI.exists_same_preview(self, items)
-  return self._windows:exists_same_sidecar(items[1])
+  return self._windows.sidecar:exists_same(items[1])
 end
 
 function UI.close_preview(self)
