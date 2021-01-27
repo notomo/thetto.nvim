@@ -49,7 +49,7 @@ end
 function UI.scroll(self, offset)
   if offset ~= 0 then
     self:update_offset(offset)
-    self._windows:set_row(self._row)
+    self._windows.item_list:set_row(self._row)
   end
 end
 

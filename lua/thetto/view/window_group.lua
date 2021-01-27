@@ -1,11 +1,10 @@
 local windowlib = require("thetto/lib/window")
-local cursorlib = require("thetto/lib/cursor")
-local bufferlib = require("thetto/lib/buffer")
 local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
 local repository = require("thetto/core/repository")
 local ItemList = require("thetto/view/item_list").ItemList
 local Inputter = require("thetto/view/inputter").Inputter
+local StatusLine = require("thetto/view/status_line").StatusLine
 local vim = vim
 
 local get_width = function()
@@ -23,10 +22,7 @@ WindowGroup.__index = WindowGroup
 M.WindowGroup = WindowGroup
 
 function WindowGroup.open(collector, active)
-  local tbl = {
-    _preview_hl_factory = highlights.new_factory("thetto-preview"),
-    _info_hl_factory = highlights.new_factory("thetto-info-text"),
-  }
+  local tbl = {_preview_hl_factory = highlights.new_factory("thetto-preview")}
 
   local self = setmetatable(tbl, WindowGroup)
 
@@ -38,51 +34,26 @@ function WindowGroup.open(collector, active)
   local row = (vim.o.lines - height - #input_lines) / 2
   local column = get_column()
 
-  local inputter = Inputter.new(collector, width, height, row, column)
-  local item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
+  self.inputter = Inputter.new(collector, width, height, row, column)
+  self.item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
+  self.status_line = StatusLine.new(source_name, width, height, row, column)
+  self._buffers = {input = self.inputter.bufnr, list = self.item_list.bufnr}
 
-  local info_bufnr = bufferlib.scratch(function(bufnr)
-    vim.bo[bufnr].modifiable = false
-  end)
-  self._buffers = {input = inputter.bufnr, list = item_list.bufnr, info = info_bufnr}
-  self.item_list = item_list
-  self.inputter = inputter
-
-  local info_window = vim.api.nvim_open_win(self._buffers.info, false, {
-    width = width,
-    height = 1,
-    relative = "editor",
-    row = row + height,
-    col = column,
-    external = false,
-    style = "minimal",
-  })
-  vim.wo[info_window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self._buffers.info, source_name)
-  vim.cmd(on_info_enter)
-
-  local group_name = self:_close_group_name()
-  vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
-  vim.cmd(on_win_closed)
-  vim.cmd("augroup END")
-
-  self.list = item_list.window
-  self._sign = item_list._sign_window -- TODO
-  self.input = inputter.window
-  self._info = info_window
-  self._filter_info = inputter._filter_info_window -- TODO
-  self._windows = {self.list, self._sign, self.input, self._info, self._filter_info}
+  self.list = self.item_list.window
+  self.input = self.inputter.window
+  self._windows = {
+    self.list,
+    self.item_list._sign_window, -- TODO
+    self.input,
+    self.status_line.window,
+    self.inputter._filter_info_window, -- TODO
+  }
 
   self:_set_left_padding()
 
   self:enter(active)
-
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/window_group')._on_moved('%s')"):format(self._buffers.list, source_name)
-  vim.cmd(on_moved)
-
-  local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self._buffers.list)
-  vim.cmd(on_moved_i)
+  -- NOTICE: set autocmd in the end not to fire it
+  self.item_list:enable_on_moved(source_name)
 
   return self
 end
@@ -97,7 +68,7 @@ function WindowGroup.enter(self, to)
 end
 
 function WindowGroup.open_sidecar(self, item, open_target)
-  if not vim.api.nvim_win_is_valid(self.list) then
+  if not self.item_list:is_valid() then
     return
   end
   if open_target.bufnr ~= nil and not vim.api.nvim_buf_is_valid(open_target.bufnr) then
@@ -203,38 +174,30 @@ function WindowGroup.has(self, window_id)
 end
 
 function WindowGroup.close(self)
+  -- TODO: remove self._windows
   for _, id in pairs(self._windows) do
     windowlib.close(id)
   end
   self:close_sidecar()
-  vim.cmd("autocmd! " .. self:_close_group_name())
+  vim.cmd("autocmd! " .. "theto_closed_" .. self._buffers.list)
 end
 
 function WindowGroup.move_to(self, left_column)
   self.item_list:move_to(left_column)
   self.inputter:move_to(left_column)
-  local info_config = vim.api.nvim_win_get_config(self._info)
-  vim.api.nvim_win_set_config(self._info, {
-    relative = "editor",
-    col = left_column,
-    row = info_config.row,
-  })
+  self.status_line:move_to(left_column)
   self:_set_left_padding()
 end
 
 function WindowGroup.reset_position(self)
-  if not vim.api.nvim_win_is_valid(self.list) then
+  if not self.item_list:is_valid() then
     return
   end
   self:move_to(get_column())
 end
 
-function WindowGroup.set_row(self, row)
-  cursorlib.set_row(row, self.list, self._buffers.list)
-end
-
 function WindowGroup.redraw(self, draw_ctx)
-  if not vim.api.nvim_buf_is_valid(self._buffers.list) then
+  if not self.item_list:is_valid() then
     return
   end
 
@@ -243,50 +206,14 @@ function WindowGroup.redraw(self, draw_ctx)
   local input_lines = draw_ctx.input_lines
 
   self.item_list:redraw(items, source, input_lines, draw_ctx.filters, draw_ctx.opts)
-  self:_redraw_info(source, items, draw_ctx.sorters, draw_ctx.finished, draw_ctx.result_count)
+  self.status_line:redraw(source, items, draw_ctx.sorters, draw_ctx.finished, draw_ctx.result_count)
   self.inputter:redraw(input_lines, draw_ctx.filters)
-end
-
-function WindowGroup._redraw_info(self, source, items, sorters, finished, result_count)
-  local sorter_info = ""
-  local sorter_names = {}
-  for _, sorter in ipairs(sorters) do
-    table.insert(sorter_names, sorter.name)
-  end
-  if #sorter_names > 0 then
-    sorter_info = "  sorter=" .. table.concat(sorter_names, ", ")
-  end
-
-  local status = ""
-  if not finished then
-    status = "running"
-  end
-
-  local text = ("%s%s  [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
-  local highlighter = self._info_hl_factory:reset(self._buffers.info)
-  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. status, "Comment"}})
 end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function WindowGroup._set_left_padding(self)
   self.inputter:set_left_padding()
-  vim.wo[self._info].signcolumn = "yes:1"
-end
-
-function WindowGroup._close_group_name(self)
-  return "theto_closed_" .. self._buffers.list
-end
-
-M._on_close = function(key, id)
-  local ui = repository.get(key).ui
-  if ui == nil then
-    return
-  end
-  if not ui:has_window(id) then
-    return
-  end
-
-  ui:close()
+  self.status_line:set_left_padding()
 end
 
 M._on_enter = function(key, to)
@@ -295,14 +222,6 @@ M._on_enter = function(key, to)
     return
   end
   ui:enter(to)
-end
-
-M._on_moved = function(key)
-  local ui = repository.get(key).ui
-  if ui == nil then
-    return
-  end
-  ui:on_move()
 end
 
 vim.cmd("highlight default link ThettoSelected Statement")

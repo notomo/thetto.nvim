@@ -1,5 +1,7 @@
 local bufferlib = require("thetto/lib/buffer")
+local cursorlib = require("thetto/lib/cursor")
 local highlights = require("thetto/lib/highlight")
+local repository = require("thetto/core/repository")
 
 local M = {}
 
@@ -46,6 +48,12 @@ function ItemList.new(source_name, display_limit, width, height, row, column)
 
   local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/lib/window').enter(%s)"):format(sign_bufnr, window)
   vim.cmd(on_sign_enter)
+
+  local group_name = "theto_closed_" .. bufnr
+  vim.cmd(("augroup %s"):format(group_name))
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
+  vim.cmd(on_win_closed)
+  vim.cmd("augroup END")
 
   local tbl = {
     bufnr = bufnr,
@@ -105,6 +113,42 @@ function ItemList.move_to(self, left_column)
     col = left_column,
     row = list_config.row,
   })
+end
+
+function ItemList.is_valid(self)
+  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr)
+end
+
+function ItemList.enable_on_moved(self, source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/item_list')._on_moved('%s')"):format(self.bufnr, source_name)
+  vim.cmd(on_moved)
+
+  local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self.bufnr)
+  vim.cmd(on_moved_i)
+end
+
+function ItemList.set_row(self, row)
+  cursorlib.set_row(row, self.window, self.bufnr)
+end
+
+M._on_moved = function(key)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  ui:on_move()
+end
+
+M._on_close = function(key, id)
+  local ui = repository.get(key).ui
+  if ui == nil then
+    return
+  end
+  if not ui:has_window(id) then
+    return
+  end
+
+  ui:close()
 end
 
 return M
