@@ -4,10 +4,10 @@ local bufferlib = require("thetto/lib/buffer")
 local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
 local repository = require("thetto/core/repository")
+local ItemList = require("thetto/view/item_list").ItemList
 local vim = vim
 
 local input_filetype = "thetto-input"
-local list_filetype = "thetto"
 
 local get_width = function()
   return math.floor(vim.o.columns * 0.6)
@@ -25,8 +25,6 @@ M.WindowGroup = WindowGroup
 
 function WindowGroup.open(collector, active)
   local tbl = {
-    _display_limit = collector.opts.display_limit,
-    _selection_hl_factory = highlights.new_factory("thetto-selection-highlight"),
     _preview_hl_factory = highlights.new_factory("thetto-preview"),
     _info_hl_factory = highlights.new_factory("thetto-info-text"),
     _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
@@ -37,6 +35,11 @@ function WindowGroup.open(collector, active)
 
   local source_name = collector.source.name
   local input_lines = collector.input_lines
+
+  local height = math.floor(vim.o.lines * 0.5)
+  local width = get_width()
+  local row = (vim.o.lines - height - #input_lines) / 2
+  local column = get_column()
 
   local input_bufnr = bufferlib.scratch(function(bufnr)
     vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source_name, input_filetype))
@@ -52,14 +55,9 @@ function WindowGroup.open(collector, active)
       end,
     })
   end)
-  local sign_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, vim.fn["repeat"]({""}, self._display_limit))
-    vim.bo[bufnr].modifiable = false
-  end)
-  local list_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source_name, list_filetype))
-    vim.bo[bufnr].filetype = list_filetype
-  end)
+
+  local item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
+
   local info_bufnr = bufferlib.scratch(function(bufnr)
     vim.bo[bufnr].modifiable = false
   end)
@@ -67,42 +65,11 @@ function WindowGroup.open(collector, active)
   end)
   self._buffers = {
     input = input_bufnr,
-    sign = sign_bufnr,
-    list = list_bufnr,
+    list = item_list.bufnr,
     info = info_bufnr,
     filter_info = filter_info_bufnr,
   }
-
-  local sign_width = 4
-  local height = math.floor(vim.o.lines * 0.5)
-  local width = get_width()
-  local row = (vim.o.lines - height - #input_lines) / 2
-  local column = get_column()
-
-  local list_window = vim.api.nvim_open_win(self._buffers.list, false, {
-    width = width - sign_width,
-    height = height,
-    relative = "editor",
-    row = row,
-    col = column + sign_width,
-    external = false,
-    style = "minimal",
-  })
-  vim.wo[list_window].scrollbind = true
-
-  local sign_window = vim.api.nvim_open_win(self._buffers.sign, false, {
-    width = sign_width,
-    height = height,
-    relative = "editor",
-    row = row,
-    col = column,
-    external = false,
-    style = "minimal",
-  })
-  vim.wo[sign_window].winhighlight = "Normal:ThettoColorLabelBackground"
-  vim.wo[sign_window].scrollbind = true
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'list')"):format(self._buffers.sign, source_name)
-  vim.cmd(on_sign_enter)
+  self.item_list = item_list
 
   local lines = vim.api.nvim_buf_get_lines(self._buffers.input, 0, -1, false)
   local input_width = math.floor(width * 0.75)
@@ -148,8 +115,8 @@ function WindowGroup.open(collector, active)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
-  self.list = list_window
-  self._sign = sign_window
+  self.list = item_list.window
+  self._sign = item_list._sign_window -- TODO
   self.input = input_window
   self._info = info_window
   self._filter_info = filter_info_window
@@ -274,13 +241,6 @@ function WindowGroup.close_sidecar(self)
   end
 end
 
-function WindowGroup.redraw_selections(self, items)
-  local highligher = self._selection_hl_factory:reset(self._buffers.list)
-  highligher:filter("ThettoSelected", items, function(item)
-    return item.selected
-  end)
-end
-
 function WindowGroup.has(self, window_id)
   for _, id in ipairs(self._windows) do
     if window_id == id then
@@ -299,21 +259,10 @@ function WindowGroup.close(self)
 end
 
 function WindowGroup.move_to(self, left_column)
-  local list_config = vim.api.nvim_win_get_config(self.list)
   local input_config = vim.api.nvim_win_get_config(self.input)
   local info_config = vim.api.nvim_win_get_config(self._info)
-  local sign_config = vim.api.nvim_win_get_config(self._sign)
   local filter_info_config = vim.api.nvim_win_get_config(self._filter_info)
-  vim.api.nvim_win_set_config(self.list, {
-    relative = "editor",
-    col = left_column + sign_config.width,
-    row = list_config.row,
-  })
-  vim.api.nvim_win_set_config(self._sign, {
-    relative = "editor",
-    col = left_column,
-    row = list_config.row,
-  })
+  self.item_list:move_to(left_column)
   vim.api.nvim_win_set_config(self._info, {
     relative = "editor",
     col = left_column,
@@ -352,27 +301,9 @@ function WindowGroup.redraw(self, draw_ctx)
   local items = draw_ctx.items
   local source = draw_ctx.source
 
-  self:_redraw_list(items, source)
+  self.item_list:redraw(items, source)
   self:_redraw_info(source, items, draw_ctx.sorters, draw_ctx.finished, draw_ctx.result_count)
   self:_redraw_input(draw_ctx.input_lines, items, draw_ctx.filters, draw_ctx.opts)
-end
-
-function WindowGroup._redraw_list(self, items, source)
-  local lines = self._head_lines(items, self._display_limit)
-  vim.bo[self._buffers.list].modifiable = true
-  vim.api.nvim_buf_set_lines(self._buffers.list, 0, -1, false, lines)
-  vim.bo[self._buffers.list].modifiable = false
-
-  if vim.api.nvim_win_is_valid(self.list) and vim.api.nvim_get_current_buf() ~= self._buffers.list then
-    vim.api.nvim_win_set_cursor(self.list, {1, 0})
-    if vim.api.nvim_win_is_valid(self._sign) then
-      vim.api.nvim_win_set_cursor(self._sign, {1, 0})
-    end
-  end
-
-  source:highlight(self._buffers.list, items)
-  source:highlight_sign(self._buffers.sign, items)
-  self:redraw_selections(items)
 end
 
 function WindowGroup._redraw_input(self, input_lines, items, filters, opts)
@@ -431,14 +362,6 @@ end
 
 function WindowGroup._close_group_name(self)
   return "theto_closed_" .. self._buffers.list
-end
-
-function WindowGroup._head_lines(items)
-  local lines = {}
-  for _, item in pairs(items) do
-    table.insert(lines, item.desc or item.value)
-  end
-  return lines
 end
 
 M._on_close = function(key, id)

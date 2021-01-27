@@ -220,7 +220,7 @@ function UI.has_window(self, id)
 end
 
 function UI.redraw_selections(self, items)
-  return self._windows:redraw_selections(items)
+  return self._windows.item_list:redraw_selections(items)
 end
 
 -- for testing
