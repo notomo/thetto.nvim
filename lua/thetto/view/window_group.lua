@@ -5,9 +5,8 @@ local filelib = require("thetto/lib/file")
 local highlights = require("thetto/lib/highlight")
 local repository = require("thetto/core/repository")
 local ItemList = require("thetto/view/item_list").ItemList
+local Inputter = require("thetto/view/inputter").Inputter
 local vim = vim
-
-local input_filetype = "thetto-input"
 
 local get_width = function()
   return math.floor(vim.o.columns * 0.6)
@@ -27,8 +26,6 @@ function WindowGroup.open(collector, active)
   local tbl = {
     _preview_hl_factory = highlights.new_factory("thetto-preview"),
     _info_hl_factory = highlights.new_factory("thetto-info-text"),
-    _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
-    _filter_height = 0,
   }
 
   local self = setmetatable(tbl, WindowGroup)
@@ -41,48 +38,15 @@ function WindowGroup.open(collector, active)
   local row = (vim.o.lines - height - #input_lines) / 2
   local column = get_column()
 
-  local input_bufnr = bufferlib.scratch(function(bufnr)
-    vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/%s"):format(source_name, input_filetype))
-    vim.bo[bufnr].filetype = input_filetype
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, input_lines)
-    collector:attach(bufnr)
-    vim.api.nvim_buf_attach(bufnr, false, {
-      on_lines = function()
-        return collector:update_with_debounce()
-      end,
-      on_detach = function()
-        return collector:discard()
-      end,
-    })
-  end)
-
+  local inputter = Inputter.new(collector, width, height, row, column)
   local item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
 
   local info_bufnr = bufferlib.scratch(function(bufnr)
     vim.bo[bufnr].modifiable = false
   end)
-  local filter_info_bufnr = bufferlib.scratch(function(_)
-  end)
-  self._buffers = {
-    input = input_bufnr,
-    list = item_list.bufnr,
-    info = info_bufnr,
-    filter_info = filter_info_bufnr,
-  }
+  self._buffers = {input = inputter.bufnr, list = item_list.bufnr, info = info_bufnr}
   self.item_list = item_list
-
-  local lines = vim.api.nvim_buf_get_lines(self._buffers.input, 0, -1, false)
-  local input_width = math.floor(width * 0.75)
-  local input_window = vim.api.nvim_open_win(self._buffers.input, false, {
-    width = input_width,
-    height = #lines,
-    relative = "editor",
-    row = row + height + 1,
-    col = column,
-    external = false,
-    style = "minimal",
-  })
-  vim.wo[input_window].winhighlight = "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput"
+  self.inputter = inputter
 
   local info_window = vim.api.nvim_open_win(self._buffers.info, false, {
     width = width,
@@ -97,18 +61,6 @@ function WindowGroup.open(collector, active)
   local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self._buffers.info, source_name)
   vim.cmd(on_info_enter)
 
-  local filter_info_window = vim.api.nvim_open_win(self._buffers.filter_info, false, {
-    width = width - input_width,
-    height = #lines,
-    relative = "editor",
-    row = row + height + 1,
-    col = column + input_width,
-    external = false,
-    style = "minimal",
-  })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/window_group')._on_enter('%s', 'input')"):format(self._buffers.filter_info, source_name)
-  vim.cmd(on_filter_info_enter)
-
   local group_name = self:_close_group_name()
   vim.cmd(("augroup %s"):format(group_name))
   local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/window_group')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
@@ -117,9 +69,9 @@ function WindowGroup.open(collector, active)
 
   self.list = item_list.window
   self._sign = item_list._sign_window -- TODO
-  self.input = input_window
+  self.input = inputter.window
   self._info = info_window
-  self._filter_info = filter_info_window
+  self._filter_info = inputter._filter_info_window -- TODO
   self._windows = {self.list, self._sign, self.input, self._info, self._filter_info}
 
   self:_set_left_padding()
@@ -153,7 +105,7 @@ function WindowGroup.open_sidecar(self, item, open_target)
   end
 
   local list_config = vim.api.nvim_win_get_config(self.list)
-  local height = list_config.height + self._filter_height + 1
+  local height = list_config.height + self.inputter.height + 1
   local half_height = math.floor(height / 2)
 
   local top_row = 1
@@ -259,26 +211,14 @@ function WindowGroup.close(self)
 end
 
 function WindowGroup.move_to(self, left_column)
-  local input_config = vim.api.nvim_win_get_config(self.input)
-  local info_config = vim.api.nvim_win_get_config(self._info)
-  local filter_info_config = vim.api.nvim_win_get_config(self._filter_info)
   self.item_list:move_to(left_column)
+  self.inputter:move_to(left_column)
+  local info_config = vim.api.nvim_win_get_config(self._info)
   vim.api.nvim_win_set_config(self._info, {
     relative = "editor",
     col = left_column,
     row = info_config.row,
   })
-  vim.api.nvim_win_set_config(self.input, {
-    relative = "editor",
-    col = left_column,
-    row = input_config.row,
-  })
-  vim.api.nvim_win_set_config(self._filter_info, {
-    relative = "editor",
-    col = left_column + input_config.width,
-    row = filter_info_config.row,
-  })
-
   self:_set_left_padding()
 end
 
@@ -300,38 +240,11 @@ function WindowGroup.redraw(self, draw_ctx)
 
   local items = draw_ctx.items
   local source = draw_ctx.source
+  local input_lines = draw_ctx.input_lines
 
-  self.item_list:redraw(items, source)
+  self.item_list:redraw(items, source, input_lines, draw_ctx.filters, draw_ctx.opts)
   self:_redraw_info(source, items, draw_ctx.sorters, draw_ctx.finished, draw_ctx.result_count)
-  self:_redraw_input(draw_ctx.input_lines, items, draw_ctx.filters, draw_ctx.opts)
-end
-
-function WindowGroup._redraw_input(self, input_lines, items, filters, opts)
-  local height = #filters
-
-  if vim.api.nvim_win_is_valid(self.input) then
-    vim.api.nvim_win_set_height(self.input, height)
-    vim.api.nvim_win_set_height(self._filter_info, height)
-    vim.api.nvim_buf_set_lines(self._buffers.filter_info, 0, -1, false, vim.fn["repeat"]({""}, height))
-    self._filter_height = height
-  end
-
-  local highlighter = self._info_hl_factory:reset(self._buffers.filter_info)
-  for i, filter in ipairs(filters) do
-    local input_line = input_lines[i] or ""
-    if filter.highlight ~= nil and input_line ~= "" then
-      filter:highlight(self._buffers.list, items, input_line, opts)
-    end
-    local filter_info = ("[%s]"):format(filter.name)
-    highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}})
-  end
-
-  local line_count_diff = height - #input_lines
-  if line_count_diff > 0 then
-    vim.api.nvim_buf_set_lines(self._buffers.input, height - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
-  elseif line_count_diff < 0 then
-    vim.api.nvim_buf_set_lines(self._buffers.input, height, -1, false, {})
-  end
+  self.inputter:redraw(input_lines, draw_ctx.filters)
 end
 
 function WindowGroup._redraw_info(self, source, items, sorters, finished, result_count)
@@ -356,7 +269,7 @@ end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function WindowGroup._set_left_padding(self)
-  vim.wo[self.input].signcolumn = "yes:1"
+  self.inputter:set_left_padding()
   vim.wo[self._info].signcolumn = "yes:1"
 end
 

@@ -57,7 +57,7 @@ function ItemList.new(source_name, display_limit, width, height, row, column)
   return setmetatable(tbl, ItemList)
 end
 
-function ItemList.redraw(self, items, source)
+function ItemList.redraw(self, items, source, input_lines, filters, opts)
   local lines = vim.tbl_map(function(item)
     return item.desc or item.value
   end, items)
@@ -76,6 +76,13 @@ function ItemList.redraw(self, items, source)
   source:highlight(self.bufnr, items)
   source:highlight_sign(self._sign_bufnr, items)
   self:redraw_selections(items)
+
+  for i, filter in ipairs(filters) do
+    local input_line = input_lines[i] or ""
+    if filter.highlight ~= nil and input_line ~= "" then
+      filter:highlight(self.bufnr, items, input_line, opts)
+    end
+  end
 end
 
 function ItemList.redraw_selections(self, items)

@@ -1,6 +1,8 @@
 local M = {}
 
 M.scratch = function(modify)
+  modify = modify or function()
+  end
   local bufnr = vim.api.nvim_create_buf(false, true)
   modify(bufnr)
   vim.bo[bufnr].bufhidden = "wipe"
