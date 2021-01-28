@@ -1,3 +1,4 @@
+local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local cursorlib = require("thetto/lib/cursor")
 local highlights = require("thetto/lib/highlight")
@@ -129,6 +130,10 @@ end
 
 function ItemList.set_row(self, row)
   cursorlib.set_row(row, self.window, self.bufnr)
+end
+
+function ItemList.enter(self)
+  windowlib.enter(self.window)
 end
 
 M._on_moved = function(key)

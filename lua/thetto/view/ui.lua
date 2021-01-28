@@ -138,8 +138,12 @@ function UI.close(self)
   self._collector:discard()
 end
 
-function UI.enter(self, to)
-  self._windows:enter(to)
+function UI.into_list(self)
+  self._windows.item_list:enter()
+end
+
+function UI.into_inputter(self)
+  self._windows.inputter:enter()
 end
 
 function UI.current_position_filter(self)

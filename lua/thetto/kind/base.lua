@@ -36,12 +36,12 @@ M.action_toggle_all_selection = function(_, _, ctx)
 end
 
 M.action_move_to_input = function(self, _, ctx)
-  ctx.ui:enter("input")
+  ctx.ui:into_inputter()
   ctx.ui:start_insert(self.action_opts.behavior)
 end
 
 M.action_move_to_list = function(_, _, ctx)
-  ctx.ui:enter("list")
+  ctx.ui:into_list()
   vim.cmd("stopinsert")
 end
 

@@ -1,3 +1,4 @@
+local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local highlights = require("thetto/lib/highlight")
 
@@ -104,6 +105,10 @@ end
 
 function Inputter.set_left_padding(self)
   vim.wo[self.window].signcolumn = "yes:1"
+end
+
+function Inputter.enter(self)
+  windowlib.enter(self.window)
 end
 
 return M

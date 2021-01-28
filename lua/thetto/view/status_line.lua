@@ -23,7 +23,7 @@ function StatusLine.new(source_name, width, height, row, column)
     style = "minimal",
   })
   vim.wo[window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/status_line')._on_enter('%s', 'input')"):format(bufnr, source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/status_line')._on_enter('%s')"):format(bufnr, source_name)
   vim.cmd(on_info_enter)
 
   local tbl = {
@@ -67,12 +67,12 @@ function StatusLine.set_left_padding(self)
   vim.wo[self.window].signcolumn = "yes:1"
 end
 
-M._on_enter = function(key, to)
+M._on_enter = function(key)
   local ui = repository.get(key).ui
   if ui == nil then
     return
   end
-  ui:enter(to)
+  ui:into_inputter()
 end
 
 return M

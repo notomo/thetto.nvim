@@ -50,7 +50,12 @@ function WindowGroup.open(collector, active)
 
   self:_set_left_padding()
 
-  self:enter(active)
+  if active == "input" then
+    self.inputter:enter()
+  else
+    self.item_list:enter()
+  end
+
   -- NOTICE: set autocmd in the end not to fire it
   self.item_list:enable_on_moved(source_name)
 
@@ -60,10 +65,6 @@ end
 function WindowGroup.is_current(self, name)
   local bufnr = self._buffers[name]
   return vim.api.nvim_get_current_buf() == bufnr
-end
-
-function WindowGroup.enter(self, to)
-  windowlib.enter(self[to])
 end
 
 function WindowGroup.open_sidecar(self, item, open_target)
