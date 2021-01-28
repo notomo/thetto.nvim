@@ -557,6 +557,24 @@ tes]])
     assert.current_line("tes")
   end)
 
+  it("can reverse specified sorter", function()
+    require("thetto/custom").default_sorters = {"row", "length"}
+
+    helper.set_lines([[
+te
+t
+tes]])
+
+    command("Thetto line --no-insert")
+    assert.current_line("t")
+
+    helper.wait_ui(function()
+      command("ThettoDo reverse_sorter --x-name=length")
+    end)
+
+    assert.current_line("tes")
+  end)
+
   it("can add sorter by toggle_sorter", function()
     helper.set_lines([[
 te

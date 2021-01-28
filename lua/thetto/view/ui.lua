@@ -77,13 +77,16 @@ function UI.redraw(self, input_lines, row)
     input_lines = input_lines,
   }
   self._windows:redraw(draw_ctx)
+
   if row ~= nil then
     self._windows.item_list:set_row(row)
   end
+
   local err = self:on_move()
   if err ~= nil then
     return err
   end
+
   M._changed_after(input_lines)
 end
 
@@ -149,11 +152,6 @@ end
 function UI.current_position_filter(self)
   local cursor = self._windows.inputter:cursor()
   return self._collector.filters[cursor[1]]
-end
-
-function UI.current_position_sorter(self)
-  local cursor = self._windows.inputter:cursor()
-  return self._collector.sorters[cursor[1]]
 end
 
 function UI.start_insert(self, behavior)

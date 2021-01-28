@@ -99,8 +99,10 @@ M.action_change_filter = function(self, _, ctx)
 end
 
 M.action_reverse_sorter = function(self, _, ctx)
-  local sorter_name = self.action_opts.name or ctx.ui:current_position_sorter().name
-  ctx.collector:reverse_sorter(sorter_name)
+  if ctx.collector.sorters:length() == 0 then
+    return nil, "no sorter"
+  end
+  return nil, ctx.collector:reverse_sorter(self.action_opts.name or ctx.collector.sorters[1].name)
 end
 
 M.action_toggle_sorter = function(self, _, ctx)
