@@ -127,4 +127,24 @@ function Inputter.is_active(self)
   return vim.api.nvim_get_current_win() == self.window
 end
 
+function Inputter.cursor(self)
+  return vim.api.nvim_win_get_cursor(self.window)
+end
+
+function Inputter.set_cursor(self, cursor)
+  return vim.api.nvim_win_set_cursor(self.window, cursor)
+end
+
+function Inputter.start_insert(self, behavior)
+  vim.cmd("startinsert")
+  if behavior == "a" then
+    local max_col = vim.fn.col("$")
+    local cursor = self:cursor()
+    if cursor[2] ~= max_col then
+      cursor[2] = cursor[2] + 1
+      vim.api.nvim_win_set_cursor(self.window, cursor)
+    end
+  end
+end
+
 return M

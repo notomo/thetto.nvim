@@ -58,7 +58,7 @@ function UI.resume(self)
   self:open(self._on_move)
 
   if self._input_cursor ~= nil then
-    vim.api.nvim_win_set_cursor(self._windows.input, self._input_cursor)
+    self._windows.inputter:set_cursor(self._input_cursor)
     self._input_cursor = nil
   end
 
@@ -114,7 +114,7 @@ function UI.close(self)
   local current_window = vim.api.nvim_get_current_win()
 
   if self._windows.item_list:is_valid() then
-    self._row = vim.api.nvim_win_get_cursor(self._windows.list)[1]
+    self._row = self._windows.item_list:cursor()[1]
     local active = "input"
     if self._windows.item_list:is_active() then
       active = "list"
@@ -124,7 +124,7 @@ function UI.close(self)
   end
 
   if self._windows.inputter:is_valid() then
-    self._input_cursor = vim.api.nvim_win_get_cursor(self._windows.input)
+    self._input_cursor = self._windows.inputter:cursor()
   end
 
   self._windows:close()
@@ -147,25 +147,17 @@ function UI.into_inputter(self)
 end
 
 function UI.current_position_filter(self)
-  local cursor = vim.api.nvim_win_get_cursor(self._windows.input)
+  local cursor = self._windows.inputter:cursor()
   return self._collector.filters[cursor[1]]
 end
 
 function UI.current_position_sorter(self)
-  local cursor = vim.api.nvim_win_get_cursor(self._windows.input)
+  local cursor = self._windows.inputter:cursor()
   return self._collector.sorters[cursor[1]]
 end
 
 function UI.start_insert(self, behavior)
-  vim.cmd("startinsert")
-  if behavior == "a" then
-    local max_col = vim.fn.col("$")
-    local cursor = vim.api.nvim_win_get_cursor(self._windows.input)
-    if cursor[2] ~= max_col then
-      cursor[2] = cursor[2] + 1
-      vim.api.nvim_win_set_cursor(self._windows.input, cursor)
-    end
-  end
+  self._windows.inputter:start_insert(behavior)
 end
 
 function UI.current_item_groups(self, action_name, range)

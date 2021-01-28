@@ -32,8 +32,6 @@ function WindowGroup.open(collector, active)
   tbl.item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
   tbl.status_line = StatusLine.new(source_name, width, height, row, column)
   tbl.sidecar = Sidecar.new()
-  tbl.list = tbl.item_list.window
-  tbl.input = tbl.inputter.window
 
   local self = setmetatable(tbl, WindowGroup)
 
@@ -54,11 +52,11 @@ function WindowGroup.open_sidecar(self, item, open_target)
     return
   end
 
-  local list_config = vim.api.nvim_win_get_config(self.list)
-  local height = list_config.height + self.inputter.height + 1
+  local pos = self.item_list:position()
+  local height = pos.height + self.inputter.height + 1
   local left_column = 2
   local width = get_width()
-  local row = list_config.row
+  local row = pos.row
 
   self:move_to(left_column)
   self.sidecar:open(item, open_target, width, height, row, left_column)

@@ -146,6 +146,15 @@ function ItemList.close(self)
   vim.cmd("autocmd! " .. "theto_closed_" .. self.bufnr)
 end
 
+function ItemList.position(self)
+  local config = vim.api.nvim_win_get_config(self.window)
+  return {height = config.height, row = config.row}
+end
+
+function ItemList.cursor(self)
+  return vim.api.nvim_win_get_cursor(self.window)
+end
+
 M._on_moved = function(key)
   local ui = repository.get(key).ui
   if ui == nil then
