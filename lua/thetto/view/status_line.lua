@@ -1,3 +1,4 @@
+local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local highlights = require("thetto/lib/highlight")
 local repository = require("thetto/core/repository")
@@ -65,6 +66,14 @@ end
 
 function StatusLine.set_left_padding(self)
   vim.wo[self.window].signcolumn = "yes:1"
+end
+
+function StatusLine.close(self)
+  windowlib.close(self.window)
+end
+
+function StatusLine.is_valid(self)
+  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr)
 end
 
 M._on_enter = function(key)

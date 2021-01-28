@@ -78,7 +78,7 @@ function UI.redraw(self, input_lines, row)
   }
   self._windows:redraw(draw_ctx)
   if row ~= nil then
-    vim.api.nvim_win_set_cursor(self._windows.list, {row, 0})
+    self._windows.item_list:set_row(row)
   end
   local err = self:on_move()
   if err ~= nil then
@@ -113,17 +113,17 @@ function UI.close(self)
 
   local current_window = vim.api.nvim_get_current_win()
 
-  if vim.api.nvim_win_is_valid(self._windows.list) then
+  if self._windows.item_list:is_valid() then
     self._row = vim.api.nvim_win_get_cursor(self._windows.list)[1]
     local active = "input"
-    if vim.api.nvim_get_current_win() == self._windows.list then
+    if self._windows.item_list:is_active() then
       active = "list"
     end
     self._active = active
     self._mode = vim.api.nvim_get_mode().mode
   end
 
-  if vim.api.nvim_win_is_valid(self._windows.input) then
+  if self._windows.inputter:is_valid() then
     self._input_cursor = vim.api.nvim_win_get_cursor(self._windows.input)
   end
 
@@ -188,7 +188,7 @@ function UI._selected_items(self, action_name, range)
     return selected
   end
 
-  if range ~= nil and self._windows:is_current("list") then
+  if range ~= nil and self._windows.item_list:is_active() then
     local items = {}
     for i = range.first, range.last, 1 do
       table.insert(items, self._collector.items[i])
@@ -197,9 +197,9 @@ function UI._selected_items(self, action_name, range)
   end
 
   local index
-  if self._windows:is_current("input") then
+  if self._windows.inputter:is_active() then
     index = 1
-  elseif self._windows:is_current("list") then
+  elseif self._windows.item_list:is_active() then
     index = vim.fn.line(".")
   else
     index = self._row
@@ -219,12 +219,12 @@ function UI.close_preview(self)
   self._windows:close_sidecar()
 end
 
-function UI.has_window(self, id)
-  return self._windows:has(id)
-end
-
 function UI.redraw_selections(self, items)
   return self._windows.item_list:redraw_selections(items)
+end
+
+function UI.is_valid(self)
+  return self._windows:is_valid()
 end
 
 -- for testing

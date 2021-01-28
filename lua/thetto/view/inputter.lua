@@ -111,4 +111,17 @@ function Inputter.enter(self)
   windowlib.enter(self.window)
 end
 
+function Inputter.close(self)
+  windowlib.close(self.window)
+  windowlib.close(self._filter_info_window)
+end
+
+function Inputter.is_valid(self)
+  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr) and vim.api.nvim_win_is_valid(self._filter_info_window) and vim.api.nvim_buf_is_valid(self._filter_info_bufnr)
+end
+
+function Inputter.is_active(self)
+  return vim.api.nvim_get_current_win() == self.window
+end
+
 return M

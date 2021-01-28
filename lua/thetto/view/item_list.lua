@@ -52,7 +52,7 @@ function ItemList.new(source_name, display_limit, width, height, row, column)
 
   local group_name = "theto_closed_" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/item_list')._on_close('%s')"):format(group_name, source_name)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
@@ -117,7 +117,11 @@ function ItemList.move_to(self, left_column)
 end
 
 function ItemList.is_valid(self)
-  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr)
+  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr) and vim.api.nvim_win_is_valid(self._sign_window) and vim.api.nvim_buf_is_valid(self._sign_bufnr)
+end
+
+function ItemList.is_active(self)
+  return vim.api.nvim_get_current_win() == self.window
 end
 
 function ItemList.enable_on_moved(self, source_name)
@@ -136,6 +140,12 @@ function ItemList.enter(self)
   windowlib.enter(self.window)
 end
 
+function ItemList.close(self)
+  windowlib.close(self.window)
+  windowlib.close(self._sign_window)
+  vim.cmd("autocmd! " .. "theto_closed_" .. self.bufnr)
+end
+
 M._on_moved = function(key)
   local ui = repository.get(key).ui
   if ui == nil then
@@ -144,15 +154,14 @@ M._on_moved = function(key)
   ui:on_move()
 end
 
-M._on_close = function(key, id)
+M._on_close = function(key)
   local ui = repository.get(key).ui
   if ui == nil then
     return
   end
-  if not ui:has_window(id) then
+  if ui:is_valid() then
     return
   end
-
   ui:close()
 end
 

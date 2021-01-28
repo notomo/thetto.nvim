@@ -1,4 +1,3 @@
-local windowlib = require("thetto/lib/window")
 local ItemList = require("thetto/view/item_list").ItemList
 local Inputter = require("thetto/view/inputter").Inputter
 local StatusLine = require("thetto/view/status_line").StatusLine
@@ -36,17 +35,9 @@ function WindowGroup.open(collector, active)
   self.item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
   self.status_line = StatusLine.new(source_name, width, height, row, column)
   self.sidecar = Sidecar.new()
-  self._buffers = {input = self.inputter.bufnr, list = self.item_list.bufnr}
 
   self.list = self.item_list.window
   self.input = self.inputter.window
-  self._windows = {
-    self.list,
-    self.item_list._sign_window, -- TODO
-    self.input,
-    self.status_line.window,
-    self.inputter._filter_info_window, -- TODO
-  }
 
   self:_set_left_padding()
 
@@ -60,11 +51,6 @@ function WindowGroup.open(collector, active)
   self.item_list:enable_on_moved(source_name)
 
   return self
-end
-
-function WindowGroup.is_current(self, name)
-  local bufnr = self._buffers[name]
-  return vim.api.nvim_get_current_buf() == bufnr
 end
 
 function WindowGroup.open_sidecar(self, item, open_target)
@@ -90,22 +76,11 @@ function WindowGroup.close_sidecar(self)
   self:move_to(get_column())
 end
 
-function WindowGroup.has(self, window_id)
-  for _, id in ipairs(self._windows) do
-    if window_id == id then
-      return true
-    end
-  end
-  return false
-end
-
 function WindowGroup.close(self)
-  -- TODO: remove self._windows
-  for _, id in pairs(self._windows) do
-    windowlib.close(id)
-  end
+  self.item_list:close()
+  self.inputter:close()
+  self.status_line:close()
   self:close_sidecar()
-  vim.cmd("autocmd! " .. "theto_closed_" .. self._buffers.list)
 end
 
 function WindowGroup.move_to(self, left_column)
@@ -127,6 +102,10 @@ function WindowGroup.redraw(self, draw_ctx)
   self.item_list:redraw(items, source, input_lines, draw_ctx.filters, draw_ctx.opts)
   self.status_line:redraw(source, items, draw_ctx.sorters, draw_ctx.finished, draw_ctx.result_count)
   self.inputter:redraw(input_lines, draw_ctx.filters)
+end
+
+function WindowGroup.is_valid(self)
+  return self.item_list:is_valid() and self.inputter:is_valid() and self.status_line:is_valid()
 end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
