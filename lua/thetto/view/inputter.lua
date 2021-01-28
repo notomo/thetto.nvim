@@ -60,7 +60,9 @@ function Inputter.new(collector, width, height, row, column)
     _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
     height = input_height,
   }
-  return setmetatable(tbl, Inputter)
+  local self = setmetatable(tbl, Inputter)
+  self:_set_left_padding()
+  return self
 end
 
 function Inputter.redraw(self, input_lines, filters)
@@ -100,10 +102,11 @@ function Inputter.move_to(self, left_column)
     col = left_column + input_config.width,
     row = filter_info_config.row,
   })
-  self:set_left_padding()
+  self:_set_left_padding()
 end
 
-function Inputter.set_left_padding(self)
+-- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
+function Inputter._set_left_padding(self)
   vim.wo[self.window].signcolumn = "yes:1"
 end
 

@@ -19,10 +19,6 @@ WindowGroup.__index = WindowGroup
 M.WindowGroup = WindowGroup
 
 function WindowGroup.open(collector, active)
-  local tbl = {}
-
-  local self = setmetatable(tbl, WindowGroup)
-
   local source_name = collector.source.name
   local input_lines = collector.input_lines
 
@@ -31,15 +27,15 @@ function WindowGroup.open(collector, active)
   local row = (vim.o.lines - height - #input_lines) / 2
   local column = get_column()
 
-  self.inputter = Inputter.new(collector, width, height, row, column)
-  self.item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
-  self.status_line = StatusLine.new(source_name, width, height, row, column)
-  self.sidecar = Sidecar.new()
+  local tbl = {}
+  tbl.inputter = Inputter.new(collector, width, height, row, column)
+  tbl.item_list = ItemList.new(source_name, collector.opts.display_limit, width, height, row, column)
+  tbl.status_line = StatusLine.new(source_name, width, height, row, column)
+  tbl.sidecar = Sidecar.new()
+  tbl.list = tbl.item_list.window
+  tbl.input = tbl.inputter.window
 
-  self.list = self.item_list.window
-  self.input = self.inputter.window
-
-  self:_set_left_padding()
+  local self = setmetatable(tbl, WindowGroup)
 
   if active == "input" then
     self.inputter:enter()
@@ -87,7 +83,6 @@ function WindowGroup.move_to(self, left_column)
   self.item_list:move_to(left_column)
   self.inputter:move_to(left_column)
   self.status_line:move_to(left_column)
-  self:_set_left_padding()
 end
 
 function WindowGroup.redraw(self, draw_ctx)
@@ -106,12 +101,6 @@ end
 
 function WindowGroup.is_valid(self)
   return self.item_list:is_valid() and self.inputter:is_valid() and self.status_line:is_valid()
-end
-
--- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
-function WindowGroup._set_left_padding(self)
-  self.inputter:set_left_padding()
-  self.status_line:set_left_padding()
 end
 
 vim.cmd("highlight default link ThettoSelected Statement")

@@ -32,7 +32,9 @@ function StatusLine.new(source_name, width, height, row, column)
     window = window,
     _info_hl_factory = highlights.new_factory("thetto-info-text"),
   }
-  return setmetatable(tbl, StatusLine)
+  local self = setmetatable(tbl, StatusLine)
+  self:_set_left_padding()
+  return self
 end
 
 function StatusLine.redraw(self, source, items, sorters, finished, result_count)
@@ -62,9 +64,11 @@ function StatusLine.move_to(self, left_column)
     col = left_column,
     row = config.row,
   })
+  self:_set_left_padding()
 end
 
-function StatusLine.set_left_padding(self)
+-- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
+function StatusLine._set_left_padding(self)
   vim.wo[self.window].signcolumn = "yes:1"
 end
 
