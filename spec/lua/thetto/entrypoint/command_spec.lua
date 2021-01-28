@@ -29,6 +29,16 @@ test3]])
     assert.current_line("test3")
   end)
 
+  it("can close ui by :quit", function()
+    helper.set_lines([[
+test]])
+
+    command("Thetto line --no-insert")
+    vim.cmd("quit")
+
+    assert.window_count(1)
+  end)
+
   it("should exist only one in a tab", function()
     command("Thetto line")
     command("Thetto vim/runtimepath")

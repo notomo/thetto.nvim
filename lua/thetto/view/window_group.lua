@@ -101,6 +101,10 @@ function WindowGroup.is_valid(self)
   return self.item_list:is_valid() and self.inputter:is_valid() and self.status_line:is_valid()
 end
 
+function WindowGroup.has(self, id)
+  return self.item_list:has(id) or self.inputter:has(id) or self.status_line:has(id)
+end
+
 vim.cmd("highlight default link ThettoSelected Statement")
 vim.cmd("highlight default link ThettoInfo StatusLine")
 vim.cmd("highlight default link ThettoColorLabelOthers StatusLine")

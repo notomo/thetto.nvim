@@ -148,4 +148,8 @@ function Inputter.start_insert(self, behavior)
   end
 end
 
+function Inputter.has(self, id)
+  return self._window == id or self._filter_info_window == id
+end
+
 return M

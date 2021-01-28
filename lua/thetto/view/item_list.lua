@@ -53,7 +53,7 @@ function ItemList.new(source_name, display_limit, width, height, row, column)
 
   local group_name = "theto_closed_" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/item_list')._on_close('%s')"):format(group_name, source_name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
@@ -156,6 +156,10 @@ function ItemList.cursor(self)
   return vim.api.nvim_win_get_cursor(self._window)
 end
 
+function ItemList.has(self, id)
+  return self._window == id or self._sign_window == id
+end
+
 M._on_moved = function(key)
   local ui = repository.get(key).ui
   if ui == nil then
@@ -164,12 +168,12 @@ M._on_moved = function(key)
   ui:on_move()
 end
 
-M._on_close = function(key)
+M._on_close = function(key, id)
   local ui = repository.get(key).ui
   if ui == nil then
     return
   end
-  if ui:is_valid() then
+  if not ui:has_window(id) then
     return
   end
   ui:close()

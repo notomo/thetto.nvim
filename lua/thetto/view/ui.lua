@@ -217,6 +217,10 @@ function UI.is_valid(self)
   return self._windows:is_valid()
 end
 
+function UI.has_window(self, id)
+  return self._windows:has(id)
+end
+
 -- for testing
 M._changed_after = function(_)
 end
