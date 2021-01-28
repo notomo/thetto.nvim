@@ -9,6 +9,9 @@ M.root = root
 M.test_data_path = "spec/test_data/"
 M.test_data_dir = M.root .. "/" .. M.test_data_path
 
+-- HACK
+vim.cmd("autocmd SwapExists * lua vim.v.swapchoice = 'd'")
+
 M.command = function(cmd)
   local _, err = pcall(vim.cmd, cmd)
   if err then

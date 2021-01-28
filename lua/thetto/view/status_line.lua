@@ -2,6 +2,7 @@ local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local highlights = require("thetto/lib/highlight")
 local repository = require("thetto/core/repository")
+local vim = vim
 
 local M = {}
 
@@ -28,8 +29,8 @@ function StatusLine.new(source_name, width, height, row, column)
   vim.cmd(on_info_enter)
 
   local tbl = {
-    bufnr = bufnr,
-    window = window,
+    _bufnr = bufnr,
+    _window = window,
     _info_hl_factory = highlights.new_factory("thetto-info-text"),
   }
   local self = setmetatable(tbl, StatusLine)
@@ -53,13 +54,13 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
   end
 
   local text = ("%s%s  [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
-  local highlighter = self._info_hl_factory:reset(self.bufnr)
+  local highlighter = self._info_hl_factory:reset(self._bufnr)
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. status, "Comment"}})
 end
 
 function StatusLine.move_to(self, left_column)
-  local config = vim.api.nvim_win_get_config(self.window)
-  vim.api.nvim_win_set_config(self.window, {
+  local config = vim.api.nvim_win_get_config(self._window)
+  vim.api.nvim_win_set_config(self._window, {
     relative = "editor",
     col = left_column,
     row = config.row,
@@ -69,15 +70,15 @@ end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function StatusLine._set_left_padding(self)
-  vim.wo[self.window].signcolumn = "yes:1"
+  vim.wo[self._window].signcolumn = "yes:1"
 end
 
 function StatusLine.close(self)
-  windowlib.close(self.window)
+  windowlib.close(self._window)
 end
 
 function StatusLine.is_valid(self)
-  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr)
+  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr)
 end
 
 M._on_enter = function(key)

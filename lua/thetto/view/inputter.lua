@@ -1,6 +1,7 @@
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local highlights = require("thetto/lib/highlight")
+local vim = vim
 
 local M = {}
 
@@ -53,8 +54,8 @@ function Inputter.new(collector, width, height, row, column)
   vim.cmd(on_filter_info_enter)
 
   local tbl = {
-    bufnr = bufnr,
-    window = window,
+    _bufnr = bufnr,
+    _window = window,
     _filter_info_bufnr = filter_info_bufnr,
     _filter_info_window = filter_info_window,
     _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
@@ -68,8 +69,8 @@ end
 function Inputter.redraw(self, input_lines, filters)
   local height = #filters
 
-  if vim.api.nvim_win_is_valid(self.window) then
-    vim.api.nvim_win_set_height(self.window, height)
+  if vim.api.nvim_win_is_valid(self._window) then
+    vim.api.nvim_win_set_height(self._window, height)
     vim.api.nvim_win_set_height(self._filter_info_window, height)
     vim.api.nvim_buf_set_lines(self._filter_info_bufnr, 0, -1, false, vim.fn["repeat"]({""}, height))
     self.height = height
@@ -83,16 +84,16 @@ function Inputter.redraw(self, input_lines, filters)
 
   local line_count_diff = height - #input_lines
   if line_count_diff > 0 then
-    vim.api.nvim_buf_set_lines(self.bufnr, height - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
+    vim.api.nvim_buf_set_lines(self._bufnr, height - 1, -1, false, vim.fn["repeat"]({""}, line_count_diff))
   elseif line_count_diff < 0 then
-    vim.api.nvim_buf_set_lines(self.bufnr, height, -1, false, {})
+    vim.api.nvim_buf_set_lines(self._bufnr, height, -1, false, {})
   end
 end
 
 function Inputter.move_to(self, left_column)
-  local input_config = vim.api.nvim_win_get_config(self.window)
+  local input_config = vim.api.nvim_win_get_config(self._window)
   local filter_info_config = vim.api.nvim_win_get_config(self._filter_info_window)
-  vim.api.nvim_win_set_config(self.window, {
+  vim.api.nvim_win_set_config(self._window, {
     relative = "editor",
     col = left_column,
     row = input_config.row,
@@ -107,32 +108,32 @@ end
 
 -- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
 function Inputter._set_left_padding(self)
-  vim.wo[self.window].signcolumn = "yes:1"
+  vim.wo[self._window].signcolumn = "yes:1"
 end
 
 function Inputter.enter(self)
-  windowlib.enter(self.window)
+  windowlib.enter(self._window)
 end
 
 function Inputter.close(self)
-  windowlib.close(self.window)
+  windowlib.close(self._window)
   windowlib.close(self._filter_info_window)
 end
 
 function Inputter.is_valid(self)
-  return vim.api.nvim_win_is_valid(self.window) and vim.api.nvim_buf_is_valid(self.bufnr) and vim.api.nvim_win_is_valid(self._filter_info_window) and vim.api.nvim_buf_is_valid(self._filter_info_bufnr)
+  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr) and vim.api.nvim_win_is_valid(self._filter_info_window) and vim.api.nvim_buf_is_valid(self._filter_info_bufnr)
 end
 
 function Inputter.is_active(self)
-  return vim.api.nvim_get_current_win() == self.window
+  return vim.api.nvim_get_current_win() == self._window
 end
 
 function Inputter.cursor(self)
-  return vim.api.nvim_win_get_cursor(self.window)
+  return vim.api.nvim_win_get_cursor(self._window)
 end
 
 function Inputter.set_cursor(self, cursor)
-  return vim.api.nvim_win_set_cursor(self.window, cursor)
+  return vim.api.nvim_win_set_cursor(self._window, cursor)
 end
 
 function Inputter.start_insert(self, behavior)
@@ -142,7 +143,7 @@ function Inputter.start_insert(self, behavior)
     local cursor = self:cursor()
     if cursor[2] ~= max_col then
       cursor[2] = cursor[2] + 1
-      vim.api.nvim_win_set_cursor(self.window, cursor)
+      vim.api.nvim_win_set_cursor(self._window, cursor)
     end
   end
 end
