@@ -77,10 +77,6 @@ function StatusLine.close(self)
   windowlib.close(self._window)
 end
 
-function StatusLine.is_valid(self)
-  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr)
-end
-
 function StatusLine.has(self, id)
   return self._window == id
 end

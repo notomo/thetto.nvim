@@ -43,7 +43,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
   vim.bo[bufnr].bufhidden = "wipe"
 
-  if not self:opened() then
+  if not self:_opened() then
     self._window = vim.api.nvim_open_win(bufnr, false, {
       width = vim.o.columns - left_column - width - 3,
       height = height,
@@ -82,12 +82,8 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   end
 end
 
-function Sidecar.opened(self)
-  return self._window ~= nil and vim.api.nvim_win_is_valid(self._window)
-end
-
 function Sidecar.exists_same(self, item)
-  if not self:opened() then
+  if not self:_opened() then
     return false
   end
   return item ~= nil and item.index == self._index
@@ -95,6 +91,10 @@ end
 
 function Sidecar.close(self)
   windowlib.close(self._window)
+end
+
+function Sidecar._opened(self)
+  return self._window ~= nil and vim.api.nvim_win_is_valid(self._window)
 end
 
 return M
