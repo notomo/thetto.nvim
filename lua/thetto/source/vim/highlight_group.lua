@@ -52,6 +52,6 @@ M.highlight = function(self, bufnr, items)
   end
 end
 
-M.kind_name = "word"
+M.kind_name = "vim/highlight_group"
 
 return M
