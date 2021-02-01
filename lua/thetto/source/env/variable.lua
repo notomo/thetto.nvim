@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self)
+M.collect = function()
   local names = vim.fn.getcompletion("*", "environment")
   local items = {}
   for _, name in ipairs(names) do

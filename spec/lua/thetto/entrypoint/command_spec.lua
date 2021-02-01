@@ -58,11 +58,18 @@ test]])
     command("Thetto line")
     command("tabedit")
 
-    local current = vim.api.nvim_get_current_win()
     command("Thetto --resume")
     assert.window_count(6)
+  end)
 
+  it("goes back to original window when quit resumed thetto", function()
+    command("Thetto line")
+    command("tabedit")
+    local current = vim.api.nvim_get_current_win()
+
+    command("Thetto --resume")
     command("ThettoDo quit")
+
     assert.window(current)
   end)
 
