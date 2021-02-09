@@ -1,26 +1,29 @@
 local M = {}
 
+local goto_item_pos = function(item)
+  if item.bufnr then
+    vim.cmd("buffer " .. item.bufnr)
+  end
+  vim.api.nvim_win_set_cursor(0, {item.row, item.column or 0})
+end
+
 M.action_open = function(_, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_win_set_cursor(0, {item.row, 0})
+    goto_item_pos(item)
   end
 end
 
 M.action_tab_open = function(_, items)
-  local bufnr = vim.api.nvim_get_current_buf()
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
-    vim.cmd("buffer " .. bufnr)
-    vim.api.nvim_win_set_cursor(0, {item.row, 0})
+    goto_item_pos(item)
   end
 end
 
 M.action_vsplit_open = function(_, items)
-  local bufnr = vim.api.nvim_get_current_buf()
   for _, item in ipairs(items) do
     vim.cmd("vsplit")
-    vim.cmd("buffer " .. bufnr)
-    vim.api.nvim_win_set_cursor(0, {item.row, 0})
+    goto_item_pos(item)
   end
 end
 
