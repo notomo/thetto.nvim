@@ -27,7 +27,7 @@ describe("alter source", function()
     command("edit ./from/file_test.lua")
 
     command("Thetto file/alter --no-insert --x-allow-new --immediately")
-    command("write")
+    command("silent! write")
 
     assert.file_name("file.lua")
     assert.dir_name("to")
