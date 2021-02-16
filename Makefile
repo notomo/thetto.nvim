@@ -4,7 +4,8 @@
 # - grep
 # - ps
 # - git
-# - find
+# - find or where
+# - apropos
 
 test:
 	vusted --shuffle -v
