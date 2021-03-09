@@ -9,9 +9,14 @@ local to_regexes = function(input_line, opts)
     return text ~= ""
   end, vim.split(line, "%s"))
 
-  return vim.tbl_map(function(text)
-    return vim.regex(text)
-  end, texts)
+  local regexes = {}
+  for _, text in ipairs(texts) do
+    local ok, regex = pcall(vim.regex, text)
+    if ok then
+      table.insert(regexes, regex)
+    end
+  end
+  return regexes
 end
 
 M.apply = function(self, items, input_line, opts)
