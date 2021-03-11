@@ -9,7 +9,7 @@ M.action_kill = function(self, items)
   end
 
   local cmd = vim.deepcopy(M.cmd)
-  table.insert(cmd, table.concat(pids, " "))
+  vim.list_extend(cmd, pids)
 
   local job = self.jobs.new(cmd, {on_exit = self.jobs.print_output})
   local err = job:start()
