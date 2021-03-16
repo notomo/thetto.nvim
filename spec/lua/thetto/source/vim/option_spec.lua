@@ -14,8 +14,19 @@ describe("vim/option source", function()
 
     command("ThettoDo move_to_list")
     assert.current_line("buftype=nofile")
+  end)
 
-    command("ThettoDo")
+  it("can toggle options", function()
+    command("setlocal wrap")
+
+    command("Thetto vim/option")
+    helper.sync_input({"wrap"})
+
+    command("ThettoDo move_to_list")
+    helper.search("^wrap=")
+
+    command("ThettoDo toggle")
+    assert.is_false(vim.wo.wrap)
   end)
 
 end)

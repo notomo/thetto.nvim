@@ -8,11 +8,11 @@ M.collect = function()
     local cmd = ("echo &%s"):format(name)
     local option_value = vim.api.nvim_exec(cmd, true)
     local value = ("%s=%s"):format(name, option_value)
-    table.insert(items, {value = value})
+    table.insert(items, {value = value, option = {name = name, value = option_value}})
   end
   return items
 end
 
-M.kind_name = "word"
+M.kind_name = "vim/option"
 
 return M
