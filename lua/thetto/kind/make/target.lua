@@ -8,6 +8,14 @@ M.action_execute = function(_, items)
   end
 end
 
+M.action_dry_run = function(_, items)
+  for _, item in ipairs(items) do
+    vim.cmd("tabedit")
+    local cmd = {"make", "-n", "-f", item.path, item.value}
+    vim.fn.termopen(cmd, {cwd = vim.fn.fnamemodify(item.path, ":h")})
+  end
+end
+
 M.default_action = "execute"
 
 return setmetatable(M, require("thetto/kind/file"))
