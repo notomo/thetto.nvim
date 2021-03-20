@@ -27,10 +27,9 @@ function Inputter.new(collector, width, height, row, column)
     })
   end)
 
-  local input_width = math.floor(width * 0.75)
   local input_height = #collector.input_lines
   local window = vim.api.nvim_open_win(bufnr, false, {
-    width = input_width,
+    width = width,
     height = input_height,
     relative = "editor",
     row = row + height + 1,
@@ -40,24 +39,9 @@ function Inputter.new(collector, width, height, row, column)
   })
   vim.wo[window].winhighlight = "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput"
 
-  local filter_info_bufnr = bufferlib.scratch()
-  local filter_info_window = vim.api.nvim_open_win(filter_info_bufnr, false, {
-    width = width - input_width,
-    height = input_height,
-    relative = "editor",
-    row = row + height + 1,
-    col = column + input_width,
-    external = false,
-    style = "minimal",
-  })
-  local on_filter_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/lib/window').enter(%s)"):format(filter_info_bufnr, window)
-  vim.cmd(on_filter_info_enter)
-
   local tbl = {
     _bufnr = bufnr,
     _window = window,
-    _filter_info_bufnr = filter_info_bufnr,
-    _filter_info_window = filter_info_window,
     _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
     height = input_height,
   }
@@ -71,15 +55,7 @@ function Inputter.redraw(self, input_lines, filters)
 
   if vim.api.nvim_win_is_valid(self._window) then
     vim.api.nvim_win_set_height(self._window, height)
-    vim.api.nvim_win_set_height(self._filter_info_window, height)
-    vim.api.nvim_buf_set_lines(self._filter_info_bufnr, 0, -1, false, vim.fn["repeat"]({""}, height))
     self.height = height
-  end
-
-  local highlighter = self._filter_info_hl_factory:reset(self._filter_info_bufnr)
-  for i, filter in ipairs(filters) do
-    local filter_info = ("[%s]"):format(filter.name)
-    highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}})
   end
 
   local line_count_diff = height - #input_lines
@@ -88,20 +64,28 @@ function Inputter.redraw(self, input_lines, filters)
   elseif line_count_diff < 0 then
     vim.api.nvim_buf_set_lines(self._bufnr, height, -1, false, {})
   end
+
+  local ns = vim.api.nvim_create_namespace("thetto-input-filter-info")
+  vim.api.nvim_buf_clear_namespace(self._bufnr, ns, 0, -1)
+  for i, filter in ipairs(filters) do
+    local filter_info = ("[%s]"):format(filter.name)
+    local column = vim.api.nvim_win_get_width(self._window) - #filter_info
+    local space = (" "):rep(column - 3)
+    vim.api.nvim_buf_set_extmark(self._bufnr, ns, i - 1, 0, {
+      virt_text_pos = "overlay",
+      virt_text_hide = false,
+      hl_mode = "blend",
+      virt_text = {{space, "ThettoBlend"}, {filter_info, "ThettoFilterInfo"}},
+    })
+  end
 end
 
 function Inputter.move_to(self, left_column)
   local input_config = vim.api.nvim_win_get_config(self._window)
-  local filter_info_config = vim.api.nvim_win_get_config(self._filter_info_window)
   vim.api.nvim_win_set_config(self._window, {
     relative = "editor",
     col = left_column,
     row = input_config.row,
-  })
-  vim.api.nvim_win_set_config(self._filter_info_window, {
-    relative = "editor",
-    col = left_column + input_config.width,
-    row = filter_info_config.row,
   })
   self:_set_left_padding()
 end
@@ -117,11 +101,10 @@ end
 
 function Inputter.close(self)
   windowlib.close(self._window)
-  windowlib.close(self._filter_info_window)
 end
 
 function Inputter.is_valid(self)
-  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr) and vim.api.nvim_win_is_valid(self._filter_info_window) and vim.api.nvim_buf_is_valid(self._filter_info_bufnr)
+  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr)
 end
 
 function Inputter.is_active(self)
@@ -149,7 +132,7 @@ function Inputter.start_insert(self, behavior)
 end
 
 function Inputter.has(self, id)
-  return self._window == id or self._filter_info_window == id
+  return self._window == id
 end
 
 return M

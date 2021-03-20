@@ -245,5 +245,6 @@ vim.cmd("highlight default link ThettoColorLabelBackground NormalFloat")
 vim.cmd("highlight default link ThettoInput NormalFloat")
 vim.cmd("highlight default link ThettoPreview Search")
 vim.cmd("highlight default link ThettoFilterInfo Comment")
+vim.cmd("highlight! ThettoBlend guifg=#ffffff blend=100")
 
 return M
