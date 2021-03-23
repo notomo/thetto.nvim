@@ -3,7 +3,9 @@ local setup = require("thetto/setup/file/mru")
 
 local M = {}
 
-M.collect = function(self)
+M.cwd_marker = "${%s}/"
+
+M.collect = function(self, opts)
   local items = {}
 
   local paths = setup.get()
@@ -24,10 +26,18 @@ M.collect = function(self)
   vim.list_extend(paths, vim.v.oldfiles)
   paths = self.listlib.unique(paths)
 
+  local to_relative = self.pathlib.relative_modifier(opts.cwd)
+  local dir = vim.fn.fnamemodify(opts.cwd, ":t")
+  local cwd_marker = M.cwd_marker:format(dir)
   local home = self.pathlib.home()
   for _, path in ipairs(vim.tbl_filter(setup.validate_fn(), paths)) do
-    local value = path:gsub(home, "~")
-    table.insert(items, {value = value, path = path})
+    local relative_path = to_relative(path)
+    local value = relative_path:gsub(home, "~")
+    local item = {value = value, path = path}
+    if path ~= relative_path then
+      item.value = cwd_marker .. relative_path
+    end
+    table.insert(items, item)
   end
   return items
 end
