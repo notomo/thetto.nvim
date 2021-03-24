@@ -3,7 +3,7 @@ local setup = require("thetto/setup/file/mru")
 
 local M = {}
 
-M.cwd_marker = "${%s}/"
+M.cwd_marker = "%s/"
 
 M.collect = function(self, opts)
   local items = {}
