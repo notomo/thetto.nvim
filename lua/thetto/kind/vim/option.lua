@@ -6,6 +6,14 @@ M.action_toggle = function(_, items)
     local info = vim.api.nvim_get_option_info(name)
     if info.type == "boolean" then
       vim.cmd(("setlocal %s!"):format(name))
+    else
+      local prompt = ("setlocal %s="):format(name)
+      local value = vim.fn.input(prompt, item.option.value)
+      if value == "" then
+        return
+      end
+      vim.cmd(("setlocal %s=%s"):format(name, value))
+      return
     end
   end
 end
