@@ -38,6 +38,7 @@ function Source.new(name, source_opts, opts)
     sign_highlights = highlights.new_factory("thetto-sign-highlight"),
     filters = nil,
     sorters = nil,
+    bufnr = vim.api.nvim_get_current_buf(),
     compiled_colors = vim.tbl_map(function(color)
       return {regex = vim.regex(color.pattern), chunks = color.chunks}
     end, origin.colors or base.colors),
@@ -58,7 +59,7 @@ function Source.__index(self, k)
   return rawget(Source, k) or self._origin[k] or base[k]
 end
 
-function Source.collect(self, opts, append)
+function Source.collect(self, opts, append, reset)
   self.append = function(_, items, source_ctx)
     local err = append(items)
     if err ~= nil then
@@ -68,6 +69,7 @@ function Source.collect(self, opts, append)
       self.ctx = source_ctx
     end
   end
+  self.reset = reset
 
   local all_items, job, err = self._origin.collect(self, opts)
   if err ~= nil and err ~= Source.errors.skip_empty_pattern then

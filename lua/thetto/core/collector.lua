@@ -81,8 +81,11 @@ function Collector.start(self)
     self.result:append(items)
     return self:update_with_debounce()
   end
+  local reset = function()
+    self.result:reset()
+  end
 
-  local result, err = self.source:collect(self.opts, on_update_job)
+  local result, err = self.source:collect(self.opts, on_update_job, reset)
   if err ~= nil then
     return err
   end

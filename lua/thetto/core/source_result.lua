@@ -11,6 +11,9 @@ function SourcePendingResult.__index(_, k)
 end
 
 function SourcePendingResult.start(self)
+  if self._job:is_running() then
+    return
+  end
   return self._job:start()
 end
 
@@ -90,6 +93,10 @@ function SourceResult.append(self, items)
     item.index = len + i
   end
   vim.list_extend(self._all_items, items)
+end
+
+function SourceResult.reset(self)
+  self._all_items = {}
 end
 
 function SourceResult.apply_selected(self, items)
