@@ -9,9 +9,8 @@ M.collect = function()
     if type(excmd) ~= "table" then
       goto continue
     end
-    local desc = ("%s %s"):format(excmd.name, excmd.definition)
     table.insert(items, {
-      desc = desc,
+      desc = ("%s %s"):format(excmd.name, excmd.definition):gsub("%c+", " "),
       value = excmd.name,
       column_offsets = {value = 0, definition = #excmd.name + 1},
     })
