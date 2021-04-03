@@ -23,12 +23,7 @@ M.collect = function(self)
 
   local paths = {}
   for _, line in ipairs(lines) do
-    local path = vim.fn.expand(line)
-    if vim.fn.filereadable(path) == 0 and vim.fn.isdirectory(path) == 0 then
-      goto continue
-    end
-    table.insert(paths, path)
-    ::continue::
+    vim.list_extend(paths, vim.fn.glob(line, true, true, true))
   end
 
   local items = {}
