@@ -13,8 +13,12 @@ M._find_dir = function(name, paths)
   if vim.startswith(name, "lua-") then
     return M._find_dir(name:gsub("^lua%-", ""), paths)
   end
-
-  -- HACK
+  if vim.startswith(name, "lua_") then
+    return M._find_dir(name:gsub("^lua_", ""), paths)
+  end
+  if vim.startswith(name, "lua") then
+    return M._find_dir(name:gsub("^lua", ""), paths)
+  end
   if name:find("%-") then
     local splitted = vim.split(name, "-", true)
     return M._find_dir(splitted[1], paths)
