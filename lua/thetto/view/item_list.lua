@@ -16,7 +16,9 @@ local SIGN_WIDTH = 4
 
 function ItemList.new(source_name, display_limit, width, height, row, column)
   local bufnr = bufferlib.scratch(function(b)
-    vim.api.nvim_buf_set_name(b, ("thetto://%s/%s"):format(source_name, FILETYPE))
+    local name = ("thetto://%s/%s"):format(source_name, FILETYPE)
+    bufferlib.delete_by_name(name)
+    vim.api.nvim_buf_set_name(b, name)
     vim.bo[b].filetype = FILETYPE
   end)
 

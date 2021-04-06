@@ -13,7 +13,9 @@ local FILETYPE = "thetto-input"
 
 function Inputter.new(collector, width, height, row, column)
   local bufnr = bufferlib.scratch(function(b)
-    vim.api.nvim_buf_set_name(b, ("thetto://%s/%s"):format(collector.source.name, FILETYPE))
+    local name = ("thetto://%s/%s"):format(collector.source.name, FILETYPE)
+    bufferlib.delete_by_name(name)
+    vim.api.nvim_buf_set_name(b, name)
     vim.bo[b].filetype = FILETYPE
     vim.api.nvim_buf_set_lines(b, 0, -1, false, collector.input_lines)
     collector:attach(b)

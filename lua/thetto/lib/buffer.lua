@@ -9,6 +9,14 @@ M.scratch = function(modify)
   return bufnr
 end
 
+M.delete_by_name = function(name)
+  local bufnr = vim.fn.bufnr(("^%s$"):format(name))
+  if bufnr == -1 then
+    return
+  end
+  vim.api.nvim_buf_delete(bufnr, {force = true})
+end
+
 M.in_tabpage = function(tabpage_index)
   local ids = vim.api.nvim_tabpage_list_wins(tabpage_index)
   local i = 1
