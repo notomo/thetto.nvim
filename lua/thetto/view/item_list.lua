@@ -144,9 +144,14 @@ function ItemList.enter(self)
 end
 
 function ItemList.close(self)
+  if self._closed then
+    return
+  end
+  self._closed = true
+
+  vim.cmd("autocmd! " .. "theto_closed_" .. self._bufnr)
   windowlib.close(self._window)
   windowlib.close(self._sign_window)
-  vim.cmd("autocmd! " .. "theto_closed_" .. self._bufnr)
 end
 
 function ItemList.position(self)

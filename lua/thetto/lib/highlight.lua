@@ -10,7 +10,7 @@ function Highlighter.add(self, hl_group, row, start_col, end_col)
 end
 
 function Highlighter.set_virtual_text(self, row, chunks)
-  vim.api.nvim_buf_set_virtual_text(self.bufnr, self.ns, row, chunks, {})
+  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, row, 0, {virt_text = chunks})
 end
 
 function Highlighter.filter(self, hl_group, elements, condition)

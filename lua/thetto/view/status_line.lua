@@ -74,6 +74,11 @@ function StatusLine._set_left_padding(self)
 end
 
 function StatusLine.close(self)
+  if self._closed then
+    return
+  end
+  self._closed = true
+
   windowlib.close(self._window)
 end
 

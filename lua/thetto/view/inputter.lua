@@ -118,6 +118,11 @@ function Inputter.enter(self)
 end
 
 function Inputter.close(self)
+  if self._closed then
+    return
+  end
+  self._closed = true
+
   windowlib.close(self._window)
   windowlib.close(self._filter_info_window)
 end
