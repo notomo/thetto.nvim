@@ -96,7 +96,7 @@ function Parser.eat(self, output)
   error(err)
 end
 
-M.collect = function(self)
+function M.collect(self)
   local result = vim.api.nvim_exec("verbose autocmd", true)
   local outputs = vim.split(result, "\n", true)
   table.remove(outputs, 1)

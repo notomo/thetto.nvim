@@ -7,27 +7,27 @@ local goto_item_pos = function(item)
   vim.api.nvim_win_set_cursor(0, {item.row, item.column or 0})
 end
 
-M.action_open = function(_, items)
+function M.action_open(_, items)
   for _, item in ipairs(items) do
     goto_item_pos(item)
   end
 end
 
-M.action_tab_open = function(_, items)
+function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
     goto_item_pos(item)
   end
 end
 
-M.action_vsplit_open = function(_, items)
+function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
     vim.cmd("vsplit")
     goto_item_pos(item)
   end
 end
 
-M.action_preview = function(_, items, ctx)
+function M.action_preview(_, items, ctx)
   local item = items[1]
   if item == nil then
     return

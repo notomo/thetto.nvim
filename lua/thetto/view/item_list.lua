@@ -167,7 +167,7 @@ function ItemList.has(self, id)
   return self._window == id or self._sign_window == id
 end
 
-M._on_moved = function(key)
+function M._on_moved(key)
   local ui = repository.get(key).ui
   if ui == nil then
     return
@@ -175,7 +175,7 @@ M._on_moved = function(key)
   ui:on_move()
 end
 
-M._on_close = function(key, id)
+function M._on_close(key, id)
   local ui = repository.get(key).ui
   if ui == nil then
     return

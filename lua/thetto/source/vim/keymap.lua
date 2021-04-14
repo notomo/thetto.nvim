@@ -2,7 +2,7 @@ local M = {}
 
 local modes = "nvoicsxlt"
 
-M.collect = function(_)
+function M.collect(_)
   local keymaps = {}
   for _, mode in ipairs(vim.split(modes, "")) do
     vim.list_extend(keymaps, vim.api.nvim_get_keymap(mode))

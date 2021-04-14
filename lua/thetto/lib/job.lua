@@ -100,7 +100,7 @@ local create_co = function(outputs)
   end)
 end
 
-M.loop = function(ms, f)
+function M.loop(ms, f)
   local current = nil
   local next_outputs = {}
   local timer = vim.loop.new_timer()
@@ -170,7 +170,7 @@ function Job.wait(self, ms)
   end, 10)
 end
 
-M.new = function(cmd_and_args, opts)
+function M.new(cmd_and_args, opts)
   local job = {}
 
   local command = table.remove(cmd_and_args, 1)
@@ -203,14 +203,14 @@ M.new = function(cmd_and_args, opts)
   return setmetatable(job, Job)
 end
 
-M.print_stderr = function(_, _, data)
+function M.print_stderr(_, _, data)
   if data == nil or data == "" then
     return
   end
   vim.api.nvim_err_write(data .. "\n")
 end
 
-M.print_stdout = function(self)
+function M.print_stdout(self)
   if self.stdout_output == "" then
     return
   end
@@ -218,7 +218,7 @@ M.print_stdout = function(self)
   vim.api.nvim_out_write(output .. "\n")
 end
 
-M.print_output = function(self)
+function M.print_output(self)
   if self.all_output == "" then
     return
   end

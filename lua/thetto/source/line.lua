@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function()
+function M.collect()
   local bufnr = vim.api.nvim_get_current_buf()
   local kind_name = nil
   local path = vim.api.nvim_buf_get_name(bufnr)

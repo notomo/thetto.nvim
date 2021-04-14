@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = {merged = false}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local _, err = self.filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err

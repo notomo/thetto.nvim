@@ -1,11 +1,11 @@
 local M = {}
 
 if vim.fn.has("win32") == 1 then
-  M.get_command = function(path, _)
+  function M.get_command(path, _)
     return {"cmd.exe", "/C", "dir", "/AD", "/B", "/S", path}
   end
 else
-  M.get_command = function(path, max_depth)
+  function M.get_command(path, max_depth)
     return {
       "find",
       "-L",
@@ -27,13 +27,13 @@ end
 
 M.opts = {max_depth = 100}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   return require("thetto/source/file/recursive").collect(self, opts)
 end
 
 M.kind_name = "directory"
 
-M._modify_path = function(_, path)
+function M._modify_path(_, path)
   return path .. "/"
 end
 

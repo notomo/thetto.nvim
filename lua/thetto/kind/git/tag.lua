@@ -1,6 +1,6 @@
 local M = {}
 
-M.action_checkout = function(self, items)
+function M.action_checkout(self, items)
   local item = items[1]
   if item == nil then
     return
@@ -11,7 +11,7 @@ M.action_checkout = function(self, items)
   return nil, job:start()
 end
 
-M.action_delete = function(self, items)
+function M.action_delete(self, items)
   local branches = {}
   for _, item in ipairs(items) do
     table.insert(branches, item.value)

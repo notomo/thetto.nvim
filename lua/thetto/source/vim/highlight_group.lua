@@ -4,7 +4,7 @@ local M = {}
 
 local colored = "xxx"
 
-M.collect = function()
+function M.collect()
   local items = {}
   local names = vim.fn.getcompletion("*", "highlight")
   for _, name in ipairs(names) do
@@ -44,7 +44,7 @@ M.collect = function()
   return items
 end
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   local end_col = #colored
   for i, item in ipairs(items) do

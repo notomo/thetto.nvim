@@ -1,6 +1,6 @@
 local M = {}
 
-M.scratch = function(modify)
+function M.scratch(modify)
   modify = modify or function()
   end
   local bufnr = vim.api.nvim_create_buf(false, true)
@@ -9,7 +9,7 @@ M.scratch = function(modify)
   return bufnr
 end
 
-M.delete_by_name = function(name)
+function M.delete_by_name(name)
   local bufnr = vim.fn.bufnr(("^%s$"):format(name))
   if bufnr == -1 then
     return
@@ -17,7 +17,7 @@ M.delete_by_name = function(name)
   vim.api.nvim_buf_delete(bufnr, {force = true})
 end
 
-M.in_tabpage = function(tabpage_index)
+function M.in_tabpage(tabpage_index)
   local ids = vim.api.nvim_tabpage_list_wins(tabpage_index)
   local i = 1
   return function()

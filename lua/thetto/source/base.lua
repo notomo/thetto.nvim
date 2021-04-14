@@ -2,14 +2,14 @@ local custom = require("thetto/custom")
 
 local M = {}
 
-M.collect = function()
+function M.collect()
   return {}
 end
 
-M.highlight = function(_, _, _)
+function M.highlight(_, _, _)
 end
 
-M.highlight_sign = function(self, bufnr, items)
+function M.highlight_sign(self, bufnr, items)
   if #self.compiled_colors == 0 then
     return
   end

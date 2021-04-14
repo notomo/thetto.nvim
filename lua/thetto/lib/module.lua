@@ -21,7 +21,7 @@ end
 M.set_base = set_base
 
 local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
-M.cleanup = function()
+function M.cleanup()
   local dir = plugin_name .. "/"
   for key in pairs(package.loaded) do
     if (vim.startswith(key, dir) or key == plugin_name) then
@@ -32,27 +32,27 @@ end
 
 -- for app
 
-M.find_source = function(name)
+function M.find_source(name)
   return find("thetto/source/" .. name)
 end
 
-M.find_kind = function(name)
+function M.find_kind(name)
   return find("thetto/kind/" .. name)
 end
 
-M.find_filter = function(name)
+function M.find_filter(name)
   return find("thetto/iteradapter/filter/" .. name)
 end
 
-M.find_sorter = function(name)
+function M.find_sorter(name)
   return find("thetto/iteradapter/sorter/" .. name)
 end
 
-M.find_target = function(name)
+function M.find_target(name)
   return find("thetto/target/" .. name)
 end
 
-M.find_setup = function(name)
+function M.find_setup(name)
   return find("thetto/setup/" .. name)
 end
 

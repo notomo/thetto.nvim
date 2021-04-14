@@ -1,6 +1,6 @@
 local M = {}
 
-M._load = function(self, path, cwd)
+function M._load(self, path, cwd)
   if not self.filelib.readable(path) then
     return {}
   end
@@ -29,7 +29,7 @@ M._load = function(self, path, cwd)
   return items
 end
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local path = opts.cwd .. "/Makefile"
   local dir_path = vim.fn.fnamemodify(path, ":h")
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
@@ -43,7 +43,7 @@ end
 
 vim.cmd("highlight default link ThettoMakeTargetPath Comment")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     highlighter:add("ThettoMakeTargetPath", i - 1, 0, item.column_offsets.value - 1)

@@ -1,6 +1,6 @@
 local M = {}
 
-M.apply = function(self, items)
+function M.apply(self, items)
   if self.reversed then
     table.sort(items, function(a, b)
       return #a.value > #b.value

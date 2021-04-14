@@ -1,6 +1,6 @@
 local M = {}
 
-M.close = function(id)
+function M.close(id)
   if not id then
     return
   end
@@ -10,7 +10,7 @@ M.close = function(id)
   vim.api.nvim_win_close(id, true)
 end
 
-M.enter = function(id)
+function M.enter(id)
   if not id then
     return
   end

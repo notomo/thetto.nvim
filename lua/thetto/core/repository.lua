@@ -2,7 +2,7 @@ local persist = {}
 
 local M = {}
 
-M.set = function(key, values)
+function M.set(key, values)
   local new_values = {}
   for k, v in pairs(values) do
     new_values[k] = v
@@ -11,11 +11,11 @@ M.set = function(key, values)
   persist[key] = new_values
 end
 
-M.get = function(key)
+function M.get(key)
   return persist[key] or {}
 end
 
-M.resume = function(key)
+function M.resume(key)
   if key ~= nil then
     local ctx = persist[key]
     if ctx == nil then
@@ -40,7 +40,7 @@ M.resume = function(key)
   return recent, nil
 end
 
-M.get_from_path = function(bufnr)
+function M.get_from_path(bufnr)
   local path = vim.api.nvim_buf_get_name(bufnr or 0)
   -- this should move to the view module maybe
   local key = path:match("thetto://(.+)/thetto")

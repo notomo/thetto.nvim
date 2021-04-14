@@ -10,14 +10,14 @@ local vim = vim
 
 local M = {}
 
-local Source = {}
+local Source = {
+  errors = {skip_empty_pattern = "skip_empty_pattern"},
+  jobs = jobs,
+  pathlib = pathlib,
+  filelib = filelib,
+  listlib = listlib,
+}
 M.Source = Source
-
-Source.errors = {skip_empty_pattern = "skip_empty_pattern"}
-Source.jobs = jobs
-Source.pathlib = pathlib
-Source.filelib = filelib
-Source.listlib = listlib
 
 function Source.new(name, source_opts, opts)
   vim.validate({

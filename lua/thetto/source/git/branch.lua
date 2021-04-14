@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = {all = false}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local _, err = self.filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err
@@ -45,7 +45,7 @@ end
 
 vim.cmd("highlight default link ThettoGitActiveBranch Type")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     if item.is_current_branch then

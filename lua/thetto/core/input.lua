@@ -9,7 +9,7 @@ local pattern_types = {
   end,
 }
 
-M.get = function(typ)
+function M.get(typ)
   local fn = pattern_types[typ]
   if fn == nil then
     return nil, "not found input type: " .. typ

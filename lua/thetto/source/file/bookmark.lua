@@ -3,7 +3,7 @@ local M = {}
 M.file_path = nil
 M.default_paths = {}
 
-M.collect = function(self)
+function M.collect(self)
   local file_path = M.file_path or self.pathlib.user_data_path("file_bookmark.txt")
   if self.filelib.create_if_need(file_path) then
     local f = io.open(file_path, "w")
@@ -40,7 +40,7 @@ end
 
 vim.cmd("highlight default link ThettoFileBookmarkDirectory String")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   highlighter:filter("ThettoFileBookmarkDirectory", items, function(item)
     return item.kind_name == "directory"

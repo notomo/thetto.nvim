@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = {buftype = nil}
 
-M.collect = function(self)
+function M.collect(self)
   local items = {}
   local bufnrs = vim.api.nvim_list_bufs()
   for _, bufnr in ipairs(bufnrs) do

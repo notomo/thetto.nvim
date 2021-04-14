@@ -12,7 +12,7 @@ local to_texts = function(input_line, opts)
   end, vim.split(line, "%s"))
 end
 
-M.apply = function(self, items, input_line, opts)
+function M.apply(self, items, input_line, opts)
   local filtered = {}
   local texts = to_texts(input_line, opts)
   for _, item in ipairs(items) do
@@ -38,7 +38,7 @@ end
 
 vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
 
-M.highlight = function(self, bufnr, items, input_line, opts)
+function M.highlight(self, bufnr, items, input_line, opts)
   if self.inversed then
     return
   end

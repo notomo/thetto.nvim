@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function()
+function M.collect()
   local items = {}
   local namespaces = vim.api.nvim_get_namespaces()
   for name, id in pairs(namespaces) do

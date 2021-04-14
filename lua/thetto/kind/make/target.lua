@@ -1,6 +1,6 @@
 local M = {}
 
-M.action_execute = function(_, items)
+function M.action_execute(_, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
     local cmd = {"make", "-f", item.path, item.value}
@@ -8,7 +8,7 @@ M.action_execute = function(_, items)
   end
 end
 
-M.action_dry_run = function(_, items)
+function M.action_dry_run(_, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
     local cmd = {"make", "-n", "-f", item.path, item.value}

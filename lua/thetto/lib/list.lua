@@ -1,6 +1,6 @@
 local M = {}
 
-M.unique = function(list)
+function M.unique(list)
   local hash = {}
   local new_list = {}
   for _, v in ipairs(list) do
@@ -12,7 +12,7 @@ M.unique = function(list)
   return new_list
 end
 
-M.group_by = function(list, make_key)
+function M.group_by(list, make_key)
   local prev = nil
   local groups = {}
   for _, element in ipairs(list) do
@@ -27,7 +27,7 @@ M.group_by = function(list, make_key)
   return groups
 end
 
-M.remove = function(list, value)
+function M.remove(list, value)
   local idx
   for i, v in ipairs(list) do
     if v == value then

@@ -4,7 +4,7 @@ local M = {}
 
 M.root_patterns = {".git"}
 
-M.cwd = function(target_patterns)
+function M.cwd(target_patterns)
   local patterns = M.root_patterns
   if #target_patterns > 0 then
     patterns = target_patterns

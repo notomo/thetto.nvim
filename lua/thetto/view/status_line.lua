@@ -86,7 +86,7 @@ function StatusLine.has(self, id)
   return self._window == id
 end
 
-M._on_enter = function(key)
+function M._on_enter(key)
   local ui = repository.get(key).ui
   if ui == nil then
     return

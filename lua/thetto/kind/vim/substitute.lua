@@ -1,10 +1,10 @@
 local M = {}
 
-M.after = function(_, _)
+function M.after(_, _)
   vim.cmd("nohlsearch")
 end
 
-M.action_execute = function(_, items)
+function M.action_execute(_, items)
   for _, item in ipairs(items) do
     local cmd = item.range_part .. item.excmd
     vim.cmd(cmd)
@@ -12,7 +12,7 @@ M.action_execute = function(_, items)
   end
 end
 
-M.action_preview = function(self, items, ctx)
+function M.action_preview(self, items, ctx)
   local item = items[1]
   if item == nil then
     return

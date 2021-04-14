@@ -4,7 +4,7 @@ local M = {}
 
 M.opts = {ignore = {}}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local file_path = vim.api.nvim_buf_get_name(0)
   if not self.filelib.readable(file_path) then
     return {}, nil
@@ -42,7 +42,7 @@ end
 vim.cmd("highlight default link ThettoOutlineLine Comment")
 vim.cmd("highlight default link ThettoOutlineType Statement")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     highlighter:add("ThettoOutlineLine", i - 1, item.column_offsets.line, -1)

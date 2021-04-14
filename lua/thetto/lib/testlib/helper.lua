@@ -12,7 +12,7 @@ M.test_data_dir = M.root .. "/" .. M.test_data_path
 -- HACK
 vim.cmd("autocmd SwapExists * lua vim.v.swapchoice = 'd'")
 
-M.command = function(cmd)
+function M.command(cmd)
   local _, err = pcall(vim.cmd, cmd)
   if err then
     local info = debug.getinfo(2)
@@ -22,14 +22,14 @@ M.command = function(cmd)
   end
 end
 
-M.before_each = function()
+function M.before_each()
   M.command("filetype on")
   M.command("syntax enable")
   M.new_directory("")
   vim.api.nvim_set_current_dir(M.test_data_dir)
 end
 
-M.after_each = function()
+function M.after_each()
   -- avoid segmentation fault??
   M.command("tabedit")
   M.command("tabprevious")
@@ -46,18 +46,18 @@ M.after_each = function()
   M.delete("")
 end
 
-M.buffer_log = function()
+function M.buffer_log()
   local lines = vim.fn.getbufline("%", 1, "$")
   for _, line in ipairs(lines) do
     print(line)
   end
 end
 
-M.set_lines = function(lines)
+function M.set_lines(lines)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
 end
 
-M.sync_input = function(texts)
+function M.sync_input(texts)
   local text = texts[1]
   local finished = false
   require("thetto/view/ui")._changed_after = function(input_lines)
@@ -76,7 +76,7 @@ M.sync_input = function(texts)
   end
 end
 
-M.sync_open = function(...)
+function M.sync_open(...)
   local _range = nil
   local collector = require("thetto/entrypoint/command").start_by_excmd(0, _range, {...})
   if collector == nil then
@@ -101,7 +101,7 @@ M.sync_open = function(...)
   return collector
 end
 
-M.sync_execute = function(...)
+function M.sync_execute(...)
   local _range = nil
   local job = require("thetto/entrypoint/command").execute(0, _range, {...})
   if job == nil then
@@ -113,7 +113,7 @@ M.sync_execute = function(...)
   end
 end
 
-M.wait_ui = function(f)
+function M.wait_ui(f)
   local finished = false
   require("thetto/view/ui")._changed_after = function(_)
     finished = true
@@ -129,7 +129,7 @@ M.wait_ui = function(f)
   end
 end
 
-M.search = function(pattern)
+function M.search(pattern)
   local result = vim.fn.search(pattern)
   if result == 0 then
     local info = debug.getinfo(2)
@@ -141,7 +141,7 @@ M.search = function(pattern)
   return result
 end
 
-M.new_file = function(path, ...)
+function M.new_file(path, ...)
   local f = io.open(M.test_data_dir .. path, "w")
   for _, line in ipairs({...}) do
     f:write(line .. "\n")
@@ -149,27 +149,27 @@ M.new_file = function(path, ...)
   f:close()
 end
 
-M.new_directory = function(path)
+function M.new_directory(path)
   vim.fn.mkdir(M.test_data_dir .. path, "p")
 end
 
-M.delete = function(path)
+function M.delete(path)
   vim.fn.delete(M.test_data_dir .. path, "rf")
 end
 
-M.cd = function(path)
+function M.cd(path)
   vim.api.nvim_set_current_dir(M.test_data_dir .. path)
 end
 
-M.path = function(path)
+function M.path(path)
   return M.test_data_dir .. (path or "")
 end
 
-M.window_count = function()
+function M.window_count()
   return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
 end
 
-M.sub_windows = function()
+function M.sub_windows()
   local windows = {}
   for bufnr, id in require("thetto/lib/buffer").in_tabpage(0) do
     local config = vim.api.nvim_win_get_config(id)

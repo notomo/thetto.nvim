@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self)
+function M.collect(self)
   local cmd = {"ps", "--no-headers", "faxo", "pid,user,command"}
   local remove_header = function(_)
   end

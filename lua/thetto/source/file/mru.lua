@@ -5,7 +5,7 @@ local M = {}
 
 M.cwd_marker = "%s/"
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local items = {}
 
   local paths = setup.get()

@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local lines = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)
 
   local pattern = opts.pattern
@@ -49,7 +49,7 @@ end
 
 vim.cmd("highlight default link ThettoJqError WarningMsg")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   highlighter:filter("ThettoJqError", items, function(item)
     return item.is_error

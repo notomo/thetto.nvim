@@ -1,6 +1,6 @@
 local M = {}
 
-M.action_execute = function(_, items)
+function M.action_execute(_, items)
   for _, item in ipairs(items) do
     if not item.keymap.mode:find("n") then
       goto continue
@@ -30,15 +30,15 @@ end
 
 local file_kind = require("thetto/kind/file")
 
-M.action_open = function(self, items)
+function M.action_open(self, items)
   file_kind.action_open(self, to_files(self, items))
 end
 
-M.action_tab_open = function(self, items)
+function M.action_tab_open(self, items)
   file_kind.action_tab_open(self, to_files(self, items))
 end
 
-M.action_vsplit_open = function(self, items)
+function M.action_vsplit_open(self, items)
   file_kind.action_vsplit_open(self, to_files(self, items))
 end
 

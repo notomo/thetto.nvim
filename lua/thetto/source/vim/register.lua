@@ -51,7 +51,7 @@ local names = {
   "/",
 }
 
-M.collect = function()
+function M.collect()
   local items = {}
   for _, name in ipairs(names) do
     local register = vim.fn.getreg(name)

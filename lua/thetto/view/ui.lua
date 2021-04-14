@@ -236,7 +236,7 @@ function UI._column(self)
 end
 
 -- for testing
-M._changed_after = function(_)
+function M._changed_after(_)
 end
 
 vim.cmd("highlight default link ThettoSelected Statement")

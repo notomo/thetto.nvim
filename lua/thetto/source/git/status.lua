@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self, _)
+function M.collect(self, _)
   local git_root, err = self.filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err

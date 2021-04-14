@@ -2,11 +2,11 @@ local vim = vim
 
 local M = {}
 
-M.readable = function(file_path)
+function M.readable(file_path)
   return vim.fn.filereadable(file_path) ~= 0
 end
 
-M.create_if_need = function(file_path)
+function M.create_if_need(file_path)
   local dir_path = vim.fn.fnamemodify(file_path, ":h")
   if vim.fn.isdirectory(dir_path) == 0 then
     vim.fn.mkdir(dir_path, "p")
@@ -18,7 +18,7 @@ M.create_if_need = function(file_path)
   return true
 end
 
-M.read_lines = function(path, s, e)
+function M.read_lines(path, s, e)
   local f = io.open(path, "r")
   if f == nil then
     return {}
@@ -36,7 +36,7 @@ M.read_lines = function(path, s, e)
   return lines
 end
 
-M.write_lines = function(path, lines)
+function M.write_lines(path, lines)
   local f = io.open(path, "w")
   for _, line in ipairs(lines) do
     f:write(line .. "\n")
@@ -44,7 +44,7 @@ M.write_lines = function(path, lines)
   f:close()
 end
 
-M.find_upward_dir = function(child_pattern)
+function M.find_upward_dir(child_pattern)
   local found_file = vim.fn.findfile(child_pattern, ".;")
   if found_file ~= "" then
     return vim.fn.fnamemodify(found_file, ":p:h")
@@ -58,7 +58,7 @@ M.find_upward_dir = function(child_pattern)
   return nil
 end
 
-M.find_git_root = function()
+function M.find_git_root()
   local git_root = M.find_upward_dir(".git")
   if git_root == nil then
     return nil, "not found .git"

@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function()
+function M.collect()
   local items = {}
   for key in pairs(package.loaded) do
     table.insert(items, {value = key})

@@ -1,6 +1,6 @@
 local M = {}
 
-M._find_dir = function(name, paths)
+function M._find_dir(name, paths)
   for _, p in ipairs(paths) do
     local path = p:gsub("?", name)
     local dir = vim.fn.fnamemodify(path, ":h")
@@ -27,7 +27,7 @@ M._find_dir = function(name, paths)
   return nil
 end
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local package_paths = vim.split(package.path, ";", true)
   vim.list_extend(package_paths, vim.split(package.cpath, ";", true))
 
@@ -63,7 +63,7 @@ end
 
 vim.cmd("highlight default link ThettoLuaLuarocksVersion Comment")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     highlighter:add("ThettoLuaLuarocksVersion", i - 1, item.column_offsets.version, -1)

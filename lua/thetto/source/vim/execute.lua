@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = {cmd = "messages"}
 
-M.collect = function(self)
+function M.collect(self)
   local items = {}
   local outputs = vim.api.nvim_exec(self.opts.cmd, true)
   for line in vim.gsplit(outputs, "\n", true) do

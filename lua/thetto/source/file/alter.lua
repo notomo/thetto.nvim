@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self)
+function M.collect(self)
   local path = vim.fn.expand("%:p")
   for _, patterns in ipairs(self.opts.pattern_groups) do
     local items = self:_to_items(patterns, path)
@@ -11,7 +11,7 @@ M.collect = function(self)
   return {}
 end
 
-M._to_items = function(self, patterns, path)
+function M._to_items(self, patterns, path)
   local index, matches
   for i, pattern in ipairs(patterns) do
     local m = self._match(pattern, path)
@@ -53,7 +53,7 @@ M._to_items = function(self, patterns, path)
   return items
 end
 
-M._match = function(pattern, path)
+function M._match(pattern, path)
   local parts = vim.split(pattern, "%", true)
   parts = vim.tbl_filter(function(part)
     return part ~= ""

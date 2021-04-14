@@ -1,6 +1,6 @@
 local M = {}
 
-M.action_execute = function(_, items)
+function M.action_execute(_, items)
   for _, item in ipairs(items) do
     vim.cmd("Thetto " .. item.value)
   end

@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self)
+function M.collect(self)
   local items = {}
   local home = self.pathlib.home()
   local paths = vim.api.nvim_list_runtime_paths()

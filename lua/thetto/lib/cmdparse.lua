@@ -21,7 +21,7 @@ local parse = function(arg)
   return nil, nil
 end
 
-M.args = function(raw_args, default)
+function M.args(raw_args, default)
   local name = nil
   local opts = vim.deepcopy(default or {})
   local ex_opts = {x = {}, xx = {}}

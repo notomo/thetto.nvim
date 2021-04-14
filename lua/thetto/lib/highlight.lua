@@ -35,7 +35,7 @@ function Factory.reset(self, bufnr)
   return highlighter
 end
 
-M.new_factory = function(key)
+function M.new_factory(key)
   local ns = vim.api.nvim_create_namespace(key)
   local factory = {ns = ns}
   return setmetatable(factory, Factory)

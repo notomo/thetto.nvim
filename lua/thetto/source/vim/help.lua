@@ -2,7 +2,7 @@ local vim = vim
 
 local M = {}
 
-M.collect = function(self)
+function M.collect(self)
   local items = {}
   local paths = self.listlib.unique(vim.api.nvim_get_runtime_file("doc/tags", true))
   for _, path in ipairs(paths) do

@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self)
+function M.collect(self)
   if vim.fn.has("win32") == 1 then
     return nil, nil, "not supported in windows"
   end
@@ -27,7 +27,7 @@ end
 
 vim.cmd("highlight default link ThettoManualDescription Comment")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     highlighter:add("ThettoManualDescription", i - 1, item.column_offsets._desc, -1)

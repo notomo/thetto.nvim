@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(_, opts)
+function M.collect(_, opts)
   local paths = {}
   for _, path in ipairs(vim.fn.readdir(opts.cwd)) do
     local abs_path = vim.fn.fnamemodify(opts.cwd .. "/" .. path, ":p:gs?\\?\\/?")
@@ -33,7 +33,7 @@ end
 
 vim.cmd("highlight default link ThettoFileInDirDirectory String")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   highlighter:filter("ThettoFileInDirDirectory", items, function(item)
     return item.kind_name == "directory"

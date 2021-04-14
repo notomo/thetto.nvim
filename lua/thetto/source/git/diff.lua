@@ -31,7 +31,7 @@ end
 
 M.opts = {expr = nil}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local git_root, err = self.filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err

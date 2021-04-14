@@ -1,6 +1,6 @@
 local M = {}
 
-M.apply = function(_, items)
+function M.apply(_, items)
   -- Note: if this filter exists, interactive mode is started.
   return items
 end

@@ -19,7 +19,7 @@ local get_bufnr = function(item)
   return vim.fn.bufnr(pattern)
 end
 
-M.action_open = function(_, items)
+function M.action_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -31,7 +31,7 @@ M.action_open = function(_, items)
   end
 end
 
-M.action_tab_open = function(_, items)
+function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -44,7 +44,7 @@ M.action_tab_open = function(_, items)
   end
 end
 
-M.action_vsplit_open = function(_, items)
+function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -57,7 +57,7 @@ M.action_vsplit_open = function(_, items)
   end
 end
 
-M.action_preview = function(_, items, ctx)
+function M.action_preview(_, items, ctx)
   local item = items[1]
   if item == nil then
     return
@@ -82,15 +82,15 @@ local to_dirs = function(items)
   return dirs
 end
 
-M.action_directory_open = function(self, items)
+function M.action_directory_open(self, items)
   directory_kind.action_open(self, to_dirs(items))
 end
 
-M.action_directory_tab_open = function(self, items)
+function M.action_directory_tab_open(self, items)
   directory_kind.action_tab_open(self, to_dirs(items))
 end
 
-M.action_directory_enter = function(_, items)
+function M.action_directory_enter(_, items)
   local item = items[1]
   if item == nil then
     return

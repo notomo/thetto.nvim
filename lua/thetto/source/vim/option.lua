@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function()
+function M.collect()
   local items = {}
   -- NOTE: ignore 'all'
   local names = {unpack(vim.fn.getcompletion("*", "option"), 2)}

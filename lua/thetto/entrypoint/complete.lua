@@ -4,7 +4,7 @@ local repository = require("thetto/core/repository")
 
 local M = {}
 
-M.action = function(_, _, _)
+function M.action(_, _, _)
   local ctx, err = repository.get_from_path()
   if err ~= nil then
     return ""
@@ -20,7 +20,7 @@ M.action = function(_, _, _)
   return table.concat(kind:action_names(), "\n")
 end
 
-M.source = function(_, _, _)
+function M.source(_, _, _)
   return table.concat(Source.all_names(), "\n")
 end
 

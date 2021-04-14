@@ -2,7 +2,7 @@ local M = {}
 
 M.key = "PATH"
 
-M.collect = function(self)
+function M.collect(self)
   local items = {}
   local paths = vim.split(os.getenv(M.key), self.pathlib.env_separator, true)
   for _, path in ipairs(paths) do

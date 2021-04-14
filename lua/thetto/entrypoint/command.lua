@@ -12,7 +12,7 @@ local modulelib = require("thetto/lib/module")
 
 local M = {}
 
-M.start_by_excmd = function(has_range, raw_range, raw_args)
+function M.start_by_excmd(has_range, raw_range, raw_args)
   local source_name, raw_opts, ex_opts, parse_err = cmdparse.args(raw_args, Options.default_empty())
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
@@ -35,7 +35,7 @@ M.start_by_excmd = function(has_range, raw_range, raw_args)
   return result, nil
 end
 
-M.start = function(args)
+function M.start(args)
   local source_name = args.source_name
   local source_opts = args.source_opts or {}
   local action_opts = args.action_opts or {}
@@ -49,7 +49,7 @@ M.start = function(args)
   return result, nil
 end
 
-M._start = function(source_name, source_opts, action_opts, raw_opts)
+function M._start(source_name, source_opts, action_opts, raw_opts)
   local opts, opts_err = Options.new(raw_opts)
   if opts_err ~= nil then
     return nil, opts_err
@@ -109,7 +109,7 @@ M._start = function(source_name, source_opts, action_opts, raw_opts)
   return collector, nil
 end
 
-M.execute = function(has_range, raw_range, raw_args)
+function M.execute(has_range, raw_range, raw_args)
   local action_name, opts, ex_opts, parse_err = cmdparse.args(raw_args, {resume = false, offset = 0})
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)
@@ -130,7 +130,7 @@ M.execute = function(has_range, raw_range, raw_args)
   return result, nil
 end
 
-M._execute = function(action_name, range, action_opts, opts)
+function M._execute(action_name, range, action_opts, opts)
   local ctx
   if opts.resume then
     ctx = repository.resume()
@@ -160,7 +160,7 @@ M._execute = function(action_name, range, action_opts, opts)
   return executor:batch(ctx)
 end
 
-M.setup = function(raw_args)
+function M.setup(raw_args)
   local setup_name, _, _, parse_err = cmdparse.args(raw_args, {})
   if parse_err ~= nil then
     return nil, messagelib.error(parse_err)

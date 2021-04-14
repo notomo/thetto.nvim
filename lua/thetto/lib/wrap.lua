@@ -2,7 +2,7 @@ local vim = vim
 
 local M = {}
 
-M.debounce = function(ms, f)
+function M.debounce(ms, f)
   local timer = nil
   return function(...)
     if timer == nil then
@@ -16,7 +16,7 @@ M.debounce = function(ms, f)
   end
 end
 
-M.traceback = function(f)
+function M.traceback(f)
   local ok, result, err = xpcall(f, debug.traceback)
   if not ok then
     error(result)

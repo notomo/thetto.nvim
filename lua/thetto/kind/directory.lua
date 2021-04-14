@@ -1,16 +1,16 @@
 local M = {}
 
-M.after = function(_)
+function M.after(_)
 end
 
-M.action_cd = function(_, items)
+function M.action_cd(_, items)
   for _, item in ipairs(items) do
     vim.cmd("lcd " .. item.path)
     M.after(item.path)
   end
 end
 
-M.action_tab_open = function(_, items)
+function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
     vim.cmd("lcd " .. item.path)
@@ -18,7 +18,7 @@ M.action_tab_open = function(_, items)
   end
 end
 
-M.action_vsplit_open = function(_, items)
+function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
     vim.cmd("vsplit")
     vim.cmd("lcd " .. item.path)
@@ -26,7 +26,7 @@ M.action_vsplit_open = function(_, items)
   end
 end
 
-M.action_enter = function(_, items)
+function M.action_enter(_, items)
   local item = items[1]
   if item == nil then
     return

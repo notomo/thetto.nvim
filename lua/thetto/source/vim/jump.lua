@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local items = {}
 
   local jumps = vim.fn.reverse(vim.fn.getjumplist(0)[1])
@@ -40,7 +40,7 @@ end
 
 vim.cmd("highlight default link ThettoVimJumpPath Comment")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     highlighter:add("ThettoVimJumpPath", i - 1, 0, item.column_offsets.value - 1)

@@ -11,7 +11,7 @@ M.commands = {
 
 M.opts = {flags = "ge", range = "%", magic = "\\v"}
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local items = {}

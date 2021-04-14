@@ -12,7 +12,7 @@ M.ignore_pattern = "^$"
 local store_file_path = pathlib.user_data_path("setup_file_mru.txt")
 local group_name = "thetto_setup_file_mru"
 
-M.start = function()
+function M.start()
   local stored_paths = filelib.read_lines(store_file_path, 0, M.limit)
   persist.paths = vim.tbl_filter(M.validate_fn, stored_paths)
 
@@ -25,18 +25,18 @@ M.start = function()
   vim.cmd("augroup END")
 end
 
-M.get = function()
+function M.get()
   return vim.fn.reverse(persist.paths)
 end
 
-M.validate_fn = function()
+function M.validate_fn()
   local regex = vim.regex(M.ignore_pattern)
   return function(line)
     return not regex:match_str(line) and filelib.readable(line)
   end
 end
 
-M._add = function(bufnr)
+function M._add(bufnr)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     return
   end
@@ -59,7 +59,7 @@ M._add = function(bufnr)
   table.insert(persist.paths, path)
 end
 
-M._save = function()
+function M._save()
   filelib.write_lines(store_file_path, persist.paths)
 end
 

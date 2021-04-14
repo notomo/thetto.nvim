@@ -19,7 +19,7 @@ local to_regexes = function(input_line, opts)
   return regexes
 end
 
-M.apply = function(self, items, input_line, opts)
+function M.apply(self, items, input_line, opts)
   local filtered = {}
   local regexes = to_regexes(input_line, opts)
   for _, item in ipairs(items) do
@@ -45,7 +45,7 @@ end
 
 vim.cmd("highlight default link ThettoFilterRegexMatch Boolean")
 
-M.highlight = function(self, bufnr, items, input_line, opts)
+function M.highlight(self, bufnr, items, input_line, opts)
   if self.inversed then
     return
   end

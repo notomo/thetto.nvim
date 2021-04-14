@@ -6,7 +6,7 @@ M.command_opts = {"-inH"}
 M.recursive_opt = "-r"
 M.separator = "--"
 
-M.collect = function(self, opts)
+function M.collect(self, opts)
   local pattern = opts.pattern
   if not opts.interactive and pattern == nil then
     pattern = vim.fn.input("Pattern: ")
@@ -78,7 +78,7 @@ vim.cmd("highlight default link ThettoFileGrepMatch Define")
 -- NOTICE: support only this pattern
 local highlight_target = vim.regex("\\v[[:alnum:]_]+")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   local pattern = (self.ctx.pattern or ""):lower()
   local ok = ({highlight_target:match_str(pattern)})[1] ~= nil

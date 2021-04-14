@@ -60,7 +60,6 @@ function Kind.new(executor, name)
     behaviors = vim.tbl_deep_extend("force", base.behaviors, origin.behaviors or {}, user_behaviors, source_user_behaviors),
     _origin = origin,
   }
-  tbl.__index = tbl
   return setmetatable(tbl, Kind)
 end
 

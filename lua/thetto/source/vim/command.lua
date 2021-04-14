@@ -1,6 +1,6 @@
 local M = {}
 
-M.collect = function()
+function M.collect()
   local excmds = vim.api.nvim_get_commands({builtin = false})
   excmds = vim.tbl_extend("force", excmds, vim.api.nvim_buf_get_commands(0, {}))
 
@@ -21,7 +21,7 @@ end
 
 vim.cmd("highlight default link ThettoVimCommandDefinition Comment")
 
-M.highlight = function(self, bufnr, items)
+function M.highlight(self, bufnr, items)
   local highlighter = self.highlights:reset(bufnr)
   for i, item in ipairs(items) do
     highlighter:add("ThettoVimCommandDefinition", i - 1, item.column_offsets.definition, -1)
