@@ -43,7 +43,7 @@ test]])
     command("Thetto line")
     command("Thetto vim/runtimepath")
 
-    assert.window_count(6)
+    assert.window_count(5)
   end)
 
   it("should exist same source only one", function()
@@ -51,7 +51,7 @@ test]])
     command("tabedit")
     command("Thetto line")
 
-    assert.window_count(6)
+    assert.window_count(5)
   end)
 
   it("can resume even if opened", function()
@@ -59,7 +59,7 @@ test]])
     command("tabedit")
 
     command("Thetto --resume")
-    assert.window_count(6)
+    assert.window_count(5)
   end)
 
   it("goes back to original window when quit resumed thetto", function()

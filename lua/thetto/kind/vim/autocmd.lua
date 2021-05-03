@@ -1,9 +1,9 @@
 local M = {}
 
-function M.action_delete_group(_, items)
-  for _, item in ipairs(items) do
-    vim.cmd("autocmd! " .. item.autocmd.group)
-  end
-end
-
-return setmetatable(M, require("thetto/kind/file"))
+local anonymous_autocmd_kind = require("thetto/kind/vim/anonymous_autocmd")
+local file_kind = require("thetto/kind/file")
+return setmetatable(M, {
+  __index = function(_, k)
+    return rawget(M, k) or anonymous_autocmd_kind[k] or file_kind[k]
+  end,
+})

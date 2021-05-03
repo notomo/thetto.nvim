@@ -15,8 +15,7 @@ describe("vim/autocmd source", function()
     command("ThettoDo move_to_list")
     helper.search("hoge_autocmd")
 
-    command("ThettoDo tab_open")
-    assert.tab_count(2)
+    assert.exists_pattern("hoge_autocmd")
   end)
 
   it("can delete autocmd", function()

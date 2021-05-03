@@ -14,7 +14,7 @@ vim.cmd("autocmd SwapExists * lua vim.v.swapchoice = 'd'")
 
 function M.command(cmd)
   local _, err = pcall(vim.cmd, cmd)
-  if err then
+  if err and err ~= "" then
     local info = debug.getinfo(2)
     local pos = ("%s:%d"):format(info.source, info.currentline)
     local msg = ("on %s: failed excmd `%s`\n%s"):format(pos, cmd, err)
@@ -40,7 +40,7 @@ function M.after_each()
   M.command("silent! %bwipeout!")
   M.command("filetype off")
   M.command("syntax off")
-  print(" ")
+  print(" \n")
 
   require("thetto/lib/module").cleanup()
   M.delete("")

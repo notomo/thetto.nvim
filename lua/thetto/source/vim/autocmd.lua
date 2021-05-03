@@ -67,6 +67,13 @@ function Parser.eat(self, output)
     return
   end
 
+  -- ex. Last set from anonymous :source line 8888
+  local source_row = output:match("^%s+Last%s+set%s+from%s+anonymous%s+%S+%s+line%s+(%d+)")
+  if source_row ~= nil then
+    table.insert(self.autocmds, Autocmd.new(vim.deepcopy(self.autocmd)))
+    return
+  end
+
   -- ex.    *         echomsg "executed"
   local pattern, cmd = output:match("^    (%S+)%s+(.+)")
   if pattern ~= nil and cmd ~= nil then
@@ -107,11 +114,16 @@ function M.collect(self)
     parser:eat(output)
   end
   for _, autocmd in ipairs(parser.autocmds) do
+    local kind_name
+    if not autocmd.path then
+      kind_name = "vim/anonymous_autocmd"
+    end
     table.insert(items, {
       value = autocmd:string(),
       autocmd = autocmd:value(),
       path = autocmd.path,
       row = autocmd.row,
+      kind_name = kind_name,
     })
   end
   return items

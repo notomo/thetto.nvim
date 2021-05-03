@@ -17,6 +17,7 @@ local to_files = function(self, items)
   for _, item in ipairs(items) do
     local result = vim.api.nvim_exec("verbose map " .. item.keymap.lhs, true)
     local outputs = vim.split(result, "\n", true)
+    -- NOTICE: cannot jump to anonymous :source line
     for _, output in ipairs(outputs) do
       local path = output:match("^%s+Last%s+set%s+from%s+(%S+)")
       if path ~= nil and self.filelib.readable(vim.fn.expand(path)) then

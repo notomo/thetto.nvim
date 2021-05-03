@@ -8,7 +8,7 @@
 # - apropos
 
 test:
-	vusted --shuffle -v
+	vusted --shuffle
 	@# vusted --shuffle -v --seed=SEED
 
 .PHONY: test

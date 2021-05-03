@@ -21,19 +21,4 @@ describe("vim/keymap source", function()
     assert.tab_count(2)
   end)
 
-  it("can execute tab_open", function()
-    command("nnoremap <buffer> <Space>hoge :<C-u>tabedit<CR>")
-
-    command("Thetto vim/keymap")
-    helper.sync_input({"hoge"})
-
-    command("ThettoDo move_to_list")
-
-    helper.search("hoge")
-
-    command("ThettoDo tab_open")
-
-    assert.tab_count(2)
-  end)
-
 end)
