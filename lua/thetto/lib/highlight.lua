@@ -9,11 +9,10 @@ function Highlighter.add(self, hl_group, row, start_col, end_col)
   vim.api.nvim_buf_add_highlight(self.bufnr, self.ns, hl_group, row, start_col, end_col)
 end
 
-function Highlighter.set_virtual_text(self, row, chunks, pos_type)
-  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, row, 0, {
-    virt_text = chunks,
-    virt_text_pos = pos_type,
-  })
+function Highlighter.set_virtual_text(self, row, chunks, opts)
+  opts = opts or {}
+  opts.virt_text = chunks
+  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, row, 0, opts)
 end
 
 function Highlighter.filter(self, hl_group, elements, condition)

@@ -63,7 +63,9 @@ function Inputter.redraw(self, input_lines, filters)
   local highlighter = self._filter_info_hl_factory:reset(self._bufnr)
   for i, filter in ipairs(filters) do
     local filter_info = ("[%s] "):format(filter.name)
-    highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}}, "right_align")
+    highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}}, {
+      virt_text_pos = "right_align",
+    })
   end
 
   local line_count_diff = height - #input_lines

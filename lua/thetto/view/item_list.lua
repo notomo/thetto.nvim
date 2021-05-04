@@ -12,9 +12,8 @@ ItemList.__index = ItemList
 M.ItemList = ItemList
 
 local FILETYPE = "thetto"
-local SIGN_WIDTH = 4
 
-function ItemList.new(source_name, display_limit, width, height, row, column)
+function ItemList.new(source_name, width, height, row, column)
   local bufnr = bufferlib.scratch(function(b)
     local name = ("thetto://%s/%s"):format(source_name, FILETYPE)
     bufferlib.delete_by_name(name)
@@ -23,35 +22,24 @@ function ItemList.new(source_name, display_limit, width, height, row, column)
   end)
 
   local window = vim.api.nvim_open_win(bufnr, false, {
-    width = width - SIGN_WIDTH,
-    height = height,
-    relative = "editor",
-    row = row,
-    col = column + SIGN_WIDTH,
-    external = false,
-    style = "minimal",
-  })
-  vim.wo[window].scrollbind = true
-
-  local sign_bufnr = bufferlib.scratch(function(b)
-    vim.api.nvim_buf_set_lines(b, 0, -1, false, vim.fn["repeat"]({""}, display_limit))
-    vim.bo[b].modifiable = false
-  end)
-
-  local sign_window = vim.api.nvim_open_win(sign_bufnr, false, {
-    width = SIGN_WIDTH,
+    width = width - 2, -- NOTICE: calc border width
     height = height,
     relative = "editor",
     row = row,
     col = column,
     external = false,
     style = "minimal",
+    border = {
+      {"", "NormalFloat"},
+      {"", "NormalFloat"},
+      {" ", "NormalFloat"},
+      {" ", "NormalFloat"},
+      {"", "NormalFloat"},
+      {"", "NormalFloat"},
+      {" ", "NormalFloat"},
+      {" ", "NormalFloat"},
+    },
   })
-  vim.wo[sign_window].winhighlight = "Normal:ThettoColorLabelBackground"
-  vim.wo[sign_window].scrollbind = true
-
-  local on_sign_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/lib/window').enter(%s)"):format(sign_bufnr, window)
-  vim.cmd(on_sign_enter)
 
   local group_name = "theto_closed_" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
@@ -62,8 +50,6 @@ function ItemList.new(source_name, display_limit, width, height, row, column)
   local tbl = {
     _bufnr = bufnr,
     _window = window,
-    _sign_bufnr = sign_bufnr,
-    _sign_window = sign_window,
     _selection_hl_factory = highlights.new_factory("thetto-selection-highlight"),
   }
   return setmetatable(tbl, ItemList)
@@ -80,13 +66,10 @@ function ItemList.redraw(self, items, source, input_lines, filters, opts)
 
   if vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_get_current_buf() ~= self._bufnr then
     vim.api.nvim_win_set_cursor(self._window, {1, 0})
-    if vim.api.nvim_win_is_valid(self._sign_window) then
-      vim.api.nvim_win_set_cursor(self._sign_window, {1, 0})
-    end
   end
 
   source:highlight(self._bufnr, items)
-  source:highlight_sign(self._sign_bufnr, items)
+  source:highlight_sign(self._bufnr, items)
   self:redraw_selections(items)
 
   for i, filter in ipairs(filters) do
@@ -106,13 +89,7 @@ end
 
 function ItemList.move_to(self, left_column)
   local list_config = vim.api.nvim_win_get_config(self._window)
-  local sign_config = vim.api.nvim_win_get_config(self._sign_window)
   vim.api.nvim_win_set_config(self._window, {
-    relative = "editor",
-    col = left_column + sign_config.width,
-    row = list_config.row,
-  })
-  vim.api.nvim_win_set_config(self._sign_window, {
     relative = "editor",
     col = left_column,
     row = list_config.row,
@@ -120,7 +97,7 @@ function ItemList.move_to(self, left_column)
 end
 
 function ItemList.is_valid(self)
-  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr) and vim.api.nvim_win_is_valid(self._sign_window) and vim.api.nvim_buf_is_valid(self._sign_bufnr)
+  return vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_buf_is_valid(self._bufnr)
 end
 
 function ItemList.is_active(self)
@@ -151,7 +128,6 @@ function ItemList.close(self)
 
   vim.cmd("autocmd! " .. "theto_closed_" .. self._bufnr)
   windowlib.close(self._window)
-  windowlib.close(self._sign_window)
 end
 
 function ItemList.position(self)
@@ -164,7 +140,7 @@ function ItemList.cursor(self)
 end
 
 function ItemList.has(self, id)
-  return self._window == id or self._sign_window == id
+  return self._window == id
 end
 
 function M._on_moved(key)

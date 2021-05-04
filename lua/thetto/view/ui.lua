@@ -38,7 +38,7 @@ function UI.open(self, on_move)
   local column = self:_column()
 
   self._inputter = Inputter.new(self._collector, width, height, row, column)
-  self._item_list = ItemList.new(source_name, self._collector.opts.display_limit, width, height, row, column)
+  self._item_list = ItemList.new(source_name, width, height, row, column)
   self._status_line = StatusLine.new(source_name, width, height, row, column)
   self._sidecar = Sidecar.new()
 
