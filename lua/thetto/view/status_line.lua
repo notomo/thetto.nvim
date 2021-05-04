@@ -16,15 +16,25 @@ function StatusLine.new(source_name, width, height, row, column)
   end)
 
   local window = vim.api.nvim_open_win(bufnr, false, {
-    width = width,
+    width = width - 2,
     height = 1,
     relative = "editor",
     row = row + height,
     col = column,
     external = false,
     style = "minimal",
+    border = {
+      {"", "ThettoInfo"},
+      {"", "ThettoInfo"},
+      {" ", "ThettoInfo"},
+      {" ", "ThettoInfo"},
+      {"", "ThettoInfo"},
+      {"", "ThettoInfo"},
+      {" ", "ThettoInfo"},
+      {" ", "ThettoInfo"},
+    },
   })
-  vim.wo[window].winhighlight = "Normal:ThettoInfo,SignColumn:ThettoInfo,CursorLine:ThettoInfo"
+  vim.wo[window].winhighlight = "Normal:ThettoInfo,CursorLine:ThettoInfo"
   local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/status_line')._on_enter('%s')"):format(bufnr, source_name)
   vim.cmd(on_info_enter)
 
@@ -33,9 +43,7 @@ function StatusLine.new(source_name, width, height, row, column)
     _window = window,
     _info_hl_factory = highlights.new_factory("thetto-info-text"),
   }
-  local self = setmetatable(tbl, StatusLine)
-  self:_set_left_padding()
-  return self
+  return setmetatable(tbl, StatusLine)
 end
 
 function StatusLine.redraw(self, source, items, sorters, finished, result_count)
@@ -55,7 +63,9 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
 
   local text = ("%s%s  [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
   local highlighter = self._info_hl_factory:reset(self._bufnr)
-  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {"  " .. status, "Comment"}})
+  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {status, "Comment"}}, {
+    virt_text_pos = "overlay",
+  })
 end
 
 function StatusLine.move_to(self, left_column)
@@ -65,12 +75,6 @@ function StatusLine.move_to(self, left_column)
     col = left_column,
     row = config.row,
   })
-  self:_set_left_padding()
-end
-
--- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
-function StatusLine._set_left_padding(self)
-  vim.wo[self._window].signcolumn = "yes:1"
 end
 
 function StatusLine.close(self)

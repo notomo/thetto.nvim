@@ -31,15 +31,25 @@ function Inputter.new(collector, width, height, row, column)
 
   local input_height = #collector.input_lines
   local window = vim.api.nvim_open_win(bufnr, false, {
-    width = width,
+    width = width - 2,
     height = input_height,
     relative = "editor",
     row = row + height + 1,
     col = column,
     external = false,
     style = "minimal",
+    border = {
+      {"", "ThettoInput"},
+      {"", "ThettoInput"},
+      {" ", "ThettoInput"},
+      {" ", "ThettoInput"},
+      {"", "ThettoInput"},
+      {"", "ThettoInput"},
+      {" ", "ThettoInput"},
+      {" ", "ThettoInput"},
+    },
   })
-  vim.wo[window].winhighlight = "Normal:ThettoInput,SignColumn:ThettoInput,CursorLine:ThettoInput"
+  vim.wo[window].winhighlight = "Normal:ThettoInput,CursorLine:ThettoInput"
 
   local tbl = {
     _bufnr = bufnr,
@@ -47,9 +57,7 @@ function Inputter.new(collector, width, height, row, column)
     height = input_height,
     _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
   }
-  local self = setmetatable(tbl, Inputter)
-  self:_set_left_padding()
-  return self
+  return setmetatable(tbl, Inputter)
 end
 
 function Inputter.redraw(self, input_lines, filters)
@@ -62,7 +70,7 @@ function Inputter.redraw(self, input_lines, filters)
 
   local highlighter = self._filter_info_hl_factory:reset(self._bufnr)
   for i, filter in ipairs(filters) do
-    local filter_info = ("[%s] "):format(filter.name)
+    local filter_info = ("[%s]"):format(filter.name)
     highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}}, {
       virt_text_pos = "right_align",
     })
@@ -83,12 +91,6 @@ function Inputter.move_to(self, left_column)
     col = left_column,
     row = input_config.row,
   })
-  self:_set_left_padding()
-end
-
--- NOTE: nvim_win_set_config resets `signcolumn` if `style` is "minimal".
-function Inputter._set_left_padding(self)
-  vim.wo[self._window].signcolumn = "yes:1"
 end
 
 function Inputter.enter(self)
