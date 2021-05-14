@@ -61,9 +61,9 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
     status = "running"
   end
 
-  local text = ("%s%s  [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
+  local text = ("%s%s [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
   local highlighter = self._info_hl_factory:reset(self._bufnr)
-  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {status, "Comment"}}, {
+  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {" "}, {status, "Comment"}}, {
     virt_text_pos = "overlay",
   })
 end
