@@ -87,7 +87,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     local range = open_target.range or {s = {column = 0}, e = {column = -1}}
     highlighter:add("ThettoPreview", row - 1, range.s.column, range.e.column)
     if vim.fn.getbufline(bufnr, row)[1] == "" then
-      highlighter:set_virtual_text(row - 1, {{"(empty)", "ThettoPreview"}})
+      highlighter:set_virtual_text(row - 1, {{" ", "ThettoPreview"}}, {virt_text_pos = "overlay"})
     end
   end
 end
