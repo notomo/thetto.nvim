@@ -63,10 +63,10 @@ end
 
 vim.cmd("highlight default link ThettoLuaLuarocksVersion Comment")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   for i, item in ipairs(items) do
-    highlighter:add("ThettoLuaLuarocksVersion", i - 1, item.column_offsets.version, -1)
+    highlighter:add("ThettoLuaLuarocksVersion", first_line + i - 1, item.column_offsets.version, -1)
   end
 end
 

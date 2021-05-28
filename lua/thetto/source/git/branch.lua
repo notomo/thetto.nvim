@@ -45,11 +45,11 @@ end
 
 vim.cmd("highlight default link ThettoGitActiveBranch Type")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   for i, item in ipairs(items) do
     if item.is_current_branch then
-      highlighter:add("ThettoGitActiveBranch", i - 1, 0, -1)
+      highlighter:add("ThettoGitActiveBranch", first_line + i - 1, 0, -1)
     end
   end
 end

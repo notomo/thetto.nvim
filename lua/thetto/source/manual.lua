@@ -27,10 +27,10 @@ end
 
 vim.cmd("highlight default link ThettoManualDescription Comment")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   for i, item in ipairs(items) do
-    highlighter:add("ThettoManualDescription", i - 1, item.column_offsets._desc, -1)
+    highlighter:add("ThettoManualDescription", first_line + i - 1, item.column_offsets._desc, -1)
   end
 end
 

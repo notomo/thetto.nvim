@@ -35,7 +35,6 @@ function Source.new(name, source_opts, opts)
     name = name,
     opts = vim.tbl_extend("force", origin.opts or base.opts, source_opts),
     highlights = highlights.new_factory("thetto-list-highlight"),
-    sign_highlights = highlights.new_factory("thetto-sign-highlight"),
     filters = nil,
     sorters = nil,
     bufnr = vim.api.nvim_get_current_buf(),

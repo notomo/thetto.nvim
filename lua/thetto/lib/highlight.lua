@@ -5,8 +5,23 @@ local M = {}
 local Highlighter = {}
 Highlighter.__index = Highlighter
 
-function Highlighter.add(self, hl_group, row, start_col, end_col)
+-- HACK
+function Highlighter.add_normal(self, hl_group, row, start_col, end_col)
   vim.api.nvim_buf_add_highlight(self.bufnr, self.ns, hl_group, row, start_col, end_col)
+end
+
+function Highlighter.add(self, hl_group, row, start_col, end_col)
+  local end_line
+  if end_col == -1 then
+    end_line = row + 1
+    end_col = nil
+  end
+  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, row, start_col, {
+    hl_group = hl_group,
+    end_line = end_line,
+    end_col = end_col,
+    ephemeral = true,
+  })
 end
 
 function Highlighter.set_virtual_text(self, row, chunks, opts)
@@ -15,10 +30,18 @@ function Highlighter.set_virtual_text(self, row, chunks, opts)
   vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, row, 0, opts)
 end
 
-function Highlighter.filter(self, hl_group, elements, condition)
+function Highlighter.add_line(self, hl_group, row)
+  vim.api.nvim_buf_set_extmark(self.bufnr, self.ns, row, 0, {
+    hl_group = hl_group,
+    end_line = row + 1,
+    ephemeral = true,
+  })
+end
+
+function Highlighter.filter(self, hl_group, row, elements, condition)
   for i, e in ipairs(elements) do
     if condition(e) then
-      self:add(hl_group, i - 1, 0, -1)
+      self:add_line(hl_group, row + i - 1)
     end
   end
 end

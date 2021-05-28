@@ -33,9 +33,9 @@ end
 
 vim.cmd("highlight default link ThettoFileInDirDirectory String")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
-  highlighter:filter("ThettoFileInDirDirectory", items, function(item)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
+  highlighter:filter("ThettoFileInDirDirectory", first_line, items, function(item)
     return item.kind_name == "directory"
   end)
 end

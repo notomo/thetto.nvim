@@ -63,6 +63,33 @@ function UI.resume(self)
   return self:redraw(self._collector.input_lines, self._state.row)
 end
 
+function UI._highlight_win(_, _, bufnr, topline, botline_guess)
+  local ctx, err = repository.get_from_path(bufnr, "$")
+  if err ~= nil then
+    return false
+  end
+  ctx.ui:highlight(topline, botline_guess)
+  return false
+end
+
+local ns = vim.api.nvim_create_namespace("thetto-list-highlight")
+vim.api.nvim_set_decoration_provider(ns, {})
+vim.api.nvim_set_decoration_provider(ns, {on_win = UI._highlight_win})
+
+function UI.highlight(self, first_line, last_line)
+  local collector_items = self._collector.items:values()
+  local items = {}
+  for i = first_line + 1, last_line, 1 do
+    table.insert(items, collector_items[i])
+  end
+
+  local source = self._collector.source
+  local input_lines = self._collector.input_lines
+  local filters = self._collector.filters:values()
+  local opts = self._collector.opts
+  self._item_list:highlight(first_line, items, source, input_lines, filters, opts)
+end
+
 function UI.redraw(self, input_lines, row)
   if self._item_list:is_valid() then
     local filters = self._collector.filters:values()
@@ -70,10 +97,9 @@ function UI.redraw(self, input_lines, row)
     local source = self._collector.source
     local result_count = self._collector.result:count()
     local items = self._collector.items:values()
-    local opts = self._collector.opts
     local finished = self._collector:finished()
 
-    self._item_list:redraw(items, source, input_lines, filters, opts)
+    self._item_list:redraw(items)
     self._status_line:redraw(source, items, sorters, finished, result_count)
     self._inputter:redraw(input_lines, filters)
   end

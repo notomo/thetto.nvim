@@ -43,10 +43,10 @@ end
 
 vim.cmd("highlight default link ThettoMakeTargetPath Comment")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   for i, item in ipairs(items) do
-    highlighter:add("ThettoMakeTargetPath", i - 1, 0, item.column_offsets.value - 1)
+    highlighter:add("ThettoMakeTargetPath", first_line + i - 1, 0, item.column_offsets.value - 1)
   end
 end
 

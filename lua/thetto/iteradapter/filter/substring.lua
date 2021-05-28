@@ -38,12 +38,12 @@ end
 
 vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
 
-function M.highlight(self, bufnr, items, input_line, opts)
+function M.highlight(self, bufnr, first_line, items, input_line, opts)
   if self.inversed then
     return
   end
 
-  local highlighter = self.highlights:reset(bufnr)
+  local highlighter = self.highlights:create(bufnr)
   local texts = to_texts(input_line, opts)
   for i, item in ipairs(items) do
     local offsets = item.column_offsets or {}
@@ -70,7 +70,7 @@ function M.highlight(self, bufnr, items, input_line, opts)
 
     local offset = offsets[self.key] or 0
     for _, pos in ipairs(positions) do
-      highlighter:add("ThettoFilterSubstringMatch", i - 1, offset + pos[1] - 1, offset + pos[2])
+      highlighter:add("ThettoFilterSubstringMatch", first_line + i - 1, offset + pos[1] - 1, offset + pos[2])
     end
   end
 end

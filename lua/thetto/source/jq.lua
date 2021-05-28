@@ -49,9 +49,9 @@ end
 
 vim.cmd("highlight default link ThettoJqError WarningMsg")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
-  highlighter:filter("ThettoJqError", items, function(item)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
+  highlighter:filter("ThettoJqError", first_line, items, function(item)
     return item.is_error
   end)
 end

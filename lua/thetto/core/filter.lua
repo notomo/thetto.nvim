@@ -61,8 +61,8 @@ function Filter.new(name, opts, inversed, key, modifier)
     _key = _key,
     is_interactive = name == "interactive",
     modifier = modifier,
+    highlights = highlights.new_factory("thetto-list-highlight"),
   }
-  tbl.highlights = highlights.new_factory("thetto-filter-highlight-" .. Filter._name(tbl))
 
   return setmetatable(tbl, Filter)
 end

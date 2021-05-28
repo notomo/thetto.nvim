@@ -44,11 +44,11 @@ function M.collect()
   return items
 end
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   local end_col = #colored
   for i, item in ipairs(items) do
-    highlighter:add(item.value, i - 1, 0, end_col)
+    highlighter:add(item.value, first_line + i - 1, 0, end_col)
   end
 end
 

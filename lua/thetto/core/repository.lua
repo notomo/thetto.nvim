@@ -40,10 +40,11 @@ function M.resume(key)
   return recent, nil
 end
 
-function M.get_from_path(bufnr)
+function M.get_from_path(bufnr, pattern)
+  pattern = pattern or ""
   local path = vim.api.nvim_buf_get_name(bufnr or 0)
   -- this should move to the view module maybe
-  local key = path:match("thetto://(.+)/thetto")
+  local key = path:match("thetto://(.+)/thetto" .. pattern)
   if key == nil then
     return nil, "not matched path: " .. path
   end

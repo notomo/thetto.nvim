@@ -78,18 +78,18 @@ vim.cmd("highlight default link ThettoFileGrepMatch Define")
 -- NOTICE: support only this pattern
 local highlight_target = vim.regex("\\v[[:alnum:]_]+")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   local pattern = (self.ctx.pattern or ""):lower()
   local ok = ({highlight_target:match_str(pattern)})[1] ~= nil
   for i, item in ipairs(items) do
-    highlighter:add("ThettoFileGrepPath", i - 1, 0, item.column_offsets.value - 1)
+    highlighter:add("ThettoFileGrepPath", first_line + i - 1, 0, item.column_offsets.value - 1)
     if ok then
       -- NOTICE: support only ignorecase
       -- NOTICE: support only the first occurrence
       local s, e = (item.value:lower()):find(pattern, 1, true)
       if s ~= nil then
-        highlighter:add("ThettoFileGrepMatch", i - 1, item.column_offsets.value + s - 1, item.column_offsets.value + e)
+        highlighter:add("ThettoFileGrepMatch", first_line + i - 1, item.column_offsets.value + s - 1, item.column_offsets.value + e)
       end
     end
   end

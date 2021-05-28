@@ -42,11 +42,11 @@ end
 vim.cmd("highlight default link ThettoOutlineLine Comment")
 vim.cmd("highlight default link ThettoOutlineType Statement")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
   for i, item in ipairs(items) do
-    highlighter:add("ThettoOutlineLine", i - 1, item.column_offsets.line, -1)
-    highlighter:add("ThettoOutlineType", i - 1, item.column_offsets.type, item.column_offsets.line)
+    highlighter:add("ThettoOutlineLine", first_line + i - 1, item.column_offsets.line, -1)
+    highlighter:add("ThettoOutlineType", first_line + i - 1, item.column_offsets.type, item.column_offsets.line)
   end
 end
 

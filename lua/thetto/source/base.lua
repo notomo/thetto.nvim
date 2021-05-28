@@ -6,19 +6,22 @@ function M.collect()
   return {}
 end
 
-function M.highlight(_, _, _)
+function M.highlight(_, _, _, _)
 end
 
-function M.highlight_sign(self, bufnr, items)
+function M.highlight_sign(self, bufnr, first_line, items)
   if #self.compiled_colors == 0 then
     return
   end
 
-  local highlighter = self.sign_highlights:reset(bufnr)
+  local highlighter = self.highlights:create(bufnr)
   for i, item in ipairs(items) do
     for _, color in ipairs(self.compiled_colors) do
       if color.always or color.regex:match_str(item[self.color_label_key]) then
-        highlighter:set_virtual_text(i - 1, color.chunks, {virt_text_pos = "right_align"})
+        highlighter:set_virtual_text(first_line + i - 1, color.chunks, {
+          virt_text_pos = "right_align",
+          ephemeral = true,
+        })
         break
       end
     end

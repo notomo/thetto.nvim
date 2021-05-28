@@ -40,9 +40,9 @@ end
 
 vim.cmd("highlight default link ThettoFileBookmarkDirectory String")
 
-function M.highlight(self, bufnr, items)
-  local highlighter = self.highlights:reset(bufnr)
-  highlighter:filter("ThettoFileBookmarkDirectory", items, function(item)
+function M.highlight(self, bufnr, first_line, items)
+  local highlighter = self.highlights:create(bufnr)
+  highlighter:filter("ThettoFileBookmarkDirectory", first_line, items, function(item)
     return item.kind_name == "directory"
   end)
 end

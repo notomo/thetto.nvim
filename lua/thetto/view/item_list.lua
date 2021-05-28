@@ -55,7 +55,7 @@ function ItemList.new(source_name, width, height, row, column)
   return setmetatable(tbl, ItemList)
 end
 
-function ItemList.redraw(self, items, source, input_lines, filters, opts)
+function ItemList.redraw(self, items)
   local lines = vim.tbl_map(function(item)
     return item.desc or item.value
   end, items)
@@ -67,24 +67,27 @@ function ItemList.redraw(self, items, source, input_lines, filters, opts)
   if vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_get_current_buf() ~= self._bufnr then
     vim.api.nvim_win_set_cursor(self._window, {1, 0})
   end
+end
 
-  source:highlight(self._bufnr, items)
-  source:highlight_sign(self._bufnr, items)
-  self:redraw_selections(items)
+function ItemList.highlight(self, first_line, items, source, input_lines, filters, opts)
+  source:highlight(self._bufnr, first_line, items)
+  source:highlight_sign(self._bufnr, first_line, items)
+
+  local highligher = source.highlights:create(self._bufnr)
+  highligher:filter("ThettoSelected", first_line, items, function(item)
+    return item.selected
+  end)
 
   for i, filter in ipairs(filters) do
     local input_line = input_lines[i] or ""
     if filter.highlight ~= nil and input_line ~= "" then
-      filter:highlight(self._bufnr, items, input_line, opts)
+      filter:highlight(self._bufnr, first_line, items, input_line, opts)
     end
   end
 end
 
 function ItemList.redraw_selections(self, items)
-  local highligher = self._selection_hl_factory:reset(self._bufnr)
-  highligher:filter("ThettoSelected", items, function(item)
-    return item.selected
-  end)
+  vim.api.nvim__buf_redraw_range(self._bufnr, items[1].index - 1, items[#items].index - 1)
 end
 
 function ItemList.move_to(self, left_column)
