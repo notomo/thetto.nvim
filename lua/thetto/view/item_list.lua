@@ -87,7 +87,7 @@ function ItemList.highlight(self, first_line, items, source, input_lines, filter
 end
 
 function ItemList.redraw_selections(self, items)
-  vim.api.nvim__buf_redraw_range(self._bufnr, items[1].index - 1, items[#items].index - 1)
+  vim.api.nvim__buf_redraw_range(self._bufnr, items[1].index - 1, items[#items].index)
 end
 
 function ItemList.move_to(self, left_column)
