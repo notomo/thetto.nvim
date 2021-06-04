@@ -23,16 +23,16 @@ function ItemList.new(source_name, width, height, row, column)
 
   local window = vim.api.nvim_open_win(bufnr, false, {
     width = width - 2, -- NOTICE: calc border width
-    height = height,
+    height = height - 1,
     relative = "editor",
     row = row,
     col = column,
     external = false,
     style = "minimal",
     border = {
-      {"", "NormalFloat"},
-      {"", "NormalFloat"},
-      {" ", "NormalFloat"},
+      {"═", "ThettoAboveBorder"},
+      {"═", "ThettoAboveBorder"},
+      {"═", "ThettoAboveBorder"},
       {" ", "NormalFloat"},
       {"", "NormalFloat"},
       {"", "NormalFloat"},
@@ -135,7 +135,7 @@ end
 
 function ItemList.position(self)
   local config = vim.api.nvim_win_get_config(self._window)
-  return {height = config.height, row = config.row}
+  return {height = config.height + 1, row = config.row}
 end
 
 function ItemList.cursor(self)
