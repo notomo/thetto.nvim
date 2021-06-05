@@ -30,9 +30,9 @@ function ItemList.new(source_name, width, height, row, column)
     external = false,
     style = "minimal",
     border = {
-      {"═", "ThettoAboveBorder"},
-      {"═", "ThettoAboveBorder"},
-      {"═", "ThettoAboveBorder"},
+      {" ", "NormalFloat"},
+      {"―", "ThettoAboveBorder"},
+      {" ", "NormalFloat"},
       {" ", "NormalFloat"},
       {"", "NormalFloat"},
       {"", "NormalFloat"},
