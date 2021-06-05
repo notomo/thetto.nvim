@@ -2,6 +2,14 @@ local M = {}
 M.__index = M
 
 local adjust_cursor = function(item)
+  if item.pattern ~= nil then
+    vim.fn.search(item.pattern)
+    vim.fn.setreg("/", item.pattern)
+    vim.cmd("let &hlsearch = 1")
+    vim.cmd("let v:searchforward = 1")
+    return
+  end
+
   if item.row == nil then
     return
   end
