@@ -232,8 +232,8 @@ function UI.close_preview(self)
   end
 end
 
-function UI.redraw_selections(self, items)
-  return self._item_list:redraw_selections(items)
+function UI.redraw_selections(self, s, e)
+  return self._item_list:redraw_selections(s, e)
 end
 
 function UI.has_window(self, id)

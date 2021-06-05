@@ -71,8 +71,8 @@ function Collector.attach_ui(self, ui)
   self._send_redraw_event = function(_, input_lines)
     return ui:redraw(input_lines)
   end
-  self._send_redraw_selection_event = function()
-    return ui:redraw_selections(self.items:values())
+  self._send_redraw_selection_event = function(_, s, e)
+    return ui:redraw_selections(s, e)
   end
 end
 
@@ -111,6 +111,7 @@ function Collector.finished(self)
 end
 
 function Collector.toggle_selections(self, items)
+  local rows = {}
   for _, item in ipairs(items) do
     local key = tostring(item.index)
     if self.selected[key] then
@@ -119,14 +120,15 @@ function Collector.toggle_selections(self, items)
       self.selected[key] = item
     end
 
-    for _, filtered_item in self.items:iter() do
+    for row, filtered_item in self.items:iter() do
       if filtered_item.index == item.index then
+        table.insert(rows, row)
         filtered_item.selected = not filtered_item.selected
         break
       end
     end
   end
-  self:_send_redraw_selection_event()
+  self:_send_redraw_selection_event(rows[1] - 1, rows[#rows])
 end
 
 function Collector.toggle_all_selections(self)
