@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/autocmd source", function()
 
@@ -7,33 +7,33 @@ describe("vim/autocmd source", function()
   after_each(helper.after_each)
 
   it("can show autocmds", function()
-    command("autocmd VimResume <buffer> echomsg 'hoge_autocmd'")
+    vim.cmd("autocmd VimResume <buffer> echomsg 'hoge_autocmd'")
 
-    command("Thetto vim/autocmd")
+    thetto.start("vim/autocmd")
     helper.sync_input({"hoge_autocmd"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     helper.search("hoge_autocmd")
 
     assert.exists_pattern("hoge_autocmd")
   end)
 
   it("can delete autocmd", function()
-    command("augroup target_group")
-    command("autocmd VimResume <buffer> echomsg 'target_autocmd'")
-    command("augroup END")
+    vim.cmd("augroup target_group")
+    vim.cmd("autocmd VimResume <buffer> echomsg 'target_autocmd'")
+    vim.cmd("augroup END")
 
-    command("Thetto vim/autocmd")
+    thetto.start("vim/autocmd")
     helper.sync_input({"target_autocmd"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     helper.search("target_autocmd")
 
-    command("ThettoDo delete_group")
+    thetto.execute("delete_group")
 
-    command("Thetto vim/autocmd")
+    thetto.start("vim/autocmd")
     helper.sync_input({"target_autocmd"})
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.no.exists_pattern("target_autocmd")
   end)

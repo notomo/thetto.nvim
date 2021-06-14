@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/runtimepath source", function()
 
@@ -7,25 +7,25 @@ describe("vim/runtimepath source", function()
   after_each(helper.after_each)
 
   it("can show runtime paths", function()
-    command("Thetto vim/runtimepath --no-insert")
+    thetto.start("vim/runtimepath", {opts = {insert = false}})
 
     assert.exists_pattern("thetto.nvim")
   end)
 
   it("can execute tab_open", function()
-    command("Thetto vim/runtimepath --no-insert")
+    thetto.start("vim/runtimepath", {opts = {insert = false}})
 
     helper.search("thetto.nvim")
-    command("ThettoDo tab_open")
+    thetto.execute("tab_open")
 
     assert.tab_count(2)
   end)
 
   it("can execute vsplit_open", function()
-    command("Thetto vim/runtimepath --no-insert")
+    thetto.start("vim/runtimepath", {opts = {insert = false}})
 
     helper.search("thetto.nvim")
-    command("ThettoDo vsplit_open")
+    thetto.execute("vsplit_open")
 
     assert.window_count(2)
   end)

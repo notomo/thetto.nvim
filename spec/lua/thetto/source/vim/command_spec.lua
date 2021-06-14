@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/command source", function()
 
@@ -7,25 +7,27 @@ describe("vim/command source", function()
   after_each(helper.after_each)
 
   it("can show global ex commands", function()
-    command("Thetto vim/command")
+    vim.cmd("command! ThettoTest echomsg 'executed vim/command'")
 
-    helper.sync_input({"Thetto"})
-    command("ThettoDo move_to_list")
+    thetto.start("vim/command")
 
-    assert.exists_pattern("Thetto")
+    helper.sync_input({"ThettoTest"})
+    thetto.execute("move_to_list")
+
+    assert.exists_pattern("ThettoTest")
   end)
 
   it("can show buffer local ex commands", function()
-    command("command! -buffer HogeFoo echomsg 'executed vim/command'")
+    vim.cmd("command! -buffer HogeFoo echomsg 'executed vim/command'")
 
-    command("Thetto vim/command")
+    thetto.start("vim/command")
 
     helper.sync_input({"HogeFoo"})
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.current_line("HogeFoo echomsg 'executed vim/command'")
 
-    command("ThettoDo")
+    thetto.execute()
   end)
 
 end)

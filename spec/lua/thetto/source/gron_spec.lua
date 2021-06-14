@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("gron source", function()
 
@@ -12,12 +12,12 @@ describe("gron source", function()
   "hoge": "foo",
   "bar": "baz"
 }]])
-    command("edit test.json")
+    vim.cmd("edit test.json")
 
-    helper.sync_open("gron", "--no-insert")
+    helper.sync_open("gron", {opts = {insert = false}})
 
     helper.search("baz")
-    command("ThettoDo open")
+    thetto.execute("open")
 
     assert.current_line([[  "bar": "baz"]])
   end)

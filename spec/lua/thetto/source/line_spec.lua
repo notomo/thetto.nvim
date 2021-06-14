@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("line source", function()
 
@@ -12,11 +12,11 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     helper.search("test2")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.current_line("test2")
   end)
@@ -27,11 +27,11 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     helper.search("test2")
 
-    command("ThettoDo tab_open")
+    thetto.execute("tab_open")
 
     assert.tab_count(2)
     assert.current_line("test2")
@@ -43,11 +43,11 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     helper.search("test2")
 
-    command("ThettoDo vsplit_open")
+    thetto.execute("vsplit_open")
 
     assert.window_count(2)
     assert.current_line("test2")
@@ -58,13 +58,13 @@ test3]])
 test1
 test2
 test3]])
-    command("vsplit")
-    command("wincmd w")
+    vim.cmd("vsplit")
+    vim.cmd("wincmd w")
     local window = vim.api.nvim_get_current_win()
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
-    command("ThettoDo open")
+    thetto.execute("open")
 
     assert.current_window(window)
   end)

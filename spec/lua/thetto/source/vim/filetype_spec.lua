@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/filetype source", function()
 
@@ -7,10 +7,10 @@ describe("vim/filetype source", function()
   after_each(helper.after_each)
 
   it("can show filetypes", function()
-    command("Thetto vim/filetype")
+    thetto.start("vim/filetype")
     helper.sync_input({"lua"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     assert.current_line("lua")
   end)
 

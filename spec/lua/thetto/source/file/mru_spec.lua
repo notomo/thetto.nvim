@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("file/mru source", function()
 
@@ -8,24 +8,24 @@ describe("file/mru source", function()
 
   it("can show mru files", function()
     helper.new_file("oldfile")
-    command("edit oldfile")
+    vim.cmd("edit oldfile")
 
-    command("Thetto file/mru --no-insert")
+    thetto.start("file/mru", {opts = {insert = false}})
 
     helper.search("oldfile")
-    command("ThettoDo")
+    thetto.execute()
 
     assert.file_name("oldfile")
   end)
 
   it("can execute directory_open", function()
     helper.new_file("oldfile")
-    command("edit oldfile")
+    vim.cmd("edit oldfile")
 
-    command("Thetto file/mru --no-insert")
+    thetto.start("file/mru", {opts = {insert = false}})
 
     helper.search("oldfile")
-    command("ThettoDo directory_open")
+    thetto.execute("directory_open")
 
     assert.current_dir("")
   end)

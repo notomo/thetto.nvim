@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("file/bookmark source", function()
 
@@ -11,11 +11,11 @@ describe("file/bookmark source", function()
     source.file_path = helper.path("file_bookmark")
     source.default_paths = {helper.path()}
 
-    command("Thetto file/bookmark --no-insert")
+    thetto.start("file/bookmark", {opts = {insert = false}})
 
     assert.exists_pattern("file_bookmark")
 
-    command("ThettoDo")
+    thetto.execute()
   end)
 
 end)

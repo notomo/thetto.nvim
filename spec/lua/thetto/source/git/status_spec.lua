@@ -8,7 +8,7 @@ describe("git/status source", function()
   it("can show status files", function()
     helper.new_file("test_file")
 
-    helper.sync_open("git/status", "--no-insert")
+    helper.sync_open("git/status", {opts = {insert = false}})
 
     assert.exists_pattern("?? " .. helper.test_data_path)
   end)

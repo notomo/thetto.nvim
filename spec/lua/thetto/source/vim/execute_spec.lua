@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/execute source", function()
 
@@ -7,7 +7,7 @@ describe("vim/execute source", function()
   after_each(helper.after_each)
 
   it("can show command execute output", function()
-    command("Thetto vim/execute --x-cmd=version --no-insert")
+    thetto.start("vim/execute", {source_opts = {cmd = "version"}, opts = {insert = false}})
 
     assert.exists_pattern("NVIM")
   end)

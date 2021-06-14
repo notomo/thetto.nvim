@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/keymap source", function()
 
@@ -7,16 +7,16 @@ describe("vim/keymap source", function()
   after_each(helper.after_each)
 
   it("can show and execute keymaps", function()
-    command("nnoremap <silent> <buffer> <Space>hoge :<C-u>tabedit<CR>")
+    vim.cmd("nnoremap <silent> <buffer> <Space>hoge :<C-u>tabedit<CR>")
 
-    command("Thetto vim/keymap")
+    thetto.start("vim/keymap")
     helper.sync_input({"hoge"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("n noremap <silent> <buffer> <Space>hoge :<C-U>tabedit<CR>")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.tab_count(2)
   end)

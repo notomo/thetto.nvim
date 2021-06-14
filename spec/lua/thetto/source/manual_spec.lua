@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("manual source", function()
 
@@ -10,7 +10,7 @@ describe("manual source", function()
     helper.sync_open("manual")
     helper.sync_input({"nvim"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("nvim(1)")
   end)

@@ -1,10 +1,7 @@
-local M = {}
+local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
+local M = require("vusted.helper")
 
-local root, find_err = require("thetto/lib/path").find_root("thetto/*.lua")
-if find_err ~= nil then
-  error(find_err)
-end
-M.root = root
+M.root = M.find_plugin_root(plugin_name)
 
 M.test_data_path = "spec/test_data/"
 M.test_data_dir = M.root .. "/" .. M.test_data_path
@@ -12,37 +9,28 @@ M.test_data_dir = M.root .. "/" .. M.test_data_path
 -- HACK
 vim.cmd("autocmd SwapExists * lua vim.v.swapchoice = 'd'")
 
-function M.command(cmd)
-  local _, err = pcall(vim.cmd, cmd)
-  if err and err ~= "" then
-    local info = debug.getinfo(2)
-    local pos = ("%s:%d"):format(info.source, info.currentline)
-    local msg = ("on %s: failed excmd `%s`\n%s"):format(pos, cmd, err)
-    error(msg)
-  end
-end
-
 function M.before_each()
-  M.command("filetype on")
-  M.command("syntax enable")
+  vim.cmd("filetype on")
+  vim.cmd("syntax enable")
   M.new_directory("")
   vim.api.nvim_set_current_dir(M.test_data_dir)
 end
 
 function M.after_each()
   -- avoid segmentation fault??
-  M.command("tabedit")
-  M.command("tabprevious")
-  M.command("quit!")
+  vim.cmd("tabedit")
+  vim.cmd("tabprevious")
+  vim.cmd("quit!")
 
-  M.command("tabedit")
-  M.command("tabonly!")
-  M.command("silent! %bwipeout!")
-  M.command("filetype off")
-  M.command("syntax off")
+  vim.cmd("tabedit")
+  vim.cmd("tabonly!")
+  vim.cmd("silent! %bwipeout!")
+  vim.cmd("filetype off")
+  vim.cmd("syntax off")
+  vim.cmd("messages clear")
   print(" \n")
 
-  require("thetto/lib/module").cleanup()
+  M.cleanup_loaded_modules(plugin_name)
   M.delete("")
 end
 
@@ -77,8 +65,7 @@ function M.sync_input(texts)
 end
 
 function M.sync_open(...)
-  local _range = nil
-  local collector = require("thetto/entrypoint/command").start_by_excmd(0, _range, {...})
+  local collector = require("thetto").start(...)
   if collector == nil then
     return
   end
@@ -102,8 +89,7 @@ function M.sync_open(...)
 end
 
 function M.sync_execute(...)
-  local _range = nil
-  local job = require("thetto/entrypoint/command").execute(0, _range, {...})
+  local job = require("thetto").execute(...)
   if job == nil then
     return
   end
@@ -248,38 +234,6 @@ asserts.create("exists_message"):register(function(self)
     local messages = vim.split(vim.api.nvim_exec("messages", true), "\n")
     for _, msg in ipairs(messages) do
       if msg:match(expected) then
-        return true
-      end
-    end
-    return false
-  end
-end)
-
-asserts.create("error_message"):register(function(self)
-  return function(_, args)
-    local expected = args[1]
-    local f = args[2]
-    local ok, actual = pcall(f)
-    if ok then
-      self:set_positive("should be error")
-      self:set_negative("should be error")
-      return false
-    end
-    self:set_positive(("error message should end with '%s', but actual: '%s'"):format(expected, actual))
-    self:set_negative(("error message should not end with '%s', but actual: '%s'"):format(expected, actual))
-    return vim.endswith(actual, expected)
-  end
-end)
-
-asserts.create("completion_contains"):register(function(self)
-  return function(_, args)
-    local result = args[1]
-    local expected = args[2]
-    local names = vim.split(result, "\n", true)
-    self:set_positive(("completion should contain \"%s\", but actual: %s"):format(expected, vim.inspect(names)))
-    self:set_negative(("completion should not contain \"%s\", but actual: %s"):format(expected, vim.inspect(names)))
-    for _, name in ipairs(names) do
-      if name == expected then
         return true
       end
     end

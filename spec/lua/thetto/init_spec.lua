@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("thetto", function()
 
@@ -7,13 +7,13 @@ describe("thetto", function()
   after_each(helper.after_each)
 
   it("can open ui in list buffer", function()
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     assert.filetype("thetto")
   end)
 
   it("can open ui in input buffer", function()
-    command("Thetto line")
+    thetto.start("line")
 
     assert.filetype("thetto-input")
   end)
@@ -24,7 +24,7 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert --offset=10")
+    thetto.start("line", {opts = {insert = false, offset = 10}})
 
     assert.current_line("test3")
   end)
@@ -33,42 +33,43 @@ test3]])
     helper.set_lines([[
 test]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     vim.cmd("quit")
 
     assert.window_count(1)
   end)
 
   it("should exist only one in a tab", function()
-    command("Thetto line")
-    command("Thetto vim/runtimepath")
+    thetto.start("line")
+    thetto.start("vim/runtimepath")
 
     assert.window_count(4)
   end)
 
   it("should exist same source only one", function()
-    command("Thetto line")
-    command("tabedit")
-    command("Thetto line")
+    thetto.start("line")
+    vim.cmd("tabedit")
+    thetto.start("line")
 
     assert.window_count(4)
   end)
 
   it("can resume even if opened", function()
-    command("Thetto line")
-    command("tabedit")
+    thetto.start("line")
+    vim.cmd("tabedit")
 
-    command("Thetto --resume")
+    thetto.resume()
     assert.window_count(4)
   end)
 
   it("goes back to original window when quit resumed thetto", function()
-    command("Thetto line")
-    command("tabedit")
+    thetto.start("line")
+    vim.cmd("tabedit")
     local current = vim.api.nvim_get_current_win()
 
-    command("Thetto --resume")
-    command("ThettoDo quit")
+    thetto.resume()
+    thetto.start("line")
+    thetto.execute("quit")
 
     assert.window(current)
   end)
@@ -80,42 +81,42 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"2"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.current_line("test2")
     assert.no.exists_pattern("test1")
   end)
 
   it("can move to filter", function()
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     assert.filetype("thetto")
 
-    command("ThettoDo move_to_input")
+    thetto.execute("move_to_input")
 
     assert.filetype("thetto-input")
   end)
 
   it("can move to list", function()
-    command("Thetto line")
+    thetto.start("line")
 
     assert.filetype("thetto-input")
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.filetype("thetto")
   end)
 
   it("can move to list even if empty", function()
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"test"})
 
     assert.filetype("thetto-input")
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.filetype("thetto")
   end)
@@ -126,24 +127,24 @@ test11
 test21
 test22]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"test2"})
 
-    command("ThettoDo move_to_list")
-    command("normal! G")
+    thetto.execute("move_to_list")
+    vim.cmd("normal! G")
 
-    command("ThettoDo quit")
-    command("Thetto --resume")
+    thetto.execute("quit")
+    thetto.resume()
 
-    command("ThettoDo move_to_input")
+    thetto.execute("move_to_input")
 
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.current_line("test22")
-    command("normal! gg")
+    vim.cmd("normal! gg")
     assert.current_line("test21")
   end)
 
@@ -153,18 +154,18 @@ test11
 test21
 test22]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"test2"})
 
-    command("ThettoDo quit")
-    command("Thetto vim/runtimepath")
-    command("ThettoDo quit")
-    command("Thetto line --resume")
+    thetto.execute("quit")
+    thetto.start("vim/runtimepath")
+    thetto.execute("quit")
+    thetto.resume("line")
 
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.current_line("test21")
   end)
@@ -176,10 +177,10 @@ TEST2
 test2
 test3]])
 
-    command("Thetto line --ignorecase")
+    thetto.start("line", {opts = {ignorecase = true}})
     helper.sync_input({"test2"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.current_line("TEST2")
   end)
@@ -190,21 +191,21 @@ TEST1
 test1
 hoge]])
 
-    command("Thetto line --smartcase")
+    thetto.start("line", {opts = {smartcase = true}})
     helper.sync_input({"t"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("TEST1")
     assert.exists_pattern("test1")
     assert.no.exists_pattern("hoge")
 
-    command("ThettoDo move_to_input")
+    thetto.execute("move_to_input")
 
-    command("normal! dd")
+    vim.cmd("normal! dd")
     helper.sync_input({"TE"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("TEST1")
     assert.no.exists_pattern("test1")
@@ -212,25 +213,22 @@ hoge]])
   end)
 
   it("should show an error message if not found source", function()
-    assert.error_message("not found source: invalid", function()
-      command("Thetto invalid")
-    end)
+    thetto.start("invalid")
+    assert.exists_message("not found source: invalid")
     assert.window_count(1)
   end)
 
   it("should show an error message if not found action", function()
-    command("Thetto line")
-    assert.error_message("not found action: invalid", function()
-      command("ThettoDo invalid")
-    end)
+    thetto.start("line")
+    thetto.execute("invalid")
+    assert.exists_message("not found action: invalid")
   end)
 
   it("cannot execute open if there is no items", function()
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"hoge"})
-    assert.error_message("not found action: open", function()
-      command("ThettoDo open")
-    end)
+    thetto.execute("open")
+    assert.exists_message("not found action: open")
   end)
 
   it("can resume with offset", function()
@@ -239,21 +237,21 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
-    command("ThettoDo quit")
+    thetto.start("line")
+    thetto.execute("quit")
 
-    command("ThettoDo --resume --offset=-1")
+    thetto.resume_execute({opts = {offset = -1}})
     assert.current_line("test1")
 
-    command("ThettoDo --resume --offset=1")
+    thetto.resume_execute({opts = {offset = 1}})
     assert.window_count(1)
     assert.current_line("test2")
 
-    command("ThettoDo --resume --offset=1")
+    thetto.resume_execute({opts = {offset = 1}})
     assert.window_count(1)
     assert.current_line("test3")
 
-    command("ThettoDo --resume --offset=1")
+    thetto.resume_execute({opts = {offset = 1}})
     assert.current_line("test3")
   end)
 
@@ -271,8 +269,8 @@ test1
 test2
 test3]])
 
-    command("Thetto line --action=hoge")
-    command("ThettoDo")
+    thetto.start("line", {opts = {action = "hoge"}})
+    thetto.execute()
 
     assert.is_true(called)
   end)
@@ -291,8 +289,8 @@ test1
 test2
 test3]])
 
-    command("Thetto vim/runtimepath --action=hoge")
-    command("ThettoDo")
+    thetto.start("vim/runtimepath", {opts = {action = "hoge"}})
+    thetto.execute()
 
     assert.is_true(called)
   end)
@@ -303,10 +301,10 @@ test1
 test%
 test3]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"%"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.current_line("test%")
   end)
@@ -316,9 +314,9 @@ test3]])
 test1
 test2]])
 
-    command("Thetto line")
+    thetto.start("line")
 
-    command("ThettoDo debug_print")
+    thetto.execute("debug_print")
 
     assert.exists_message("row = 1")
     assert.exists_message("value = \"test1\"")
@@ -330,17 +328,17 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
-    command("ThettoDo toggle_selection")
-    command("normal! j")
-    command("ThettoDo toggle_selection")
-    command("normal! j")
+    thetto.execute("toggle_selection")
+    vim.cmd("normal! j")
+    thetto.execute("toggle_selection")
+    vim.cmd("normal! j")
 
-    command("ThettoDo toggle_selection")
-    command("ThettoDo toggle_selection")
+    thetto.execute("toggle_selection")
+    thetto.execute("toggle_selection")
 
-    command("ThettoDo tab_open")
+    thetto.execute("tab_open")
 
     assert.tab_count(3)
     assert.current_line("test2")
@@ -352,18 +350,18 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     helper.search("test2")
-    command("ThettoDo toggle_selection")
+    thetto.execute("toggle_selection")
 
-    command("ThettoDo toggle_all_selection")
+    thetto.execute("toggle_all_selection")
 
-    command("ThettoDo tab_open")
+    thetto.execute("tab_open")
 
     assert.tab_count(3)
     assert.current_line("test3")
-    command("tabclose")
+    vim.cmd("tabclose")
     assert.current_line("test1")
   end)
 
@@ -373,8 +371,8 @@ test3]])
       return {}, job
     end
 
-    command("Thetto line --no-insert")
-    command("ThettoDo quit")
+    thetto.start("line", {opts = {insert = false}})
+    thetto.execute("quit")
 
     assert.is_false(job:is_running())
   end)
@@ -385,10 +383,10 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
-    helper.search("test2")
+    thetto.start("line", {opts = {insert = false}})
 
-    command("1,2ThettoDo yank")
+    vim.cmd("normal! vj")
+    thetto.execute("yank")
 
     assert.register_value("+", "test1\ntest2")
   end)
@@ -399,10 +397,10 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert --xx-register=1")
+    thetto.start("line", {opts = {insert = false}, action_opts = {register = 1}})
     helper.search("test3")
 
-    command("ThettoDo yank")
+    thetto.execute("yank")
 
     assert.register_value("1", "test3")
   end)
@@ -412,12 +410,12 @@ test3]])
 test1
 test2
 test3]])
-    command("normal! $")
+    vim.cmd("normal! $")
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     helper.search("test2")
 
-    command("ThettoDo append")
+    thetto.execute("append")
 
     assert.current_line("test1test2")
   end)
@@ -429,25 +427,23 @@ t
 test
 tes]])
 
-    command("Thetto line --no-insert --sorters=length")
+    thetto.start("line", {opts = {insert = false, sorters = {"length"}}})
 
     assert.current_line("t")
-    command("normal! j")
+    vim.cmd("normal! j")
     assert.current_line("te")
-    command("normal! j")
+    vim.cmd("normal! j")
     assert.current_line("tes")
   end)
 
   it("does not open windows if no items", function()
-    assert.error_message("outline: empty", function()
-      command("Thetto outline")
-    end)
+    thetto.start("outline")
+    assert.exists_message("outline: empty")
     assert.window_count(1)
 
+    thetto.start("outline")
     -- should be the same error
-    assert.error_message("outline: empty", function()
-      command("Thetto outline")
-    end)
+    assert.exists_message("outline: empty")
   end)
 
   it("can custom default opts", function()
@@ -458,7 +454,7 @@ test1
 test2
 test3]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     assert.line_count(1)
   end)
@@ -469,13 +465,13 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
-    command("ThettoDo add_filter --x-name=-substring")
+    thetto.start("line")
+    thetto.execute("add_filter", {action_opts = {name = "-substring"}})
 
-    command("normal! G")
+    vim.cmd("normal! G")
     helper.sync_input({"test2"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("test1")
     assert.exists_pattern("test3")
@@ -489,15 +485,15 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
+    thetto.start("line")
 
-    command("normal! G")
+    vim.cmd("normal! G")
     helper.sync_input({"test2"})
 
     helper.wait_ui(function()
-      command("ThettoDo remove_filter --x-name=-substring")
+      thetto.execute("remove_filter", {action_opts = {name = "-substring"}})
     end)
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("test2")
   end)
@@ -510,10 +506,10 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"test2"})
 
-    command("ThettoDo inverse_filter")
+    thetto.execute("inverse_filter")
 
     assert.exists_pattern("test2")
   end)
@@ -526,31 +522,30 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"test2"})
 
     helper.wait_ui(function()
-      command("ThettoDo change_filter --x-name=-substring")
+      thetto.execute("change_filter", {action_opts = {name = "-substring"}})
     end)
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.no.exists_pattern("test2")
   end)
 
   it("cannot remove the last filter", function()
-    command("Thetto line")
+    thetto.start("line")
 
-    assert.error_message("the last filter cannot be removed", function()
-      command("ThettoDo remove_filter")
-    end)
+    thetto.execute("remove_filter")
+    assert.exists_message("the last filter cannot be removed")
   end)
 
   it("cannot delete input lines", function()
     require("thetto/custom").default_filters = {"substring", "-substring"}
 
-    command("Thetto line")
+    thetto.start("line")
     helper.wait_ui(function()
-      command("normal! dd")
+      vim.cmd("normal! dd")
     end)
 
     assert.line_count(2)
@@ -564,11 +559,11 @@ te
 t
 tes]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     assert.current_line("t")
 
     helper.wait_ui(function()
-      command("ThettoDo reverse_sorter")
+      thetto.execute("reverse_sorter")
     end)
 
     assert.current_line("tes")
@@ -582,11 +577,11 @@ te
 t
 tes]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     assert.current_line("t")
 
     helper.wait_ui(function()
-      command("ThettoDo reverse_sorter --x-name=length")
+      thetto.execute("reverse_sorter", {action_opts = {name = "length"}})
     end)
 
     assert.current_line("tes")
@@ -598,10 +593,10 @@ te
 t
 tes]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     helper.wait_ui(function()
-      command("ThettoDo toggle_sorter --x-name=length")
+      thetto.execute("toggle_sorter", {action_opts = {name = "length"}})
     end)
 
     assert.current_line("t")
@@ -615,10 +610,10 @@ te
 t
 tes]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
     helper.wait_ui(function()
-      command("ThettoDo toggle_sorter --x-name=length")
+      thetto.execute("toggle_sorter", {action_opts = {name = "length"}})
     end)
 
     assert.current_line("te")
@@ -627,11 +622,11 @@ tes]])
   it("can move to input with behavior as `i`", function()
     require("thetto/custom").default_filters = {"substring", "-substring"}
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"hoge"})
 
-    command("ThettoDo move_to_list")
-    command("ThettoDo move_to_input")
+    thetto.execute("move_to_list")
+    thetto.execute("move_to_input")
 
     assert.current_column(#("hoge"))
   end)
@@ -639,11 +634,11 @@ tes]])
   it("can move to input with behavior as `a`", function()
     require("thetto/custom").default_filters = {"substring", "-substring"}
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"hoge"})
 
-    command("ThettoDo move_to_list")
-    command("ThettoDo move_to_input --x-behavior=a")
+    thetto.execute("move_to_list")
+    thetto.execute("move_to_input", {action_opts = {behavior = "a"}})
 
     assert.current_column(#("hoge") + 1)
   end)
@@ -656,10 +651,10 @@ test1
 test2
 test3]])
 
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"2$"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("test2")
   end)
@@ -672,33 +667,22 @@ test3
 test4
 test5]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
 
-    command("2,4ThettoDo toggle_selection")
-    command("ThettoDo tab_open")
+    vim.cmd("2")
+    vim.cmd("normal! v2j")
+    thetto.execute("toggle_selection")
+    thetto.execute("tab_open")
 
     assert.tab_count(4)
   end)
 
   it("closes ui completely", function()
-    command("Thetto line")
-    command("buffer #")
-    command("close")
+    thetto.start("line")
+    vim.cmd("buffer #")
+    vim.cmd("close")
 
     assert.window_count(1)
-  end)
-
-  it("start in lua", function()
-    helper.set_lines([[
-test1
-test2]])
-
-    require("thetto/entrypoint/command").start({source_name = "line", opts = {insert = false}})
-
-    helper.search("test2")
-    command("ThettoDo open")
-
-    assert.current_line("test2")
   end)
 
   it("can resume current window", function()
@@ -706,10 +690,10 @@ test2]])
 test1
 test2]])
 
-    command("Thetto line")
-    command("ThettoDo move_to_list")
-    command("ThettoDo quit")
-    command("Thetto --resume")
+    thetto.start("line")
+    thetto.execute("move_to_list")
+    thetto.execute("quit")
+    thetto.resume()
 
     assert.exists_pattern("test1")
   end)
@@ -719,13 +703,13 @@ test2]])
 test1
 test2]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     local count = helper.window_count()
 
-    command("ThettoDo preview")
+    thetto.execute("preview")
     assert.window_count(count + 1)
 
-    command("ThettoDo close_preview")
+    thetto.execute("close_preview")
     assert.window_count(count)
   end)
 
@@ -734,13 +718,13 @@ test2]])
 test1
 test2]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     local count = helper.window_count()
 
-    command("ThettoDo toggle_preview")
+    thetto.execute("toggle_preview")
     assert.window_count(count + 1)
 
-    command("ThettoDo toggle_preview")
+    thetto.execute("toggle_preview")
     assert.window_count(count)
   end)
 
@@ -749,14 +733,14 @@ test2]])
 test1
 test2]])
 
-    command("Thetto line --no-insert")
+    thetto.start("line", {opts = {insert = false}})
     local count = helper.window_count()
 
-    command("ThettoDo toggle_preview")
+    thetto.execute("toggle_preview")
     assert.window_count(count + 1)
 
-    command("normal! j")
-    command("ThettoDo toggle_preview")
+    vim.cmd("normal! j")
+    thetto.execute("toggle_preview")
     assert.window_count(count + 1)
   end)
 
@@ -765,7 +749,7 @@ test2]])
 test1
 test2]])
 
-    command("Thetto line")
+    thetto.start("line")
 
     for _, window in ipairs(helper.sub_windows()) do
       vim.fn.win_gotoid(window)
@@ -787,22 +771,21 @@ test2]])
 test_auto_1
 test_auto_2]])
 
-    command("Thetto line --auto=hoge --no-insert")
+    thetto.start("line", {opts = {auto = "hoge", insert = false}})
     assert.equals("test_auto_1", value)
 
-    command("ThettoDo move_to_input")
+    thetto.execute("move_to_input")
     helper.sync_input({"test_auto_2"})
 
     assert.equals("test_auto_2", value)
   end)
 
   it("action shows error if it is executed on empty", function()
-    command("Thetto line")
+    thetto.start("line")
     helper.sync_input({"hoge"})
 
-    assert.error_message("not found action: open", function()
-      command("ThettoDo open")
-    end)
+    thetto.execute("open")
+    assert.exists_message("not found action: open")
   end)
 
 end)

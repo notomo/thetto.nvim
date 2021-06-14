@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/buffer source", function()
 
@@ -11,17 +11,17 @@ describe("vim/buffer source", function()
     helper.new_file("dir/foo")
     helper.new_file("dir/file")
 
-    command("edit " .. "dir/foo")
-    command("edit " .. "dir/file")
+    vim.cmd("edit " .. "dir/foo")
+    vim.cmd("edit " .. "dir/file")
 
-    command("Thetto vim/buffer")
+    thetto.start("vim/buffer")
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     assert.exists_pattern("dir/file")
 
     helper.search("foo")
 
-    command("ThettoDo")
+    thetto.execute()
     assert.file_name("foo")
   end)
 
@@ -31,7 +31,7 @@ describe("vim/buffer source", function()
 
     vim.fn.termopen({"echo", "1111"})
 
-    command("Thetto vim/buffer --x-buftype=terminal --no-insert")
+    thetto.start("vim/buffer", {source_opts = {buftype = "terminal"}, opts = {insert = false}})
 
     assert.exists_pattern("term://")
     assert.no.exists_pattern("foo")

@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/substitute source", function()
 
@@ -15,10 +15,10 @@ hoge
 foo
 hoge]])
 
-    command("Thetto vim/substitute --no-insert")
+    thetto.start("vim/substitute", {opts = {insert = false}})
 
     helper.search("hoge_to_foo")
-    command("ThettoDo")
+    thetto.execute()
 
     assert.current_line("foo")
     assert.no.exists_pattern("hoge")
@@ -33,7 +33,7 @@ hoge
 foo
 hoge]])
 
-    command("Thetto vim/substitute --no-insert --auto=preview")
+    thetto.start("vim/substitute", {opts = {insert = false, auto = "preview"}})
   end)
 
 end)

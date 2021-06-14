@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("source source", function()
 
@@ -7,14 +7,14 @@ describe("source source", function()
   after_each(helper.after_each)
 
   it("can show all sources", function()
-    command("Thetto source --no-insert")
+    thetto.start("source", {opts = {insert = false}})
 
     assert.exists_pattern("source")
     assert.exists_pattern("file/mru")
     helper.search("runtimepath")
 
-    command("ThettoDo")
-    command("ThettoDo move_to_list")
+    thetto.execute()
+    thetto.execute("move_to_list")
 
     assert.exists_pattern("thetto.nvim$")
   end)

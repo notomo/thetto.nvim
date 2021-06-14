@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/register source", function()
 
@@ -9,11 +9,11 @@ describe("vim/register source", function()
   it("can show registers", function()
     helper.set_lines([[
 foo]])
-    command("normal! dw")
+    vim.cmd("normal! dw")
 
-    command("Thetto vim/register --no-insert")
+    thetto.start("vim/register", {opts = {insert = false}})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     assert.current_line("\" foo")
   end)
 

@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/jump source", function()
 
@@ -16,13 +16,13 @@ bottom]])
     vim.cmd("normal! G")
     vim.cmd("normal! gg")
 
-    command("Thetto vim/jump")
+    thetto.start("vim/jump")
     helper.sync_input({"bottom"})
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
 
     assert.exists_pattern(":4 bottom")
 
-    command("ThettoDo open")
+    thetto.execute("open")
 
     assert.current_line("bottom")
   end)

@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("lua/loaded source", function()
 
@@ -8,25 +8,25 @@ describe("lua/loaded source", function()
 
   it("can show loaded packages", function()
     package.loaded["thetto/lua_loaded_test"] = helper
-    command("Thetto lua/loaded")
+    thetto.start("lua/loaded")
     helper.sync_input({"lua_loaded_test"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     assert.exists_pattern("thetto/lua_loaded_test")
   end)
 
   it("can unload a package", function()
     package.loaded["thetto/lua_unload_test"] = helper
-    command("Thetto lua/loaded")
+    thetto.start("lua/loaded")
     helper.sync_input({"lua_unload_test"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     helper.search("thetto/lua_unload_test")
 
-    command("ThettoDo unload")
+    thetto.execute("unload")
 
-    command("Thetto lua/loaded")
-    command("ThettoDo move_to_list")
+    thetto.start("lua/loaded")
+    thetto.execute("move_to_list")
     assert.no.exists_pattern("thetto/lua_unload_test")
   end)
 

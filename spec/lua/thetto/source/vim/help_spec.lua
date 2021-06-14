@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/help source", function()
 
@@ -7,32 +7,32 @@ describe("vim/help source", function()
   after_each(helper.after_each)
 
   it("can show help tags", function()
-    command("Thetto vim/help --no-insert")
+    thetto.start("vim/help", {opts = {insert = false}})
 
     assert.exists_pattern("$VIM")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.exists_pattern("%*$VIM%*")
   end)
 
   it("can execute tab_open", function()
-    command("Thetto vim/help --no-insert")
+    thetto.start("vim/help", {opts = {insert = false}})
 
     assert.exists_pattern("$VIM")
 
-    command("ThettoDo tab_open")
+    thetto.execute("tab_open")
 
     assert.tab_count(2)
     assert.exists_pattern("%*$VIM%*")
   end)
 
   it("can execute vsplit_open", function()
-    command("Thetto vim/help --no-insert")
+    thetto.start("vim/help", {opts = {insert = false}})
 
     assert.exists_pattern("$VIM")
 
-    command("ThettoDo vsplit_open")
+    thetto.execute("vsplit_open")
 
     assert.window_count(2)
     assert.exists_pattern("%*$VIM%*")

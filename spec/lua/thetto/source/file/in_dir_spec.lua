@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("file/in_dir source", function()
 
@@ -11,19 +11,19 @@ describe("file/in_dir source", function()
     helper.new_directory("dir")
     helper.new_file("dir/file")
 
-    command("Thetto file/in_dir --no-insert")
+    thetto.start("file/in_dir", {opts = {insert = false}})
 
     assert.exists_pattern("oldfile")
     helper.search("dir")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.current_dir("dir")
 
-    command("Thetto file/in_dir --no-insert")
+    thetto.start("file/in_dir", {opts = {insert = false}})
     helper.search("file")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.file_name("file")
   end)
@@ -35,9 +35,9 @@ describe("file/in_dir source", function()
     helper.new_directory("dir")
     helper.cd("dir")
 
-    command("Thetto file/in_dir --no-insert --target=project")
+    thetto.start("file/in_dir", {opts = {insert = false, target = "project"}})
 
-    command("normal! gg")
+    vim.cmd("normal! gg")
     assert.current_line("0_root_pattern/")
   end)
 

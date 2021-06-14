@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/option source", function()
 
@@ -7,25 +7,25 @@ describe("vim/option source", function()
   after_each(helper.after_each)
 
   it("can show options", function()
-    command("setlocal buftype=nofile")
+    vim.cmd("setlocal buftype=nofile")
 
-    command("Thetto vim/option")
+    thetto.start("vim/option")
     helper.sync_input({"buftype"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     assert.current_line("buftype=nofile")
   end)
 
   it("can toggle options", function()
-    command("setlocal wrap")
+    vim.cmd("setlocal wrap")
 
-    command("Thetto vim/option")
+    thetto.start("vim/option")
     helper.sync_input({"wrap"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     helper.search("^wrap=")
 
-    command("ThettoDo toggle")
+    thetto.execute("toggle")
     assert.is_false(vim.wo.wrap)
   end)
 

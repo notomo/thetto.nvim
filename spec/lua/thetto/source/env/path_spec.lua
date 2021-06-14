@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("env/path source", function()
 
@@ -7,7 +7,7 @@ describe("env/path source", function()
   after_each(helper.after_each)
 
   it("can show PATH directories", function()
-    command("Thetto env/path --no-insert")
+    thetto.start("env/path", {opts = {insert = false}})
 
     assert.exists_pattern("/bin")
   end)

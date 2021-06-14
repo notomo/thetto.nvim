@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("file/recursive source", function()
 
@@ -10,12 +10,12 @@ describe("file/recursive source", function()
     helper.new_directory("dir")
     helper.new_file("dir/file")
 
-    helper.sync_open("file/recursive", "--no-insert")
+    helper.sync_open("file/recursive", {opts = {insert = false}})
 
     assert.exists_pattern("dir/file")
     helper.search("dir\\/file")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.file_name("file")
   end)
@@ -26,7 +26,7 @@ describe("file/recursive source", function()
     helper.new_directory("0_root_pattern")
     helper.new_file("0_root_pattern/in_root_pattern")
 
-    helper.sync_open("file/recursive", "--no-insert", "--target=project")
+    helper.sync_open("file/recursive", {opts = {insert = false, target = "project"}})
 
     assert.exists_pattern("root_pattern/in_root_pattern")
   end)
@@ -36,9 +36,8 @@ describe("file/recursive source", function()
       return {"not_exists_cmd"}
     end
 
-    assert.error_message("not_exists_cmd", function()
-      command("Thetto file/recursive")
-    end)
+    thetto.start("file/recursive")
+    assert.exists_message("not_exists_cmd")
   end)
 
 end)

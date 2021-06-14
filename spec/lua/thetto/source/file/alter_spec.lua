@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("alter source", function()
 
@@ -11,9 +11,9 @@ describe("alter source", function()
 
     helper.new_file("file.lua")
     helper.new_file("file_test.lua")
-    command("edit file.lua")
+    vim.cmd("edit file.lua")
 
-    command("Thetto file/alter --no-insert --immediately")
+    thetto.start("file/alter", {opts = {insert = false, immediately = true}})
 
     assert.file_name("file_test.lua")
   end)
@@ -24,10 +24,13 @@ describe("alter source", function()
     helper.new_directory("from")
     helper.new_directory("from/dir")
     helper.new_file("from/file_test.lua")
-    command("edit ./from/file_test.lua")
+    vim.cmd("edit ./from/file_test.lua")
 
-    command("Thetto file/alter --no-insert --x-allow-new --immediately")
-    command("silent! write")
+    thetto.start("file/alter", {
+      source_opts = {allow_new = true},
+      opts = {insert = false, immediately = true},
+    })
+    vim.cmd("silent! write")
 
     assert.file_name("file.lua")
     assert.dir_name("to")

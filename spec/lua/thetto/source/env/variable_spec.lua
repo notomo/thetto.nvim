@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("env/variable source", function()
 
@@ -7,11 +7,11 @@ describe("env/variable source", function()
   after_each(helper.after_each)
 
   it("can show environment variables", function()
-    command("Thetto env/variable --no-insert")
+    thetto.start("env/variable", {opts = {insert = false}})
 
     helper.search("^HOME=")
 
-    command("ThettoDo")
+    thetto.execute()
 
     assert.exists_message("HOME=.*")
   end)

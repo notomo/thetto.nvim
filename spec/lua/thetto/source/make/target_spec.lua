@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("make/target source", function()
 
@@ -34,7 +34,7 @@ sub_test:
   after_each(helper.after_each)
 
   it("can show makefile targets", function()
-    command("Thetto make/target --no-insert")
+    thetto.start("make/target", {opts = {insert = false}})
 
     assert.exists_pattern("Makefile:6 test")
     assert.exists_pattern("test.mk:1 build")
@@ -43,14 +43,16 @@ sub_test:
     assert.no.exists_pattern(".PHONY")
 
     helper.search("test")
-    command("ThettoDo")
+    thetto.execute()
 
     assert.tab_count(2)
   end)
 
   it("can use the nearest upward Makefile", function()
     helper.cd("sub")
-    command("Thetto make/target --no-insert --target=upward --target-patterns=Makefile")
+    thetto.start("make/target", {
+      opts = {insert = false, target = "upward", target_patterns = {"Makefile"}},
+    })
 
     assert.exists_pattern("Makefile:1 sub_test")
   end)

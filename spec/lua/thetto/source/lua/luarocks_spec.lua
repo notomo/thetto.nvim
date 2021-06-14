@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("lua/luarocks source", function()
 
@@ -10,7 +10,7 @@ describe("lua/luarocks source", function()
     helper.sync_open("lua/luarocks")
     helper.sync_input({"vusted"})
 
-    command("ThettoDo move_to_list")
+    thetto.execute("move_to_list")
     assert.exists_pattern("vusted")
   end)
 

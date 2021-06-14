@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("outline source", function()
 
@@ -11,9 +11,9 @@ describe("outline source", function()
 test:
 	echo 1
     ]])
-    command("edit Makefile")
+    vim.cmd("edit Makefile")
 
-    helper.sync_open("outline", "--no-insert")
+    helper.sync_open("outline", {opts = {insert = false}})
 
     assert.exists_pattern("test")
   end)

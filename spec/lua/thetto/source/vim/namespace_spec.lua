@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("vim/namespace source", function()
 
@@ -10,7 +10,7 @@ describe("vim/namespace source", function()
     local name = "thetto_test_namespace"
     vim.api.nvim_create_namespace(name)
 
-    command("Thetto vim/namespace --no-insert")
+    thetto.start("vim/namespace", {opts = {insert = false}})
 
     assert.exists_pattern(name)
   end)

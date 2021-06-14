@@ -1,5 +1,5 @@
 local helper = require("thetto/lib/testlib/helper")
-local command = helper.command
+local thetto = helper.require("thetto")
 
 describe("file/grep source", function()
 
@@ -13,12 +13,12 @@ bar]])
   after_each(helper.after_each)
 
   it("can show grep results", function()
-    helper.sync_open("file/grep", "--no-insert", "--pattern=hoge")
+    helper.sync_open("file/grep", {opts = {insert = false, pattern = "hoge"}})
 
     assert.exists_pattern("hoge")
 
     helper.search("target")
-    command("ThettoDo")
+    thetto.execute()
 
     assert.current_line("hoge")
   end)
@@ -27,15 +27,15 @@ bar]])
     helper.set_lines([[
 hoge
 foo]])
-    command("setlocal buftype=nofile")
+    vim.cmd("setlocal buftype=nofile")
     helper.search("hoge")
 
-    helper.sync_open("file/grep", "--no-insert", "--pattern-type=word")
+    helper.sync_open("file/grep", {opts = {insert = false, pattern_type = "word"}})
 
     assert.exists_pattern("hoge")
 
     helper.search("target")
-    command("ThettoDo")
+    thetto.execute()
 
     assert.current_line("hoge")
   end)
@@ -46,55 +46,57 @@ foo]])
 
     require("thetto/target/project").root_patterns = {"0_root_pattern"}
 
-    helper.sync_open("file/grep", "--no-insert", "--target=project", "--pattern=hoge")
+    helper.sync_open("file/grep", {opts = {insert = false, target = "project", pattern = "hoge"}})
 
     assert.exists_pattern("0_root_pattern/in_root_pattern:1 hoge in root_pattern")
   end)
 
   it("can execute tab_open", function()
-    helper.sync_open("file/grep", "--no-insert", "--pattern=foo")
+    helper.sync_open("file/grep", {opts = {insert = false, pattern = "foo"}})
 
     assert.exists_pattern("foo")
 
-    command("ThettoDo tab_open")
+    thetto.execute("tab_open")
 
     assert.tab_count(2)
     assert.current_line("foo")
   end)
 
   it("can execute vsplit_open", function()
-    helper.sync_open("file/grep", "--no-insert", "--pattern=foo")
+    helper.sync_open("file/grep", {opts = {insert = false, pattern = "foo"}})
 
     assert.exists_pattern("foo")
 
-    command("ThettoDo vsplit_open")
+    thetto.execute("vsplit_open")
 
     assert.window_count(2)
     assert.current_line("foo")
   end)
 
   it("can grep interactively", function()
-    local collector = helper.sync_open("file/grep", "--no-insert", "--filters=interactive")
+    local collector = helper.sync_open("file/grep", {
+      opts = {insert = false, filters = {"interactive"}},
+    })
 
     assert.current_line("")
 
-    command("ThettoDo move_to_input")
+    thetto.execute("move_to_input")
     helper.sync_input({"hoge"})
     assert.is_true(collector:wait())
     helper.wait_ui(function()
-      command("ThettoDo move_to_list")
+      thetto.execute("move_to_list")
     end)
 
     assert.current_line("target:1 hoge")
   end)
 
   it("can grep no result pattern interactively", function()
-    local collector = helper.sync_open("file/grep", "--filters=interactive")
+    local collector = helper.sync_open("file/grep", {opts = {filters = {"interactive"}}})
 
     helper.sync_input({"hoge"})
     helper.sync_input({"bar"})
     helper.wait_ui(function()
-      command("ThettoDo move_to_list")
+      thetto.execute("move_to_list")
     end)
 
     assert.current_line("")
@@ -102,7 +104,7 @@ foo]])
   end)
 
   it("can grep with camelcase pattern", function()
-    helper.sync_open("file/grep", "--no-insert", "--ignorecase", "--pattern=Foo")
+    helper.sync_open("file/grep", {opts = {insert = false, ignorecase = true, pattern = "Foo"}})
 
     assert.exists_pattern("foo")
   end)
@@ -110,7 +112,7 @@ foo]])
   it("can show grep results with including :digits: text", function()
     helper.new_file("file", [[  test :111:  ]])
 
-    helper.sync_open("file/grep", "--no-insert", "--pattern=test")
+    helper.sync_open("file/grep", {opts = {insert = false, pattern = "test"}})
 
     assert.exists_pattern("file:1   test :111:  ")
   end)

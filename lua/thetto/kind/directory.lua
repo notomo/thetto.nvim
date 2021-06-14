@@ -31,7 +31,7 @@ function M.action_enter(_, items)
   if item == nil then
     return
   end
-  vim.cmd("Thetto file/in_dir --cwd=" .. item.path)
+  require("thetto").start("file/in_dir", {opts = {cwd = item.path}})
 end
 
 M.action_open = M.action_cd

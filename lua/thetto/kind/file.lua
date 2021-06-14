@@ -104,7 +104,7 @@ function M.action_directory_enter(_, items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h")
-  vim.cmd("Thetto file/in_dir --cwd=" .. path)
+  require("thetto").start("file/in_dir", {opts = {cwd = path}})
 end
 
 M.default_action = "open"
