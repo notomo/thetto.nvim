@@ -148,7 +148,8 @@ function Command.resume_execute(args)
 end
 
 function Command.setup(name)
-  local setup = modulelib.find_setup(name)
+  vim.validate({name = {name, "string"}})
+  local setup = modulelib.find("thetto/setup/" .. name)
   return setup.start()
 end
 

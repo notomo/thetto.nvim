@@ -40,7 +40,7 @@ function Filter.new(name, opts, inversed, key, modifier)
     modifier = {modifier, "table"},
   })
 
-  local origin = modulelib.find_filter(name)
+  local origin = modulelib.find("thetto/iteradapter/filter/" .. name)
   if origin == nil then
     return nil, "not found filter: " .. name
   end

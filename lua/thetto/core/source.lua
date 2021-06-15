@@ -26,7 +26,7 @@ function Source.new(name, source_opts, opts)
     opts = {opts, "table"},
   })
 
-  local origin = modulelib.find_source(name)
+  local origin = modulelib.find("thetto/source/" .. name)
   if origin == nil then
     return nil, "not found source: " .. name
   end
