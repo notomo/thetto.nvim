@@ -1,6 +1,6 @@
 local custom = require("thetto/custom")
 local inputs = require("thetto/core/input")
-local modulelib = require("thetto/lib/module")
+local targets = require("thetto/core/target")
 
 local M = {}
 
@@ -42,11 +42,11 @@ function Options.new(raw)
   end
 
   if opts.target ~= nil then
-    local target = modulelib.find_target(opts.target)
-    if target == nil then
-      return nil, "not found target: " .. opts.target
+    local target_cwd, err = targets.get(opts.target, opts.target_patterns)
+    if err then
+      return nil, err
     end
-    cwd = target.cwd(opts.target_patterns)
+    cwd = target_cwd
   end
   opts.cwd = cwd
 

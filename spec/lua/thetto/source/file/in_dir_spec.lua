@@ -29,7 +29,7 @@ describe("file/in_dir source", function()
   end)
 
   it("can show files in project dir", function()
-    require("thetto/target/project").root_patterns = {"0_root_pattern"}
+    require("thetto/core/target").project_root_patterns = {"0_root_pattern"}
 
     helper.new_directory("0_root_pattern")
     helper.new_directory("dir")
