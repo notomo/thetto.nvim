@@ -1,7 +1,7 @@
+local Context = require("thetto/core/context").Context
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local highlights = require("thetto/lib/highlight")
-local repository = require("thetto/core/repository")
 local vim = vim
 
 local M = {}
@@ -91,11 +91,11 @@ function StatusLine.has(self, id)
 end
 
 function M._on_enter(key)
-  local ui = repository.get(key).ui
-  if ui == nil then
+  local ctx = Context.get(key)
+  if not ctx then
     return
   end
-  ui:into_inputter()
+  ctx.ui:into_inputter()
 end
 
 return M

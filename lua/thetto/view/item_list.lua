@@ -1,8 +1,8 @@
+local Context = require("thetto/core/context").Context
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local cursorlib = require("thetto/lib/cursor")
 local highlights = require("thetto/lib/highlight")
-local repository = require("thetto/core/repository")
 local vim = vim
 
 local M = {}
@@ -147,22 +147,22 @@ function ItemList.has(self, id)
 end
 
 function M._on_moved(key)
-  local ui = repository.get(key).ui
-  if ui == nil then
+  local ctx = Context.get(key)
+  if not ctx then
     return
   end
-  ui:on_move()
+  ctx.ui:on_move()
 end
 
 function M._on_close(key, id)
-  local ui = repository.get(key).ui
-  if ui == nil then
+  local ctx = Context.get(key)
+  if not ctx then
     return
   end
-  if not ui:has_window(id) then
+  if not ctx.ui:has_window(id) then
     return
   end
-  ui:close()
+  ctx.ui:close()
 end
 
 return M

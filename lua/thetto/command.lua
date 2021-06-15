@@ -1,9 +1,9 @@
 local Collector = require("thetto/core/collector").Collector
 local Executor = require("thetto/core/executor").Executor
 local Options = require("thetto/core/option").Options
+local Context = require("thetto/core/context").Context
 local UI = require("thetto/view/ui").UI
 local messagelib = require("thetto/lib/message")
-local repository = require("thetto/core/repository")
 local modulelib = require("thetto/lib/module")
 local modelib = require("thetto/lib/mode")
 
@@ -42,8 +42,8 @@ function Command.start(source_name, args)
     return nil, "no source"
   end
 
-  local old_ctx = repository.get(source_name)
-  if old_ctx.ui ~= nil then
+  local old_ctx = Context.get(source_name)
+  if old_ctx then
     old_ctx.ui:close()
   end
 
@@ -53,9 +53,7 @@ function Command.start(source_name, args)
   end
   local executor = Executor.new(source_name, action_opts, opts.action)
   local ui = UI.new(collector)
-
-  local ctx = {collector = collector, ui = ui, executor = executor}
-  repository.set(source_name, ctx)
+  local ctx = Context.new(source_name, collector, ui, executor)
 
   local start_err = collector:start()
   if start_err ~= nil then
@@ -64,9 +62,9 @@ function Command.start(source_name, args)
 
   ui:open(executor:auto(ctx, opts.auto, action_opts))
 
-  err = collector:update()
-  if err ~= nil then
-    return nil, err
+  local update_err = collector:update()
+  if update_err ~= nil then
+    return nil, update_err
   end
   ui:scroll(opts.offset)
 
@@ -81,16 +79,17 @@ function Command.start(source_name, args)
 end
 
 function Command.resume(source_name)
-  local old_ctx = repository.get(source_name)
-  if old_ctx.ui ~= nil then
+  local old_ctx = Context.get(source_name)
+  if old_ctx then
     old_ctx.ui:close()
   end
 
-  local ctx, err = repository.resume(source_name)
-  if err ~= nil then
-    return nil, err
+  local ctx, ctx_err = Context.resume(source_name)
+  if ctx_err ~= nil then
+    return nil, ctx_err
   end
-  err = ctx.ui:resume()
+
+  local err = ctx.ui:resume()
   if err ~= nil then
     return nil, err
   end
@@ -99,15 +98,12 @@ end
 
 function Command.execute(action_name, args)
   args = args or {}
+  action_name = action_name or "default"
   local action_opts = args.action_opts or {}
 
-  local ctx, ctx_err = repository.get_from_path()
+  local ctx, ctx_err = Context.get_from_path()
   if ctx_err ~= nil then
     return nil, "not found state: " .. ctx_err
-  end
-
-  if action_name == nil then
-    action_name = "default"
   end
 
   local range = modelib.visual_range()
@@ -129,7 +125,7 @@ function Command.resume_execute(args)
   local action_opts = args.action_opts or {}
   local opts = args.opts or {}
 
-  local ctx = repository.resume()
+  local ctx = Context.resume()
   ctx.ui:update_offset(opts.offset)
 
   local action_name = "default"

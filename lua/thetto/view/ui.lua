@@ -1,10 +1,10 @@
+local Context = require("thetto/core/context").Context
 local ItemList = require("thetto/view/item_list").ItemList
 local Inputter = require("thetto/view/inputter").Inputter
 local StatusLine = require("thetto/view/status_line").StatusLine
 local Sidecar = require("thetto/view/sidecar").Sidecar
 local State = require("thetto/view/state").State
 local bufferlib = require("thetto/lib/buffer")
-local repository = require("thetto/core/repository")
 local listlib = require("thetto/lib/list")
 local highlightlib = require("thetto/lib/highlight")
 local vim = vim
@@ -24,8 +24,8 @@ function UI.open(self, on_move)
   vim.validate({on_move = {on_move, "function"}})
 
   for bufnr in bufferlib.in_tabpage(0) do
-    local ctx, _ = repository.get_from_path(bufnr)
-    if ctx ~= nil then
+    local ctx = Context.get_from_path(bufnr)
+    if ctx then
       ctx.ui:close()
     end
   end
@@ -65,7 +65,7 @@ function UI.resume(self)
 end
 
 function UI._highlight_win(_, _, bufnr, topline, botline_guess)
-  local ctx, err = repository.get_from_path(bufnr, "$")
+  local ctx, err = Context.get_from_path(bufnr, "$")
   if err ~= nil then
     return false
   end
