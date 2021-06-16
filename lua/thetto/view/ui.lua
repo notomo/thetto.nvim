@@ -5,7 +5,6 @@ local StatusLine = require("thetto/view/status_line").StatusLine
 local Sidecar = require("thetto/view/sidecar").Sidecar
 local State = require("thetto/view/state").State
 local bufferlib = require("thetto/lib/buffer")
-local listlib = require("thetto/lib/list")
 local highlightlib = require("thetto/lib/highlight")
 local vim = vim
 
@@ -119,8 +118,8 @@ function UI.redraw(self, input_lines, row)
 end
 
 function UI.on_move(self)
-  local item_group = self:current_item_groups()[1]
-  return self._on_move(item_group)
+  local items = self:selected_items()
+  return self._on_move(items)
 end
 
 function UI.update_offset(self, offset)
@@ -167,28 +166,7 @@ function UI.start_insert(self, behavior)
   self._inputter:start_insert(behavior)
 end
 
-function UI.current_item_groups(self, action_name, range)
-  local items = self:_selected_items(action_name, range)
-  local item_groups = listlib.group_by(items, function(item)
-    return item.kind_name or self._collector.source.kind_name
-  end)
-  if #item_groups == 0 then
-    table.insert(item_groups, {"base", {}})
-  end
-
-  -- HACK
-  if action_name == "toggle_all_selection" then
-    local all = {}
-    for _, v in ipairs(item_groups) do
-      vim.list_extend(all, v)
-    end
-    return {{"base", all}}
-  end
-
-  return item_groups
-end
-
-function UI._selected_items(self, action_name, range)
+function UI.selected_items(self, action_name, range)
   if action_name ~= "toggle_selection" and not vim.tbl_isempty(self._collector.selected) then
     local selected = vim.tbl_values(self._collector.selected)
     table.sort(selected, function(a, b)

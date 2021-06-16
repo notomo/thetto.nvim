@@ -67,13 +67,27 @@ function Kind.__index(self, k)
   return rawget(Kind, k) or self._origin[k] or base[k]
 end
 
-function Kind.find_action(self, action_name, action_opts)
+function Kind.action_kind_name(self, action_name)
+  local key = self:_action_key(action_name)
+  if self._origin[key] then
+    return self.name
+  end
+  if base[key] then
+    return "base"
+  end
+  return self.name
+end
+
+function Kind._action_key(self, action_name)
   local name = action_name
   if name == "default" then
     name = self.default_action
   end
+  return Action.PREFIX .. name, name
+end
 
-  local key = Action.PREFIX .. name
+function Kind.find_action(self, action_name, action_opts)
+  local key, name = self:_action_key(action_name)
   local opts = vim.tbl_extend("force", self.opts[name] or {}, action_opts)
   local behavior = vim.tbl_deep_extend("force", {quit = true}, self.behaviors[name] or {})
 

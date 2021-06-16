@@ -51,7 +51,7 @@ function Command.start(source_name, args)
   if err ~= nil then
     return nil, err
   end
-  local executor = Executor.new(source_name, action_opts, opts.action)
+  local executor = Executor.new(source_name, collector.source.kind_name, action_opts, opts.action)
   local ui = UI.new(collector)
   local ctx = Context.new(source_name, collector, ui, executor)
 
@@ -60,7 +60,7 @@ function Command.start(source_name, args)
     return nil, start_err
   end
 
-  ui:open(executor:auto(ctx, opts.auto, action_opts))
+  ui:open(executor:auto(ctx, opts.auto))
 
   local update_err = collector:update()
   if update_err ~= nil then
@@ -107,17 +107,8 @@ function Command.execute(action_name, args)
   end
 
   local range = modelib.visual_range()
-  local item_groups = ctx.ui:current_item_groups(action_name, range)
-  local executor = ctx.executor
-  for _, item_group in ipairs(item_groups) do
-    local kind_name, items = unpack(item_group)
-    local err = executor:add(action_name, kind_name, items, action_opts)
-    if err ~= nil then
-      return nil, err
-    end
-  end
-
-  return executor:batch(ctx)
+  local items = ctx.ui:selected_items(action_name, range)
+  return ctx.executor:action(items, ctx, action_name, action_opts)
 end
 
 function Command.resume_execute(args)
@@ -130,17 +121,8 @@ function Command.resume_execute(args)
 
   local action_name = "default"
   local range = modelib.visual_range()
-  local item_groups = ctx.ui:current_item_groups(action_name, range)
-  local executor = ctx.executor
-  for _, item_group in ipairs(item_groups) do
-    local kind_name, items = unpack(item_group)
-    local err = executor:add(action_name, kind_name, items, action_opts)
-    if err ~= nil then
-      return nil, err
-    end
-  end
-
-  return executor:batch(ctx)
+  local items = ctx.ui:selected_items(action_name, range)
+  return ctx.executor:action(items, ctx, action_name, action_opts)
 end
 
 function Command.setup(name)
