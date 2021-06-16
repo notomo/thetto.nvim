@@ -116,10 +116,13 @@ function Command.resume_execute(args)
   local action_opts = args.action_opts or {}
   local opts = args.opts or {}
 
-  local ctx = Context.resume()
-  ctx.ui:update_offset(opts.offset)
+  local ctx, ctx_err = Context.resume(args.source_name)
+  if ctx_err ~= nil then
+    return nil, "not found state: " .. ctx_err
+  end
+  ctx.ui:update_offset(opts.offset or 0)
 
-  local action_name = "default"
+  local action_name = args.action_name or "default"
   local range = modelib.visual_range()
   local items = ctx.ui:selected_items(action_name, range)
   return ctx.executor:action(items, ctx, action_name, action_opts)
