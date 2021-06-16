@@ -175,6 +175,16 @@ function UI.current_item_groups(self, action_name, range)
   if #item_groups == 0 then
     table.insert(item_groups, {"base", {}})
   end
+
+  -- HACK
+  if action_name == "toggle_all_selection" then
+    local all = {}
+    for _, v in ipairs(item_groups) do
+      vim.list_extend(all, v)
+    end
+    return {{"base", all}}
+  end
+
   return item_groups
 end
 

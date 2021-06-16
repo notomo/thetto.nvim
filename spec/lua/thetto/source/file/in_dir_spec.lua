@@ -41,4 +41,17 @@ describe("file/in_dir source", function()
     assert.current_line("0_root_pattern/")
   end)
 
+  it("can unselect by toggle_all_selection", function()
+    helper.new_file("file")
+    helper.new_directory("dir")
+
+    thetto.start("file/in_dir", {opts = {insert = false}})
+
+    thetto.execute("toggle_all_selection")
+    thetto.execute("toggle_all_selection")
+
+    thetto.execute("tab_open")
+    assert.tab_count(2)
+  end)
+
 end)
