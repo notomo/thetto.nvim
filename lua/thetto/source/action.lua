@@ -9,7 +9,7 @@ function M.collect()
     return nil, nil, "must be executed in thetto buffer"
   end
 
-  local item = ctx.ui:selected_items()[1]
+  local item = ctx.ui:selected_items()[1] or {}
   local kind_name = item.kind_name or ctx.collector.source.kind_name
   local kind = Kind.new(ctx.executor, kind_name)
 
