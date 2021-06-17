@@ -88,4 +88,36 @@ function Context.resume_previous(self)
   return resumed, nil
 end
 
+function Context.resume_next(self)
+  local resumed = nil
+  local min_at = tonumber(self._updated_at)
+  local at = min_at
+  for _, ctx in repository:all() do
+    local updated_at = tonumber(ctx._updated_at)
+    if min_at <= at and at < updated_at then
+      resumed = ctx
+      at = updated_at
+    end
+  end
+  if not resumed then
+    return nil, "not found state for resume"
+  end
+  return resumed, nil
+end
+
+function Context.resume_last()
+  local all = {}
+  for _, ctx in repository:all() do
+    table.insert(all, ctx)
+  end
+  table.sort(all, function(a, b)
+    return a._updated_at < b._updated_at
+  end)
+  local resumed = all[1]
+  if not resumed then
+    return nil, "not found state for resume"
+  end
+  return resumed, nil
+end
+
 return M

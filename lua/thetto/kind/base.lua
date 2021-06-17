@@ -9,6 +9,7 @@ M.opts = {
   reverse_sorter = {name = nil},
   move_to_input = {behavior = "i"},
   resume_previous = {wrap = true},
+  resume_next = {wrap = true},
 }
 
 M.behaviors = {
@@ -136,6 +137,20 @@ function M.action_resume_previous(self, _, ctx)
     local first_ctx = require("thetto/core/context").Context.resume()
     if first_ctx then
       return nil, first_ctx.ui:resume()
+    end
+  end
+  return nil, "no context"
+end
+
+function M.action_resume_next(self, _, ctx)
+  local next_ctx = ctx:resume_next()
+  if next_ctx then
+    return nil, next_ctx.ui:resume()
+  end
+  if self.action_opts.wrap then
+    local last_ctx = ctx:resume_last()
+    if last_ctx then
+      return nil, last_ctx.ui:resume()
     end
   end
   return nil, "no context"

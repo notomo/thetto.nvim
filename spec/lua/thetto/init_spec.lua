@@ -823,4 +823,37 @@ test2]])
     assert.current_line("test2")
   end)
 
+  it("can resume next source", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("source")
+    thetto.execute("quit")
+
+    thetto.start("line", {opts = {insert = false}})
+    helper.search("test2")
+
+    thetto.execute("resume_previous")
+    thetto.execute("resume_next")
+    thetto.execute("open")
+
+    assert.current_line("test2")
+  end)
+
+  it("can resume wrapped next source", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", {opts = {insert = false}})
+    helper.search("test2")
+
+    thetto.start("source")
+    thetto.execute("resume_next")
+    thetto.execute("open")
+
+    assert.current_line("test2")
+  end)
+
 end)
