@@ -64,7 +64,6 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
         {" ", "ThettoInput"},
       },
     })
-    vim.wo[self._window].scrollbind = false
   else
     vim.api.nvim_win_set_buf(self._window, bufnr)
   end
