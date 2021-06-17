@@ -2,6 +2,7 @@ local Context = require("thetto/core/context").Context
 local windowlib = require("thetto/lib/window")
 local bufferlib = require("thetto/lib/buffer")
 local cursorlib = require("thetto/lib/cursor")
+local modelib = require("thetto/lib/mode")
 local highlights = require("thetto/lib/highlight")
 local vim = vim
 
@@ -147,6 +148,9 @@ function ItemList.has(self, id)
 end
 
 function M._on_moved(key)
+  if modelib.is_visual() then
+    return
+  end
   local ctx = Context.get(key)
   if not ctx then
     return

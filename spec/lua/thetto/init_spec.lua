@@ -780,6 +780,30 @@ test_auto_2]])
     assert.equals("test_auto_2", value)
   end)
 
+  it("can use visual mode even if enabled auto action", function()
+    local actions = require("thetto/custom").source_actions
+    actions["line"] = {
+      action_hoge = function(_, _)
+        vim.cmd("normal! " .. vim.api.nvim_eval("\"\\<ESC>\""))
+      end,
+      behaviors = {hoge = {quit = false}},
+    }
+
+    helper.set_lines([[
+test_auto_1
+test_auto_2]])
+
+    thetto.start("line", {opts = {auto = "hoge", insert = false}})
+
+    vim.cmd("normal! Vj")
+    vim.cmd("doautocmd CursorMoved")
+
+    thetto.execute("toggle_selection")
+    thetto.execute("tab_open")
+
+    assert.tab_count(3)
+  end)
+
   it("action shows error if it is executed on empty", function()
     thetto.start("line")
     helper.sync_input({"hoge"})
