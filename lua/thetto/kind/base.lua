@@ -8,6 +8,7 @@ M.opts = {
   change_filter = {name = nil},
   reverse_sorter = {name = nil},
   move_to_input = {behavior = "i"},
+  resume_previous = {wrap = true},
 }
 
 M.behaviors = {
@@ -124,6 +125,20 @@ end
 
 function M.action_close_preview(_, _, ctx)
   ctx.ui:close_preview()
+end
+
+function M.action_resume_previous(self, _, ctx)
+  local previous_ctx = ctx:resume_previous()
+  if previous_ctx then
+    return nil, previous_ctx.ui:resume()
+  end
+  if self.action_opts.wrap then
+    local first_ctx = require("thetto/core/context").Context.resume()
+    if first_ctx then
+      return nil, first_ctx.ui:resume()
+    end
+  end
+  return nil, "no context"
 end
 
 M.default_action = "echo"

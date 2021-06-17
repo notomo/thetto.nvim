@@ -71,5 +71,21 @@ function Context.resume(source_name)
   return recent, nil
 end
 
-return M
+function Context.resume_previous(self)
+  local resumed = nil
+  local at = 0
+  local max_at = tonumber(self._updated_at)
+  for _, ctx in repository:all() do
+    local updated_at = tonumber(ctx._updated_at)
+    if at < updated_at and updated_at < max_at then
+      resumed = ctx
+      at = updated_at
+    end
+  end
+  if not resumed then
+    return nil, "not found state for resume"
+  end
+  return resumed, nil
+end
 
+return M

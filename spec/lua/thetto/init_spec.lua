@@ -788,4 +788,39 @@ test_auto_2]])
     assert.exists_message("not found action: open")
   end)
 
+  it("can resume previous source", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", {opts = {insert = false}})
+    helper.search("test2")
+
+    thetto.start("source")
+    thetto.execute("resume_previous")
+    thetto.execute("open")
+
+    assert.current_line("test2")
+  end)
+
+  it("can resume wrapped previous source", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("source", {opts = {insert = false}})
+    thetto.execute("quit")
+
+    thetto.start("line", {opts = {insert = false}})
+    helper.search("test2")
+
+    thetto.execute("resume_previous")
+    assert.exists_pattern("^line$")
+
+    thetto.execute("resume_previous")
+    thetto.execute("open")
+
+    assert.current_line("test2")
+  end)
+
 end)
