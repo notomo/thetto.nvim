@@ -41,6 +41,6 @@ function M.collect(self)
   return {}, job
 end
 
-M.kind_name = "process"
+M.kind_name = "env/process"
 
 return M

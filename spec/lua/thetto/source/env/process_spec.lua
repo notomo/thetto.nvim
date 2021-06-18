@@ -1,6 +1,6 @@
 local helper = require("thetto/lib/testlib/helper")
 
-describe("process source", function()
+describe("env/process source", function()
 
   before_each(helper.before_each)
   after_each(helper.after_each)
@@ -11,7 +11,7 @@ describe("process source", function()
     local sleep2 = require("thetto/lib/job").new({"sleep", "9"}, {})
     sleep2:start()
 
-    helper.sync_open("process", {opts = {insert = false}})
+    helper.sync_open("env/process", {opts = {insert = false}})
     helper.search("sleep 8")
     helper.sync_execute("toggle_selection")
     helper.search("sleep 9")
