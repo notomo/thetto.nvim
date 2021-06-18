@@ -98,13 +98,13 @@ end
 
 function Command.execute(action_name, args)
   args = args or {}
-  action_name = action_name or "default"
   local action_opts = args.action_opts or {}
 
   local ctx, ctx_err = Context.get_from_path()
   if ctx_err ~= nil then
     return nil, "not found state: " .. ctx_err
   end
+  action_name = action_name or ctx.collector.source.default_action or "default"
 
   local range = modelib.visual_range()
   local items = ctx.ui:selected_items(action_name, range)

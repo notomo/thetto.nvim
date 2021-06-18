@@ -120,4 +120,8 @@ function Context.resume_last()
   return resumed, nil
 end
 
+function Context.all()
+  return repository:all()
+end
+
 return M
