@@ -3,25 +3,25 @@ local M = {}
 function M.after(_)
 end
 
-function M.action_cd(_, items)
+function M.action_cd(self, items)
   for _, item in ipairs(items) do
-    vim.cmd("lcd " .. item.path)
+    vim.cmd("lcd " .. self.filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
-function M.action_tab_open(_, items)
+function M.action_tab_open(self, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
-    vim.cmd("lcd " .. item.path)
+    vim.cmd("lcd " .. self.filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
-function M.action_vsplit_open(_, items)
+function M.action_vsplit_open(self, items)
   for _, item in ipairs(items) do
     vim.cmd("vsplit")
-    vim.cmd("lcd " .. item.path)
+    vim.cmd("lcd " .. self.filelib.escape(item.path))
     M.after(item.path)
   end
 end

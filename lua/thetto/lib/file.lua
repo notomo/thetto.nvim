@@ -66,4 +66,8 @@ function M.find_git_root()
   return git_root, nil
 end
 
+function M.escape(path)
+  return ([[`='%s'`]]):format(path:gsub("'", "''"))
+end
+
 return M

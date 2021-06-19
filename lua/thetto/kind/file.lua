@@ -27,39 +27,43 @@ local get_bufnr = function(item)
   return vim.fn.bufnr(pattern)
 end
 
-function M.action_open(_, items)
+function M.escape(path)
+  return ([[`='%s'`]]):format(path:gsub("'", "''"))
+end
+
+function M.action_open(self, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd("buffer " .. bufnr)
     else
-      vim.cmd("edit " .. item.path)
+      vim.cmd("edit " .. self.filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
 end
 
-function M.action_tab_open(_, items)
+function M.action_tab_open(self, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd("tabedit")
       vim.cmd("buffer " .. bufnr)
     else
-      vim.cmd("tabedit " .. item.path)
+      vim.cmd("tabedit " .. self.filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
 end
 
-function M.action_vsplit_open(_, items)
+function M.action_vsplit_open(self, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd("vsplit")
       vim.cmd("buffer " .. bufnr)
     else
-      vim.cmd("vsplit" .. item.path)
+      vim.cmd("vsplit" .. self.filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
