@@ -437,13 +437,13 @@ tes]])
   end)
 
   it("does not open windows if no items", function()
-    thetto.start("outline")
-    assert.exists_message("outline: empty")
+    thetto.start("cmd/ctags")
+    assert.exists_message("cmd/ctags: empty")
     assert.window_count(1)
 
-    thetto.start("outline")
+    thetto.start("cmd/ctags")
     -- should be the same error
-    assert.exists_message("outline: empty")
+    assert.exists_message("cmd/ctags: empty")
   end)
 
   it("can custom default opts", function()
