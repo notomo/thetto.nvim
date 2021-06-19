@@ -1,7 +1,7 @@
 local helper = require("thetto/lib/testlib/helper")
 local thetto = helper.require("thetto")
 
-describe("directory/recursive source", function()
+describe("file/directory/recursive source", function()
 
   before_each(function()
     helper.before_each()
@@ -13,7 +13,7 @@ describe("directory/recursive source", function()
   after_each(helper.after_each)
 
   it("can show directories recursively", function()
-    helper.sync_open("directory/recursive", {opts = {insert = false}})
+    helper.sync_open("file/directory/recursive", {opts = {insert = false}})
 
     assert.exists_pattern("dir/")
     assert.no.exists_pattern("dir/file")
@@ -25,7 +25,10 @@ describe("directory/recursive source", function()
   end)
 
   it("can show directories with depth range", function()
-    helper.sync_open("directory/recursive", {source_opts = {max_depth = 1}, opts = {insert = false}})
+    helper.sync_open("file/directory/recursive", {
+      source_opts = {max_depth = 1},
+      opts = {insert = false},
+    })
 
     assert.no.exists_pattern("dir/depth2")
     assert.exists_pattern("dir/$")
@@ -34,7 +37,7 @@ describe("directory/recursive source", function()
   end)
 
   it("can execute enter", function()
-    helper.sync_open("directory/recursive", {opts = {insert = false}})
+    helper.sync_open("file/directory/recursive", {opts = {insert = false}})
     helper.search("dir/$")
 
     thetto.execute("enter")
