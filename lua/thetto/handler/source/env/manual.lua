@@ -34,6 +34,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "manual"
+M.kind_name = "env/manual"
 
 return M
