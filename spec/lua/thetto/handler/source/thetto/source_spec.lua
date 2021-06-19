@@ -1,13 +1,13 @@
 local helper = require("thetto/lib/testlib/helper")
 local thetto = helper.require("thetto")
 
-describe("source source", function()
+describe("thetto/source source", function()
 
   before_each(helper.before_each)
   after_each(helper.after_each)
 
   it("can show all sources", function()
-    thetto.start("source", {opts = {insert = false}})
+    thetto.start("thetto/source", {opts = {insert = false}})
 
     assert.exists_pattern("source")
     assert.exists_pattern("file/mru")

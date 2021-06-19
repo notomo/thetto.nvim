@@ -820,7 +820,7 @@ test2]])
     thetto.start("line", {opts = {insert = false}})
     helper.search("test2")
 
-    thetto.start("source")
+    thetto.start("thetto/source")
     thetto.execute("resume_previous")
     thetto.execute("open")
 
@@ -832,7 +832,7 @@ test2]])
 test1
 test2]])
 
-    thetto.start("source", {opts = {insert = false}})
+    thetto.start("thetto/source", {opts = {insert = false}})
     thetto.execute("quit")
 
     thetto.start("line", {opts = {insert = false}})
@@ -852,7 +852,7 @@ test2]])
 test1
 test2]])
 
-    thetto.start("source")
+    thetto.start("thetto/source")
     thetto.execute("quit")
 
     thetto.start("line", {opts = {insert = false}})
@@ -873,7 +873,7 @@ test2]])
     thetto.start("line", {opts = {insert = false}})
     helper.search("test2")
 
-    thetto.start("source")
+    thetto.start("thetto/source")
     thetto.execute("resume_next")
     thetto.execute("open")
 

@@ -10,6 +10,6 @@ function M.collect()
   return items
 end
 
-M.kind_name = "source"
+M.kind_name = "thetto/source"
 
 return M

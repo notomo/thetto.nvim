@@ -21,6 +21,6 @@ function M.collect()
   return items
 end
 
-M.kind_name = "action"
+M.kind_name = "thetto/action"
 
 return M

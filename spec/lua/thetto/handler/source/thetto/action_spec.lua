@@ -1,7 +1,7 @@
 local helper = require("thetto/lib/testlib/helper")
 local thetto = helper.require("thetto")
 
-describe("action source", function()
+describe("thetto/action source", function()
 
   before_each(helper.before_each)
   after_each(helper.after_each)
@@ -15,7 +15,7 @@ test3]])
     thetto.start("line", {opts = {insert = false}})
     helper.search("test2")
 
-    thetto.start("action", {opts = {insert = false}})
+    thetto.start("thetto/action", {opts = {insert = false}})
     helper.search("open")
     thetto.execute()
 
@@ -23,7 +23,7 @@ test3]])
   end)
 
   it("shows error if action source is not executed in thetto buffer", function()
-    thetto.start("action")
+    thetto.start("thetto/action")
     assert.exists_message([[must be executed in thetto buffer]])
   end)
 
