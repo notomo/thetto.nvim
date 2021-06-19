@@ -28,7 +28,7 @@ end
 M.opts = {max_depth = 100}
 
 function M.collect(self, opts)
-  return require("thetto/source/file/recursive").collect(self, opts)
+  return require("thetto/handler/source/file/recursive").collect(self, opts)
 end
 
 M.kind_name = "directory"

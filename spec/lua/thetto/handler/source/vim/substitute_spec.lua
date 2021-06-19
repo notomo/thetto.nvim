@@ -7,7 +7,7 @@ describe("vim/substitute source", function()
   after_each(helper.after_each)
 
   it("can show all substitute", function()
-    require("thetto/source/vim/substitute").commands = {
+    require("thetto/handler/source/vim/substitute").commands = {
       hoge_to_foo = {pattern = "hoge", after = "foo"},
     }
     helper.set_lines([[
@@ -25,7 +25,7 @@ hoge]])
   end)
 
   it("can preview substitute", function()
-    require("thetto/source/vim/substitute").commands = {
+    require("thetto/handler/source/vim/substitute").commands = {
       hoge_to_foo = {pattern = "hoge", after = "foo"},
     }
     helper.set_lines([[

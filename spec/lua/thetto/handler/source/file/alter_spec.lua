@@ -7,7 +7,7 @@ describe("alter source", function()
   after_each(helper.after_each)
 
   it("can show alternative readable files", function()
-    require("thetto/source/file/alter").opts.pattern_groups = {{"%_test.lua", "%.lua"}}
+    require("thetto/handler/source/file/alter").opts.pattern_groups = {{"%_test.lua", "%.lua"}}
 
     helper.new_file("file.lua")
     helper.new_file("file_test.lua")
@@ -19,7 +19,9 @@ describe("alter source", function()
   end)
 
   it("can show alternative files including new files", function()
-    require("thetto/source/file/alter").opts.pattern_groups = {{"%/from/%_test.lua", "%/to/%.lua"}}
+    require("thetto/handler/source/file/alter").opts.pattern_groups = {
+      {"%/from/%_test.lua", "%/to/%.lua"},
+    }
 
     helper.new_directory("from")
     helper.new_directory("from/dir")

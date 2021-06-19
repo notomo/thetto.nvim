@@ -5,7 +5,7 @@ local filelib = require("thetto/lib/file")
 local listlib = require("thetto/lib/list")
 local modulelib = require("thetto/lib/module")
 local SourceResult = require("thetto/core/source_result").SourceResult
-local base = require("thetto/source/base")
+local base = require("thetto/handler/source/base")
 local vim = vim
 
 local M = {}
@@ -26,7 +26,7 @@ function Source.new(name, source_opts, opts)
     opts = {opts, "table"},
   })
 
-  local origin = modulelib.find("thetto/source/" .. name)
+  local origin = modulelib.find("thetto/handler/source/" .. name)
   if origin == nil then
     return nil, "not found source: " .. name
   end
@@ -90,9 +90,9 @@ function Source.collect(self, opts, append, reset)
 end
 
 function Source.all_names()
-  local paths = vim.api.nvim_get_runtime_file("lua/thetto/source/**/*.lua", true)
+  local paths = vim.api.nvim_get_runtime_file("lua/thetto/handler/source/**/*.lua", true)
   return vim.tbl_map(function(path)
-    local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/source/", true)[2]
+    local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/source/", true)[2]
     return source_file:sub(1, #source_file - 4)
   end, paths)
 end

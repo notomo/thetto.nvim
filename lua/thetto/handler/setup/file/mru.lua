@@ -18,9 +18,9 @@ function M.start()
 
   vim.cmd(("augroup %s"):format(group_name))
   vim.cmd("autocmd!")
-  local on_buf_enter = ("autocmd %s BufEnter * lua require('thetto/setup/file/mru')._add(vim.fn.expand('<abuf>'))"):format(group_name)
+  local on_buf_enter = ("autocmd %s BufEnter * lua require('thetto/handler/setup/file/mru')._add(vim.fn.expand('<abuf>'))"):format(group_name)
   vim.cmd(on_buf_enter)
-  local on_quit_pre = ("autocmd %s QuitPre * lua require('thetto/setup/file/mru')._save()"):format(group_name)
+  local on_quit_pre = ("autocmd %s QuitPre * lua require('thetto/handler/setup/file/mru')._save()"):format(group_name)
   vim.cmd(on_quit_pre)
   vim.cmd("augroup END")
 end

@@ -7,7 +7,7 @@ describe("file/bookmark source", function()
   after_each(helper.after_each)
 
   it("can show file bookmarks", function()
-    local source = require("thetto/source/file/bookmark")
+    local source = require("thetto/handler/source/file/bookmark")
     source.file_path = helper.path("file_bookmark")
     source.default_paths = {helper.path()}
 

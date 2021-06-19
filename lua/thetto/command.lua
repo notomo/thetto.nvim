@@ -130,7 +130,7 @@ end
 
 function Command.setup(name)
   vim.validate({name = {name, "string"}})
-  local setup = modulelib.find("thetto/setup/" .. name)
+  local setup = modulelib.find("thetto/handler/setup/" .. name)
   return setup.start()
 end
 

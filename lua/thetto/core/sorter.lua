@@ -9,7 +9,7 @@ M.Sorter = Sorter
 function Sorter.new(name, reversed)
   vim.validate({name = {name, "string"}, reversed = {reversed, "boolean"}})
 
-  local origin = modulelib.find("thetto/iteradapter/sorter/" .. name)
+  local origin = modulelib.find("thetto/handler/sorter/" .. name)
   if origin == nil then
     return nil, "not found sorter: " .. name
   end

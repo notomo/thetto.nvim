@@ -367,7 +367,7 @@ test3]])
 
   it("stops the unfinished job on closed", function()
     local job = require("thetto/lib/job").new({"sleep", "9"}, {})
-    require("thetto/source/line").collect = function(_)
+    require("thetto/handler/source/line").collect = function(_)
       return {}, job
     end
 
@@ -478,7 +478,7 @@ test3]])
   end)
 
   it("can remove filter", function()
-    require("thetto/source/line").filters = {"substring", "-substring"}
+    require("thetto/handler/source/line").filters = {"substring", "-substring"}
 
     helper.set_lines([[
 test1

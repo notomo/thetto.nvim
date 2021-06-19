@@ -2,7 +2,7 @@ local jobs = require("thetto/lib/job")
 local modulelib = require("thetto/lib/module")
 local filelib = require("thetto/lib/file")
 local custom = require("thetto/custom")
-local base = require("thetto/kind/base")
+local base = require("thetto/handler/kind/base")
 local vim = vim
 
 local M = {}
@@ -32,7 +32,7 @@ Kind.filelib = filelib
 function Kind.new(executor, name)
   vim.validate({executor = {executor, "table"}, name = {name, "string"}})
 
-  local origin = modulelib.find("thetto/kind/" .. name)
+  local origin = modulelib.find("thetto/handler/kind/" .. name)
   if origin == nil then
     return nil, "not found kind: " .. name
   end

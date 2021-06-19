@@ -29,7 +29,7 @@ local to_files = function(self, items)
   return files
 end
 
-local file_kind = require("thetto/kind/file")
+local file_kind = require("thetto/handler/kind/file")
 
 function M.action_open(self, items)
   file_kind.action_open(self, to_files(self, items))

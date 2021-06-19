@@ -1,5 +1,5 @@
 local vim = vim
-local setup = require("thetto/setup/file/mru")
+local setup = require("thetto/handler/setup/file/mru")
 
 local M = {}
 
