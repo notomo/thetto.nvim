@@ -50,6 +50,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "make/target"
+M.kind_name = "cmd/make/target"
 
 return M
