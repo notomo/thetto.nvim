@@ -82,7 +82,7 @@ function M.action_preview(_, items, ctx)
   end
 end
 
-local directory_kind = require("thetto/handler/kind/directory")
+local directory_kind = require("thetto/handler/kind/file/directory")
 
 local to_dirs = function(items)
   local dirs = {}

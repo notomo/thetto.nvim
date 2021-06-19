@@ -278,7 +278,7 @@ test3]])
   it("can custom kind action", function()
     local called = false
     local actions = require("thetto/custom").kind_actions
-    actions["directory"] = {
+    actions["file/directory"] = {
       action_hoge = function(_)
         called = true
       end,

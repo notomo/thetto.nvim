@@ -30,7 +30,7 @@ function M.collect(self)
   for _, path in ipairs(paths) do
     local kind_name = M.kind_name
     if vim.fn.isdirectory(path) ~= 0 then
-      kind_name = "directory"
+      kind_name = "file/directory"
     end
     table.insert(items, {value = path, path = path, kind_name = kind_name})
   end
@@ -43,7 +43,7 @@ vim.cmd("highlight default link ThettoFileBookmarkDirectory String")
 function M.highlight(self, bufnr, first_line, items)
   local highlighter = self.highlights:create(bufnr)
   highlighter:filter("ThettoFileBookmarkDirectory", first_line, items, function(item)
-    return item.kind_name == "directory"
+    return item.kind_name == "file/directory"
   end)
 end
 

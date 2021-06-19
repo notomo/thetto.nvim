@@ -41,7 +41,7 @@ function M._to_items(self, patterns, path)
     if self.filelib.readable(abs_path) then
       table.insert(items, {value = value, path = abs_path})
     elseif self.opts.allow_new then
-      table.insert(items, {value = value, path = abs_path, kind_name = "new_file"})
+      table.insert(items, {value = value, path = abs_path, kind_name = "file/new"})
     end
 
     ::continue::

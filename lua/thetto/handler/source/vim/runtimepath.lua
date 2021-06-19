@@ -11,6 +11,6 @@ function M.collect(self)
   return items
 end
 
-M.kind_name = "directory"
+M.kind_name = "file/directory"
 
 return M

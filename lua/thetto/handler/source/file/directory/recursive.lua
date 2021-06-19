@@ -31,7 +31,7 @@ function M.collect(self, opts)
   return require("thetto/handler/source/file/recursive").collect(self, opts)
 end
 
-M.kind_name = "directory"
+M.kind_name = "file/directory"
 
 function M._modify_path(_, path)
   return path .. "/"

@@ -22,7 +22,7 @@ function M.collect(_, opts)
     local kind_name = M.kind_name
     if vim.fn.isdirectory(path) ~= 0 then
       value = vim.fn.fnamemodify(path, ":h:t") .. "/"
-      kind_name = "directory"
+      kind_name = "file/directory"
     else
       value = vim.fn.fnamemodify(path, ":t")
     end
@@ -36,7 +36,7 @@ vim.cmd("highlight default link ThettoFileInDirDirectory String")
 function M.highlight(self, bufnr, first_line, items)
   local highlighter = self.highlights:create(bufnr)
   highlighter:filter("ThettoFileInDirDirectory", first_line, items, function(item)
-    return item.kind_name == "directory"
+    return item.kind_name == "file/directory"
   end)
 end
 
