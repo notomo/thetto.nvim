@@ -1,5 +1,5 @@
 local vim = vim
-local setup = require("thetto/handler/setup/file/mru")
+local store = require("thetto/handler/store/file/mru")
 
 local M = {}
 
@@ -8,7 +8,7 @@ M.cwd_marker = "%s/"
 function M.collect(self, opts)
   local items = {}
 
-  local paths = setup.get()
+  local paths = store.get()
   for _, bufnr in ipairs(vim.fn.range(vim.fn.bufnr("$"), 1, -1)) do
     if not vim.api.nvim_buf_is_valid(bufnr) then
       goto continue
@@ -30,7 +30,7 @@ function M.collect(self, opts)
   local dir = vim.fn.fnamemodify(opts.cwd, ":t")
   local cwd_marker = M.cwd_marker:format(dir)
   local home = self.pathlib.home()
-  for _, path in ipairs(vim.tbl_filter(setup.validate_fn(), paths)) do
+  for _, path in ipairs(vim.tbl_filter(store.validate_fn(), paths)) do
     local relative_path = to_relative(path)
     local value = relative_path:gsub(home, "~")
     local item = {value = value, path = path}

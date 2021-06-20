@@ -128,10 +128,10 @@ function Command.resume_execute(args)
   return ctx.executor:action(items, ctx, action_name, action_opts)
 end
 
-function Command.setup(name)
+function Command.setup_store(name)
   vim.validate({name = {name, "string"}})
-  local setup = modulelib.find("thetto/handler/setup/" .. name)
-  return setup.start()
+  local store = modulelib.find("thetto/handler/store/" .. name)
+  return store.start()
 end
 
 return M

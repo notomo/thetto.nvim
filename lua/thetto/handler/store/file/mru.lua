@@ -9,8 +9,8 @@ local M = {}
 M.limit = 500
 M.ignore_pattern = "^$"
 
-local store_file_path = pathlib.user_data_path("setup_file_mru.txt")
-local group_name = "thetto_setup_file_mru"
+local store_file_path = pathlib.user_data_path("store_file_mru.txt")
+local group_name = "thetto_store_file_mru"
 
 function M.start()
   local stored_paths = filelib.read_lines(store_file_path, 0, M.limit)
@@ -18,9 +18,9 @@ function M.start()
 
   vim.cmd(("augroup %s"):format(group_name))
   vim.cmd("autocmd!")
-  local on_buf_enter = ("autocmd %s BufEnter * lua require('thetto/handler/setup/file/mru')._add(vim.fn.expand('<abuf>'))"):format(group_name)
+  local on_buf_enter = ("autocmd %s BufEnter * lua require('thetto/handler/store/file/mru')._add(vim.fn.expand('<abuf>'))"):format(group_name)
   vim.cmd(on_buf_enter)
-  local on_quit_pre = ("autocmd %s QuitPre * lua require('thetto/handler/setup/file/mru')._save()"):format(group_name)
+  local on_quit_pre = ("autocmd %s QuitPre * lua require('thetto/handler/store/file/mru')._save()"):format(group_name)
   vim.cmd(on_quit_pre)
   vim.cmd("augroup END")
 end
