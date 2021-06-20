@@ -1,6 +1,4 @@
-local persist = {paths = {}}
 local listlib = require("thetto/lib/list")
-local pathlib = require("thetto/lib/path")
 local filelib = require("thetto/lib/file")
 local vim = vim
 
@@ -9,34 +7,35 @@ local M = {}
 M.limit = 500
 M.ignore_pattern = "^$"
 
-local store_file_path = pathlib.user_data_path("store_file_mru.txt")
-local group_name = "thetto_store_file_mru"
+function M.start(self)
+  local paths = filelib.read_lines(self.file_path, 0, self.limit)
+  self.persist.paths = vim.tbl_filter(self:validator(), paths)
 
-function M.start()
-  local stored_paths = filelib.read_lines(store_file_path, 0, M.limit)
-  persist.paths = vim.tbl_filter(M.validate_fn, stored_paths)
-
-  vim.cmd(("augroup %s"):format(group_name))
-  vim.cmd("autocmd!")
-  local on_buf_enter = ("autocmd %s BufEnter * lua require('thetto/handler/store/file/mru')._add(vim.fn.expand('<abuf>'))"):format(group_name)
-  vim.cmd(on_buf_enter)
-  local on_quit_pre = ("autocmd %s QuitPre * lua require('thetto/handler/store/file/mru')._save()"):format(group_name)
-  vim.cmd(on_quit_pre)
-  vim.cmd("augroup END")
+  vim.cmd(([[
+augroup %s
+  autocmd!
+  autocmd BufEnter * lua require("thetto/command").Command.add_to_store("file/mru", vim.fn.expand('<abuf>'))
+  autocmd QuitPre * lua require("thetto/command").Command.save_to_store("file/mru")
+augroup END
+]]):format(self.augroup_name))
 end
 
-function M.get()
-  return vim.fn.reverse(persist.paths)
+function M.data(self)
+  return vim.fn.reverse(self.persist.paths)
 end
 
-function M.validate_fn()
-  local regex = vim.regex(M.ignore_pattern)
-  return function(line)
-    return not regex:match_str(line) and filelib.readable(line)
+function M.validator(self)
+  local regex = vim.regex(self.ignore_pattern)
+  return function(path)
+    return not regex:match_str(path) and filelib.readable(path)
   end
 end
 
-function M._add(bufnr)
+function M.is_valid(self, path)
+  return self:validator()(path)
+end
+
+function M.add(self, bufnr)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     return
   end
@@ -46,21 +45,20 @@ function M._add(bufnr)
     return
   end
 
-  local is_valid = M.validate_fn()
-  if not is_valid(path) then
+  if not self:is_valid(path) then
     return
   end
 
-  local removed = listlib.remove(persist.paths, path)
-  if not removed and #persist.paths > M.limit then
-    table.remove(persist.paths, 1)
+  local removed = listlib.remove(self.persist.paths, path)
+  if not removed and #self.persist.paths > self.limit then
+    table.remove(self.persist.paths, 1)
   end
 
-  table.insert(persist.paths, path)
+  table.insert(self.persist.paths, path)
 end
 
-function M._save()
-  filelib.write_lines(store_file_path, persist.paths)
+function M.save(self)
+  filelib.write_lines(self.file_path, self.persist.paths)
 end
 
 return M

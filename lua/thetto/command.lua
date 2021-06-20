@@ -2,9 +2,9 @@ local Collector = require("thetto/core/collector").Collector
 local Executor = require("thetto/core/executor").Executor
 local Options = require("thetto/core/option").Options
 local Context = require("thetto/core/context").Context
+local Store = require("thetto/core/store").Store
 local UI = require("thetto/view/ui").UI
 local messagelib = require("thetto/lib/message")
-local modulelib = require("thetto/lib/module")
 local modelib = require("thetto/lib/mode")
 
 local M = {}
@@ -128,10 +128,30 @@ function Command.resume_execute(args)
   return ctx.executor:action(items, ctx, action_name, action_opts)
 end
 
-function Command.setup_store(name)
+function Command.setup_store(name, opts)
+  local store, err = Store.new(name, opts)
+  if err ~= nil then
+    return nil, err
+  end
+  return nil, store:start()
+end
+
+function Command.add_to_store(name, ...)
   vim.validate({name = {name, "string"}})
-  local store = modulelib.find("thetto/handler/store/" .. name)
-  return store.start()
+  local store, err = Store.get(name)
+  if err ~= nil then
+    return nil, err
+  end
+  return nil, store:add(...)
+end
+
+function Command.save_to_store(name, ...)
+  vim.validate({name = {name, "string"}})
+  local store, err = Store.get(name)
+  if err ~= nil then
+    return nil, err
+  end
+  return nil, store:save(...)
 end
 
 return M

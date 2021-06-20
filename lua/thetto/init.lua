@@ -18,8 +18,8 @@ function M.resume_execute(args)
   return Command.new("resume_execute", args)
 end
 
-function M.setup_store(name)
-  return Command.new("setup_store", name)
+function M.setup_store(name, opts)
+  return Command.new("setup_store", name, opts)
 end
 
 return M
