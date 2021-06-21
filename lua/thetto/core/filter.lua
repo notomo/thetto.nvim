@@ -40,7 +40,7 @@ function Filter.new(name, opts, inversed, key, modifier)
     modifier = {modifier, "table"},
   })
 
-  local origin = modulelib.find("thetto/handler/filter/" .. name)
+  local origin = modulelib.find("thetto.handler.filter." .. name)
   if origin == nil then
     return nil, "not found filter: " .. name
   end

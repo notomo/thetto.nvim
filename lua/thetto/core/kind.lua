@@ -31,7 +31,7 @@ Kind.filelib = filelib
 function Kind.new(executor, name)
   vim.validate({executor = {executor, "table"}, name = {name, "string"}})
 
-  local origin = modulelib.find("thetto/handler/kind/" .. name)
+  local origin = modulelib.find("thetto.handler.kind." .. name)
   if origin == nil then
     return nil, "not found kind: " .. name
   end

@@ -11,7 +11,7 @@ function Store.new(name, opts)
   vim.validate({name = {name, "string"}, opts = {opts, "table", true}})
   opts = opts or {}
 
-  local store = modulelib.find("thetto/handler/store/" .. name)
+  local store = modulelib.find("thetto.handler.store." .. name)
   if not store then
     return nil, "not found store: " .. name
   end
