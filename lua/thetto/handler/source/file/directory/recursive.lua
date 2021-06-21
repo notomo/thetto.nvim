@@ -28,7 +28,7 @@ else
 end
 
 function M.collect(self, opts)
-  return require("thetto/handler/source/file/recursive").collect(self, opts)
+  return require("thetto.handler.source.file.recursive").collect(self, opts)
 end
 
 M.kind_name = "file/directory"

@@ -134,7 +134,7 @@ function M.action_resume_previous(self, _, ctx)
     return nil, previous_ctx.ui:resume()
   end
   if self.action_opts.wrap then
-    local first_ctx = require("thetto/core/context").Context.resume()
+    local first_ctx = require("thetto.core.context").Context.resume()
     if first_ctx then
       return nil, first_ctx.ui:resume()
     end

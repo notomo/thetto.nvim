@@ -1,4 +1,4 @@
-local helper = require("thetto/lib/testlib/helper")
+local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("file/in_dir source", function()
@@ -29,7 +29,7 @@ describe("file/in_dir source", function()
   end)
 
   it("can show files in project dir", function()
-    require("thetto/core/target").project_root_patterns = {"0_root_pattern"}
+    require("thetto.core.target").project_root_patterns = {"0_root_pattern"}
 
     helper.new_directory("0_root_pattern")
     helper.new_directory("dir")

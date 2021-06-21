@@ -1,12 +1,12 @@
-local Collector = require("thetto/core/collector").Collector
-local Executor = require("thetto/core/executor").Executor
-local Options = require("thetto/core/option").Options
-local Context = require("thetto/core/context").Context
-local Store = require("thetto/core/store").Store
-local UI = require("thetto/view/ui").UI
-local custom = require("thetto/core/custom")
-local messagelib = require("thetto/lib/message")
-local modelib = require("thetto/lib/mode")
+local Collector = require("thetto.core.collector").Collector
+local Executor = require("thetto.core.executor").Executor
+local Options = require("thetto.core.option").Options
+local Context = require("thetto.core.context").Context
+local Store = require("thetto.core.store").Store
+local UI = require("thetto.view.ui").UI
+local custom = require("thetto.core.custom")
+local messagelib = require("thetto.lib.message")
+local modelib = require("thetto.lib.mode")
 
 local M = {}
 

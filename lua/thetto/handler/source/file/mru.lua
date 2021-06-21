@@ -1,4 +1,4 @@
-local Store = require("thetto/core/store").Store
+local Store = require("thetto.core.store").Store
 local vim = vim
 
 local M = {}

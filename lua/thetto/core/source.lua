@@ -1,11 +1,11 @@
-local highlights = require("thetto/lib/highlight")
-local jobs = require("thetto/lib/job")
-local pathlib = require("thetto/lib/path")
-local filelib = require("thetto/lib/file")
-local listlib = require("thetto/lib/list")
-local modulelib = require("thetto/lib/module")
-local SourceResult = require("thetto/core/source_result").SourceResult
-local base = require("thetto/handler/source/base")
+local highlights = require("thetto.lib.highlight")
+local jobs = require("thetto.lib.job")
+local pathlib = require("thetto.lib.path")
+local filelib = require("thetto.lib.file")
+local listlib = require("thetto.lib.list")
+local modulelib = require("thetto.lib.module")
+local SourceResult = require("thetto.core.source_result").SourceResult
+local base = require("thetto.handler.source.base")
 local vim = vim
 
 local M = {}
@@ -31,7 +31,7 @@ function Source.new(name, source_opts, opts)
     return nil, "not found source: " .. name
   end
 
-  local config = require("thetto/core/custom").config
+  local config = require("thetto.core.custom").config
   local source_config = config.source[name] or {}
   local tbl = {
     name = name,

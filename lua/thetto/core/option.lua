@@ -1,5 +1,5 @@
-local inputs = require("thetto/core/input")
-local targets = require("thetto/core/target")
+local inputs = require("thetto.core.input")
+local targets = require("thetto.core.target")
 
 local M = {}
 
@@ -30,7 +30,7 @@ local default = {
 }
 
 function Options.new(raw)
-  local opts = vim.tbl_extend("force", default, require("thetto/core/custom").config.global_opts, raw)
+  local opts = vim.tbl_extend("force", default, require("thetto.core.custom").config.global_opts, raw)
 
   local cwd = vim.fn.expand(opts.cwd)
   if cwd == "." then

@@ -1,4 +1,4 @@
-local filelib = require("thetto/lib/file")
+local filelib = require("thetto.lib.file")
 
 local M = {}
 

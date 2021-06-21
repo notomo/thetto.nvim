@@ -1,6 +1,6 @@
-local helper = require("thetto/lib/testlib/helper")
+local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
-local store = helper.require("thetto/core/store")
+local store = helper.require("thetto.core.store")
 
 describe("file/mru store", function()
 

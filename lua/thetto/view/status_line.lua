@@ -1,7 +1,7 @@
-local Context = require("thetto/core/context").Context
-local windowlib = require("thetto/lib/window")
-local bufferlib = require("thetto/lib/buffer")
-local highlights = require("thetto/lib/highlight")
+local Context = require("thetto.core.context").Context
+local windowlib = require("thetto.lib.window")
+local bufferlib = require("thetto.lib.buffer")
+local highlights = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
@@ -35,7 +35,7 @@ function StatusLine.new(source_name, width, height, row, column)
     },
   })
   vim.wo[window].winhighlight = "Normal:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto/view/status_line')._on_enter('%s')"):format(bufnr, source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto.view.status_line')._on_enter('%s')"):format(bufnr, source_name)
   vim.cmd(on_info_enter)
 
   local tbl = {

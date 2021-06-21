@@ -1,7 +1,7 @@
-local jobs = require("thetto/lib/job")
-local modulelib = require("thetto/lib/module")
-local filelib = require("thetto/lib/file")
-local base = require("thetto/handler/kind/base")
+local jobs = require("thetto.lib.job")
+local modulelib = require("thetto.lib.module")
+local filelib = require("thetto.lib.file")
+local base = require("thetto.handler.kind.base")
 local vim = vim
 
 local M = {}
@@ -39,7 +39,7 @@ function Kind.new(executor, name)
   local source_name = executor.source_name
   local source_user_opts = {}
   local source_user_behaviors = {}
-  local config = require("thetto/core/custom").config
+  local config = require("thetto.core.custom").config
   if config.source_actions ~= nil and config.source_actions[source_name] ~= nil then
     source_user_opts = config.source_actions[source_name].opts or {}
     source_user_behaviors = config.source_actions[source_name].behaviors or {}
@@ -87,11 +87,11 @@ function Kind._action_key(self, action_name)
 end
 
 function Kind.find_action(self, action_name, action_opts)
+  local config = require("thetto.core.custom").config
+
   local key, name = self:_action_key(action_name)
   local opts = vim.tbl_extend("force", self.opts[name] or {}, action_opts)
   local behavior = vim.tbl_deep_extend("force", {quit = true}, self.behaviors[name] or {})
-
-  local config = require("thetto/core/custom").config
 
   local source_action = config.source_actions[self.source_name]
   if source_action ~= nil and source_action[key] then
@@ -113,7 +113,7 @@ end
 
 function Kind.action_names(self)
   local names = {}
-  local config = require("thetto/core/custom").config
+  local config = require("thetto.core.custom").config
   local actions = vim.tbl_extend("force", self._origin, base, config.source_actions[self.source_name] or {}, config.kind_actions[self.name] or {})
   for key in pairs(actions) do
     if vim.startswith(key, Action.PREFIX) then

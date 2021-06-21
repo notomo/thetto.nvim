@@ -48,7 +48,7 @@ end
 function M.sync_input(texts)
   local text = texts[1]
   local finished = false
-  require("thetto/view/ui")._changed_after = function(input_lines)
+  require("thetto.view.ui")._changed_after = function(input_lines)
     for _, line in ipairs(input_lines) do
       if vim.endswith(line, text) then
         finished = true
@@ -75,7 +75,7 @@ function M.sync_open(...)
   end
 
   local finished = false
-  require("thetto/view/ui")._changed_after = function()
+  require("thetto.view.ui")._changed_after = function()
     finished = collector:finished()
   end
   ok = vim.wait(1000, function()
@@ -101,7 +101,7 @@ end
 
 function M.wait_ui(f)
   local finished = false
-  require("thetto/view/ui")._changed_after = function(_)
+  require("thetto.view.ui")._changed_after = function(_)
     finished = true
   end
 
@@ -157,7 +157,7 @@ end
 
 function M.sub_windows()
   local windows = {}
-  for bufnr, id in require("thetto/lib/buffer").in_tabpage(0) do
+  for bufnr, id in require("thetto.lib.buffer").in_tabpage(0) do
     local config = vim.api.nvim_win_get_config(id)
     if config.relative ~= "" and vim.bo[bufnr].filetype == "" then
       table.insert(windows, id)

@@ -1,9 +1,9 @@
-local Context = require("thetto/core/context").Context
-local windowlib = require("thetto/lib/window")
-local bufferlib = require("thetto/lib/buffer")
-local cursorlib = require("thetto/lib/cursor")
-local modelib = require("thetto/lib/mode")
-local highlights = require("thetto/lib/highlight")
+local Context = require("thetto.core.context").Context
+local windowlib = require("thetto.lib.window")
+local bufferlib = require("thetto.lib.buffer")
+local cursorlib = require("thetto.lib.cursor")
+local modelib = require("thetto.lib.mode")
+local highlights = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
@@ -44,7 +44,7 @@ function ItemList.new(source_name, width, height, row, column)
 
   local group_name = "theto_closed_" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto/view/item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
+  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto.view.item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
@@ -109,7 +109,7 @@ function ItemList.is_active(self)
 end
 
 function ItemList.enable_on_moved(self, source_name)
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto/view/item_list')._on_moved('%s')"):format(self._bufnr, source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto.view.item_list')._on_moved('%s')"):format(self._bufnr, source_name)
   vim.cmd(on_moved)
 
   local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self._bufnr)

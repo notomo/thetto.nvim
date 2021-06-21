@@ -1,4 +1,4 @@
-local helper = require("thetto/lib/testlib/helper")
+local helper = require("thetto.lib.testlib.helper")
 
 describe("env/process source", function()
 
@@ -6,9 +6,9 @@ describe("env/process source", function()
   after_each(helper.after_each)
 
   it("can execute kill", function()
-    local sleep1 = require("thetto/lib/job").new({"sleep", "8"}, {})
+    local sleep1 = require("thetto.lib.job").new({"sleep", "8"}, {})
     sleep1:start()
-    local sleep2 = require("thetto/lib/job").new({"sleep", "9"}, {})
+    local sleep2 = require("thetto.lib.job").new({"sleep", "9"}, {})
     sleep2:start()
 
     helper.sync_open("env/process", {opts = {insert = false}})

@@ -1,9 +1,9 @@
-local Source = require("thetto/core/source").Source
-local SourceResult = require("thetto/core/source_result").SourceResult
-local Items = require("thetto/core/item").Items
-local Filters = require("thetto/core/filter").Filters
-local Sorters = require("thetto/core/sorter").Sorters
-local wraplib = require("thetto/lib/wrap")
+local Source = require("thetto.core.source").Source
+local SourceResult = require("thetto.core.source_result").SourceResult
+local Items = require("thetto.core.item").Items
+local Filters = require("thetto.core.filter").Filters
+local Sorters = require("thetto.core.sorter").Sorters
+local wraplib = require("thetto.lib.wrap")
 local vim = vim
 
 local M = {}

@@ -1,6 +1,6 @@
-local modulelib = require("thetto/lib/module")
-local pathlib = require("thetto/lib/path")
-local repository = require("thetto/lib/repository").Repository.new("store")
+local modulelib = require("thetto.lib.module")
+local pathlib = require("thetto.lib.path")
+local repository = require("thetto.lib.repository").Repository.new("store")
 
 local M = {}
 

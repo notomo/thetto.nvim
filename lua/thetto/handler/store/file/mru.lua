@@ -1,5 +1,5 @@
-local listlib = require("thetto/lib/list")
-local filelib = require("thetto/lib/file")
+local listlib = require("thetto.lib.list")
+local filelib = require("thetto.lib.file")
 local vim = vim
 
 local M = {}
@@ -14,8 +14,8 @@ function M.start(self)
   vim.cmd(([[
 augroup %s
   autocmd!
-  autocmd BufEnter * lua require("thetto/command").Command.add_to_store("file/mru", vim.fn.expand('<abuf>'))
-  autocmd QuitPre * lua require("thetto/command").Command.save_to_store("file/mru")
+  autocmd BufEnter * lua require("thetto.command").Command.add_to_store("file/mru", vim.fn.expand('<abuf>'))
+  autocmd QuitPre * lua require("thetto.command").Command.save_to_store("file/mru")
 augroup END
 ]]):format(self.augroup_name))
 end

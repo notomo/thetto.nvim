@@ -1,6 +1,6 @@
-local windowlib = require("thetto/lib/window")
-local highlights = require("thetto/lib/highlight")
-local filelib = require("thetto/lib/file")
+local windowlib = require("thetto.lib.window")
+local highlights = require("thetto.lib.highlight")
+local filelib = require("thetto.lib.file")
 local vim = vim
 
 local M = {}

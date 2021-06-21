@@ -1,5 +1,5 @@
-local Kind = require("thetto/core/kind").Kind
-local listlib = require("thetto/lib/list")
+local Kind = require("thetto.core.kind").Kind
+local listlib = require("thetto.lib.list")
 
 local M = {}
 

@@ -1,4 +1,4 @@
-local repository = require("thetto/lib/repository").Repository.new("context")
+local repository = require("thetto.lib.repository").Repository.new("context")
 
 local M = {}
 

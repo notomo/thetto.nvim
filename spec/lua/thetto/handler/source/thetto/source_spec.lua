@@ -1,4 +1,4 @@
-local helper = require("thetto/lib/testlib/helper")
+local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("thetto/source source", function()

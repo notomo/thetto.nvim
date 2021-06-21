@@ -1,5 +1,5 @@
-local Kind = require("thetto/core/kind").Kind
-local Context = require("thetto/core/context").Context
+local Kind = require("thetto.core.kind").Kind
+local Context = require("thetto.core.context").Context
 
 local M = {}
 

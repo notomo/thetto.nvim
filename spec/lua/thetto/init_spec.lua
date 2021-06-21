@@ -1,4 +1,4 @@
-local helper = require("thetto/lib/testlib/helper")
+local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("thetto", function()
@@ -373,8 +373,8 @@ test3]])
   end)
 
   it("stops the unfinished job on closed", function()
-    local job = require("thetto/lib/job").new({"sleep", "9"}, {})
-    require("thetto/handler/source/line").collect = function(_)
+    local job = require("thetto.lib.job").new({"sleep", "9"}, {})
+    require("thetto.handler.source.line").collect = function(_)
       return {}, job
     end
 

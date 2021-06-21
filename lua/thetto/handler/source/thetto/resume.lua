@@ -1,4 +1,4 @@
-local Context = require("thetto/core/context").Context
+local Context = require("thetto.core.context").Context
 
 local M = {}
 
