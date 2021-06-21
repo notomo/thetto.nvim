@@ -29,8 +29,10 @@ local default = {
   range = nil,
 }
 
-function Options.new(raw)
-  local opts = vim.tbl_extend("force", default, require("thetto.core.custom").config.global_opts, raw)
+function Options.new(raw, source_name)
+  local config = require("thetto.core.custom").config
+  local source_config = config.source[source_name] or {}
+  local opts = vim.tbl_extend("force", default, config.global_opts, source_config.global_opts or {}, raw)
 
   local cwd = vim.fn.expand(opts.cwd)
   if cwd == "." then

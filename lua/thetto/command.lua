@@ -30,17 +30,15 @@ function Command.new(name, ...)
 end
 
 function Command.start(source_name, args)
+  vim.validate({source_name = {source_name, "string"}, args = {args, "table", true}})
+
   args = args or {}
   local source_opts = args.source_opts or {}
   local action_opts = args.action_opts or {}
 
-  local opts, opts_err = Options.new(args.opts or {})
+  local opts, opts_err = Options.new(args.opts or {}, source_name)
   if opts_err ~= nil then
     return nil, opts_err
-  end
-
-  if source_name == nil then
-    return nil, "no source"
   end
 
   local old_ctx = Context.get(source_name)

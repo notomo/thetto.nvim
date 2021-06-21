@@ -255,6 +255,18 @@ test3]])
     assert.current_line("test3")
   end)
 
+  it("can custom source global options", function()
+    thetto.setup({source = {line = {global_opts = {insert = false}}}})
+
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line")
+
+    assert.current_line("test1")
+  end)
+
   it("can custom source action", function()
     local called = false
     thetto.setup({
