@@ -1,13 +1,12 @@
 local M = {}
 
-M.file_path = nil
-M.default_paths = {}
+M.opts = {file_path = nil, default_paths = {}}
 
 function M.collect(self)
-  local file_path = M.file_path or self.pathlib.user_data_path("file_bookmark.txt")
+  local file_path = self.opts.file_path or self.pathlib.user_data_path("file_bookmark.txt")
   if self.filelib.create_if_need(file_path) then
     local f = io.open(file_path, "w")
-    for _, path in ipairs(M.default_paths) do
+    for _, path in ipairs(self.opts.default_paths) do
       f:write(path .. "\n")
     end
     f:close()

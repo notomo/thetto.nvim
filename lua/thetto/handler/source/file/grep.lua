@@ -1,10 +1,12 @@
 local M = {}
 
-M.command = "grep"
-M.pattern_opt = "-e"
-M.command_opts = {"-inH"}
-M.recursive_opt = "-r"
-M.separator = "--"
+M.opts = {
+  command = "grep",
+  pattern_opt = "-e",
+  command_opts = {"-inH"},
+  recursive_opt = "-r",
+  separator = "--",
+}
 
 function M.collect(self, opts)
   local pattern = opts.pattern
@@ -19,8 +21,14 @@ function M.collect(self, opts)
   end
 
   local paths = opts.cwd
-  local cmd = vim.list_extend({M.command}, M.command_opts)
-  for _, x in ipairs({M.recursive_opt, M.pattern_opt, pattern, M.separator, paths}) do
+  local cmd = vim.list_extend({self.opts.command}, self.opts.command_opts)
+  for _, x in ipairs({
+    self.opts.recursive_opt,
+    self.opts.pattern_opt,
+    pattern,
+    self.opts.separator,
+    paths,
+  }) do
     if x == "" then
       goto continue
     end

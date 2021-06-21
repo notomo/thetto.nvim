@@ -3,7 +3,7 @@ local vim = vim
 
 local M = {}
 
-M.cwd_marker = "%s/"
+M.opts = {cwd_marker = "%s/"}
 
 function M.collect(self, opts)
   local store, err = Store.new_or_get("file/mru")
@@ -30,7 +30,7 @@ function M.collect(self, opts)
 
   local to_relative = self.pathlib.relative_modifier(opts.cwd)
   local dir = vim.fn.fnamemodify(opts.cwd, ":t")
-  local cwd_marker = M.cwd_marker:format(dir)
+  local cwd_marker = self.opts.cwd_marker:format(dir)
   local home = self.pathlib.home()
 
   local items = {}

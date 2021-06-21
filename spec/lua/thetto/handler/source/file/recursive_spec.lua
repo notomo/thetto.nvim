@@ -32,9 +32,17 @@ describe("file/recursive source", function()
   end)
 
   it("shows error if command does not exist", function()
-    require("thetto/handler/source/file/recursive").get_command = function()
-      return {"not_exists_cmd"}
-    end
+    thetto.setup({
+      source = {
+        ["file/recursive"] = {
+          opts = {
+            get_command = function()
+              return {"not_exists_cmd"}
+            end,
+          },
+        },
+      },
+    })
 
     thetto.start("file/recursive")
     assert.exists_message("not_exists_cmd")

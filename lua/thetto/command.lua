@@ -4,6 +4,7 @@ local Options = require("thetto/core/option").Options
 local Context = require("thetto/core/context").Context
 local Store = require("thetto/core/store").Store
 local UI = require("thetto/view/ui").UI
+local custom = require("thetto/core/custom")
 local messagelib = require("thetto/lib/message")
 local modelib = require("thetto/lib/mode")
 
@@ -126,6 +127,11 @@ function Command.resume_execute(args)
   local range = modelib.visual_range()
   local items = ctx.ui:selected_items(action_name, range)
   return ctx.executor:action(items, ctx, action_name, action_opts)
+end
+
+function Command.setup(config)
+  vim.validate({config = {config, "table"}})
+  custom.set(config)
 end
 
 function Command.setup_store(name, opts)

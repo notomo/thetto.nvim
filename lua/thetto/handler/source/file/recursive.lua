@@ -2,12 +2,14 @@ local vim = vim
 
 local M = {}
 
+M.opts = {max_depth = 100}
+
 if vim.fn.has("win32") == 1 then
-  function M.get_command(path, _)
+  M.opts.get_command = function(path, _)
     return {"where", "/R", path, "*"}
   end
 else
-  function M.get_command(path, max_depth)
+  M.opts.get_command = function(path, max_depth)
     return {
       "find",
       "-L",
@@ -27,10 +29,8 @@ else
   end
 end
 
-M.opts = {max_depth = 100}
-
 function M.collect(self, opts)
-  local cmd = self.get_command(opts.cwd, self.opts.max_depth)
+  local cmd = self.opts.get_command(opts.cwd, self.opts.max_depth)
   local to_relative = self.pathlib.relative_modifier(opts.cwd)
 
   local items = {}

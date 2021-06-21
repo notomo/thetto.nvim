@@ -75,7 +75,7 @@ test]])
   end)
 
   it("can filter by substring", function()
-    require("thetto/custom").default_sorters = {"length"}
+    thetto.setup({sorters = {"length"}})
     helper.set_lines([[
 test1
 test2
@@ -257,12 +257,15 @@ test3]])
 
   it("can custom source action", function()
     local called = false
-    local actions = require("thetto/custom").source_actions
-    actions["line"] = {
-      action_hoge = function(_)
-        called = true
-      end,
-    }
+    thetto.setup({
+      source_actions = {
+        line = {
+          action_hoge = function(_)
+            called = true
+          end,
+        },
+      },
+    })
 
     helper.set_lines([[
 test1
@@ -277,12 +280,16 @@ test3]])
 
   it("can custom kind action", function()
     local called = false
-    local actions = require("thetto/custom").kind_actions
-    actions["file/directory"] = {
-      action_hoge = function(_)
-        called = true
-      end,
-    }
+
+    thetto.setup({
+      kind_actions = {
+        ["file/directory"] = {
+          action_hoge = function(_)
+            called = true
+          end,
+        },
+      },
+    })
 
     helper.set_lines([[
 test1
@@ -447,7 +454,7 @@ tes]])
   end)
 
   it("can custom default opts", function()
-    require("thetto/custom").opts = {display_limit = 1}
+    thetto.setup({global_opts = {display_limit = 1}})
 
     helper.set_lines([[
 test1
@@ -478,7 +485,7 @@ test3]])
   end)
 
   it("can remove filter", function()
-    require("thetto/handler/source/line").filters = {"substring", "-substring"}
+    thetto.setup({source = {line = {filters = {"substring", "-substring"}}}})
 
     helper.set_lines([[
 test1
@@ -499,7 +506,7 @@ test3]])
   end)
 
   it("can inverse filter", function()
-    require("thetto/custom").default_filters = {"-substring"}
+    thetto.setup({filters = {"-substring"}})
 
     helper.set_lines([[
 test1
@@ -515,7 +522,7 @@ test3]])
   end)
 
   it("can change filter", function()
-    require("thetto/custom").default_filters = {"substring"}
+    thetto.setup({filters = {"substring"}})
 
     helper.set_lines([[
 test1
@@ -541,7 +548,7 @@ test3]])
   end)
 
   it("cannot delete input lines", function()
-    require("thetto/custom").default_filters = {"substring", "-substring"}
+    thetto.setup({filters = {"substring", "-substring"}})
 
     thetto.start("line")
     helper.wait_ui(function()
@@ -552,7 +559,7 @@ test3]])
   end)
 
   it("can reverse sorter", function()
-    require("thetto/custom").default_sorters = {"length"}
+    thetto.setup({sorters = {"length"}})
 
     helper.set_lines([[
 te
@@ -570,7 +577,7 @@ tes]])
   end)
 
   it("can reverse specified sorter", function()
-    require("thetto/custom").default_sorters = {"row", "length"}
+    thetto.setup({sorters = {"row", "length"}})
 
     helper.set_lines([[
 te
@@ -603,7 +610,7 @@ tes]])
   end)
 
   it("can remove sorter by toggle_sorter", function()
-    require("thetto/custom").default_sorters = {"length"}
+    thetto.setup({sorters = {"length"}})
 
     helper.set_lines([[
 te
@@ -620,7 +627,7 @@ tes]])
   end)
 
   it("can move to input with behavior as `i`", function()
-    require("thetto/custom").default_filters = {"substring", "-substring"}
+    thetto.setup({filters = {"substring", "-substring"}})
 
     thetto.start("line")
     helper.sync_input({"hoge"})
@@ -632,7 +639,7 @@ tes]])
   end)
 
   it("can move to input with behavior as `a`", function()
-    require("thetto/custom").default_filters = {"substring", "-substring"}
+    thetto.setup({filters = {"substring", "-substring"}})
 
     thetto.start("line")
     helper.sync_input({"hoge"})
@@ -644,7 +651,7 @@ tes]])
   end)
 
   it("can filter by regex", function()
-    require("thetto/custom").default_filters = {"regex"}
+    thetto.setup({filters = {"regex"}})
 
     helper.set_lines([[
 test1
@@ -759,13 +766,16 @@ test2]])
 
   it("can execute action automatically", function()
     local value = nil
-    local actions = require("thetto/custom").source_actions
-    actions["line"] = {
-      action_hoge = function(_, items)
-        value = items[1].value
-      end,
-      behaviors = {hoge = {quit = false}},
-    }
+    thetto.setup({
+      source_actions = {
+        line = {
+          action_hoge = function(_, items)
+            value = items[1].value
+          end,
+          behaviors = {hoge = {quit = false}},
+        },
+      },
+    })
 
     helper.set_lines([[
 test_auto_1
@@ -781,13 +791,16 @@ test_auto_2]])
   end)
 
   it("can use visual mode even if enabled auto action", function()
-    local actions = require("thetto/custom").source_actions
-    actions["line"] = {
-      action_hoge = function(_, _)
-        vim.cmd("normal! " .. vim.api.nvim_eval("\"\\<ESC>\""))
-      end,
-      behaviors = {hoge = {quit = false}},
-    }
+    thetto.setup({
+      source_actions = {
+        line = {
+          action_hoge = function(_, _)
+            vim.cmd("normal! " .. vim.api.nvim_eval("\"\\<ESC>\""))
+          end,
+          behaviors = {hoge = {quit = false}},
+        },
+      },
+    })
 
     helper.set_lines([[
 test_auto_1

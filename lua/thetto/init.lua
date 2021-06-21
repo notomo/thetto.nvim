@@ -18,6 +18,10 @@ function M.resume_execute(args)
   return Command.new("resume_execute", args)
 end
 
+function M.setup(config)
+  return Command.new("setup", config)
+end
+
 function M.setup_store(name, opts)
   return Command.new("setup_store", name, opts)
 end

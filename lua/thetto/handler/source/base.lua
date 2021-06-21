@@ -1,5 +1,3 @@
-local custom = require("thetto/custom")
-
 local M = {}
 
 function M.collect()
@@ -30,8 +28,8 @@ end
 
 M.color_label_key = "value"
 M.colors = {{always = true, pattern = "", chunks = {{" ", "ThettoColorLabelOthers"}}}}
-M.filters = custom.default_filters or {"substring"}
-M.sorters = custom.default_sorters or {}
+M.filters = {"substring"}
+M.sorters = {}
 M.kind_name = "base"
 M.opts = {}
 M.chunk_max_count = 10000

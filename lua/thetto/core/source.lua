@@ -31,25 +31,21 @@ function Source.new(name, source_opts, opts)
     return nil, "not found source: " .. name
   end
 
+  local config = require("thetto/core/custom").config
+  local source_config = config.source[name] or {}
   local tbl = {
     name = name,
-    opts = vim.tbl_extend("force", origin.opts or base.opts, source_opts),
+    opts = vim.tbl_extend("force", origin.opts or base.opts, source_config.opts or {}, source_opts),
     highlights = highlights.new_factory("thetto-list-highlight"),
-    filters = nil,
-    sorters = nil,
+    filters = opts.filters or source_config.filters or origin.filters or config.filters,
+    sorters = opts.sorters or source_config.sorters or origin.sorters or config.sorters,
     bufnr = vim.api.nvim_get_current_buf(),
     compiled_colors = vim.tbl_map(function(color)
       return {regex = vim.regex(color.pattern), chunks = color.chunks}
-    end, origin.colors or base.colors),
+    end, origin.colors or source_config.colors or base.colors),
     ctx = {},
     _origin = origin,
   }
-  if #opts.filters ~= 0 then
-    tbl.filters = opts.filters
-  end
-  if #opts.sorters ~= 0 then
-    tbl.sorters = opts.sorters
-  end
 
   return setmetatable(tbl, Source)
 end

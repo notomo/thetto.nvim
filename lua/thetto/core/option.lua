@@ -1,4 +1,3 @@
-local custom = require("thetto/custom")
 local inputs = require("thetto/core/input")
 local targets = require("thetto/core/target")
 
@@ -22,8 +21,8 @@ local default = {
   action = nil,
   display_limit = 100,
   debounce_ms = 50,
-  filters = {},
-  sorters = {},
+  filters = nil,
+  sorters = nil,
   allow_empty = false,
   auto = nil,
   immediately = false,
@@ -31,7 +30,7 @@ local default = {
 }
 
 function Options.new(raw)
-  local opts = vim.tbl_extend("force", default, custom.opts, raw)
+  local opts = vim.tbl_extend("force", default, require("thetto/core/custom").config.global_opts, raw)
 
   local cwd = vim.fn.expand(opts.cwd)
   if cwd == "." then

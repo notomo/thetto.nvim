@@ -1,21 +1,24 @@
 local M = {}
 
-M.commands = {
-  remove_new_line = {pattern = "^$\\n", after = ""},
-  clean_tab_sequence = {pattern = "\\\\t", after = "    "},
-  clean_new_line_sequence = {pattern = "\\\\n", after = "\\r"},
-  escape = {pattern = "^(.+)$", after = "\\=escape(submatch(0), \"\\/\")"},
-  surround_by_single_quote = {pattern = "^(.+)$", after = "'\\1'"},
-  surround_by_double_quote = {pattern = "^(.+)$", after = "\"\\1\""},
+M.opts = {
+  flags = "ge",
+  range = "%",
+  magic = "\\v",
+  commands = {
+    remove_new_line = {pattern = "^$\\n", after = ""},
+    clean_tab_sequence = {pattern = "\\\\t", after = "    "},
+    clean_new_line_sequence = {pattern = "\\\\n", after = "\\r"},
+    escape = {pattern = "^(.+)$", after = "\\=escape(submatch(0), \"\\/\")"},
+    surround_by_single_quote = {pattern = "^(.+)$", after = "'\\1'"},
+    surround_by_double_quote = {pattern = "^(.+)$", after = "\"\\1\""},
+  },
 }
-
-M.opts = {flags = "ge", range = "%", magic = "\\v"}
 
 function M.collect(self, opts)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local items = {}
-  for name, c in pairs(M.commands) do
+  for name, c in pairs(self.opts.commands) do
     local range_part = self.opts.range
     local range = nil
     if opts.range ~= nil then
