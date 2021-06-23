@@ -1,5 +1,5 @@
+local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local windowlib = require("thetto.lib.window")
-local highlights = require("thetto.lib.highlight")
 local filelib = require("thetto.lib.file")
 local vim = vim
 
@@ -10,7 +10,7 @@ Sidecar.__index = Sidecar
 M.Sidecar = Sidecar
 
 function Sidecar.new()
-  local tbl = {_window = nil, _preview_hl_factory = highlights.new_factory("thetto-preview")}
+  local tbl = {_window = nil, _hl_factory = HighlighterFactory.new("thetto-preview")}
   return setmetatable(tbl, Sidecar)
 end
 
@@ -82,7 +82,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   end
 
   if row ~= nil then
-    local highlighter = self._preview_hl_factory:create(bufnr)
+    local highlighter = self._hl_factory:create(bufnr)
     local range = open_target.range or {s = {column = 0}, e = {column = -1}}
     highlighter:add_normal("ThettoPreview", row - 1, range.s.column, range.e.column)
     if vim.fn.getbufline(bufnr, row)[1] == "" then

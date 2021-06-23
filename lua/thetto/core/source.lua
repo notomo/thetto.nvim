@@ -1,4 +1,4 @@
-local highlights = require("thetto.lib.highlight")
+local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local jobs = require("thetto.lib.job")
 local pathlib = require("thetto.lib.path")
 local filelib = require("thetto.lib.file")
@@ -36,7 +36,7 @@ function Source.new(name, source_opts, opts)
   local tbl = {
     name = name,
     opts = vim.tbl_extend("force", origin.opts or base.opts, source_config.opts or {}, source_opts),
-    highlights = highlights.new_factory("thetto-list-highlight"),
+    highlights = HighlighterFactory.new("thetto-list-highlight"),
     filters = opts.filters or source_config.filters or origin.filters or config.filters,
     sorters = opts.sorters or source_config.sorters or origin.sorters or config.sorters,
     bufnr = vim.api.nvim_get_current_buf(),

@@ -1,4 +1,4 @@
-local highlights = require("thetto.lib.highlight")
+local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local modulelib = require("thetto.lib.module")
 local pathlib = require("thetto.lib.path")
 local vim = vim
@@ -61,7 +61,7 @@ function Filter.new(name, opts, inversed, key, modifier)
     _key = _key,
     is_interactive = name == "interactive",
     modifier = modifier,
-    highlights = highlights.new_factory("thetto-list-highlight"),
+    highlights = HighlighterFactory.new("thetto-list-highlight"),
   }
 
   return setmetatable(tbl, Filter)

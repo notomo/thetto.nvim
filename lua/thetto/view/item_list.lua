@@ -3,7 +3,6 @@ local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")
 local modelib = require("thetto.lib.mode")
-local highlights = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
@@ -48,11 +47,7 @@ function ItemList.new(source_name, width, height, row, column)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
-  local tbl = {
-    _bufnr = bufnr,
-    _window = window,
-    _selection_hl_factory = highlights.new_factory("thetto-selection-highlight"),
-  }
+  local tbl = {_bufnr = bufnr, _window = window}
   return setmetatable(tbl, ItemList)
 end
 

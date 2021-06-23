@@ -1,6 +1,6 @@
+local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
-local highlights = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
@@ -55,7 +55,7 @@ function Inputter.new(collector, width, height, row, column)
     _bufnr = bufnr,
     _window = window,
     height = input_height,
-    _filter_info_hl_factory = highlights.new_factory("thetto-input-filter-info"),
+    _hl_factory = HighlighterFactory.new("thetto-input-filter-info"),
   }
   return setmetatable(tbl, Inputter)
 end
@@ -68,7 +68,7 @@ function Inputter.redraw(self, input_lines, filters)
     self.height = height
   end
 
-  local highlighter = self._filter_info_hl_factory:reset(self._bufnr)
+  local highlighter = self._hl_factory:reset(self._bufnr)
   for i, filter in ipairs(filters) do
     local filter_info = ("[%s]"):format(filter.name)
     highlighter:set_virtual_text(i - 1, {{filter_info, "ThettoFilterInfo"}}, {

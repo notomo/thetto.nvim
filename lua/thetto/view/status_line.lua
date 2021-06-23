@@ -1,7 +1,7 @@
 local Context = require("thetto.core.context").Context
+local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
-local highlights = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
@@ -41,7 +41,7 @@ function StatusLine.new(source_name, width, height, row, column)
   local tbl = {
     _bufnr = bufnr,
     _window = window,
-    _info_hl_factory = highlights.new_factory("thetto-info-text"),
+    _hl_factory = HighlighterFactory.new("thetto-info-text"),
   }
   return setmetatable(tbl, StatusLine)
 end
@@ -62,7 +62,7 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
   end
 
   local text = ("%s%s [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
-  local highlighter = self._info_hl_factory:reset(self._bufnr)
+  local highlighter = self._hl_factory:reset(self._bufnr)
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {" "}, {status, "Comment"}}, {
     virt_text_pos = "overlay",
   })
