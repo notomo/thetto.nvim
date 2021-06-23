@@ -1,16 +1,7 @@
 local M = {}
 
-function M.apply(self, items)
-  if self.reversed then
-    table.sort(items, function(a, b)
-      return #a.value > #b.value
-    end)
-  else
-    table.sort(items, function(a, b)
-      return #a.value < #b.value
-    end)
-  end
-  return items
+function M.value(_, item)
+  return #item.value
 end
 
 return M

@@ -121,16 +121,33 @@ function Sorters.toggle(self, name)
   return Sorters.new(names), nil
 end
 
-function Sorters.iter(self)
-  return next, self._sorters, nil
-end
-
 function Sorters.length(self)
   return #self._sorters
 end
 
 function Sorters.values(self)
   return self._sorters
+end
+
+function Sorters.apply(self, items)
+  if #self._sorters == 0 then
+    return items
+  end
+
+  local compare = function(item_a, item_b)
+    for _, sorter in ipairs(self._sorters) do
+      local a = sorter:value(item_a)
+      local b = sorter:value(item_b)
+      if a ~= b then
+        return (a > b and sorter.reversed) or not (a > b or sorter.reversed)
+      end
+    end
+    return false
+  end
+
+  table.sort(items, compare)
+
+  return items
 end
 
 return M

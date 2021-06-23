@@ -589,7 +589,7 @@ tes]])
   end)
 
   it("can reverse specified sorter", function()
-    thetto.setup({sorters = {"row", "length"}})
+    thetto.setup({sorters = {"length", "row"}})
 
     helper.set_lines([[
 te

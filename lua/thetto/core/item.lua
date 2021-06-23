@@ -15,9 +15,7 @@ function Items.new(result, input_lines, filters, sorters, opts)
       items = filter:apply(items, input_line, opts)
     end
   end
-  for _, sorter in sorters:iter() do
-    items = sorter:apply(items)
-  end
+  items = sorters:apply(items)
 
   local filtered = {}
   for i = 1, opts.display_limit, 1 do
