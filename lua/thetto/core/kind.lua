@@ -114,7 +114,8 @@ end
 function Kind.action_names(self)
   local names = {}
   local config = require("thetto.core.custom").config
-  local actions = vim.tbl_extend("force", self._origin, unpack(self._origin.extends or {}) or {}, base, config.source_actions[self.source_name] or {}, config.kind_actions[self.name] or {})
+  local actions = vim.tbl_extend("force", self._origin, unpack(self._origin.extends or {{}}))
+  actions = vim.tbl_extend("force", actions, base, config.source_actions[self.source_name] or {}, config.kind_actions[self.name] or {})
   for key in pairs(actions) do
     if vim.startswith(key, Action.PREFIX) then
       local action_name = key:gsub("^" .. Action.PREFIX, "")
@@ -135,7 +136,7 @@ function M.extend(raw_kind, ...)
       end
       for _, extend in ipairs(extends) do
         local v = extend[k]
-        if extend[k] then
+        if v then
           return v
         end
       end
