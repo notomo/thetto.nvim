@@ -27,4 +27,18 @@ test3]])
     assert.exists_message([[must be executed in thetto buffer]])
   end)
 
+  it("can execute no-quit action", function()
+    helper.set_lines([[
+test1
+]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    thetto.start("thetto/action", {opts = {insert = false}})
+    helper.search("move_to_input")
+    thetto.execute()
+
+    assert.filetype("thetto-input")
+  end)
+
 end)

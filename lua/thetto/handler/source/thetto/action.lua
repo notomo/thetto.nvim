@@ -16,7 +16,8 @@ function M.collect()
   local items = {}
   local source_name = ctx.collector.source.name
   for _, action_name in ipairs(kind:action_names()) do
-    table.insert(items, {value = action_name, source_name = source_name})
+    local quit = (kind.behaviors[action_name] or {}).quit or false
+    table.insert(items, {value = action_name, source_name = source_name, quit = quit})
   end
   return items
 end
