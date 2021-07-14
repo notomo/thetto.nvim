@@ -905,4 +905,23 @@ test2]])
     assert.current_line("test2")
   end)
 
+  it("can use custom action as default", function()
+    local called = false
+    thetto.setup({
+      kind_actions = {
+        ["vim/variable"] = {
+          action_hoge = function(_)
+            called = true
+          end,
+        },
+      },
+      source = {["vim/variable"] = {global_opts = {action = "hoge"}}},
+    })
+
+    thetto.start("vim/variable", {opts = {insert = false}})
+    thetto.execute()
+
+    assert.is_true(called)
+  end)
+
 end)

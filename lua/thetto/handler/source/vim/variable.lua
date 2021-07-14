@@ -31,6 +31,6 @@ function M.collect()
   return items
 end
 
-M.kind_name = "word"
+M.kind_name = "vim/variable"
 
 return M

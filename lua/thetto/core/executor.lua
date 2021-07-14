@@ -17,7 +17,7 @@ function Executor.new(source_name, default_kind_name, default_action_opts, defau
   local tbl = {
     source_name = source_name,
     _default_action_opts = default_action_opts,
-    _default_action_name = default_action_name,
+    default_action_name = default_action_name,
     _default_kind_name = default_kind_name,
   }
   return setmetatable(tbl, Executor)
@@ -30,8 +30,8 @@ function Executor._action(self, action_name, kind_name, items, action_opts)
   end
 
   local name
-  if action_name == "default" and self._default_action_name ~= nil then
-    name = self._default_action_name
+  if action_name == "default" and self.default_action_name ~= nil then
+    name = self.default_action_name
   else
     name = action_name
   end

@@ -55,6 +55,7 @@ function Kind.new(executor, name)
   local tbl = {
     name = name,
     executor = executor,
+    default_action = executor.default_action_name,
     source_name = source_name,
     opts = vim.tbl_deep_extend("force", base.opts, origin.opts or {}, user_opts, source_user_opts),
     behaviors = vim.tbl_deep_extend("force", base.behaviors, origin.behaviors or {}, user_behaviors, source_user_behaviors),
