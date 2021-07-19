@@ -56,6 +56,13 @@ function M.action_tab_open(self, items)
   end
 end
 
+function M.action_tab_drop(self, items)
+  for _, item in ipairs(items) do
+    vim.cmd("tab drop " .. self.filelib.escape(item.path))
+    adjust_cursor(item)
+  end
+end
+
 function M.action_vsplit_open(self, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)

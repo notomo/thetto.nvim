@@ -20,6 +20,15 @@ function M.action_vsplit_open(_, items)
   end
 end
 
+function M.action_tab_drop(self, items)
+  for _, item in ipairs(items) do
+    local path = vim.api.nvim_buf_get_name(item.bufnr)
+    if path ~= "" then
+      vim.cmd("tab drop " .. self.filelib.escape(path))
+    end
+  end
+end
+
 function M.action_preview(_, items, ctx)
   local item = items[1]
   if item == nil or not vim.api.nvim_buf_is_loaded(item.bufnr) then

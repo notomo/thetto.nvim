@@ -37,4 +37,22 @@ describe("vim/buffer source", function()
     assert.no.exists_pattern("foo")
   end)
 
+  it("can execute tab_drop", function()
+    local bufnr = vim.api.nvim_create_buf(true, true)
+    vim.api.nvim_buf_set_name(bufnr, "foo")
+    vim.cmd("tabedit")
+
+    thetto.start("vim/buffer", {opts = {insert = false}})
+    helper.search("foo")
+    thetto.execute("tab_drop")
+
+    assert.tab_count(2)
+
+    thetto.start("vim/buffer", {opts = {insert = false}})
+    helper.search("foo")
+    thetto.execute("tab_drop")
+
+    assert.tab_count(2)
+  end)
+
 end)
