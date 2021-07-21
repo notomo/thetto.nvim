@@ -54,26 +54,6 @@ test]])
     assert.window_count(4)
   end)
 
-  it("can resume even if opened", function()
-    thetto.start("line")
-    vim.cmd("tabedit")
-
-    thetto.resume()
-    assert.window_count(4)
-  end)
-
-  it("goes back to original window when quit resumed thetto", function()
-    thetto.start("line")
-    vim.cmd("tabedit")
-    local current = vim.api.nvim_get_current_win()
-
-    thetto.resume()
-    thetto.start("line")
-    thetto.execute("quit")
-
-    assert.window(current)
-  end)
-
   it("can filter by substring", function()
     thetto.setup({sorters = {"length"}})
     helper.set_lines([[
@@ -88,86 +68,6 @@ test3]])
 
     assert.current_line("test2")
     assert.no.exists_pattern("test1")
-  end)
-
-  it("can move to filter", function()
-    thetto.start("line", {opts = {insert = false}})
-
-    assert.filetype("thetto")
-
-    thetto.execute("move_to_input")
-
-    assert.filetype("thetto-input")
-  end)
-
-  it("can move to list", function()
-    thetto.start("line")
-
-    assert.filetype("thetto-input")
-
-    thetto.execute("move_to_list")
-
-    assert.filetype("thetto")
-  end)
-
-  it("can move to list even if empty", function()
-    thetto.start("line")
-    helper.sync_input({"test"})
-
-    assert.filetype("thetto-input")
-
-    thetto.execute("move_to_list")
-
-    assert.filetype("thetto")
-  end)
-
-  it("can resume latest", function()
-    helper.set_lines([[
-test11
-test21
-test22]])
-
-    thetto.start("line")
-    helper.sync_input({"test2"})
-
-    thetto.execute("move_to_list")
-    vim.cmd("normal! G")
-
-    thetto.execute("quit")
-    thetto.resume()
-
-    thetto.execute("move_to_input")
-
-    assert.filetype("thetto-input")
-    assert.current_line("test2")
-
-    thetto.execute("move_to_list")
-
-    assert.current_line("test22")
-    vim.cmd("normal! gg")
-    assert.current_line("test21")
-  end)
-
-  it("can resume by source", function()
-    helper.set_lines([[
-test11
-test21
-test22]])
-
-    thetto.start("line")
-    helper.sync_input({"test2"})
-
-    thetto.execute("quit")
-    thetto.start("vim/runtimepath")
-    thetto.execute("quit")
-    thetto.resume("line")
-
-    assert.filetype("thetto-input")
-    assert.current_line("test2")
-
-    thetto.execute("move_to_list")
-
-    assert.current_line("test21")
   end)
 
   it("can filter with ignorecase", function()
@@ -218,102 +118,6 @@ hoge]])
     assert.window_count(1)
   end)
 
-  it("should show an error message if not found action", function()
-    thetto.start("line")
-    thetto.execute("invalid")
-    assert.exists_message("not found action: invalid")
-  end)
-
-  it("cannot execute open if there is no items", function()
-    thetto.start("line")
-    helper.sync_input({"hoge"})
-    thetto.execute("open")
-    assert.exists_message("not found action: open")
-  end)
-
-  it("can resume with offset", function()
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line")
-    thetto.execute("quit")
-
-    thetto.resume_execute({opts = {offset = -1}})
-    assert.current_line("test1")
-
-    thetto.resume_execute({opts = {offset = 1}})
-    assert.window_count(1)
-    assert.current_line("test2")
-
-    thetto.resume_execute({opts = {offset = 1}})
-    assert.window_count(1)
-    assert.current_line("test3")
-
-    thetto.resume_execute({opts = {offset = 1}})
-    assert.current_line("test3")
-  end)
-
-  it("can custom source global options", function()
-    thetto.setup({source = {line = {global_opts = {insert = false}}}})
-
-    helper.set_lines([[
-test1
-test2]])
-
-    thetto.start("line")
-
-    assert.current_line("test1")
-  end)
-
-  it("can custom source action", function()
-    local called = false
-    thetto.setup({
-      source_actions = {
-        line = {
-          action_hoge = function(_)
-            called = true
-          end,
-        },
-      },
-    })
-
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line", {opts = {action = "hoge"}})
-    thetto.execute()
-
-    assert.is_true(called)
-  end)
-
-  it("can custom kind action", function()
-    local called = false
-
-    thetto.setup({
-      kind_actions = {
-        ["file/directory"] = {
-          action_hoge = function(_)
-            called = true
-          end,
-        },
-      },
-    })
-
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("vim/runtimepath", {opts = {action = "hoge"}})
-    thetto.execute()
-
-    assert.is_true(called)
-  end)
-
   it("can input lua escape character", function()
     helper.set_lines([[
 test1
@@ -328,62 +132,6 @@ test3]])
     assert.current_line("test%")
   end)
 
-  it("can execute debug_print", function()
-    helper.set_lines([[
-test1
-test2]])
-
-    thetto.start("line")
-
-    thetto.execute("debug_print")
-
-    assert.exists_message("row = 1")
-    assert.exists_message("value = \"test1\"")
-  end)
-
-  it("can select items and execute action", function()
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    thetto.execute("toggle_selection")
-    vim.cmd("normal! j")
-    thetto.execute("toggle_selection")
-    vim.cmd("normal! j")
-
-    thetto.execute("toggle_selection")
-    thetto.execute("toggle_selection")
-
-    thetto.execute("tab_open")
-
-    assert.tab_count(3)
-    assert.current_line("test2")
-  end)
-
-  it("can execute toggle_all_selection", function()
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    helper.search("test2")
-    thetto.execute("toggle_selection")
-
-    thetto.execute("toggle_all_selection")
-
-    thetto.execute("tab_open")
-
-    assert.tab_count(3)
-    assert.current_line("test3")
-    vim.cmd("tabclose")
-    assert.current_line("test1")
-  end)
-
   it("stops the unfinished job on closed", function()
     local job = require("thetto.lib.job").new({"sleep", "9"}, {})
     require("thetto.handler.source.line").collect = function(_)
@@ -394,20 +142,6 @@ test3]])
     thetto.execute("quit")
 
     assert.is_false(job:is_running())
-  end)
-
-  it("can execute yank", function()
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    vim.cmd("normal! vj")
-    thetto.execute("yank")
-
-    assert.register_value("+", "test1\ntest2")
   end)
 
   it("can open with action opts", function()
@@ -422,21 +156,6 @@ test3]])
     thetto.execute("yank")
 
     assert.register_value("1", "test3")
-  end)
-
-  it("can execute append", function()
-    helper.set_lines([[
-test1
-test2
-test3]])
-    vim.cmd("normal! $")
-
-    thetto.start("line", {opts = {insert = false}})
-    helper.search("test2")
-
-    thetto.execute("append")
-
-    assert.current_line("test1test2")
   end)
 
   it("can use sorters", function()
@@ -465,100 +184,6 @@ tes]])
     assert.exists_message("cmd/ctags: empty")
   end)
 
-  it("can custom default opts", function()
-    thetto.setup({global_opts = {display_limit = 1}})
-
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    assert.line_count(1)
-  end)
-
-  it("can add filter", function()
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line")
-    thetto.execute("add_filter", {action_opts = {name = "-substring"}})
-
-    vim.cmd("normal! G")
-    helper.sync_input({"test2"})
-
-    thetto.execute("move_to_list")
-
-    assert.exists_pattern("test1")
-    assert.exists_pattern("test3")
-  end)
-
-  it("can remove filter", function()
-    thetto.setup({source = {line = {filters = {"substring", "-substring"}}}})
-
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line")
-
-    vim.cmd("normal! G")
-    helper.sync_input({"test2"})
-
-    helper.wait_ui(function()
-      thetto.execute("remove_filter", {action_opts = {name = "-substring"}})
-    end)
-    thetto.execute("move_to_list")
-
-    assert.exists_pattern("test2")
-  end)
-
-  it("can inverse filter", function()
-    thetto.setup({filters = {"-substring"}})
-
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line")
-    helper.sync_input({"test2"})
-
-    thetto.execute("inverse_filter")
-
-    assert.exists_pattern("test2")
-  end)
-
-  it("can change filter", function()
-    thetto.setup({filters = {"substring"}})
-
-    helper.set_lines([[
-test1
-test2
-test3]])
-
-    thetto.start("line")
-    helper.sync_input({"test2"})
-
-    helper.wait_ui(function()
-      thetto.execute("change_filter", {action_opts = {name = "-substring"}})
-    end)
-    thetto.execute("move_to_list")
-
-    assert.no.exists_pattern("test2")
-  end)
-
-  it("cannot remove the last filter", function()
-    thetto.start("line")
-
-    thetto.execute("remove_filter")
-    assert.exists_message("the last filter cannot be removed")
-  end)
-
   it("cannot delete input lines", function()
     thetto.setup({filters = {"substring", "-substring"}})
 
@@ -568,74 +193,6 @@ test3]])
     end)
 
     assert.line_count(2)
-  end)
-
-  it("can reverse sorter", function()
-    thetto.setup({sorters = {"length"}})
-
-    helper.set_lines([[
-te
-t
-tes]])
-
-    thetto.start("line", {opts = {insert = false}})
-    assert.current_line("t")
-
-    helper.wait_ui(function()
-      thetto.execute("reverse_sorter")
-    end)
-
-    assert.current_line("tes")
-  end)
-
-  it("can reverse specified sorter", function()
-    thetto.setup({sorters = {"length", "row"}})
-
-    helper.set_lines([[
-te
-t
-tes]])
-
-    thetto.start("line", {opts = {insert = false}})
-    assert.current_line("t")
-
-    helper.wait_ui(function()
-      thetto.execute("reverse_sorter", {action_opts = {name = "length"}})
-    end)
-
-    assert.current_line("tes")
-  end)
-
-  it("can add sorter by toggle_sorter", function()
-    helper.set_lines([[
-te
-t
-tes]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    helper.wait_ui(function()
-      thetto.execute("toggle_sorter", {action_opts = {name = "length"}})
-    end)
-
-    assert.current_line("t")
-  end)
-
-  it("can remove sorter by toggle_sorter", function()
-    thetto.setup({sorters = {"length"}})
-
-    helper.set_lines([[
-te
-t
-tes]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    helper.wait_ui(function()
-      thetto.execute("toggle_sorter", {action_opts = {name = "length"}})
-    end)
-
-    assert.current_line("te")
   end)
 
   it("can move to input with behavior as `i`", function()
@@ -678,89 +235,12 @@ test3]])
     assert.exists_pattern("test2")
   end)
 
-  it("can execute action with range", function()
-    helper.set_lines([[
-test1
-test2
-test3
-test4
-test5]])
-
-    thetto.start("line", {opts = {insert = false}})
-
-    vim.cmd("2")
-    vim.cmd("normal! v2j")
-    thetto.execute("toggle_selection")
-    thetto.execute("tab_open")
-
-    assert.tab_count(4)
-  end)
-
   it("closes ui completely", function()
     thetto.start("line")
     vim.cmd("buffer #")
     vim.cmd("close")
 
     assert.window_count(1)
-  end)
-
-  it("can resume current window", function()
-    helper.set_lines([[
-test1
-test2]])
-
-    thetto.start("line")
-    thetto.execute("move_to_list")
-    thetto.execute("quit")
-    thetto.resume()
-
-    assert.exists_pattern("test1")
-  end)
-
-  it("can open and close preview", function()
-    helper.set_lines([[
-test1
-test2]])
-
-    thetto.start("line", {opts = {insert = false}})
-    local count = helper.window_count()
-
-    thetto.execute("preview")
-    assert.window_count(count + 1)
-
-    thetto.execute("close_preview")
-    assert.window_count(count)
-  end)
-
-  it("can toggle preview", function()
-    helper.set_lines([[
-test1
-test2]])
-
-    thetto.start("line", {opts = {insert = false}})
-    local count = helper.window_count()
-
-    thetto.execute("toggle_preview")
-    assert.window_count(count + 1)
-
-    thetto.execute("toggle_preview")
-    assert.window_count(count)
-  end)
-
-  it("toggle_preview can execute continuously", function()
-    helper.set_lines([[
-test1
-test2]])
-
-    thetto.start("line", {opts = {insert = false}})
-    local count = helper.window_count()
-
-    thetto.execute("toggle_preview")
-    assert.window_count(count + 1)
-
-    vim.cmd("normal! j")
-    thetto.execute("toggle_preview")
-    assert.window_count(count + 1)
   end)
 
   it("can focus only input or list", function()
@@ -829,13 +309,263 @@ test_auto_2]])
     assert.tab_count(3)
   end)
 
-  it("action shows error if it is executed on empty", function()
+end)
+
+describe("thetto.execute()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("should show an error message if not found action", function()
+    thetto.start("line")
+
+    thetto.execute("invalid")
+
+    assert.exists_message("not found action: invalid")
+  end)
+
+  it("shows error if items is empty because filtered", function()
     thetto.start("line")
     helper.sync_input({"hoge"})
 
     thetto.execute("open")
+
     assert.exists_message("not found action: open")
   end)
+
+  it("cannot execute open if there is no items", function()
+    thetto.start("line")
+    helper.sync_input({"hoge"})
+
+    thetto.execute("open")
+
+    assert.exists_message("not found action: open")
+  end)
+
+  it("can use custom action as default", function()
+    local called = false
+    thetto.setup({
+      kind_actions = {
+        ["vim/variable"] = {
+          action_hoge = function(_)
+            called = true
+          end,
+        },
+      },
+      source = {["vim/variable"] = {global_opts = {action = "hoge"}}},
+    })
+    thetto.start("vim/variable", {opts = {insert = false}})
+
+    thetto.execute()
+
+    assert.is_true(called)
+  end)
+
+end)
+
+describe("thetto.setup()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can custom default opts", function()
+    thetto.setup({global_opts = {display_limit = 1}})
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    assert.line_count(1)
+  end)
+
+  it("can custom source global options", function()
+    thetto.setup({source = {line = {global_opts = {insert = false}}}})
+
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line")
+
+    assert.current_line("test1")
+  end)
+
+  it("can custom source action", function()
+    local called = false
+    thetto.setup({
+      source_actions = {
+        line = {
+          action_hoge = function(_)
+            called = true
+          end,
+        },
+      },
+    })
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line", {opts = {action = "hoge"}})
+    thetto.execute()
+
+    assert.is_true(called)
+  end)
+
+  it("can custom kind action", function()
+    local called = false
+
+    thetto.setup({
+      kind_actions = {
+        ["file/directory"] = {
+          action_hoge = function(_)
+            called = true
+          end,
+        },
+      },
+    })
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("vim/runtimepath", {opts = {action = "hoge"}})
+    thetto.execute()
+
+    assert.is_true(called)
+  end)
+
+end)
+
+describe("thetto.resume()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can resume even if opened", function()
+    thetto.start("line")
+    vim.cmd("tabedit")
+
+    thetto.resume()
+    assert.window_count(4)
+  end)
+
+  it("goes back to original window when quit resumed thetto", function()
+    thetto.start("line")
+    vim.cmd("tabedit")
+    local current = vim.api.nvim_get_current_win()
+
+    thetto.resume()
+    thetto.start("line")
+    thetto.execute("quit")
+
+    assert.window(current)
+  end)
+
+  it("can resume latest", function()
+    helper.set_lines([[
+test11
+test21
+test22]])
+
+    thetto.start("line")
+    helper.sync_input({"test2"})
+
+    thetto.execute("move_to_list")
+    vim.cmd("normal! G")
+
+    thetto.execute("quit")
+    thetto.resume()
+
+    thetto.execute("move_to_input")
+
+    assert.filetype("thetto-input")
+    assert.current_line("test2")
+
+    thetto.execute("move_to_list")
+
+    assert.current_line("test22")
+    vim.cmd("normal! gg")
+    assert.current_line("test21")
+  end)
+
+  it("can resume by source", function()
+    helper.set_lines([[
+test11
+test21
+test22]])
+
+    thetto.start("line")
+    helper.sync_input({"test2"})
+
+    thetto.execute("quit")
+    thetto.start("vim/runtimepath")
+    thetto.execute("quit")
+    thetto.resume("line")
+
+    assert.filetype("thetto-input")
+    assert.current_line("test2")
+
+    thetto.execute("move_to_list")
+
+    assert.current_line("test21")
+  end)
+
+  it("can resume current window", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line")
+    thetto.execute("move_to_list")
+    thetto.execute("quit")
+    thetto.resume()
+
+    assert.exists_pattern("test1")
+  end)
+
+end)
+
+describe("thetto.resume_execute()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can resume with offset", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line")
+    thetto.execute("quit")
+
+    thetto.resume_execute({opts = {offset = -1}})
+    assert.current_line("test1")
+
+    thetto.resume_execute({opts = {offset = 1}})
+    assert.window_count(1)
+    assert.current_line("test2")
+
+    thetto.resume_execute({opts = {offset = 1}})
+    assert.window_count(1)
+    assert.current_line("test3")
+
+    thetto.resume_execute({opts = {offset = 1}})
+    assert.current_line("test3")
+  end)
+
+end)
+
+describe("resume_previous action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
 
   it("can resume previous source", function()
     helper.set_lines([[
@@ -872,6 +602,13 @@ test2]])
     assert.current_line("test2")
   end)
 
+end)
+
+describe("resume_next action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
   it("can resume next source", function()
     helper.set_lines([[
 test1
@@ -905,23 +642,453 @@ test2]])
     assert.current_line("test2")
   end)
 
-  it("can use custom action as default", function()
-    local called = false
-    thetto.setup({
-      kind_actions = {
-        ["vim/variable"] = {
-          action_hoge = function(_)
-            called = true
-          end,
-        },
-      },
-      source = {["vim/variable"] = {global_opts = {action = "hoge"}}},
-    })
+end)
 
-    thetto.start("vim/variable", {opts = {insert = false}})
-    thetto.execute()
+describe("remove_filter action", function()
 
-    assert.is_true(called)
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can remove filter", function()
+    thetto.setup({source = {line = {filters = {"substring", "-substring"}}}})
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line")
+
+    vim.cmd("normal! G")
+    helper.sync_input({"test2"})
+
+    helper.wait_ui(function()
+      thetto.execute("remove_filter", {action_opts = {name = "-substring"}})
+    end)
+    thetto.execute("move_to_list")
+
+    assert.exists_pattern("test2")
+  end)
+
+  it("cannot remove the last filter", function()
+    thetto.start("line")
+
+    thetto.execute("remove_filter")
+    assert.exists_message("the last filter cannot be removed")
+  end)
+
+end)
+
+describe("reverse_sorter action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can reverse sorter", function()
+    thetto.setup({sorters = {"length"}})
+
+    helper.set_lines([[
+te
+t
+tes]])
+
+    thetto.start("line", {opts = {insert = false}})
+    assert.current_line("t")
+
+    helper.wait_ui(function()
+      thetto.execute("reverse_sorter")
+    end)
+
+    assert.current_line("tes")
+  end)
+
+  it("can reverse specified sorter", function()
+    thetto.setup({sorters = {"length", "row"}})
+
+    helper.set_lines([[
+te
+t
+tes]])
+
+    thetto.start("line", {opts = {insert = false}})
+    assert.current_line("t")
+
+    helper.wait_ui(function()
+      thetto.execute("reverse_sorter", {action_opts = {name = "length"}})
+    end)
+
+    assert.current_line("tes")
+  end)
+
+end)
+
+describe("add_filter action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can add filter", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line")
+    thetto.execute("add_filter", {action_opts = {name = "-substring"}})
+
+    vim.cmd("normal! G")
+    helper.sync_input({"test2"})
+
+    thetto.execute("move_to_list")
+
+    assert.exists_pattern("test1")
+    assert.exists_pattern("test3")
+  end)
+
+end)
+
+describe("inverse_filter action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can inverse filter", function()
+    thetto.setup({filters = {"-substring"}})
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line")
+    helper.sync_input({"test2"})
+
+    thetto.execute("inverse_filter")
+
+    assert.exists_pattern("test2")
+  end)
+
+end)
+
+describe("change_filter action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can change filter", function()
+    thetto.setup({filters = {"substring"}})
+
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line")
+    helper.sync_input({"test2"})
+
+    helper.wait_ui(function()
+      thetto.execute("change_filter", {action_opts = {name = "-substring"}})
+    end)
+    thetto.execute("move_to_list")
+
+    assert.no.exists_pattern("test2")
+  end)
+
+end)
+
+describe("toggle_sorter action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can add sorter by toggle_sorter", function()
+    helper.set_lines([[
+te
+t
+tes]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    helper.wait_ui(function()
+      thetto.execute("toggle_sorter", {action_opts = {name = "length"}})
+    end)
+
+    assert.current_line("t")
+  end)
+
+  it("can remove sorter by toggle_sorter", function()
+    thetto.setup({sorters = {"length"}})
+
+    helper.set_lines([[
+te
+t
+tes]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    helper.wait_ui(function()
+      thetto.execute("toggle_sorter", {action_opts = {name = "length"}})
+    end)
+
+    assert.current_line("te")
+  end)
+
+end)
+
+describe("debug_print action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can execute debug_print", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line")
+
+    thetto.execute("debug_print")
+
+    assert.exists_message("row = 1")
+    assert.exists_message("value = \"test1\"")
+  end)
+
+end)
+
+describe("toggle_selection action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can select items and execute action", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    thetto.execute("toggle_selection")
+    vim.cmd("normal! j")
+    thetto.execute("toggle_selection")
+    vim.cmd("normal! j")
+
+    thetto.execute("toggle_selection")
+    thetto.execute("toggle_selection")
+
+    thetto.execute("tab_open")
+
+    assert.tab_count(3)
+    assert.current_line("test2")
+  end)
+
+  it("can execute with range", function()
+    helper.set_lines([[
+test1
+test2
+test3
+test4
+test5]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    vim.cmd("2")
+    vim.cmd("normal! v2j")
+    thetto.execute("toggle_selection")
+    thetto.execute("tab_open")
+
+    assert.tab_count(4)
+  end)
+
+end)
+
+describe("toggle_all_selection action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can execute toggle_all_selection", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    helper.search("test2")
+    thetto.execute("toggle_selection")
+
+    thetto.execute("toggle_all_selection")
+
+    thetto.execute("tab_open")
+
+    assert.tab_count(3)
+    assert.current_line("test3")
+    vim.cmd("tabclose")
+    assert.current_line("test1")
+  end)
+
+end)
+
+describe("append action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can execute append", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+    vim.cmd("normal! $")
+
+    thetto.start("line", {opts = {insert = false}})
+    helper.search("test2")
+
+    thetto.execute("append")
+
+    assert.current_line("test1test2")
+  end)
+
+end)
+
+describe("yank action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can yank item value", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line", {opts = {insert = false}})
+
+    vim.cmd("normal! vj")
+    thetto.execute("yank")
+
+    assert.register_value("+", "test1\ntest2")
+  end)
+
+end)
+
+describe("toggle_preview action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can toggle preview", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", {opts = {insert = false}})
+    local count = helper.window_count()
+
+    thetto.execute("toggle_preview")
+    assert.window_count(count + 1)
+
+    thetto.execute("toggle_preview")
+    assert.window_count(count)
+  end)
+
+  it("can execute continuously", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", {opts = {insert = false}})
+    local count = helper.window_count()
+
+    thetto.execute("toggle_preview")
+    assert.window_count(count + 1)
+
+    vim.cmd("normal! j")
+    thetto.execute("toggle_preview")
+    assert.window_count(count + 1)
+  end)
+
+end)
+
+describe("preview action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can open preview", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", {opts = {insert = false}})
+    local count = helper.window_count()
+
+    thetto.execute("preview")
+    assert.window_count(count + 1)
+  end)
+
+end)
+
+describe("close_preview action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can close preview", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", {opts = {insert = false}})
+    local count = helper.window_count()
+
+    thetto.execute("preview")
+    thetto.execute("close_preview")
+
+    assert.window_count(count)
+  end)
+
+end)
+
+describe("move_to_input action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can move to filter", function()
+    thetto.start("line", {opts = {insert = false}})
+    assert.filetype("thetto")
+
+    thetto.execute("move_to_input")
+
+    assert.filetype("thetto-input")
+  end)
+
+end)
+
+describe("move_to_list action", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can move to list", function()
+    thetto.start("line")
+    assert.filetype("thetto-input")
+
+    thetto.execute("move_to_list")
+
+    assert.filetype("thetto")
+  end)
+
+  it("can move to list even if empty", function()
+    thetto.start("line")
+    helper.sync_input({"test"})
+    assert.filetype("thetto-input")
+
+    thetto.execute("move_to_list")
+
+    assert.filetype("thetto")
   end)
 
 end)
