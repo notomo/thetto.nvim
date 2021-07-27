@@ -11,5 +11,6 @@ function M.collect()
 end
 
 M.kind_name = "word"
+M.sorters = {"numeric:namespace"}
 
 return M

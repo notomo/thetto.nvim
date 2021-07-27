@@ -6,34 +6,51 @@ local M = {}
 local Sorter = {}
 M.Sorter = Sorter
 
-function Sorter.new(name, reversed)
-  vim.validate({name = {name, "string"}, reversed = {reversed, "boolean"}})
+function Sorter.new(name, reversed, key)
+  vim.validate({
+    name = {name, "string"},
+    reversed = {reversed, "boolean"},
+    key = {key, "string", true},
+  })
 
   local origin = modulelib.find("thetto.handler.sorter." .. name)
   if origin == nil then
     return nil, "not found sorter: " .. name
   end
 
-  local tbl = {reversed = reversed, short_name = name, _origin = origin}
+  local tbl = {reversed = reversed, key = key or "value", short_name = name, _origin = origin}
   return setmetatable(tbl, Sorter), nil
 end
 
 function Sorter.parse(name)
+  local reversed = false
   if vim.startswith(name, "-") then
-    return Sorter.new(name:sub(2), true)
+    reversed = true
+    name = name:sub(2)
   end
-  return Sorter.new(name, false)
+
+  local args = vim.split(name, ":", true)
+  name = args[1]
+  local key = args[2]
+
+  return Sorter.new(name, reversed, key)
 end
 
 function Sorter.reverse(self)
-  return Sorter.new(self.short_name, not self.reversed)
+  return Sorter.new(self.short_name, not self.reversed, self.key)
 end
 
 function Sorter._name(self)
-  if self.reversed then
-    return "-" .. self.short_name
+  local name
+  if self.key ~= "value" then
+    name = ("%s:%s"):format(self.short_name, self.key)
+  else
+    name = self.short_name
   end
-  return self.short_name
+  if self.reversed then
+    return "-" .. name
+  end
+  return name
 end
 
 function Sorter.__index(self, k)
