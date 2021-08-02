@@ -38,11 +38,7 @@ function StatusLine.new(source_name, width, height, row, column)
   local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto.view.status_line')._on_enter('%s')"):format(bufnr, source_name)
   vim.cmd(on_info_enter)
 
-  local tbl = {
-    _bufnr = bufnr,
-    _window = window,
-    _hl_factory = HighlighterFactory.new("thetto-info-text"),
-  }
+  local tbl = {_window = window, _hl_factory = HighlighterFactory.new("thetto-info-text", bufnr)}
   return setmetatable(tbl, StatusLine)
 end
 
@@ -58,11 +54,12 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
 
   local status = ""
   if not finished then
-    status = "running"
+    -- HACK: the last space for clean up all characters
+    status = "running "
   end
 
   local text = ("%s%s [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
-  local highlighter = self._hl_factory:reset(self._bufnr)
+  local highlighter = self._hl_factory:reset()
   highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {" "}, {status, "Comment"}}, {
     virt_text_pos = "overlay",
   })
