@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo", milestone = nil}
+M.opts = {owner = ":owner", repo = ":repo", milestone = nil, labels = {}}
 
 function M.collect(self, opts)
   local cmd = {
@@ -14,6 +14,9 @@ function M.collect(self, opts)
   }
   if self.opts.milestone then
     vim.list_extend(cmd, {"-F", "milestone=" .. self.opts.milestone})
+  end
+  if #self.opts.labels > 0 then
+    vim.list_extend(cmd, {"-F", "labels=" .. table.concat(self.opts.labels, ",")})
   end
 
   local job = self.jobs.new(cmd, {
