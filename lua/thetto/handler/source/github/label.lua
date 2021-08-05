@@ -30,6 +30,7 @@ function M.collect(self, opts)
         table.insert(items, {
           value = label.name,
           desc = desc,
+          label = {owner = self.opts.owner, repo = self.opts.repo},
           column_offsets = {value = 0, description = #name + 1},
         })
       end

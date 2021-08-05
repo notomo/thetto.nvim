@@ -35,7 +35,12 @@ function M.collect(self, opts)
           value = milestone.title,
           url = milestone.html_url,
           desc = desc,
-          milestone = {is_opened = milestone.state == "open", number = milestone.number},
+          milestone = {
+            is_opened = milestone.state == "open",
+            number = milestone.number,
+            owner = self.opts.owner,
+            repo = self.opts.repo,
+          },
           column_offsets = {value = #mark + 1},
         })
       end
