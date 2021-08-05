@@ -41,8 +41,11 @@ function M.collect(self, opts)
     return nil, nil, err
   end
 
-  job.stdin:write(table.concat(lines, "\n"))
-  job.stdin:close()
+  job.stdin:write(lines, function()
+    if not job.stdin:is_closing() then
+      job.stdin:close()
+    end
+  end)
 
   return {}, job
 end
