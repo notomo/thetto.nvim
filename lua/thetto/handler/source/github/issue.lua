@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = {owner = ":owner", repo = ":repo", milestone = nil}
 
 function M.collect(self, opts)
   local cmd = {
@@ -12,6 +12,10 @@ function M.collect(self, opts)
     "-F",
     "per_page=100",
   }
+  if self.opts.milestone then
+    vim.list_extend(cmd, {"-F", "milestone=" .. self.opts.milestone})
+  end
+
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self, code)
       if code ~= 0 then

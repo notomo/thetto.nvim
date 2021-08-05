@@ -35,7 +35,7 @@ function M.collect(self, opts)
           value = milestone.title,
           url = milestone.html_url,
           desc = desc,
-          milestone = {is_opened = milestone.state == "open"},
+          milestone = {is_opened = milestone.state == "open", number = milestone.number},
           column_offsets = {value = #mark + 1},
         })
       end
@@ -58,6 +58,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "url"
+M.kind_name = "github/milestone"
 
 return M
