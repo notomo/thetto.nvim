@@ -33,7 +33,10 @@ function M.collect(self, opts)
           value = workflow.name,
           url = workflow.html_url,
           desc = desc,
-          workflow = {is_active = workflow.state == "active"},
+          workflow = {
+            is_active = workflow.state == "active",
+            file_name = vim.fn.fnamemodify(workflow.path, ":t"),
+          },
           column_offsets = {value = #mark + 1},
         })
       end
@@ -56,6 +59,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "url"
+M.kind_name = "github/action/workflow"
 
 return M
