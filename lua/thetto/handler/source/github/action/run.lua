@@ -28,6 +28,8 @@ function M.collect(self, opts)
           mark = "❌"
         elseif run.conclusion == "skipped" then
           mark = "🏴󠁧󠁢󠁷󠁬󠁳󠁿"
+        elseif run.conclusion == "cancelled" then
+          mark = "🚫󠁧󠁢󠁷󠁬󠁳󠁿"
         elseif run.status == "in_progress" then
           mark = "🏃"
         end
