@@ -20,7 +20,7 @@ function UI.new(collector)
 end
 
 function UI.open(self, on_move)
-  vim.validate({on_move = {on_move, "function"}})
+  vim.validate({on_move = {on_move, "function", true}})
 
   for bufnr in bufferlib.in_tabpage(0) do
     local ctx = Context.get_from_path(bufnr)
@@ -44,7 +44,8 @@ function UI.open(self, on_move)
 
   self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
-  self._on_move = on_move
+  self._on_move = on_move or function()
+  end
 
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)

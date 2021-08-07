@@ -529,6 +529,14 @@ test2]])
     assert.exists_pattern("test1")
   end)
 
+  it("can resume empty result", function()
+    thetto.start("cmd/ctags", {opts = {insert = false}})
+
+    thetto.resume()
+
+    assert.current_line("")
+  end)
+
 end)
 
 describe("thetto.resume_execute()", function()
