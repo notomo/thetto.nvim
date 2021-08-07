@@ -18,4 +18,4 @@ end
 
 M.default_action = "execute"
 
-return require("thetto.core.kind").extend(M, require("thetto.handler.kind.file"))
+return require("thetto.core.kind").extend(M, "file")

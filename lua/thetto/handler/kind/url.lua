@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_open_browser(_, items)
+function M.action_open_browser(_, _)
   error("not implemented")
 end
 

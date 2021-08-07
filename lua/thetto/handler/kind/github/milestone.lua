@@ -12,4 +12,4 @@ function M.action_list_issue(_, items)
   end
 end
 
-return require("thetto.core.kind").extend(M, require("thetto.handler.kind.url"))
+return require("thetto.core.kind").extend(M, "url")

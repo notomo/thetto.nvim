@@ -31,9 +31,9 @@ Kind.filelib = filelib
 function Kind.new(executor, name)
   vim.validate({executor = {executor, "table"}, name = {name, "string"}})
 
-  local origin = modulelib.find("thetto.handler.kind." .. name)
-  if origin == nil then
-    return nil, "not found kind: " .. name
+  local origin, err = M._find(name)
+  if err then
+    return nil, err
   end
 
   local source_name = executor.source_name
@@ -104,6 +104,13 @@ function Kind.find_action(self, action_name, action_opts)
     return Action.new(self, kind_action[key], opts, behavior), nil
   end
 
+  for _, extend in ipairs(self._origin.extends or {}) do
+    local action = config.kind_actions[extend.name]
+    if action ~= nil and action[key] then
+      return Action.new(self, action[key], opts, behavior), nil
+    end
+  end
+
   local action = self[key]
   if action ~= nil then
     return Action.new(self, action, opts, behavior), nil
@@ -126,9 +133,27 @@ function Kind.action_names(self)
   return names
 end
 
+function M._find(name)
+  local origin = modulelib.find("thetto.handler.kind." .. name)
+  if origin == nil then
+    return nil, "not found kind: " .. name
+  end
+  return origin, nil
+end
+
 function M.extend(raw_kind, ...)
-  local extends = {...}
+  local extend_names = {...}
+  local extends = {}
+  for _, name in ipairs(extend_names) do
+    local extend, err = M._find(name)
+    if err then
+      error(err)
+    end
+    extend.__index = extend
+    table.insert(extends, setmetatable({name = name}, extend))
+  end
   raw_kind.extends = extends
+
   return setmetatable(raw_kind, {
     __index = function(_, k)
       local value = rawget(raw_kind, k)
