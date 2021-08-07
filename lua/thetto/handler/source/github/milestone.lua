@@ -29,7 +29,15 @@ function M.collect(self, opts)
         else
           mark = "C"
         end
-        local title = ("%s %s"):format(mark, milestone.title)
+
+        local milestone_title = milestone.title
+
+        local milestone_desc = milestone.description
+        if milestone_desc == vim.NIL then
+          milestone_desc = ""
+        end
+
+        local title = ("%s %s %s"):format(mark, milestone_title, milestone_desc)
         local desc = title
         table.insert(items, {
           value = milestone.title,
@@ -41,7 +49,7 @@ function M.collect(self, opts)
             owner = self.opts.owner,
             repo = self.opts.repo,
           },
-          column_offsets = {value = #mark + 1},
+          column_offsets = {value = #mark + 1, description = #mark + #milestone_title + 1},
         })
       end
       self:append(items)
@@ -60,6 +68,7 @@ function M.highlight(self, bufnr, first_line, items)
     else
       highlighter:add("Boolean", first_line + i - 1, 0, 1)
     end
+    highlighter:add("Comment", first_line + i - 1, item.column_offsets.description, -1)
   end
 end
 
