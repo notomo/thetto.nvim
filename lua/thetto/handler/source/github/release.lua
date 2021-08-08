@@ -28,13 +28,13 @@ function M.collect(self, opts)
           mark = "R"
         end
         local title = ("%s %s"):format(mark, release.name)
-        local desc = title
+        local desc = ("%s %s"):format(title, release.tag_name)
         table.insert(items, {
           value = release.name,
           url = release.html_url,
           desc = desc,
-          release = {is_draft = release.draft},
-          column_offsets = {value = #mark + 1},
+          release = {is_draft = release.draft, tag_name = release.tag_name},
+          column_offsets = {value = #mark + 1, tag_name = #title + 1},
         })
       end
       self:append(items)
@@ -53,6 +53,7 @@ function M.highlight(self, bufnr, first_line, items)
     else
       highlighter:add("Character", first_line + i - 1, 0, 1)
     end
+    highlighter:add("Comment", first_line + i - 1, item.column_offsets.tag_name, -1)
   end
 end
 
