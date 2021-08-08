@@ -32,4 +32,12 @@ function M.action_list_release(_, items)
   end
 end
 
+function M.action_list_projects(_, items)
+  for _, item in ipairs(items) do
+    require("thetto").start("github/project", {
+      source_opts = {owner = item.repo.owner, repo = item.repo.name},
+    })
+  end
+end
+
 return require("thetto.core.kind").extend(M, "url")
