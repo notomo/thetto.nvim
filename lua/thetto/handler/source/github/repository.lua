@@ -40,7 +40,7 @@ function M.collect(self, opts)
           value = repo.full_name,
           url = repo.html_url,
           desc = desc,
-          repo = {is_archived = repo.archived},
+          repo = {is_archived = repo.archived, owner = repo.owner.login, name = repo.name},
           column_offsets = {value = #mark + 1},
         })
       end
@@ -61,6 +61,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "url"
+M.kind_name = "github/repository"
 
 return M
