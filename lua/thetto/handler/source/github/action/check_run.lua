@@ -32,7 +32,8 @@ function M.collect(self, opts)
           table.insert(states, run.conclusion)
         end
         local state = ("(%s)"):format(table.concat(states, ","))
-        local desc = ("%s %s"):format(title, state)
+        local elapsed_seconds = self.timelib.elapsed_seconds_for_iso_8601(run.started_at, run.completed_at)
+        local desc = ("%s %s %s"):format(title, state, self.timelib.readable(elapsed_seconds))
         table.insert(items, {
           value = run.name,
           url = run.html_url,
