@@ -38,7 +38,7 @@ function M.collect(self, opts)
           value = run.name,
           url = run.html_url,
           desc = desc,
-          run = {id = run.id},
+          job = {id = run.id},
           column_offsets = {value = #mark + 1, state = #title + 1},
         })
       end
@@ -57,6 +57,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "github/action/run"
+M.kind_name = "github/action/job"
 
 return M

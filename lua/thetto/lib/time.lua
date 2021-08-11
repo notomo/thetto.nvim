@@ -1,7 +1,7 @@
 local M = {}
 
-local iso_8601_format = "%Y-%m-%dT%H:%M:%SZ"
-
+-- use only get elapsed seconds (this ignores tz)
+local iso_8601_format = "%Y-%m-%dT%H:%M:%S"
 function M.elapsed_seconds_for_iso_8601(s, e)
   local start_seconds = vim.fn.strptime(iso_8601_format, s)
   local end_seconds = vim.fn.strptime(iso_8601_format, e)
