@@ -40,7 +40,7 @@ function M.collect(self, opts)
         local desc = ("%s %s %s"):format(title, state, self.timelib.readable(elapsed_seconds))
         table.insert(items, {
           value = step.name,
-          url = job.html_url,
+          url = ("%s#step:%d:1"):format(job.html_url, step.number),
           desc = desc,
           column_offsets = {value = #mark + 1, state = #title + 1},
         })
