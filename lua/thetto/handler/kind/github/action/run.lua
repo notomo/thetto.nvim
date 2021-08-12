@@ -8,4 +8,6 @@ function M.action_list_action_job(_, items)
   end
 end
 
+M.action_list_children = M.action_list_action_job
+
 return require("thetto.core.kind").extend(M, "url")

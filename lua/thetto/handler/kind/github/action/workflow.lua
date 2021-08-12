@@ -12,4 +12,6 @@ function M.action_list_action_run(_, items)
   end
 end
 
+M.action_list_children = M.action_list_action_run
+
 return require("thetto.core.kind").extend(M, "url")

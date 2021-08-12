@@ -38,6 +38,7 @@ M.action_open = M.action_cd
 M.action_directory_open = M.action_open
 M.action_directory_tab_open = M.action_tab_open
 M.action_directory_enter = M.action_enter
+M.action_list_children = M.action_enter
 
 M.default_action = "cd"
 
