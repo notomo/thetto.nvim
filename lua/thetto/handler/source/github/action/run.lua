@@ -33,7 +33,7 @@ function M.collect(self, opts)
         end
         local title = ("%s %s"):format(mark, run.name)
         local states = {run.status}
-        if run.conclusion then
+        if run.conclusion ~= vim.NIL then
           table.insert(states, run.conclusion)
         end
         local state = ("(%s)"):format(table.concat(states, ","))
