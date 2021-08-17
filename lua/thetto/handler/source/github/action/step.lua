@@ -41,6 +41,7 @@ function M.collect(self, opts)
         table.insert(items, {
           value = step.name,
           url = ("%s#step:%d:1"):format(job.html_url, step.number),
+          step = {run_id = job.run_id},
           desc = desc,
           column_offsets = {value = #mark + 1, state = #title + 1},
         })
@@ -60,6 +61,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "url"
+M.kind_name = "github/action/step"
 
 return M
