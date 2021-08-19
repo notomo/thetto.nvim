@@ -36,6 +36,7 @@ function M.collect(self, opts)
         if milestone_desc == vim.NIL then
           milestone_desc = ""
         end
+        milestone_desc = milestone_desc:gsub("\n", " "):gsub("\r", " ")
 
         local title = ("%s %s %s"):format(mark, milestone_title, milestone_desc)
         local desc = title
