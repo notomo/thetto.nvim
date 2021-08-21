@@ -12,6 +12,7 @@ local default = {
   resume = false,
   ignorecase = false,
   smartcase = true,
+  input_lines = {},
   pattern = nil,
   pattern_type = nil,
   offset = 0,

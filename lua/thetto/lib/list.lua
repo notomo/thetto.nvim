@@ -43,4 +43,12 @@ function M.remove(list, value)
   return false
 end
 
+function M.fill(list, length, str)
+  local new_list = vim.deepcopy(list)
+  for _ = #list + 1, length, 1 do
+    table.insert(new_list, str)
+  end
+  return new_list
+end
+
 return M

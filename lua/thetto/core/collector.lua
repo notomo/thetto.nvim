@@ -4,6 +4,7 @@ local Items = require("thetto.core.item").Items
 local Filters = require("thetto.core.filter").Filters
 local Sorters = require("thetto.core.sorter").Sorters
 local wraplib = require("thetto.lib.wrap")
+local listlib = require("thetto.lib.list")
 local vim = vim
 
 local M = {}
@@ -36,7 +37,7 @@ function Collector.new(source_name, source_opts, opts)
     selected = {},
     filters = filters,
     sorters = sorters,
-    input_lines = vim.fn["repeat"]({""}, #source.filters),
+    input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
   }
   tbl.items = Items.new(tbl.result, tbl.input_lines, filters, sorters, tbl.opts)
   local self = setmetatable(tbl, Collector)

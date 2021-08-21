@@ -174,6 +174,16 @@ tes]])
     assert.current_line("tes")
   end)
 
+  it("can set input lines", function()
+    helper.set_lines([[
+hoge
+test]])
+
+    thetto.start("line", {opts = {insert = false, input_lines = {"test"}}})
+
+    assert.current_line("test")
+  end)
+
   it("does not open windows if no items", function()
     thetto.start("cmd/ctags")
     assert.exists_message("cmd/ctags: empty")
