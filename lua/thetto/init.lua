@@ -6,6 +6,10 @@ function M.start(source_name, args)
   return Command.new("start", source_name, args)
 end
 
+function M.reload()
+  return Command.new("reload")
+end
+
 function M.resume(source_name, args)
   return Command.new("resume", source_name, args)
 end

@@ -77,6 +77,30 @@ function Command.start(source_name, args)
   return collector, nil
 end
 
+function Command.reload(bufnr)
+  vim.validate({bufnr = {bufnr, "number", true}})
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  local ctx = Context.get_from_path(bufnr)
+  if not ctx then
+    return nil, "no context buffer: " .. tostring(bufnr)
+  end
+
+  local collector = ctx.collector
+
+  local start_err = collector:start()
+  if start_err ~= nil then
+    return nil, start_err
+  end
+
+  local update_err = collector:update()
+  if update_err ~= nil then
+    return nil, update_err
+  end
+
+  return collector, nil
+end
+
 function Command.resume(source_name)
   local old_ctx = Context.get(source_name)
   if old_ctx then

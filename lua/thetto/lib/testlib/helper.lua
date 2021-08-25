@@ -99,6 +99,19 @@ function M.sync_execute(...)
   end
 end
 
+function M.sync_reload()
+  -- vim.cmd("edit!") not work?
+  local collector = require("thetto").reload()
+  if collector == nil then
+    return
+  end
+  local ok = collector:wait(1000)
+  if not ok then
+    assert(false, "job wait timeout")
+  end
+  return collector
+end
+
 function M.wait_ui(f)
   local finished = false
   require("thetto.view.ui")._changed_after = function(_)

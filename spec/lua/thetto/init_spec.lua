@@ -321,6 +321,34 @@ test_auto_2]])
 
 end)
 
+describe("thetto.reload()", function()
+
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("collects results again", function()
+    local origin_window = vim.api.nvim_get_current_win()
+    helper.set_lines([[
+test1
+test2
+]])
+
+    thetto.start("line", {opts = {insert = false, input_lines = {"test2"}}})
+
+    vim.api.nvim_set_current_win(origin_window)
+    vim.cmd("wincmd p")
+
+    helper.sync_reload()
+
+    thetto.execute("move_to_input")
+    vim.cmd("delete _")
+    thetto.execute("move_to_list")
+
+    assert.current_line("test2")
+  end)
+
+end)
+
 describe("thetto.execute()", function()
 
   before_each(helper.before_each)
