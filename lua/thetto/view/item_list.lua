@@ -21,6 +21,10 @@ function ItemList.new(source_name, width, height, row, column)
     vim.bo[b].filetype = FILETYPE
   end)
 
+  local border_char = "―"
+  if vim.o.ambiwidth == "double" then
+    border_char = "-"
+  end
   local window = vim.api.nvim_open_win(bufnr, false, {
     width = width - 2, -- NOTICE: calc border width
     height = height - 1,
@@ -31,7 +35,7 @@ function ItemList.new(source_name, width, height, row, column)
     style = "minimal",
     border = {
       {" ", "NormalFloat"},
-      {"―", "ThettoAboveBorder"},
+      {border_char, "ThettoAboveBorder"},
       {" ", "NormalFloat"},
       {" ", "NormalFloat"},
       {"", "NormalFloat"},
