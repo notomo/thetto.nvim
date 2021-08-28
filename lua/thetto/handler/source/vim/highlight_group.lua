@@ -4,6 +4,25 @@ local M = {}
 
 local colored = "xxx"
 
+local color_attributes = {
+  {"ctermfg", "fg", "cterm"},
+  {"ctermbg", "bg", "cterm"},
+  {"guifg", "fg", "gui"},
+  {"guibg", "bg", "gui"},
+  {"font", "font", "gui"},
+  {"guisp", "sp", "gui"},
+}
+
+local attributes = {
+  "bold",
+  "italic",
+  "reverse",
+  "standout",
+  "underline",
+  "undercurl",
+  "strikethrough",
+}
+
 function M.collect()
   local items = {}
   local names = vim.fn.getcompletion("*", "highlight")
@@ -13,23 +32,39 @@ function M.collect()
 
     local desc
     if id == origin_id then
-      local cterm_fg = vim.fn.synIDattr(origin_id, "fg", "cterm")
-      local cterm_bg = vim.fn.synIDattr(origin_id, "bg", "cterm")
-      local gui_fg = vim.fn.synIDattr(origin_id, "fg", "gui")
-      local gui_bg = vim.fn.synIDattr(origin_id, "bg", "gui")
       local factors = {colored, name}
-      if cterm_fg ~= "" then
-        table.insert(factors, "ctermfg=" .. cterm_fg)
+      for _, attr in ipairs(color_attributes) do
+        local key, what, mode = unpack(attr)
+        local value = vim.fn.synIDattr(origin_id, what, mode)
+        if value ~= "" then
+          table.insert(factors, key .. "=" .. value)
+        end
       end
-      if cterm_bg ~= "" then
-        table.insert(factors, "ctermbg=" .. cterm_bg)
+
+      do
+        local values = vim.tbl_filter(function(what)
+          return vim.fn.synIDattr(origin_id, what, "gui") == "1"
+        end, attributes)
+        local value = table.concat(values, ",")
+        if value ~= "" then
+          table.insert(factors, "gui=" .. value)
+        end
       end
-      if gui_fg ~= "" then
-        table.insert(factors, "guifg=" .. gui_fg)
+      do
+        local values = vim.tbl_filter(function(what)
+          return vim.fn.synIDattr(origin_id, what, "cterm") == "1"
+        end, attributes)
+        local value = table.concat(values, ",")
+        if value ~= "" then
+          table.insert(factors, "cterm=" .. value)
+        end
       end
-      if gui_bg ~= "" then
-        table.insert(factors, "guibg=" .. gui_bg)
+
+      local blend = vim.api.nvim_get_hl_by_name(name, false).blend
+      if blend then
+        table.insert(factors, "blend=" .. tostring(blend))
       end
+
       if #factors == 2 then
         table.insert(factors, "cleared")
       end
