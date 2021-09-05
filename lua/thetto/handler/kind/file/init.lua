@@ -118,7 +118,7 @@ function M.action_directory_enter(_, items)
   require("thetto").start("file/in_dir", {opts = {cwd = path}})
 end
 
-M.action_list_parents = M.action_directory_enter
+M.action_list_siblings = M.action_directory_enter
 
 M.default_action = "open"
 

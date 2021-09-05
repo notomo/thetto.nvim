@@ -131,7 +131,7 @@ function Command.execute(action_name, args)
 
   local range = modelib.visual_range()
   local items = ctx.ui:selected_items(action_name, range)
-  return ctx.executor:action(items, ctx, action_name, action_opts)
+  return ctx.executor:actions(items, ctx, action_name, args.fallback_actions, action_opts)
 end
 
 function Command.resume_execute(args)

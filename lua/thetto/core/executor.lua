@@ -100,6 +100,29 @@ function Executor.action(self, items, ctx, action_name, action_opts)
   return result, nil
 end
 
+function Executor.actions(self, items, ctx, main_action_name, fallback_action_names, action_opts)
+  local action_result, action_err = self:action(items, ctx, main_action_name, action_opts)
+  if not action_err then
+    return action_result, nil
+  end
+  if not vim.startswith(action_err, "not found action:") then
+    return nil, action_err
+  end
+
+  local errs = {action_err}
+  for _, action_name in ipairs(fallback_action_names or {}) do
+    local result, err = self:action(items, ctx, action_name, action_opts)
+    if not err then
+      return result, nil
+    end
+    table.insert(errs, err)
+    if not vim.startswith(err, "not found action:") then
+      break
+    end
+  end
+  return nil, table.concat(errs, ", ")
+end
+
 function Executor.auto(self, ctx, action_name)
   vim.validate({action_name = {action_name, "string", true}})
 
