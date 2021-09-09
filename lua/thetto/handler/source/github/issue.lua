@@ -1,6 +1,13 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo", milestone = nil, labels = {}}
+M.opts = {
+  owner = ":owner",
+  repo = ":repo",
+  milestone = nil,
+  labels = {},
+  assignee = nil,
+  state = "open",
+}
 
 function M.collect(self, opts)
   local cmd = {
@@ -11,12 +18,17 @@ function M.collect(self, opts)
     ("repos/%s/%s/issues"):format(self.opts.owner, self.opts.repo),
     "-F",
     "per_page=100",
+    "-F",
+    "state=" .. self.opts.state,
   }
   if self.opts.milestone then
     vim.list_extend(cmd, {"-F", "milestone=" .. self.opts.milestone})
   end
   if #self.opts.labels > 0 then
     vim.list_extend(cmd, {"-F", "labels=" .. table.concat(self.opts.labels, ",")})
+  end
+  if self.opts.assignee then
+    vim.list_extend(cmd, {"-F", "assignee=" .. self.opts.assignee})
   end
 
   local job = self.jobs.new(cmd, {
