@@ -1,6 +1,12 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = {
+  owner = ":owner",
+  repo = ":repo",
+  state = "open",
+  sort = "created",
+  sort_direction = "desc",
+}
 
 function M.collect(self, opts)
   local cmd = {
@@ -11,6 +17,12 @@ function M.collect(self, opts)
     ("repos/%s/%s/pulls"):format(self.opts.owner, self.opts.repo),
     "-F",
     "per_page=100",
+    "-F",
+    "state=" .. self.opts.state,
+    "-F",
+    "sort=" .. self.opts.sort,
+    "-F",
+    "direction=" .. self.opts.sort_direction,
   }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self, code)
