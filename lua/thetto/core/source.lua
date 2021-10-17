@@ -89,10 +89,17 @@ end
 
 function Source.all_names()
   local paths = vim.api.nvim_get_runtime_file("lua/thetto/handler/source/**/*.lua", true)
-  return vim.tbl_map(function(path)
+  local already = {}
+  local names = {}
+  for _, path in ipairs(paths) do
     local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/source/", true)[2]
-    return source_file:sub(1, #source_file - 4)
-  end, paths)
+    local name = source_file:sub(1, #source_file - 4)
+    if not already[name] then
+      table.insert(names, name)
+      already[name] = true
+    end
+  end
+  return names
 end
 
 return M
