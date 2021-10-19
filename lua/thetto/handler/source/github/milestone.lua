@@ -21,7 +21,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local milestones = vim.fn.json_decode(job_self:get_stdout())
+      local milestones = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, milestone in ipairs(milestones) do
         local mark
         if milestone.state == "open" then
@@ -33,7 +33,7 @@ function M.collect(self, opts)
         local milestone_title = milestone.title
 
         local milestone_desc = milestone.description
-        if milestone_desc == vim.NIL then
+        if not milestone_desc then
           milestone_desc = ""
         end
         milestone_desc = milestone_desc:gsub("\n", " "):gsub("\r", " ")

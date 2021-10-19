@@ -19,7 +19,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local releases = vim.fn.json_decode(job_self:get_stdout())
+      local releases = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, release in ipairs(releases) do
         local mark
         if release.draft then

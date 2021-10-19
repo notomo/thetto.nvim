@@ -16,7 +16,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local data = vim.fn.json_decode(job_self:get_stdout())
+      local data = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, job in ipairs(data.jobs or {}) do
         local mark = "  "
         if job.conclusion == "success" then

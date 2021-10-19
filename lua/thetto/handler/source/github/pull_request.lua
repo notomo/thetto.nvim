@@ -31,7 +31,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local prs = vim.fn.json_decode(job_self:get_stdout())
+      local prs = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, pr in ipairs(prs) do
         local mark
         if pr.draft then

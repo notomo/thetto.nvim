@@ -17,7 +17,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local data = vim.fn.json_decode(job_self:get_stdout())
+      local data = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, user in ipairs(data.items) do
         table.insert(items, {
           value = user.login,

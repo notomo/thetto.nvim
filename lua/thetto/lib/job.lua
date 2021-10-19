@@ -148,6 +148,10 @@ function Job.get_stdout(self)
   return output
 end
 
+function Job.get_joined_stdout(self)
+  return table.concat(self:get_stdout(), "")
+end
+
 function Job.get_stderr(self)
   local output = self.parse_output(self.stderr_output)
   if output[#output] == "" then

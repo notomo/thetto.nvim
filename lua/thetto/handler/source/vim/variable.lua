@@ -22,7 +22,7 @@ function M.collect()
     if type(var) == "string" then
       var = "\"" .. var:gsub("\n", "\\n") .. "\""
     elseif type(var) == "table" then
-      var = vim.fn.json_encode(var)
+      var = vim.json.encode(var)
     end
 
     local value = ("%s=%s"):format(name, var)

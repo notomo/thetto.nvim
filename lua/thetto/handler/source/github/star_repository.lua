@@ -9,7 +9,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local repos = vim.fn.json_decode(job_self:get_stdout())
+      local repos = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, repo in ipairs(repos) do
         table.insert(items, {
           value = repo.full_name,

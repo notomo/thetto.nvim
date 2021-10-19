@@ -19,11 +19,11 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local labels = vim.fn.json_decode(job_self:get_stdout())
+      local labels = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, label in ipairs(labels) do
         local name = label.name
         local label_desc = label.description
-        if label_desc == vim.NIL then
+        if not label_desc then
           label_desc = ""
         end
         local desc = ("%s %s"):format(name, label_desc)

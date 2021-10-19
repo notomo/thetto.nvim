@@ -23,7 +23,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local projects = vim.fn.json_decode(job_self:get_stdout())
+      local projects = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, project in ipairs(projects) do
         local mark
         if project.state == "open" then
@@ -35,7 +35,7 @@ function M.collect(self, opts)
         local project_name = project.name
 
         local project_desc = project.body:gsub("\n", " "):gsub("\r", " ")
-        if project_desc == vim.NIL then
+        if not project_desc then
           project_desc = ""
         end
 

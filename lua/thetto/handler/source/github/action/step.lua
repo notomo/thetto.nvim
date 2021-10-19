@@ -16,7 +16,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local job = vim.fn.json_decode(job_self:get_stdout())
+      local job = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, step in ipairs(job.steps) do
         local mark = "  "
         if step.conclusion == "success" then
@@ -32,7 +32,7 @@ function M.collect(self, opts)
         end
         local title = ("%s %s"):format(mark, step.name)
         local states = {step.status}
-        if step.conclusion ~= vim.NIL then
+        if step.conclusion then
           table.insert(states, step.conclusion)
         end
         local state = ("(%s)"):format(table.concat(states, ","))

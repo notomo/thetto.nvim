@@ -38,7 +38,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local issues = vim.fn.json_decode(job_self:get_stdout())
+      local issues = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, issue in ipairs(issues) do
         local mark
         if issue.state == "open" then

@@ -17,7 +17,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local data = vim.fn.json_decode(job_self:get_stdout())
+      local data = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
       for _, run in ipairs(data.workflow_runs or {}) do
         local mark = "  "
         if run.conclusion == "success" then
@@ -33,7 +33,7 @@ function M.collect(self, opts)
         end
         local title = ("%s %s"):format(mark, run.name)
         local states = {run.status}
-        if run.conclusion ~= vim.NIL then
+        if run.conclusion then
           table.insert(states, run.conclusion)
         end
         local state = ("(%s)"):format(table.concat(states, ","))
