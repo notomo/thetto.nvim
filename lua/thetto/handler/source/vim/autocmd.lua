@@ -68,7 +68,8 @@ function Parser.eat(self, output)
   end
 
   -- ex. Last set from anonymous :source line 8888
-  local source_row = output:match("^%s+Last%s+set%s+from%s+anonymous%s+%S+%s+line%s+(%d+)")
+  -- ex. Last set from anonymous :source
+  local source_row = output:match("^%s+Last%s+set%s+from%s+anonymous%s+:source.*")
   if source_row ~= nil then
     table.insert(self.autocmds, Autocmd.new(vim.deepcopy(self.autocmd)))
     return
