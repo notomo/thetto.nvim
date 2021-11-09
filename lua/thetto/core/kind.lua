@@ -122,7 +122,15 @@ end
 function Kind.action_names(self)
   local names = {}
   local config = require("thetto.core.custom").config
-  local actions = vim.tbl_extend("force", self._origin, unpack(self._origin.extends or {{}}))
+
+  local extends = vim.tbl_map(function(e)
+    return getmetatable(e)
+  end, self._origin.extends or {})
+  if vim.tbl_isempty(extends) then
+    extends = {{}}
+  end
+
+  local actions = vim.tbl_extend("force", self._origin, unpack(extends))
   actions = vim.tbl_extend("force", actions, base, config.source_actions[self.source_name] or {}, config.kind_actions[self.name] or {})
   for key in pairs(actions) do
     if vim.startswith(key, Action.PREFIX) then

@@ -41,4 +41,16 @@ test1
     assert.filetype("thetto-input")
   end)
 
+  it("can show exnteded actions", function()
+    helper.new_file("Makefile", [[
+build:
+	echo 'build'
+]])
+
+    thetto.start("cmd/make/target", {opts = {insert = false}})
+    thetto.start("thetto/action", {opts = {insert = false}})
+
+    assert.exists_pattern("open")
+  end)
+
 end)
