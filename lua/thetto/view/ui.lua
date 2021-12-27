@@ -262,11 +262,5 @@ vim.cmd("highlight default link ThettoColorLabelBackground NormalFloat")
 vim.cmd("highlight default link ThettoInput NormalFloat")
 vim.cmd("highlight default link ThettoPreview Search")
 vim.cmd("highlight default link ThettoFilterInfo Comment")
-highlightlib.default("ThettoAboveBorder", {
-  ctermbg = {"NormalFloat", 235},
-  guibg = {"NormalFloat", "#213243"},
-  ctermfg = {"Comment", 103},
-  guifg = {"Comment", "#8d9eb2"},
-})
 
 return M

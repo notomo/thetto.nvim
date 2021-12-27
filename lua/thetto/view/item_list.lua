@@ -3,6 +3,7 @@ local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")
 local modelib = require("thetto.lib.mode")
+local highlightlib = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
@@ -35,7 +36,7 @@ function ItemList.new(source_name, width, height, row, column)
     style = "minimal",
     border = {
       {" ", "NormalFloat"},
-      {border_char, "ThettoAboveBorder"},
+      {border_char, M._ThettoAboveBorder()},
       {" ", "NormalFloat"},
       {" ", "NormalFloat"},
       {"", "NormalFloat"},
@@ -169,5 +170,14 @@ function M._on_close(key, id)
   end
   ctx.ui:close()
 end
+
+M._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl_group)
+  return highlightlib.default(hl_group, {
+    ctermbg = {"NormalFloat", 235},
+    guibg = {"NormalFloat", "#213243"},
+    ctermfg = {"Comment", 103},
+    guifg = {"Comment", "#8d9eb2"},
+  })
+end)
 
 return M
