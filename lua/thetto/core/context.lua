@@ -38,7 +38,7 @@ function Context.get_from_path(bufnr, pattern)
   pattern = pattern or ""
 
   local path = vim.api.nvim_buf_get_name(bufnr)
-  local source_name = path:match("thetto://(.+)/thetto" .. pattern)
+  local source_name = path:match("^thetto://(.+)/thetto" .. pattern)
   if not source_name then
     return nil, "not matched path: " .. path
   end
