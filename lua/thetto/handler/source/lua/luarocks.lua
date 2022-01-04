@@ -31,7 +31,7 @@ function M.collect(self, opts)
   local package_paths = vim.split(package.path, ";", true)
   vim.list_extend(package_paths, vim.split(package.cpath, ";", true))
 
-  local job = self.jobs.new({"luarocks", "list", "--porcelain"}, {
+  local job = self.jobs.new({ "luarocks", "list", "--porcelain" }, {
     on_exit = function(job_self)
       local items = {}
       for _, output in ipairs(job_self:get_stdout()) do
@@ -49,7 +49,7 @@ function M.collect(self, opts)
           path = path,
           desc = desc,
           version = version,
-          column_offsets = {value = 0, version = #name + 1},
+          column_offsets = { value = 0, version = #name + 1 },
         })
       end
       self:append(items)

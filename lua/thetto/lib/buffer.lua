@@ -1,8 +1,7 @@
 local M = {}
 
 function M.scratch(modify)
-  modify = modify or function()
-  end
+  modify = modify or function() end
   local bufnr = vim.api.nvim_create_buf(false, true)
   modify(bufnr)
   vim.bo[bufnr].bufhidden = "wipe"
@@ -14,7 +13,7 @@ function M.delete_by_name(name)
   if bufnr == -1 then
     return
   end
-  vim.api.nvim_buf_delete(bufnr, {force = true})
+  vim.api.nvim_buf_delete(bufnr, { force = true })
 end
 
 function M.in_tabpage(tabpage_index)

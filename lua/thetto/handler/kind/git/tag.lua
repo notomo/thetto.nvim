@@ -6,8 +6,8 @@ function M.action_checkout(self, items)
     return
   end
 
-  local cmd = {"git", "checkout", "-b", item.value, "refs/tags/" .. item.value}
-  local job = self.jobs.new(cmd, {on_exit = self.jobs.print_output})
+  local cmd = { "git", "checkout", "-b", item.value, "refs/tags/" .. item.value }
+  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
   return nil, job:start()
 end
 
@@ -17,7 +17,7 @@ function M.action_delete(self, items)
     table.insert(branches, item.value)
   end
 
-  local cmd = {"git", "tag", "--delete"}
+  local cmd = { "git", "tag", "--delete" }
   vim.list_extend(cmd, branches)
 
   local job = self.jobs.new(cmd, {

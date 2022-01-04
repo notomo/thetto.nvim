@@ -6,7 +6,7 @@ function M.collect(self, _)
     return {}, nil, err
   end
 
-  local cmd = {"git", "--no-pager", "status", "--short"}
+  local cmd = { "git", "--no-pager", "status", "--short" }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self)
       local items = {}
@@ -18,7 +18,7 @@ function M.collect(self, _)
           kind_name = "word"
         end
         local value = ("%2s %s"):format(status, path)
-        table.insert(items, {value = value, path = abs_path, kind_name = kind_name})
+        table.insert(items, { value = value, path = abs_path, kind_name = kind_name })
       end
       self:append(items)
     end,

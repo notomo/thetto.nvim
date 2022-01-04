@@ -1,6 +1,6 @@
 local M = {}
 
-M.cmd = {"kill"}
+M.cmd = { "kill" }
 
 function M.action_kill(self, items)
   local pids = {}
@@ -11,7 +11,7 @@ function M.action_kill(self, items)
   local cmd = vim.deepcopy(M.cmd)
   vim.list_extend(cmd, pids)
 
-  local job = self.jobs.new(cmd, {on_exit = self.jobs.print_output})
+  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err

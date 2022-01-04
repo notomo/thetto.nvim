@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {checkout = {track = false}, delete = {force = false}}
+M.opts = { checkout = { track = false }, delete = { force = false } }
 
 function M.action_checkout(self, items)
   local item = items[1]
@@ -8,13 +8,13 @@ function M.action_checkout(self, items)
     return
   end
 
-  local cmd = {"git", "checkout"}
+  local cmd = { "git", "checkout" }
   if self.action_opts["track"] then
     table.insert(cmd, "-t")
   end
   table.insert(cmd, item.value)
 
-  local job = self.jobs.new(cmd, {on_exit = self.jobs.print_output})
+  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
   return nil, job:start()
 end
 
@@ -24,7 +24,7 @@ function M.action_delete(self, items)
     table.insert(branches, item.value)
   end
 
-  local cmd = {"git", "branch"}
+  local cmd = { "git", "branch" }
   if self.action_opts["force"] then
     table.insert(cmd, "-D")
   else

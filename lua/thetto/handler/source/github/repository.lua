@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", is_org = false}
+M.opts = { owner = ":owner", is_org = false }
 
 function M.collect(self, opts)
   local typ = "users"
@@ -26,7 +26,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local repos = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local repos = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, repo in ipairs(repos) do
         local mark
         if repo.archived then
@@ -40,8 +40,8 @@ function M.collect(self, opts)
           value = repo.full_name,
           url = repo.html_url,
           desc = desc,
-          repo = {is_archived = repo.archived, owner = repo.owner.login, name = repo.name},
-          column_offsets = {value = #mark + 1},
+          repo = { is_archived = repo.archived, owner = repo.owner.login, name = repo.name },
+          column_offsets = { value = #mark + 1 },
         })
       end
       self:append(items)

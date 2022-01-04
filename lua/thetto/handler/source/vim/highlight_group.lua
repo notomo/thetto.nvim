@@ -5,12 +5,12 @@ local M = {}
 local colored = "xxx"
 
 local color_attributes = {
-  {"ctermfg", "fg", "cterm"},
-  {"ctermbg", "bg", "cterm"},
-  {"guifg", "fg", "gui"},
-  {"guibg", "bg", "gui"},
-  {"font", "font", "gui"},
-  {"guisp", "sp", "gui"},
+  { "ctermfg", "fg", "cterm" },
+  { "ctermbg", "bg", "cterm" },
+  { "guifg", "fg", "gui" },
+  { "guibg", "bg", "gui" },
+  { "font", "font", "gui" },
+  { "guisp", "sp", "gui" },
 }
 
 local attributes = {
@@ -32,7 +32,7 @@ function M.collect()
 
     local desc
     if id == origin_id then
-      local factors = {colored, name}
+      local factors = { colored, name }
       for _, attr in ipairs(color_attributes) do
         local key, what, mode = unpack(attr)
         local value = vim.fn.synIDattr(origin_id, what, mode)
@@ -74,7 +74,7 @@ function M.collect()
       desc = ("%s %s links to %s"):format(colored, name, link)
     end
 
-    table.insert(items, {desc = desc, value = name, column_offsets = {value = #colored + 1}})
+    table.insert(items, { desc = desc, value = name, column_offsets = { value = #colored + 1 } })
   end
   return items
 end

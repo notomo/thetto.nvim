@@ -31,7 +31,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local prs = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local prs = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, pr in ipairs(prs) do
         local mark
         if pr.draft then
@@ -47,8 +47,8 @@ function M.collect(self, opts)
           value = pr.title,
           url = pr.html_url,
           desc = desc,
-          pr = {is_draft = pr.draft},
-          column_offsets = {value = #mark + 1, at = #title + 1, by = #title + #at + 1},
+          pr = { is_draft = pr.draft },
+          column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
         })
       end
       self:append(items)

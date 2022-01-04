@@ -2,7 +2,6 @@ local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("vim/buffer source", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -29,9 +28,9 @@ describe("vim/buffer source", function()
     local bufnr = vim.api.nvim_create_buf(true, true)
     vim.api.nvim_buf_set_name(bufnr, "foo")
 
-    vim.fn.termopen({"echo", "1111"})
+    vim.fn.termopen({ "echo", "1111" })
 
-    thetto.start("vim/buffer", {source_opts = {buftype = "terminal"}, opts = {insert = false}})
+    thetto.start("vim/buffer", { source_opts = { buftype = "terminal" }, opts = { insert = false } })
 
     assert.exists_pattern("term://")
     assert.no.exists_pattern("foo")
@@ -42,17 +41,16 @@ describe("vim/buffer source", function()
     vim.api.nvim_buf_set_name(bufnr, "foo")
     vim.cmd("tabedit")
 
-    thetto.start("vim/buffer", {opts = {insert = false}})
+    thetto.start("vim/buffer", { opts = { insert = false } })
     helper.search("foo")
     thetto.execute("tab_drop")
 
     assert.tab_count(2)
 
-    thetto.start("vim/buffer", {opts = {insert = false}})
+    thetto.start("vim/buffer", { opts = { insert = false } })
     helper.search("foo")
     thetto.execute("tab_drop")
 
     assert.tab_count(2)
   end)
-
 end)

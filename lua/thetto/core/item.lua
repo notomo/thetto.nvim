@@ -22,7 +22,7 @@ function Items.new(result, input_lines, filters, sorters, opts)
     filtered[i] = items[i]
   end
 
-  local tbl = {_items = filtered}
+  local tbl = { _items = filtered }
   return setmetatable(tbl, Items)
 end
 

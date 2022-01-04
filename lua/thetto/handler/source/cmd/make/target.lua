@@ -19,7 +19,7 @@ function M._load(self, path, cwd)
         value = target,
         path = path,
         row = row,
-        column_offsets = {value = #path_row + 1},
+        column_offsets = { value = #path_row + 1 },
       })
     end
     row = row + 1
@@ -35,7 +35,7 @@ function M.collect(self, opts)
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
 
   local items = {}
-  for _, p in ipairs(vim.list_extend({path}, paths)) do
+  for _, p in ipairs(vim.list_extend({ path }, paths)) do
     items = vim.list_extend(items, M._load(self, p, opts.cwd))
   end
   return items

@@ -6,7 +6,7 @@ function M.collect()
   for i = count, 1, -1 do
     local history = vim.fn.histget("cmd", i)
     if history ~= "" then
-      table.insert(items, {value = history})
+      table.insert(items, { value = history })
     end
   end
   return items

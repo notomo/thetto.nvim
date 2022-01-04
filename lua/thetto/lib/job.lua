@@ -41,15 +41,19 @@ function Job.start(self)
 
   local opts = {
     args = self.args,
-    stdio = {self.stdin, self.stdout, self.stderr},
+    stdio = { self.stdin, self.stdout, self.stderr },
     cwd = self.cwd,
     env = self.env,
     detach = self.detach,
   }
 
-  self.handle, self.pid = vim.loop.spawn(self.command, opts, vim.schedule_wrap(function(code, signal)
-    self:_shutdown(code, signal)
-  end))
+  self.handle, self.pid = vim.loop.spawn(
+    self.command,
+    opts,
+    vim.schedule_wrap(function(code, signal)
+      self:_shutdown(code, signal)
+    end)
+  )
   if type(self.pid) ~= "number" then
     return self.pid .. ": " .. self.command
   end
@@ -111,24 +115,28 @@ function M.loop(ms, f)
     end
     current = create_co(outputs)
 
-    timer:start(0, ms, vim.schedule_wrap(function()
-      if job.discarded then
-        return timer:stop()
-      end
+    timer:start(
+      0,
+      ms,
+      vim.schedule_wrap(function()
+        if job.discarded then
+          return timer:stop()
+        end
 
-      local ok = pcall(f, current)
-      if not ok then
-        return timer:stop()
-      end
+        local ok = pcall(f, current)
+        if not ok then
+          return timer:stop()
+        end
 
-      local status = coroutine.status(current)
-      if #next_outputs == 0 and not job:is_running() and status == "dead" then
-        timer:stop()
-      elseif #next_outputs ~= 0 and status == "dead" then
-        current = create_co(next_outputs)
-        next_outputs = {}
-      end
-    end))
+        local status = coroutine.status(current)
+        if #next_outputs == 0 and not job:is_running() and status == "dead" then
+          timer:stop()
+        elseif #next_outputs ~= 0 and status == "dead" then
+          current = create_co(next_outputs)
+          next_outputs = {}
+        end
+      end)
+    )
   end
 end
 

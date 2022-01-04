@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo", job_id = nil}
+M.opts = { owner = ":owner", repo = ":repo", job_id = nil }
 
 function M.collect(self, opts)
   if not self.opts.job_id then
@@ -8,7 +8,7 @@ function M.collect(self, opts)
   end
 
   local path = ("repos/%s/%s/actions/jobs/%s"):format(self.opts.owner, self.opts.repo, self.opts.job_id)
-  local cmd = {"gh", "api", "-X", "GET", path}
+  local cmd = { "gh", "api", "-X", "GET", path }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self, code)
       if code ~= 0 then
@@ -16,7 +16,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local job = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local job = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, step in ipairs(job.steps) do
         local mark = "  "
         if step.conclusion == "success" then
@@ -31,7 +31,7 @@ function M.collect(self, opts)
           mark = "🏃"
         end
         local title = ("%s %s"):format(mark, step.name)
-        local states = {step.status}
+        local states = { step.status }
         if step.conclusion then
           table.insert(states, step.conclusion)
         end
@@ -41,9 +41,9 @@ function M.collect(self, opts)
         table.insert(items, {
           value = step.name,
           url = ("%s#step:%d:1"):format(job.html_url, step.number),
-          step = {run_id = job.run_id},
+          step = { run_id = job.run_id },
           desc = desc,
-          column_offsets = {value = #mark + 1, state = #title + 1},
+          column_offsets = { value = #mark + 1, state = #title + 1 },
         })
       end
       self:append(items)

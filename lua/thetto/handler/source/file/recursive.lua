@@ -2,11 +2,11 @@ local vim = vim
 
 local M = {}
 
-M.opts = {max_depth = 100}
+M.opts = { max_depth = 100 }
 
 if vim.fn.has("win32") == 1 then
   M.opts.get_command = function(path, _)
-    return {"where", "/R", path, "*"}
+    return { "where", "/R", path, "*" }
   end
 else
   M.opts.get_command = function(path, max_depth)
@@ -45,7 +45,7 @@ function M.collect(self, opts)
       end
 
       local relative_path = self:_modify_path(to_relative(path))
-      table.insert(items, {value = relative_path, path = path})
+      table.insert(items, { value = relative_path, path = path })
       ::continue::
     end
     self:append(items)
@@ -73,8 +73,7 @@ function M.collect(self, opts)
 
       item_appender(job_self, outputs)
     end,
-    on_exit = function(_)
-    end,
+    on_exit = function(_) end,
     stdout_buffered = false,
     stderr_buffered = false,
     cwd = opts.cwd,

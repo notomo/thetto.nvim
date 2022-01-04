@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {all = false}
+M.opts = { all = false }
 
 function M.collect(self, opts)
   local _, err = self.filelib.find_git_root()
@@ -8,13 +8,13 @@ function M.collect(self, opts)
     return {}, nil, err
   end
 
-  local cmd = {"git", "branch", "--format", "%(refname:short)"}
+  local cmd = { "git", "branch", "--format", "%(refname:short)" }
   if self.opts.all then
     table.insert(cmd, "--all")
   end
 
   local current_branch = nil
-  local get_current_job = self.jobs.new({"git", "rev-parse", "--abbrev-ref", "HEAD"}, {
+  local get_current_job = self.jobs.new({ "git", "rev-parse", "--abbrev-ref", "HEAD" }, {
     on_exit = function(job_self)
       current_branch = job_self:get_stdout()[1]
     end,
@@ -32,7 +32,7 @@ function M.collect(self, opts)
       local items = {}
       for _, output in ipairs(job_self:get_stdout()) do
         local is_current_branch = output == current_branch
-        table.insert(items, {value = output, is_current_branch = is_current_branch})
+        table.insert(items, { value = output, is_current_branch = is_current_branch })
       end
       self:append(items)
     end,

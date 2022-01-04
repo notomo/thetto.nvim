@@ -3,8 +3,8 @@ local M = {}
 function M.action_execute(_, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
-    local cmd = {"npm", "run", item.value}
-    vim.fn.termopen(cmd, {cwd = vim.fn.fnamemodify(item.path, ":h")})
+    local cmd = { "npm", "run", item.value }
+    vim.fn.termopen(cmd, { cwd = vim.fn.fnamemodify(item.path, ":h") })
   end
 end
 

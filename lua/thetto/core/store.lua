@@ -8,7 +8,7 @@ local Store = {}
 M.Store = Store
 
 function Store.new(name, opts)
-  vim.validate({name = {name, "string"}, opts = {opts, "table", true}})
+  vim.validate({ name = { name, "string" }, opts = { opts, "table", true } })
   opts = opts or {}
 
   local store = modulelib.find("thetto.handler.store." .. name)
@@ -21,7 +21,7 @@ function Store.new(name, opts)
     name = name,
     augroup_name = ("thetto_%s"):format(snake_name),
     file_path = opts.file_path or pathlib.user_data_path(("store_%s.txt"):format(snake_name)),
-    persist = {paths = {}},
+    persist = { paths = {} },
     _store = store,
   }
   local self = setmetatable(tbl, Store)
@@ -39,7 +39,7 @@ function Store.quit(self)
 end
 
 function Store.get(name)
-  vim.validate({name = {name, "string"}})
+  vim.validate({ name = { name, "string" } })
   local store = repository:get(name)
   if not store then
     return nil, "no store: " .. name

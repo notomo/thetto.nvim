@@ -9,7 +9,7 @@ function M.collect(self)
     local f = io.open(path, "r")
     for line in f:lines() do
       local tag = vim.split(line, "\t")[1]
-      table.insert(items, {value = tag})
+      table.insert(items, { value = tag })
     end
     f:close()
   end

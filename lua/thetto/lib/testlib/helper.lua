@@ -55,7 +55,7 @@ function M.sync_input(texts)
       end
     end
   end
-  vim.api.nvim_put({text}, "c", true, true)
+  vim.api.nvim_put({ text }, "c", true, true)
   local ok = vim.wait(1000, function()
     return finished
   end, 10)
@@ -142,7 +142,7 @@ end
 
 function M.new_file(path, ...)
   local f = io.open(M.test_data_dir .. path, "w")
-  for _, line in ipairs({...}) do
+  for _, line in ipairs({ ... }) do
     f:write(line .. "\n")
   end
   f:close()

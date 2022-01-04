@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {per_file = false}
+M.opts = { per_file = false }
 
 function M.collect(self, opts)
   local items = {}
@@ -40,7 +40,7 @@ function M.collect(self, opts)
       row = row,
       bufnr = bufnr,
       column = jump.col,
-      column_offsets = {["path:relative"] = 0, value = #label + 1},
+      column_offsets = { ["path:relative"] = 0, value = #label + 1 },
     })
 
     ::continue::

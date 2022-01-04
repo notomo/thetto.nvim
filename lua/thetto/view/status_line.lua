@@ -24,21 +24,24 @@ function StatusLine.new(source_name, width, height, row, column)
     external = false,
     style = "minimal",
     border = {
-      {"", "ThettoInfo"},
-      {"", "ThettoInfo"},
-      {" ", "ThettoInfo"},
-      {" ", "ThettoInfo"},
-      {"", "ThettoInfo"},
-      {"", "ThettoInfo"},
-      {" ", "ThettoInfo"},
-      {" ", "ThettoInfo"},
+      { "", "ThettoInfo" },
+      { "", "ThettoInfo" },
+      { " ", "ThettoInfo" },
+      { " ", "ThettoInfo" },
+      { "", "ThettoInfo" },
+      { "", "ThettoInfo" },
+      { " ", "ThettoInfo" },
+      { " ", "ThettoInfo" },
     },
   })
   vim.wo[window].winhighlight = "Normal:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto.view.status_line')._on_enter('%s')"):format(bufnr, source_name)
+  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto.view.status_line')._on_enter('%s')"):format(
+    bufnr,
+    source_name
+  )
   vim.cmd(on_info_enter)
 
-  local tbl = {_window = window, _hl_factory = HighlighterFactory.new("thetto-info-text", bufnr)}
+  local tbl = { _window = window, _hl_factory = HighlighterFactory.new("thetto-info-text", bufnr) }
   return setmetatable(tbl, StatusLine)
 end
 
@@ -60,7 +63,7 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
 
   local text = ("%s%s [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
   local highlighter = self._hl_factory:reset()
-  highlighter:set_virtual_text(0, {{text, "ThettoInfo"}, {" "}, {status, "Comment"}}, {
+  highlighter:set_virtual_text(0, { { text, "ThettoInfo" }, { " " }, { status, "Comment" } }, {
     virt_text_pos = "overlay",
   })
 end

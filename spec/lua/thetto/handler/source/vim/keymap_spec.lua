@@ -2,7 +2,6 @@ local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("vim/keymap source", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -10,7 +9,7 @@ describe("vim/keymap source", function()
     vim.cmd("nnoremap <silent> <buffer> <Space>hoge :<C-u>tabedit<CR>")
 
     thetto.start("vim/keymap")
-    helper.sync_input({"hoge"})
+    helper.sync_input({ "hoge" })
 
     thetto.execute("move_to_list")
 
@@ -20,5 +19,4 @@ describe("vim/keymap source", function()
 
     assert.tab_count(2)
   end)
-
 end)

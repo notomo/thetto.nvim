@@ -5,12 +5,12 @@ M.opts = {
   range = "%",
   magic = "\\v",
   commands = {
-    remove_new_line = {pattern = "^$\\n", after = ""},
-    clean_tab_sequence = {pattern = "\\\\t", after = "    "},
-    clean_new_line_sequence = {pattern = "\\\\n", after = "\\r"},
-    escape = {pattern = "^(.+)$", after = "\\=escape(submatch(0), \"\\/\")"},
-    surround_by_single_quote = {pattern = "^(.+)$", after = "'\\1'"},
-    surround_by_double_quote = {pattern = "^(.+)$", after = "\"\\1\""},
+    remove_new_line = { pattern = "^$\\n", after = "" },
+    clean_tab_sequence = { pattern = "\\\\t", after = "    " },
+    clean_new_line_sequence = { pattern = "\\\\n", after = "\\r" },
+    escape = { pattern = "^(.+)$", after = '\\=escape(submatch(0), "\\/")' },
+    surround_by_single_quote = { pattern = "^(.+)$", after = "'\\1'" },
+    surround_by_double_quote = { pattern = "^(.+)$", after = '"\\1"' },
   },
 }
 
@@ -46,7 +46,7 @@ function M.collect(self, opts)
       bufnr = bufnr,
       range = range,
       range_part = range_part,
-      column_offsets = {excmd = #name + 1, value = 0},
+      column_offsets = { excmd = #name + 1, value = 0 },
     })
   end
   return items

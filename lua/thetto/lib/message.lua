@@ -8,8 +8,8 @@ function M.error(err)
 end
 
 function M.warn(msg)
-  vim.validate({msg = {msg, "string"}})
-  vim.api.nvim_echo({{prefix .. msg, "WarningMsg"}}, true, {})
+  vim.validate({ msg = { msg, "string" } })
+  vim.api.nvim_echo({ { prefix .. msg, "WarningMsg" } }, true, {})
 end
 
 return M

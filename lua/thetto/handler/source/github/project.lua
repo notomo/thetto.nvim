@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = { owner = ":owner", repo = ":repo" }
 
 function M.collect(self, opts)
   local cmd = {
@@ -23,7 +23,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local projects = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local projects = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, project in ipairs(projects) do
         local mark
         if project.state == "open" then
@@ -50,7 +50,7 @@ function M.collect(self, opts)
             owner = self.opts.owner,
             repo = self.opts.repo,
           },
-          column_offsets = {value = #mark + 1, description = #mark + #project_name + 1},
+          column_offsets = { value = #mark + 1, description = #mark + #project_name + 1 },
         })
       end
       self:append(items)

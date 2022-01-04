@@ -6,27 +6,27 @@ function M.collect(self, opts)
   local pattern = opts.pattern
   if pattern == nil or pattern == "" then
     local items = vim.tbl_map(function(line)
-      return {value = line}
+      return { value = line }
     end, lines)
     if opts.interactive then
-      self:append(items, {items = items})
+      self:append(items, { items = items })
     end
     return items, nil, self.errors.skip_empty_pattern
   end
 
-  local job = self.jobs.new({"jq", pattern}, {
+  local job = self.jobs.new({ "jq", pattern }, {
     on_exit = function(job_self, code)
       if code ~= 0 then
         return
       end
       local items = vim.tbl_map(function(output)
-        return {value = output}
+        return { value = output }
       end, job_self:get_stdout())
-      self:append(items, {items = items})
+      self:append(items, { items = items })
     end,
     on_stderr = function(job_self)
       local items = vim.tbl_map(function(output)
-        return {value = output, is_error = true}
+        return { value = output, is_error = true }
       end, job_self:get_stderr())
       if #items == 0 then
         return

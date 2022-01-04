@@ -24,7 +24,7 @@ function Modifier.new(name)
       return nil, "not found filter modifier: " .. name
     end
   end
-  local tbl = {f = f, name = name}
+  local tbl = { f = f, name = name }
   return setmetatable(tbl, Modifier)
 end
 
@@ -33,11 +33,11 @@ M.Filter = Filter
 
 function Filter.new(name, opts, inversed, key, modifier)
   vim.validate({
-    name = {name, "string"},
-    opts = {opts, "table"},
-    inversed = {inversed, "boolean"},
-    key = {key, "string", true},
-    modifier = {modifier, "table"},
+    name = { name, "string" },
+    opts = { opts, "table" },
+    inversed = { inversed, "boolean" },
+    key = { key, "string", true },
+    modifier = { modifier, "table" },
   })
 
   local origin = modulelib.find("thetto.handler.filter." .. name)
@@ -121,7 +121,7 @@ local Filters = {}
 M.Filters = Filters
 
 function Filters.new(names, opts)
-  vim.validate({names = {names, "table"}, opts = {opts, "table"}})
+  vim.validate({ names = { names, "table" }, opts = { opts, "table" } })
   local filters = {}
   for _, name in ipairs(names) do
     local filter, err = Filter.parse(name, opts)
@@ -131,7 +131,7 @@ function Filters.new(names, opts)
     table.insert(filters, filter)
   end
 
-  local tbl = {_filters = filters}
+  local tbl = { _filters = filters }
   return setmetatable(tbl, Filters)
 end
 

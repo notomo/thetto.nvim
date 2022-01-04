@@ -6,8 +6,8 @@ local Highlighter = {}
 Highlighter.__index = Highlighter
 
 function Highlighter.new(ns, bufnr)
-  vim.validate({ns = {ns, "number"}, bufnr = {bufnr, "number"}})
-  local tbl = {_ns = ns, _bufnr = bufnr}
+  vim.validate({ ns = { ns, "number" }, bufnr = { bufnr, "number" } })
+  local tbl = { _ns = ns, _bufnr = bufnr }
   return setmetatable(tbl, Highlighter)
 end
 
@@ -57,20 +57,20 @@ HighlighterFactory.__index = HighlighterFactory
 M.HighlighterFactory = HighlighterFactory
 
 function HighlighterFactory.new(key, bufnr)
-  vim.validate({key = {key, "string"}, bufnr = {bufnr, "number", true}})
+  vim.validate({ key = { key, "string" }, bufnr = { bufnr, "number", true } })
   local ns = vim.api.nvim_create_namespace(key)
-  local factory = {_ns = ns, _bufnr = bufnr}
+  local factory = { _ns = ns, _bufnr = bufnr }
   return setmetatable(factory, HighlighterFactory)
 end
 
 function HighlighterFactory.create(self, bufnr)
-  vim.validate({bufnr = {bufnr, "number", true}})
+  vim.validate({ bufnr = { bufnr, "number", true } })
   bufnr = bufnr or self._bufnr
   return Highlighter.new(self._ns, bufnr)
 end
 
 function HighlighterFactory.reset(self, bufnr)
-  vim.validate({bufnr = {bufnr, "number", true}})
+  vim.validate({ bufnr = { bufnr, "number", true } })
   bufnr = bufnr or self._bufnr
   local highlighter = self:create(bufnr)
   vim.api.nvim_buf_clear_namespace(bufnr, self._ns, 0, -1)
@@ -96,10 +96,10 @@ function M.default(name, attributes)
 end
 
 local ATTRIBUTES = {
-  ctermfg = {"fg", "cterm"},
-  guifg = {"fg", "gui"},
-  ctermbg = {"bg", "cterm"},
-  guibg = {"bg", "gui"},
+  ctermfg = { "fg", "cterm" },
+  guifg = { "fg", "gui" },
+  ctermbg = { "bg", "cterm" },
+  guibg = { "bg", "gui" },
 }
 function M.get_attribute(hl_group, name)
   local hl_id = vim.api.nvim_get_hl_id_by_name(hl_group)
@@ -115,7 +115,7 @@ Ensured.__index = Ensured
 M.Ensured = Ensured
 
 function Ensured.new(hl_group, define_hl)
-  local tbl = {_hl_group = hl_group, _define_hl = define_hl}
+  local tbl = { _hl_group = hl_group, _define_hl = define_hl }
   return setmetatable(tbl, Ensured)
 end
 

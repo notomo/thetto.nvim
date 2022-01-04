@@ -12,7 +12,7 @@ local vim = vim
 local M = {}
 
 local Source = {
-  errors = {skip_empty_pattern = "skip_empty_pattern"},
+  errors = { skip_empty_pattern = "skip_empty_pattern" },
   jobs = jobs,
   pathlib = pathlib,
   filelib = filelib,
@@ -23,9 +23,9 @@ M.Source = Source
 
 function Source.new(name, source_opts, opts)
   vim.validate({
-    name = {name, "string"},
-    source_opts = {source_opts, "table"},
-    opts = {opts, "table"},
+    name = { name, "string" },
+    source_opts = { source_opts, "table" },
+    opts = { opts, "table" },
   })
 
   local origin = modulelib.find("thetto.handler.source." .. name)
@@ -43,7 +43,7 @@ function Source.new(name, source_opts, opts)
     sorters = opts.sorters or source_config.sorters or origin.sorters or config.sorters,
     bufnr = vim.api.nvim_get_current_buf(),
     compiled_colors = vim.tbl_map(function(color)
-      return {regex = vim.regex(color.pattern), chunks = color.chunks}
+      return { regex = vim.regex(color.pattern), chunks = color.chunks }
     end, origin.colors or source_config.colors or base.colors),
     ctx = {},
     _origin = origin,

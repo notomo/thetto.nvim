@@ -10,7 +10,7 @@ local Action = {}
 Action.PREFIX = "action_"
 
 function Action.new(kind, fn, action_opts, behavior)
-  local tbl = {action_opts = action_opts, behavior = behavior, _kind = kind, _fn = fn}
+  local tbl = { action_opts = action_opts, behavior = behavior, _kind = kind, _fn = fn }
   return setmetatable(tbl, Action)
 end
 
@@ -29,7 +29,7 @@ Kind.jobs = jobs
 Kind.filelib = filelib
 
 function Kind.new(executor, name)
-  vim.validate({executor = {executor, "table"}, name = {name, "string"}})
+  vim.validate({ executor = { executor, "table" }, name = { name, "string" } })
 
   local origin, err = M._find(name)
   if err then
@@ -58,7 +58,13 @@ function Kind.new(executor, name)
     default_action = executor.default_action_name,
     source_name = source_name,
     opts = vim.tbl_deep_extend("force", base.opts, origin.opts or {}, user_opts, source_user_opts),
-    behaviors = vim.tbl_deep_extend("force", base.behaviors, origin.behaviors or {}, user_behaviors, source_user_behaviors),
+    behaviors = vim.tbl_deep_extend(
+      "force",
+      base.behaviors,
+      origin.behaviors or {},
+      user_behaviors,
+      source_user_behaviors
+    ),
     _origin = origin,
   }
   return setmetatable(tbl, Kind)
@@ -92,7 +98,7 @@ function Kind.find_action(self, action_name, action_opts)
 
   local key, name = self:_action_key(action_name)
   local opts = vim.tbl_extend("force", self.opts[name] or {}, action_opts)
-  local behavior = vim.tbl_deep_extend("force", {quit = true}, self.behaviors[name] or {})
+  local behavior = vim.tbl_deep_extend("force", { quit = true }, self.behaviors[name] or {})
 
   local source_action = config.source_actions[self.source_name]
   if source_action ~= nil and source_action[key] then
@@ -127,11 +133,17 @@ function Kind.action_names(self)
     return getmetatable(e)
   end, self._origin.extends or {})
   if vim.tbl_isempty(extends) then
-    extends = {{}}
+    extends = { {} }
   end
 
   local actions = vim.tbl_extend("force", self._origin, unpack(extends))
-  actions = vim.tbl_extend("force", actions, base, config.source_actions[self.source_name] or {}, config.kind_actions[self.name] or {})
+  actions = vim.tbl_extend(
+    "force",
+    actions,
+    base,
+    config.source_actions[self.source_name] or {},
+    config.kind_actions[self.name] or {}
+  )
   for key in pairs(actions) do
     if vim.startswith(key, Action.PREFIX) then
       local action_name = key:gsub("^" .. Action.PREFIX, "")
@@ -150,7 +162,7 @@ function M._find(name)
 end
 
 function M.extend(raw_kind, ...)
-  local extend_names = {...}
+  local extend_names = { ... }
   local extends = {}
   for _, name in ipairs(extend_names) do
     local extend, err = M._find(name)
@@ -158,7 +170,7 @@ function M.extend(raw_kind, ...)
       error(err)
     end
     extend.__index = extend
-    table.insert(extends, setmetatable({name = name}, extend))
+    table.insert(extends, setmetatable({ name = name }, extend))
   end
   raw_kind.extends = extends
 

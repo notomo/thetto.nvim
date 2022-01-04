@@ -4,8 +4,7 @@ function M.collect()
   return {}
 end
 
-function M.highlight(_, _, _, _)
-end
+function M.highlight(_, _, _, _) end
 
 function M.highlight_sign(self, bufnr, first_line, items)
   if #self.compiled_colors == 0 then
@@ -27,8 +26,8 @@ function M.highlight_sign(self, bufnr, first_line, items)
 end
 
 M.color_label_key = "value"
-M.colors = {{always = true, pattern = "", chunks = {{" ", "ThettoColorLabelOthers"}}}}
-M.filters = {"substring"}
+M.colors = { { always = true, pattern = "", chunks = { { " ", "ThettoColorLabelOthers" } } } }
+M.filters = { "substring" }
 M.sorters = {}
 M.kind_name = "base"
 M.opts = {}

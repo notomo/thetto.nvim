@@ -1,17 +1,16 @@
 local helper = require("thetto.lib.testlib.helper")
 
 describe("env/process source", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
   it("can execute kill", function()
-    local sleep1 = require("thetto.lib.job").new({"sleep", "8"}, {})
+    local sleep1 = require("thetto.lib.job").new({ "sleep", "8" }, {})
     sleep1:start()
-    local sleep2 = require("thetto.lib.job").new({"sleep", "9"}, {})
+    local sleep2 = require("thetto.lib.job").new({ "sleep", "9" }, {})
     sleep2:start()
 
-    helper.sync_open("env/process", {opts = {insert = false}})
+    helper.sync_open("env/process", { opts = { insert = false } })
     helper.search("sleep 8")
     helper.sync_execute("toggle_selection")
     helper.search("sleep 9")
@@ -25,5 +24,4 @@ describe("env/process source", function()
     assert.is_false(sleep1:is_running())
     assert.is_false(sleep2:is_running())
   end)
-
 end)

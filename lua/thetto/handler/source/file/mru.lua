@@ -3,7 +3,7 @@ local vim = vim
 
 local M = {}
 
-M.opts = {cwd_marker = "%s/"}
+M.opts = { cwd_marker = "%s/" }
 
 function M.collect(self, opts)
   local store, err = Store.new_or_get("file/mru")
@@ -37,7 +37,7 @@ function M.collect(self, opts)
   for _, path in ipairs(vim.tbl_filter(store:validator(), paths)) do
     local relative_path = to_relative(path)
     local value = relative_path:gsub(home, "~")
-    local item = {value = value, path = path}
+    local item = { value = value, path = path }
     if path ~= relative_path then
       item.value = cwd_marker .. relative_path
     end

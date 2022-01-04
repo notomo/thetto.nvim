@@ -1,7 +1,7 @@
 local M = {}
 
 function M.collect(_, opts)
-  local path = vim.fn.systemlist({"zsh", "-i", "-c", "echo ${HISTFILE}"})[1]
+  local path = vim.fn.systemlist({ "zsh", "-i", "-c", "echo ${HISTFILE}" })[1]
   if not path then
     return {}
   end
@@ -21,7 +21,7 @@ function M.collect(_, opts)
   end, cmds)
 
   return vim.tbl_map(function(cmd)
-    return {value = cmd, cwd = opts.cwd, shell = "zsh"}
+    return { value = cmd, cwd = opts.cwd, shell = "zsh" }
   end, cmds)
 end
 

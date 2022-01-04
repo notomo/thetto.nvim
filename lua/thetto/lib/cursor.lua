@@ -12,7 +12,7 @@ local get_row = function(row, bufnr)
 end
 
 function M.set_row(row, window_id, bufnr)
-  vim.api.nvim_win_set_cursor(window_id or 0, {get_row(row, bufnr), 0})
+  vim.api.nvim_win_set_cursor(window_id or 0, { get_row(row, bufnr), 0 })
 end
 
 return M

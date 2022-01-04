@@ -22,13 +22,13 @@ function M.collect(self, opts)
     "state=" .. self.opts.state,
   }
   if self.opts.milestone then
-    vim.list_extend(cmd, {"-F", "milestone=" .. self.opts.milestone})
+    vim.list_extend(cmd, { "-F", "milestone=" .. self.opts.milestone })
   end
   if #self.opts.labels > 0 then
-    vim.list_extend(cmd, {"-F", "labels=" .. table.concat(self.opts.labels, ",")})
+    vim.list_extend(cmd, { "-F", "labels=" .. table.concat(self.opts.labels, ",") })
   end
   if self.opts.assignee then
-    vim.list_extend(cmd, {"-F", "assignee=" .. self.opts.assignee})
+    vim.list_extend(cmd, { "-F", "assignee=" .. self.opts.assignee })
   end
 
   local job = self.jobs.new(cmd, {
@@ -38,7 +38,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local issues = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local issues = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, issue in ipairs(issues) do
         local mark
         if issue.state == "open" then
@@ -54,8 +54,8 @@ function M.collect(self, opts)
           value = issue.title,
           url = issue.html_url,
           desc = desc,
-          issue = {is_opened = issue.state == "open"},
-          column_offsets = {value = #mark + 1, at = #title + 1, by = #title + #at + 1},
+          issue = { is_opened = issue.state == "open" },
+          column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
         })
       end
       self:append(items)

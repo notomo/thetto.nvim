@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = { owner = ":owner", repo = ":repo" }
 
 function M.collect(self, opts)
   local cmd = {
@@ -19,7 +19,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local labels = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local labels = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, label in ipairs(labels) do
         local name = label.name
         local label_desc = label.description
@@ -30,8 +30,8 @@ function M.collect(self, opts)
         table.insert(items, {
           value = label.name,
           desc = desc,
-          label = {owner = self.opts.owner, repo = self.opts.repo},
-          column_offsets = {value = 0, description = #name + 1},
+          label = { owner = self.opts.owner, repo = self.opts.repo },
+          column_offsets = { value = 0, description = #name + 1 },
         })
       end
       self:append(items)

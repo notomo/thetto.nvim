@@ -20,13 +20,13 @@ function M.collect()
     end
 
     if type(var) == "string" then
-      var = "\"" .. var:gsub("\n", "\\n") .. "\""
+      var = '"' .. var:gsub("\n", "\\n") .. '"'
     elseif type(var) == "table" then
       var = vim.json.encode(var)
     end
 
     local value = ("%s=%s"):format(name, var)
-    table.insert(items, {value = value})
+    table.insert(items, { value = value })
   end
   return items
 end

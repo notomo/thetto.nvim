@@ -8,9 +8,9 @@ M.Sorter = Sorter
 
 function Sorter.new(name, reversed, key)
   vim.validate({
-    name = {name, "string"},
-    reversed = {reversed, "boolean"},
-    key = {key, "string", true},
+    name = { name, "string" },
+    reversed = { reversed, "boolean" },
+    key = { key, "string", true },
   })
 
   local origin = modulelib.find("thetto.handler.sorter." .. name)
@@ -18,7 +18,7 @@ function Sorter.new(name, reversed, key)
     return nil, "not found sorter: " .. name
   end
 
-  local tbl = {reversed = reversed, key = key or "value", short_name = name, _origin = origin}
+  local tbl = { reversed = reversed, key = key or "value", short_name = name, _origin = origin }
   return setmetatable(tbl, Sorter), nil
 end
 
@@ -73,7 +73,7 @@ function Sorters.new(names)
     table.insert(sorters, sorter)
   end
 
-  local tbl = {_sorters = sorters}
+  local tbl = { _sorters = sorters }
   return setmetatable(tbl, Sorters)
 end
 

@@ -2,7 +2,7 @@ local vim = vim
 
 local M = {}
 
-M.opts = {ignore = {}}
+M.opts = { ignore = {} }
 
 function M.collect(self, opts)
   local file_path = vim.api.nvim_buf_get_name(0)
@@ -10,7 +10,7 @@ function M.collect(self, opts)
     return {}, nil
   end
 
-  local cmd = {"ctags", "--output-format=xref", "-f", "-", file_path}
+  local cmd = { "ctags", "--output-format=xref", "-f", "-", file_path }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self)
       local items = {}
@@ -26,7 +26,7 @@ function M.collect(self, opts)
           value = value,
           path = path,
           row = tonumber(row),
-          column_offsets = {value = 0, line = #_desc, type = #value + 1},
+          column_offsets = { value = 0, line = #_desc, type = #value + 1 },
         })
         ::continue::
       end
@@ -52,6 +52,6 @@ end
 
 M.kind_name = "file"
 
-M.sorters = {"row"}
+M.sorters = { "row" }
 
 return M

@@ -1,32 +1,32 @@
 local M = {}
 
 M.opts = {
-  yank = {key = "value", register = "+"},
-  append = {key = "value", type = ""},
-  add_filter = {name = "substring"},
-  remove_filter = {name = nil},
-  change_filter = {name = nil},
-  reverse_sorter = {name = nil},
-  move_to_input = {behavior = "i"},
-  resume_previous = {wrap = true},
-  resume_next = {wrap = true},
+  yank = { key = "value", register = "+" },
+  append = { key = "value", type = "" },
+  add_filter = { name = "substring" },
+  remove_filter = { name = nil },
+  change_filter = { name = nil },
+  reverse_sorter = { name = nil },
+  move_to_input = { behavior = "i" },
+  resume_previous = { wrap = true },
+  resume_next = { wrap = true },
 }
 
 M.behaviors = {
-  move_to_input = {quit = false},
-  move_to_list = {quit = false},
-  debug_print = {quit = false},
-  toggle_selection = {quit = false},
-  toggle_all_selection = {quit = false},
-  add_filter = {quit = false},
-  remove_filter = {quit = false},
-  inverse_filter = {quit = false},
-  change_filter = {quit = false},
-  reverse_sorter = {quit = false},
-  toggle_sorter = {quit = false},
-  preview = {quit = false},
-  toggle_preview = {quit = false},
-  close_preview = {quit = false},
+  move_to_input = { quit = false },
+  move_to_list = { quit = false },
+  debug_print = { quit = false },
+  toggle_selection = { quit = false },
+  toggle_all_selection = { quit = false },
+  add_filter = { quit = false },
+  remove_filter = { quit = false },
+  inverse_filter = { quit = false },
+  change_filter = { quit = false },
+  reverse_sorter = { quit = false },
+  toggle_sorter = { quit = false },
+  preview = { quit = false },
+  toggle_preview = { quit = false },
+  close_preview = { quit = false },
 }
 
 function M.action_toggle_selection(_, items, ctx)
@@ -76,7 +76,7 @@ end
 
 function M.action_append(self, items)
   for _, item in ipairs(items) do
-    vim.api.nvim_put({item[self.action_opts.key]}, self.action_opts.type, true, true)
+    vim.api.nvim_put({ item[self.action_opts.key] }, self.action_opts.type, true, true)
   end
 end
 

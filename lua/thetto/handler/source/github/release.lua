@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = { owner = ":owner", repo = ":repo" }
 
 function M.collect(self, opts)
   local cmd = {
@@ -19,7 +19,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local releases = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local releases = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, release in ipairs(releases) do
         local mark
         if release.draft then
@@ -33,8 +33,8 @@ function M.collect(self, opts)
           value = release.name,
           url = release.html_url,
           desc = desc,
-          release = {is_draft = release.draft, tag_name = release.tag_name},
-          column_offsets = {value = #mark + 1, tag_name = #title + 1},
+          release = { is_draft = release.draft, tag_name = release.tag_name },
+          column_offsets = { value = #mark + 1, tag_name = #title + 1 },
         })
       end
       self:append(items)

@@ -15,7 +15,7 @@ Command.__index = Command
 M.Command = Command
 
 function Command.new(name, ...)
-  local args = {...}
+  local args = { ... }
   local f = function()
     return Command[name](unpack(args))
   end
@@ -30,7 +30,7 @@ function Command.new(name, ...)
 end
 
 function Command.start(source_name, args)
-  vim.validate({source_name = {source_name, "string"}, args = {args, "table", true}})
+  vim.validate({ source_name = { source_name, "string" }, args = { args, "table", true } })
 
   args = args or {}
   local source_opts = args.source_opts or {}
@@ -68,7 +68,7 @@ function Command.start(source_name, args)
   ui:scroll(opts.offset)
 
   if opts.immediately then
-    local _, exec_err = Command.execute(opts.action, {action_opts = action_opts})
+    local _, exec_err = Command.execute(opts.action, { action_opts = action_opts })
     if exec_err ~= nil then
       return exec_err
     end
@@ -78,7 +78,7 @@ function Command.start(source_name, args)
 end
 
 function Command.reload(bufnr)
-  vim.validate({bufnr = {bufnr, "number", true}})
+  vim.validate({ bufnr = { bufnr, "number", true } })
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
   local ctx = Context.get_from_path(bufnr)
@@ -152,7 +152,7 @@ function Command.resume_execute(args)
 end
 
 function Command.setup(config)
-  vim.validate({config = {config, "table"}})
+  vim.validate({ config = { config, "table" } })
   custom.set(config)
 end
 
@@ -165,7 +165,7 @@ function Command.setup_store(name, opts)
 end
 
 function Command.add_to_store(name, ...)
-  vim.validate({name = {name, "string"}})
+  vim.validate({ name = { name, "string" } })
   local store, err = Store.get(name)
   if err ~= nil then
     return nil, err
@@ -174,7 +174,7 @@ function Command.add_to_store(name, ...)
 end
 
 function Command.save_to_store(name, ...)
-  vim.validate({name = {name, "string"}})
+  vim.validate({ name = { name, "string" } })
   local store, err = Store.get(name)
   if err ~= nil then
     return nil, err

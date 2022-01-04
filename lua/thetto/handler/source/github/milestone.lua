@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = { owner = ":owner", repo = ":repo" }
 
 function M.collect(self, opts)
   local cmd = {
@@ -21,7 +21,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local milestones = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local milestones = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, milestone in ipairs(milestones) do
         local mark
         if milestone.state == "open" then
@@ -50,7 +50,7 @@ function M.collect(self, opts)
             owner = self.opts.owner,
             repo = self.opts.repo,
           },
-          column_offsets = {value = #mark + 1, description = #mark + #milestone_title + 1},
+          column_offsets = { value = #mark + 1, description = #mark + #milestone_title + 1 },
         })
       end
       self:append(items)

@@ -4,7 +4,7 @@ local M = {}
 
 local Target = {}
 
-M.project_root_patterns = {".git"}
+M.project_root_patterns = { ".git" }
 
 function Target.project(target_patterns)
   local patterns = M.project_root_patterns

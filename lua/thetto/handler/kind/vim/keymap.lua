@@ -21,7 +21,7 @@ local to_files = function(self, items)
     for _, output in ipairs(outputs) do
       local path = output:match("^%s+Last%s+set%s+from%s+(%S+)")
       if path ~= nil and self.filelib.readable(vim.fn.expand(path)) then
-        table.insert(files, {path = path, row = item.keymap.row})
+        table.insert(files, { path = path, row = item.keymap.row })
         break
       end
     end

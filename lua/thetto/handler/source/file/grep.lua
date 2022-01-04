@@ -3,7 +3,7 @@ local M = {}
 M.opts = {
   command = "grep",
   pattern_opt = "-e",
-  command_opts = {"-inH"},
+  command_opts = { "-inH" },
   recursive_opt = "-r",
   separator = "--",
 }
@@ -21,7 +21,7 @@ function M.collect(self, opts)
   end
 
   local paths = opts.cwd
-  local cmd = vim.list_extend({self.opts.command}, self.opts.command_opts)
+  local cmd = vim.list_extend({ self.opts.command }, self.opts.command_opts)
   for _, x in ipairs({
     self.opts.recursive_opt,
     self.opts.pattern_opt,
@@ -57,11 +57,11 @@ function M.collect(self, opts)
         value = matched_line,
         path = path,
         row = row,
-        column_offsets = {["path:relative"] = 0, value = #label + 1},
+        column_offsets = { ["path:relative"] = 0, value = #label + 1 },
       })
       ::continue::
     end
-    self:append(items, {pattern = pattern})
+    self:append(items, { pattern = pattern })
     items = {}
   end)
 
@@ -70,8 +70,7 @@ function M.collect(self, opts)
       local outputs = job_self.parse_output(data)
       item_appender(job_self, outputs)
     end,
-    on_exit = function(_)
-    end,
+    on_exit = function(_) end,
     stdout_buffered = false,
     stderr_buffered = false,
     cwd = opts.cwd,
@@ -89,7 +88,7 @@ local highlight_target = vim.regex("\\v[[:alnum:]_]+")
 function M.highlight(self, bufnr, first_line, items)
   local highlighter = self.highlights:create(bufnr)
   local pattern = (self.ctx.pattern or ""):lower()
-  local ok = ({highlight_target:match_str(pattern)})[1] ~= nil
+  local ok = ({ highlight_target:match_str(pattern) })[1] ~= nil
   for i, item in ipairs(items) do
     highlighter:add("ThettoFileGrepPath", first_line + i - 1, 0, item.column_offsets.value - 1)
     if ok then
@@ -97,7 +96,12 @@ function M.highlight(self, bufnr, first_line, items)
       -- NOTICE: support only the first occurrence
       local s, e = (item.value:lower()):find(pattern, 1, true)
       if s ~= nil then
-        highlighter:add("ThettoFileGrepMatch", first_line + i - 1, item.column_offsets.value + s - 1, item.column_offsets.value + e)
+        highlighter:add(
+          "ThettoFileGrepMatch",
+          first_line + i - 1,
+          item.column_offsets.value + s - 1,
+          item.column_offsets.value + e
+        )
       end
     end
   end

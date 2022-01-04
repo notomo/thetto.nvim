@@ -35,26 +35,30 @@ function ItemList.new(source_name, width, height, row, column)
     external = false,
     style = "minimal",
     border = {
-      {" ", "NormalFloat"},
-      {border_char, M._ThettoAboveBorder()},
-      {" ", "NormalFloat"},
-      {" ", "NormalFloat"},
-      {"", "NormalFloat"},
-      {"", "NormalFloat"},
-      {" ", "NormalFloat"},
-      {" ", "NormalFloat"},
+      { " ", "NormalFloat" },
+      { border_char, M._ThettoAboveBorder() },
+      { " ", "NormalFloat" },
+      { " ", "NormalFloat" },
+      { "", "NormalFloat" },
+      { "", "NormalFloat" },
+      { " ", "NormalFloat" },
+      { " ", "NormalFloat" },
     },
   })
 
   local group_name = "theto_closed_" .. bufnr
   vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = ("autocmd %s WinClosed * lua require('thetto.view.item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"):format(group_name, source_name)
+  local on_win_closed = (
+    "autocmd %s WinClosed * lua require('thetto.view.item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"
+  ):format(group_name, source_name)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
-  vim.cmd(("autocmd BufReadCmd <buffer=%s> lua require('thetto.command').Command.new('reload', %s)"):format(bufnr, bufnr))
+  vim.cmd(
+    ("autocmd BufReadCmd <buffer=%s> lua require('thetto.command').Command.new('reload', %s)"):format(bufnr, bufnr)
+  )
 
-  local tbl = {_bufnr = bufnr, _window = window}
+  local tbl = { _bufnr = bufnr, _window = window }
   return setmetatable(tbl, ItemList)
 end
 
@@ -68,7 +72,7 @@ function ItemList.redraw(self, items)
   vim.bo[self._bufnr].modifiable = false
 
   if vim.api.nvim_win_is_valid(self._window) and vim.api.nvim_get_current_buf() ~= self._bufnr then
-    vim.api.nvim_win_set_cursor(self._window, {1, 0})
+    vim.api.nvim_win_set_cursor(self._window, { 1, 0 })
   end
 end
 
@@ -111,7 +115,10 @@ function ItemList.is_active(self)
 end
 
 function ItemList.enable_on_moved(self, source_name)
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto.view.item_list')._on_moved('%s')"):format(self._bufnr, source_name)
+  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto.view.item_list')._on_moved('%s')"):format(
+    self._bufnr,
+    source_name
+  )
   vim.cmd(on_moved)
 
   local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self._bufnr)
@@ -138,7 +145,7 @@ end
 
 function ItemList.position(self)
   local config = vim.api.nvim_win_get_config(self._window)
-  return {height = config.height + 1, row = config.row}
+  return { height = config.height + 1, row = config.row }
 end
 
 function ItemList.cursor(self)
@@ -173,10 +180,10 @@ end
 
 M._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl_group)
   return highlightlib.default(hl_group, {
-    ctermbg = {"NormalFloat", 235},
-    guibg = {"NormalFloat", "#213243"},
-    ctermfg = {"Comment", 103},
-    guifg = {"Comment", "#8d9eb2"},
+    ctermbg = { "NormalFloat", 235 },
+    guibg = { "NormalFloat", "#213243" },
+    ctermfg = { "Comment", 103 },
+    guifg = { "Comment", "#8d9eb2" },
   })
 end)
 

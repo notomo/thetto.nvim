@@ -39,9 +39,9 @@ function M._to_items(self, patterns, path)
     local abs_path = format_pattern:format(unpack(matches))
     local value = abs_path:gsub(home, "~")
     if self.filelib.readable(abs_path) then
-      table.insert(items, {value = value, path = abs_path})
+      table.insert(items, { value = value, path = abs_path })
     elseif self.opts.allow_new then
-      table.insert(items, {value = value, path = abs_path, kind_name = "file/new"})
+      table.insert(items, { value = value, path = abs_path, kind_name = "file/new" })
     end
 
     ::continue::
@@ -80,7 +80,7 @@ function M._match(pattern, path)
   return matches
 end
 
-M.opts = {pattern_groups = {}, allow_new = false}
+M.opts = { pattern_groups = {}, allow_new = false }
 
 M.kind_name = "file"
 

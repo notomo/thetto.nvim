@@ -13,7 +13,7 @@ function M.collect()
   local items = {}
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
   for i, line in ipairs(lines) do
-    table.insert(items, {value = line, row = i, kind_name = kind_name, path = path, bufnr = bufnr})
+    table.insert(items, { value = line, row = i, kind_name = kind_name, path = path, bufnr = bufnr })
   end
   return items
 end

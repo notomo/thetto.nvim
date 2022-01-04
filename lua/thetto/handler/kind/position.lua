@@ -4,7 +4,7 @@ local goto_item_pos = function(item)
   if item.bufnr then
     vim.cmd("buffer " .. item.bufnr)
   end
-  vim.api.nvim_win_set_cursor(0, {item.row, item.column or 0})
+  vim.api.nvim_win_set_cursor(0, { item.row, item.column or 0 })
 end
 
 function M.action_open(_, items)
@@ -32,7 +32,7 @@ function M.action_preview(_, items, ctx)
   if item == nil then
     return
   end
-  ctx.ui:open_preview(item, {bufnr = item.bufnr, row = item.row})
+  ctx.ui:open_preview(item, { bufnr = item.bufnr, row = item.row })
 end
 
 M.default_action = "open"

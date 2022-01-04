@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {merged = false}
+M.opts = { merged = false }
 
 function M.collect(self, opts)
   local _, err = self.filelib.find_git_root()
@@ -8,7 +8,7 @@ function M.collect(self, opts)
     return {}, nil, err
   end
 
-  local cmd = {"git", "tag", "-l"}
+  local cmd = { "git", "tag", "-l" }
   if self.opts.merged then
     table.insert(cmd, "--merged")
   end
@@ -17,7 +17,7 @@ function M.collect(self, opts)
     on_exit = function(job_self)
       local items = {}
       for _, output in ipairs(job_self:get_stdout()) do
-        table.insert(items, {value = output})
+        table.insert(items, { value = output })
       end
       self:append(items)
     end,

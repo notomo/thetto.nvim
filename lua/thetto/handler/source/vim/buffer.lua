@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {buftype = nil}
+M.opts = { buftype = nil }
 
 function M.collect(self)
   local items = {}
@@ -32,7 +32,7 @@ function M.collect(self)
       desc = desc,
       value = name,
       bufnr = bufnr,
-      column_offsets = {value = #_desc},
+      column_offsets = { value = #_desc },
     })
     ::continue::
   end

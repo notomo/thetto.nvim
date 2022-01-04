@@ -9,10 +9,10 @@ M.Executor = Executor
 
 function Executor.new(source_name, default_kind_name, default_action_opts, default_action_name)
   vim.validate({
-    source_name = {source_name, "string"},
-    default_kind_name = {default_kind_name, "string"},
-    default_action_opts = {default_action_opts, "table"},
-    default_action_name = {default_action_name, "string", true},
+    source_name = { source_name, "string" },
+    default_kind_name = { default_kind_name, "string" },
+    default_action_opts = { default_action_opts, "table" },
+    default_action_name = { default_action_name, "string", true },
   })
   local tbl = {
     source_name = source_name,
@@ -48,15 +48,16 @@ function Executor._action(self, action_name, kind_name, items, action_opts)
       ctx.ui:close()
     end
     return action:execute(items, ctx)
-  end, nil
+  end,
+    nil
 end
 
 function Executor.action(self, items, ctx, action_name, action_opts)
   vim.validate({
-    items = {items, "table"},
-    ctx = {ctx, "table"},
-    action_name = {action_name, "string"},
-    action_opts = {action_opts, "table", true},
+    items = { items, "table" },
+    ctx = { ctx, "table" },
+    action_name = { action_name, "string" },
+    action_opts = { action_opts, "table", true },
   })
 
   local item_kind_pairs = {}
@@ -66,10 +67,10 @@ function Executor.action(self, items, ctx, action_name, action_opts)
     if err ~= nil then
       return nil, err
     end
-    table.insert(item_kind_pairs, {item, kind:action_kind_name(action_name)})
+    table.insert(item_kind_pairs, { item, kind:action_kind_name(action_name) })
   end
   if #item_kind_pairs == 0 then
-    table.insert(item_kind_pairs, {{}, "base"})
+    table.insert(item_kind_pairs, { {}, "base" })
   end
 
   local groups = listlib.group_by(item_kind_pairs, function(pair)
@@ -109,7 +110,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
     return nil, action_err
   end
 
-  local errs = {action_err}
+  local errs = { action_err }
   for _, action_name in ipairs(fallback_action_names or {}) do
     local result, err = self:action(items, ctx, action_name, action_opts)
     if not err then
@@ -124,11 +125,10 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
 end
 
 function Executor.auto(self, ctx, action_name)
-  vim.validate({action_name = {action_name, "string", true}})
+  vim.validate({ action_name = { action_name, "string", true } })
 
   if action_name == nil then
-    return function()
-    end
+    return function() end
   end
 
   return function(items)

@@ -51,7 +51,7 @@ function M.collect(_)
     local value = table.concat(factors, " ")
     table.insert(items, {
       value = value,
-      keymap = {mode = mode, lhs = lhs, rhs = rhs, row = keymap.lnum},
+      keymap = { mode = mode, lhs = lhs, rhs = rhs, row = keymap.lnum },
     })
   end
   return items

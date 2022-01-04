@@ -67,7 +67,7 @@ function M.highlight(self, bufnr, first_line, items, input_line, opts)
     for _, regex in ipairs(regexes) do
       local s, e = regex:match_str(value)
       if s ~= nil and e - s > 0 then
-        table.insert(positions, {s, e})
+        table.insert(positions, { s, e })
       end
     end
 

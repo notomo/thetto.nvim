@@ -38,15 +38,15 @@ end
 
 function SourceResult.new(name, all_items, job, empty_is_err)
   vim.validate({
-    name = {name, "string"},
-    all_items = {all_items, "table", true},
-    job = {job, "table", true},
-    empty_is_err = {empty_is_err, "boolean", true},
+    name = { name, "string" },
+    all_items = { all_items, "table", true },
+    job = { job, "table", true },
+    empty_is_err = { empty_is_err, "boolean", true },
   })
   all_items = all_items or {}
 
   if job ~= nil then
-    local tbl = {_job = job, _all_items = {}}
+    local tbl = { _job = job, _all_items = {} }
     return setmetatable(tbl, SourcePendingResult)
   end
 
@@ -57,7 +57,7 @@ function SourceResult.new(name, all_items, job, empty_is_err)
   for i, item in ipairs(all_items) do
     item.index = i
   end
-  local tbl = {_all_items = all_items}
+  local tbl = { _all_items = all_items }
   return setmetatable(tbl, SourceResult)
 end
 
@@ -65,15 +65,13 @@ function SourceResult.start(_)
   return nil
 end
 
-function SourceResult.stop(_)
-end
+function SourceResult.stop(_) end
 
 function SourceResult.wait(_)
   return true
 end
 
-function SourceResult.discard(_)
-end
+function SourceResult.discard(_) end
 
 function SourceResult.finished(_)
   return true

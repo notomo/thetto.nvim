@@ -26,7 +26,7 @@ function M.collect(_, opts)
     else
       value = vim.fn.fnamemodify(path, ":t")
     end
-    table.insert(items, {value = value, path = path, kind_name = kind_name})
+    table.insert(items, { value = value, path = path, kind_name = kind_name })
   end
   return items
 end

@@ -20,7 +20,7 @@ function M.group_by(list, make_key)
     if key == prev then
       table.insert(groups[#groups][2], element)
     else
-      table.insert(groups, {key, {element}})
+      table.insert(groups, { key, { element } })
     end
     prev = key
   end

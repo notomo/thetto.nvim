@@ -26,7 +26,7 @@ function M.parse_with_row(line)
 end
 
 function M.join(...)
-  return table.concat({...}, "/")
+  return table.concat({ ... }, "/")
 end
 
 function M.find_root(pattern)

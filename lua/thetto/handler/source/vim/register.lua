@@ -2,7 +2,7 @@ local M = {}
 
 -- :help registers
 local names = {
-  "\"",
+  '"',
   "0",
   "1",
   "2",
@@ -59,7 +59,7 @@ function M.collect()
       goto continue
     end
     local value = ("%s %s"):format(name, register:gsub("\n", "\\n"))
-    table.insert(items, {value = value})
+    table.insert(items, { value = value })
     ::continue::
   end
   return items

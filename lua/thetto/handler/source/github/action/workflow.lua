@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {owner = ":owner", repo = ":repo"}
+M.opts = { owner = ":owner", repo = ":repo" }
 
 function M.collect(self, opts)
   local cmd = {
@@ -19,7 +19,7 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local data = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local data = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, workflow in ipairs(data.workflows or {}) do
         local mark
         if workflow.state == "active" then
@@ -37,7 +37,7 @@ function M.collect(self, opts)
             is_active = workflow.state == "active",
             file_name = vim.fn.fnamemodify(workflow.path, ":t"),
           },
-          column_offsets = {value = #mark + 1},
+          column_offsets = { value = #mark + 1 },
         })
       end
       self:append(items)

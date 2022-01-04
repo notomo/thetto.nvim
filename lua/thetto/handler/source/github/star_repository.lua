@@ -1,7 +1,7 @@
 local M = {}
 
 function M.collect(self, opts)
-  local cmd = {"gh", "api", "-X", "GET", "user/starred", "-F", "per_page=100"}
+  local cmd = { "gh", "api", "-X", "GET", "user/starred", "-F", "per_page=100" }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self, code)
       if code ~= 0 then
@@ -9,12 +9,12 @@ function M.collect(self, opts)
       end
 
       local items = {}
-      local repos = vim.json.decode(job_self:get_joined_stdout(), {luanil = {object = true}})
+      local repos = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
       for _, repo in ipairs(repos) do
         table.insert(items, {
           value = repo.full_name,
           url = repo.html_url,
-          repo = {owner = repo.owner.login, name = repo.name},
+          repo = { owner = repo.owner.login, name = repo.name },
         })
       end
       self:append(items)

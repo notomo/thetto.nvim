@@ -18,8 +18,8 @@ local adjust_cursor = function(item)
   if item.row > count then
     row = count
   end
-  local range = item.range or {s = {column = 0}}
-  vim.api.nvim_win_set_cursor(0, {row, range.s.column})
+  local range = item.range or { s = { column = 0 } }
+  vim.api.nvim_win_set_cursor(0, { row, range.s.column })
 end
 
 local get_bufnr = function(item)
@@ -83,9 +83,9 @@ function M.action_preview(_, items, ctx)
   end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
-    ctx.ui:open_preview(item, {bufnr = bufnr, row = item.row, range = item.range})
+    ctx.ui:open_preview(item, { bufnr = bufnr, row = item.row, range = item.range })
   else
-    ctx.ui:open_preview(item, {path = item.path, row = item.row, range = item.range})
+    ctx.ui:open_preview(item, { path = item.path, row = item.row, range = item.range })
   end
 end
 
@@ -115,7 +115,7 @@ function M.action_directory_enter(_, items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h")
-  require("thetto").start("file/in_dir", {opts = {cwd = path}})
+  require("thetto").start("file/in_dir", { opts = { cwd = path } })
 end
 
 M.action_list_siblings = M.action_directory_enter

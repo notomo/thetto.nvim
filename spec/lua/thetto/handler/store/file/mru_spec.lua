@@ -3,7 +3,6 @@ local thetto = helper.require("thetto")
 local store = helper.require("thetto.core.store")
 
 describe("file/mru store", function()
-
   local store_file_path
   before_each(function()
     helper.before_each()
@@ -20,7 +19,7 @@ describe("file/mru store", function()
     helper.new_file("file1")
     helper.new_file("file2")
 
-    thetto.setup_store("file/mru", {file_path = store_file_path})
+    thetto.setup_store("file/mru", { file_path = store_file_path })
     vim.cmd("edit file1")
     vim.cmd("edit file2")
 
@@ -35,5 +34,4 @@ describe("file/mru store", function()
     local content = vim.fn.split(f:read("*a"), "\n", false)
     assert.is_same(vim.fn.reverse(data), content)
   end)
-
 end)

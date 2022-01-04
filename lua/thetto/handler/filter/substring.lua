@@ -63,7 +63,7 @@ function M.highlight(self, bufnr, first_line, items, input_line, opts)
       repeat
         s, e = value:find(text, e + 1, true)
         if s ~= nil then
-          table.insert(positions, {s, e})
+          table.insert(positions, { s, e })
         end
       until s == nil
     end

@@ -6,13 +6,13 @@ function M.collect(self, opts)
     return {}, nil
   end
 
-  local cmd = {"gron", "--monochrome", file_path}
+  local cmd = { "gron", "--monochrome", file_path }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self)
       local items = {}
       for _, output in ipairs(job_self:get_stdout()) do
         local pattern = M._to_pattern(output)
-        table.insert(items, {value = output, path = file_path, pattern = pattern})
+        table.insert(items, { value = output, path = file_path, pattern = pattern })
       end
       self:append(items)
     end,
@@ -29,14 +29,14 @@ M.indent = 2
 function M._to_pattern(text)
   local e = text:find(" = ")
 
-  local key_text = text:sub(#("json") + 1, e - 1)
+  local key_text = text:sub(#"json" + 1, e - 1)
   local tmp_key1, index_count = key_text:gsub("%[%d+%]", "")
   -- NOTICE: not supported quoted key
   local tmp_key2, dot_count1 = tmp_key1:gsub("[^.]+%.", "")
   local key, dot_count2 = tmp_key2:gsub("%.", "")
   local depth = index_count + dot_count1 + dot_count2
 
-  local value = text:sub(e + #(" = "), -2)
+  local value = text:sub(e + #" = ", -2)
   if value == "[]" then
     value = "["
   elseif value == "{}" then

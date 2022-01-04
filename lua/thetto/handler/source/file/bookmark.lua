@@ -1,6 +1,6 @@
 local M = {}
 
-M.opts = {file_path = nil, default_paths = {}}
+M.opts = { file_path = nil, default_paths = {} }
 
 function M.collect(self)
   local file_path = self.opts.file_path or self.pathlib.user_data_path("file_bookmark.txt")
@@ -13,7 +13,7 @@ function M.collect(self)
   end
 
   local f = io.open(file_path, "r")
-  local lines = {file_path}
+  local lines = { file_path }
   for line in f:lines() do
     table.insert(lines, line)
   end
@@ -31,7 +31,7 @@ function M.collect(self)
     if vim.fn.isdirectory(path) ~= 0 then
       kind_name = "file/directory"
     end
-    table.insert(items, {value = path, path = path, kind_name = kind_name})
+    table.insert(items, { value = path, path = path, kind_name = kind_name })
   end
 
   return items

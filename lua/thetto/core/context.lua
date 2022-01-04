@@ -19,7 +19,7 @@ function Context.new(source_name, collector, ui, executor)
 end
 
 function Context.get(source_name)
-  vim.validate({source_name = {source_name, "string", true}})
+  vim.validate({ source_name = { source_name, "string", true } })
 
   if not source_name then
     return nil, "no source_name"
@@ -33,7 +33,7 @@ function Context.get(source_name)
 end
 
 function Context.get_from_path(bufnr, pattern)
-  vim.validate({bufnr = {bufnr, "number", true}, pattern = {pattern, "string", true}})
+  vim.validate({ bufnr = { bufnr, "number", true }, pattern = { pattern, "string", true } })
   bufnr = bufnr or 0
   pattern = pattern or ""
 

@@ -5,7 +5,7 @@ local M = {}
 function M.collect()
   local items = {}
   for source_name in Context.all() do
-    table.insert(items, {value = source_name})
+    table.insert(items, { value = source_name })
   end
   return items
 end

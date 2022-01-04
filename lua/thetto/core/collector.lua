@@ -47,17 +47,15 @@ function Collector.new(source_name, source_opts, opts)
     return self:update()
   end)
 
-  self._send_redraw_event = function()
-  end
+  self._send_redraw_event = function() end
 
-  self._send_redraw_selection_event = function()
-  end
+  self._send_redraw_selection_event = function() end
 
   return self, nil
 end
 
 function Collector.attach(self, input_bufnr)
-  vim.validate({input_bufnr = {input_bufnr, "number"}})
+  vim.validate({ input_bufnr = { input_bufnr, "number" } })
   local on_input = function()
     if vim.api.nvim_buf_is_valid(input_bufnr) then
       self.input_lines = vim.api.nvim_buf_get_lines(input_bufnr, 0, -1, true)
@@ -68,7 +66,7 @@ function Collector.attach(self, input_bufnr)
 end
 
 function Collector.attach_ui(self, ui)
-  vim.validate({ui = {ui, "table"}})
+  vim.validate({ ui = { ui, "table" } })
   self._send_redraw_event = function(_, input_lines)
     return ui:redraw(input_lines)
   end

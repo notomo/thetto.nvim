@@ -2,7 +2,6 @@ local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("vim/highlight_group source", function()
-
   before_each(helper.before_each)
   before_each(function()
     helper.before_each()
@@ -19,7 +18,7 @@ describe("vim/highlight_group source", function()
 
   it("can show highlight groups", function()
     thetto.start("vim/highlight_group")
-    helper.sync_input({"ThettoTest"})
+    helper.sync_input({ "ThettoTest" })
 
     thetto.execute("move_to_list")
 
@@ -29,7 +28,7 @@ describe("vim/highlight_group source", function()
 
   it("can clear highlight group", function()
     thetto.start("vim/highlight_group")
-    helper.sync_input({"ThettoTest"})
+    helper.sync_input({ "ThettoTest" })
 
     thetto.execute("move_to_list")
     helper.search("ThettoTestDef")
@@ -37,8 +36,7 @@ describe("vim/highlight_group source", function()
     thetto.execute("delete")
 
     thetto.start("vim/highlight_group")
-    helper.sync_input({"ThettoTest"})
+    helper.sync_input({ "ThettoTest" })
     assert.no.exists_pattern("ThettoTestDef")
   end)
-
 end)

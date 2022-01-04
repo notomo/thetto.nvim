@@ -7,17 +7,17 @@ local to_hunks = function(lines)
   local searching_in_hunk = false
   for i, line in ipairs(lines) do
     if vim.startswith(line, "--- a/") then
-      path = line:sub(#("--- a/") + 1)
+      path = line:sub(#"--- a/" + 1)
       searching_in_hunk = false
     elseif vim.startswith(line, "@@") then
       local first_row = line:match("@@ %-%d+,%d+ %+(%d+),")
-      hunk = {desc = line, _first_row = first_row, _start = i + 1, minus = 0, path = path}
+      hunk = { desc = line, _first_row = first_row, _start = i + 1, minus = 0, path = path }
       searching_in_hunk = true
     elseif searching_in_hunk and vim.startswith(line, "+") then
       local row_diff = i - hunk._start - hunk.minus
       local row = hunk._first_row + row_diff
       local desc = ("%s:%d  %s"):format(hunk.path, row, hunk.desc)
-      table.insert(hunks, {row = row, desc = desc, path = hunk.path})
+      table.insert(hunks, { row = row, desc = desc, path = hunk.path })
       searching_in_hunk = false
     elseif searching_in_hunk and vim.startswith(line, "-") then
       hunk.minus = hunk.minus + 1
@@ -29,7 +29,7 @@ local to_hunks = function(lines)
   return hunks
 end
 
-M.opts = {expr = nil}
+M.opts = { expr = nil }
 
 function M.collect(self, opts)
   local git_root, err = self.filelib.find_git_root()
@@ -42,7 +42,7 @@ function M.collect(self, opts)
     path = vim.fn.expand(self.opts.expr)
   end
 
-  local cmd = {"git", "--no-pager", "diff", "--no-color", path}
+  local cmd = { "git", "--no-pager", "diff", "--no-color", path }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self)
       local items = {}

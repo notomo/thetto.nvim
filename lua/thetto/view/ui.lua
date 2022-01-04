@@ -15,12 +15,12 @@ UI.__index = UI
 M.UI = UI
 
 function UI.new(collector)
-  local tbl = {_collector = collector, _state = State.new(collector.opts.insert)}
+  local tbl = { _collector = collector, _state = State.new(collector.opts.insert) }
   return setmetatable(tbl, UI)
 end
 
 function UI.open(self, on_move)
-  vim.validate({on_move = {on_move, "function", true}})
+  vim.validate({ on_move = { on_move, "function", true } })
 
   for bufnr in bufferlib.in_tabpage(0) do
     local ctx = Context.get_from_path(bufnr)
@@ -44,8 +44,7 @@ function UI.open(self, on_move)
 
   self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
-  self._on_move = on_move or function()
-  end
+  self._on_move = on_move or function() end
 
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)
@@ -75,7 +74,7 @@ end
 
 local ns = vim.api.nvim_create_namespace("thetto-list-highlight")
 vim.api.nvim_set_decoration_provider(ns, {})
-vim.api.nvim_set_decoration_provider(ns, {on_win = UI._highlight_win})
+vim.api.nvim_set_decoration_provider(ns, { on_win = UI._highlight_win })
 
 function UI.highlight(self, first_line, last_line)
   local collector_items = self._collector.items:values()
@@ -192,7 +191,7 @@ function UI.selected_items(self, action_name, range)
   else
     index = self._state.row
   end
-  return {self._collector.items[index]}
+  return { self._collector.items[index] }
 end
 
 function UI.open_preview(self, item, open_target)
@@ -252,8 +251,7 @@ function UI._column(self)
 end
 
 -- for testing
-function M._changed_after(_)
-end
+function M._changed_after(_) end
 
 vim.cmd("highlight default link ThettoSelected Statement")
 vim.cmd("highlight default link ThettoInfo StatusLine")

@@ -32,7 +32,7 @@ function M.action_preview(self, items, ctx)
   ctx.ui:open_preview(preview_item, {
     lines = lines,
     execute = function()
-      M.action_execute(self, {preview_item})
+      M.action_execute(self, { preview_item })
     end,
   })
 end

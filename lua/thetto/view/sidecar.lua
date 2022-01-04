@@ -10,7 +10,7 @@ Sidecar.__index = Sidecar
 M.Sidecar = Sidecar
 
 function Sidecar.new()
-  local tbl = {_window = nil, _hl_factory = HighlighterFactory.new("thetto-preview")}
+  local tbl = { _window = nil, _hl_factory = HighlighterFactory.new("thetto-preview") }
   return setmetatable(tbl, Sidecar)
 end
 
@@ -54,14 +54,14 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
       external = false,
       style = "minimal",
       border = {
-        {"", "ThettoInput"},
-        {"", "ThettoInput"},
-        {" ", "ThettoInput"},
-        {" ", "ThettoInput"},
-        {"", "ThettoInput"},
-        {"", "ThettoInput"},
-        {" ", "ThettoInput"},
-        {" ", "ThettoInput"},
+        { "", "ThettoInput" },
+        { "", "ThettoInput" },
+        { " ", "ThettoInput" },
+        { " ", "ThettoInput" },
+        { "", "ThettoInput" },
+        { "", "ThettoInput" },
+        { " ", "ThettoInput" },
+        { " ", "ThettoInput" },
       },
     })
   else
@@ -83,10 +83,10 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
 
   if row ~= nil then
     local highlighter = self._hl_factory:create(bufnr)
-    local range = open_target.range or {s = {column = 0}, e = {column = -1}}
+    local range = open_target.range or { s = { column = 0 }, e = { column = -1 } }
     highlighter:add_normal("ThettoPreview", row - 1, range.s.column, range.e.column)
     if vim.fn.getbufline(bufnr, row)[1] == "" then
-      highlighter:set_virtual_text(row - 1, {{" ", "ThettoPreview"}}, {virt_text_pos = "overlay"})
+      highlighter:set_virtual_text(row - 1, { { " ", "ThettoPreview" } }, { virt_text_pos = "overlay" })
     end
   end
 end

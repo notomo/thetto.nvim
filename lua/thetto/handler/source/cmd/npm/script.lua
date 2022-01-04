@@ -12,7 +12,7 @@ function M._load(self, path)
 
   local items = {}
   for key in pairs(content.scripts) do
-    table.insert(items, {value = key, path = path})
+    table.insert(items, { value = key, path = path })
   end
 
   return items

@@ -1,7 +1,6 @@
 local M = {}
 
-function M.after(_)
-end
+function M.after(_) end
 
 function M.action_cd(self, items)
   for _, item in ipairs(items) do
@@ -31,7 +30,7 @@ function M.action_enter(_, items)
   if item == nil then
     return
   end
-  require("thetto").start("file/in_dir", {opts = {cwd = item.path}})
+  require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
 end
 
 M.action_open = M.action_cd

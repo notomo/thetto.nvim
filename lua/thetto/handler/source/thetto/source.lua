@@ -5,7 +5,7 @@ local M = {}
 function M.collect()
   local items = {}
   for _, name in ipairs(Source.all_names()) do
-    table.insert(items, {value = name})
+    table.insert(items, { value = name })
   end
   return items
 end

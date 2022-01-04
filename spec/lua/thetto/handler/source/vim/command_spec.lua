@@ -2,7 +2,6 @@ local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("vim/command source", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -11,7 +10,7 @@ describe("vim/command source", function()
 
     thetto.start("vim/command")
 
-    helper.sync_input({"ThettoTest"})
+    helper.sync_input({ "ThettoTest" })
     thetto.execute("move_to_list")
 
     assert.exists_pattern("ThettoTest")
@@ -22,12 +21,11 @@ describe("vim/command source", function()
 
     thetto.start("vim/command")
 
-    helper.sync_input({"HogeFoo"})
+    helper.sync_input({ "HogeFoo" })
     thetto.execute("move_to_list")
 
     assert.current_line("HogeFoo echomsg 'executed vim/command'")
 
     thetto.execute()
   end)
-
 end)

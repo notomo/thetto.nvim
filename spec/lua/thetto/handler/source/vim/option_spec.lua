@@ -2,7 +2,6 @@ local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("vim/option source", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -10,7 +9,7 @@ describe("vim/option source", function()
     vim.cmd("setlocal buftype=nofile")
 
     thetto.start("vim/option")
-    helper.sync_input({"buftype"})
+    helper.sync_input({ "buftype" })
 
     thetto.execute("move_to_list")
     assert.current_line("buftype=nofile")
@@ -20,7 +19,7 @@ describe("vim/option source", function()
     vim.cmd("setlocal wrap")
 
     thetto.start("vim/option")
-    helper.sync_input({"wrap"})
+    helper.sync_input({ "wrap" })
 
     thetto.execute("move_to_list")
     helper.search("^wrap=")
@@ -28,5 +27,4 @@ describe("vim/option source", function()
     thetto.execute("toggle")
     assert.is_false(vim.wo.wrap)
   end)
-
 end)

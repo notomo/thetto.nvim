@@ -1,10 +1,10 @@
 local M = {}
 
-M.opts = {max_depth = 100}
+M.opts = { max_depth = 100 }
 
 if vim.fn.has("win32") == 1 then
   M.opts.get_command = function(path, _)
-    return {"cmd.exe", "/C", "dir", "/AD", "/B", "/S", path}
+    return { "cmd.exe", "/C", "dir", "/AD", "/B", "/S", path }
   end
 else
   M.opts.get_command = function(path, max_depth)

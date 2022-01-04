@@ -5,7 +5,7 @@ function M.collect(self)
     return nil, nil, "not supported in windows"
   end
 
-  local job = self.jobs.new({"apropos", "-l", "."}, {
+  local job = self.jobs.new({ "apropos", "-l", "." }, {
     on_exit = function(job_self)
       local items = {}
       local outputs = job_self:get_stdout()
@@ -15,7 +15,7 @@ function M.collect(self)
         table.insert(items, {
           value = name,
           desc = ("%s - %s"):format(name, desc),
-          column_offsets = {value = 0, _desc = #name + 1},
+          column_offsets = { value = 0, _desc = #name + 1 },
         })
       end
       self:append(items)

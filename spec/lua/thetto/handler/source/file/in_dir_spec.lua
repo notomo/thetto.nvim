@@ -2,7 +2,6 @@ local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
 
 describe("file/in_dir source", function()
-
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -11,7 +10,7 @@ describe("file/in_dir source", function()
     helper.new_directory("dir")
     helper.new_file("dir/file")
 
-    thetto.start("file/in_dir", {opts = {insert = false}})
+    thetto.start("file/in_dir", { opts = { insert = false } })
 
     assert.exists_pattern("oldfile")
     helper.search("dir")
@@ -20,7 +19,7 @@ describe("file/in_dir source", function()
 
     assert.current_dir("dir")
 
-    thetto.start("file/in_dir", {opts = {insert = false}})
+    thetto.start("file/in_dir", { opts = { insert = false } })
     helper.search("file")
 
     thetto.execute()
@@ -29,13 +28,13 @@ describe("file/in_dir source", function()
   end)
 
   it("can show files in project dir", function()
-    require("thetto.core.target").project_root_patterns = {"0_root_pattern"}
+    require("thetto.core.target").project_root_patterns = { "0_root_pattern" }
 
     helper.new_directory("0_root_pattern")
     helper.new_directory("dir")
     helper.cd("dir")
 
-    thetto.start("file/in_dir", {opts = {insert = false, target = "project"}})
+    thetto.start("file/in_dir", { opts = { insert = false, target = "project" } })
 
     vim.cmd("normal! gg")
     assert.current_line("0_root_pattern/")
@@ -45,7 +44,7 @@ describe("file/in_dir source", function()
     helper.new_file("file")
     helper.new_directory("dir")
 
-    thetto.start("file/in_dir", {opts = {insert = false}})
+    thetto.start("file/in_dir", { opts = { insert = false } })
 
     thetto.execute("toggle_all_selection")
     thetto.execute("toggle_all_selection")
@@ -53,5 +52,4 @@ describe("file/in_dir source", function()
     thetto.execute("tab_open")
     assert.tab_count(2)
   end)
-
 end)

@@ -9,10 +9,14 @@ function M.debounce(ms, f)
       timer = vim.loop.new_timer()
     end
     timer:stop()
-    local args = {...}
-    timer:start(ms, 0, vim.schedule_wrap(function()
-      f(unpack(args))
-    end))
+    local args = { ... }
+    timer:start(
+      ms,
+      0,
+      vim.schedule_wrap(function()
+        f(unpack(args))
+      end)
+    )
   end
 end
 
