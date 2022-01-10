@@ -25,11 +25,24 @@ function M.action_delete(self, items)
   end
 
   local cmd = { "git", "branch" }
-  if self.action_opts["force"] then
-    table.insert(cmd, "-D")
-  else
-    table.insert(cmd, "--delete")
+  table.insert(cmd, "--delete")
+  vim.list_extend(cmd, branches)
+
+  local job = self.jobs.new(cmd, {
+    on_exit = self.jobs.print_stdout,
+    on_stderr = self.jobs.print_stderr,
+  })
+  return nil, job:start()
+end
+
+function M.action_force_delete(self, items)
+  local branches = {}
+  for _, item in ipairs(items) do
+    table.insert(branches, item.value)
   end
+
+  local cmd = { "git", "branch" }
+  table.insert(cmd, "-D")
   vim.list_extend(cmd, branches)
 
   local job = self.jobs.new(cmd, {
