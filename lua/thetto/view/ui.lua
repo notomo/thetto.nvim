@@ -5,7 +5,6 @@ local StatusLine = require("thetto.view.status_line").StatusLine
 local Sidecar = require("thetto.view.sidecar").Sidecar
 local State = require("thetto.view.state").State
 local bufferlib = require("thetto.lib.buffer")
-local highlightlib = require("thetto.lib.highlight")
 local vim = vim
 
 local M = {}
