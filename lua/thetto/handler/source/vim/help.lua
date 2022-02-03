@@ -4,12 +4,24 @@ local M = {}
 
 function M.collect(self)
   local items = {}
-  local paths = self.listlib.unique(vim.api.nvim_get_runtime_file("doc/tags", true))
-  for _, path in ipairs(paths) do
-    local f = io.open(path, "r")
+
+  local paths = vim.api.nvim_get_runtime_file("doc/tags", true)
+
+  local pack_path = vim.split(vim.o.packpath, ",", true)[1]
+  pack_path = vim.fn.fnamemodify(pack_path, ":p")
+  local pattern = pack_path .. "pack/*/opt/*/doc/tags"
+  vim.list_extend(paths, vim.fn.glob(pattern, false, true))
+
+  paths = self.listlib.unique(paths)
+  for _, tags_path in ipairs(paths) do
+    local f = io.open(tags_path, "r")
+    local doc_path = tags_path:gsub("tags$", "")
     for line in f:lines() do
-      local tag = vim.split(line, "\t")[1]
-      table.insert(items, { value = tag })
+      local splitted = vim.split(line, "\t")
+      local tag = splitted[1]
+      local path = splitted[2]
+      local tag_pattern = splitted[3]:sub(2)
+      table.insert(items, { value = tag, path = doc_path .. path, pattern = tag_pattern })
     end
     f:close()
   end
