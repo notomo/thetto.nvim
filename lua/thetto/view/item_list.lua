@@ -54,9 +54,7 @@ function ItemList.new(source_name, width, height, row, column)
   vim.cmd(on_win_closed)
   vim.cmd("augroup END")
 
-  vim.cmd(
-    ("autocmd BufReadCmd <buffer=%s> lua require('thetto.command').Command.new('reload', %s)"):format(bufnr, bufnr)
-  )
+  vim.cmd(("autocmd BufReadCmd <buffer=%s> lua require('thetto.command').reload(%s)"):format(bufnr, bufnr))
 
   local tbl = { _bufnr = bufnr, _window = window }
   return setmetatable(tbl, ItemList)

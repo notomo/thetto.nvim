@@ -5,31 +5,12 @@ local Context = require("thetto.core.context").Context
 local Store = require("thetto.core.store").Store
 local UI = require("thetto.view.ui").UI
 local custom = require("thetto.core.custom")
-local messagelib = require("thetto.lib.message")
 local modelib = require("thetto.lib.mode")
 
-local M = {}
+local ReturnValue = require("thetto.lib.error_handler").for_return_value()
+local ShowError = require("thetto.lib.error_handler").for_show_error()
 
-local Command = {}
-Command.__index = Command
-M.Command = Command
-
-function Command.new(name, ...)
-  local args = { ... }
-  local f = function()
-    return Command[name](unpack(args))
-  end
-
-  local ok, result, msg = xpcall(f, debug.traceback)
-  if not ok then
-    return messagelib.error(result)
-  elseif msg then
-    return messagelib.warn(msg)
-  end
-  return result
-end
-
-function Command.start(source_name, args)
+function ReturnValue.start(source_name, args)
   vim.validate({ source_name = { source_name, "string" }, args = { args, "table", true } })
 
   args = args or {}
@@ -68,7 +49,7 @@ function Command.start(source_name, args)
   ui:scroll(opts.offset)
 
   if opts.immediately then
-    local _, exec_err = Command.execute(opts.action, { action_opts = action_opts })
+    local _, exec_err = ReturnValue.execute(opts.action, { action_opts = action_opts })
     if exec_err ~= nil then
       return exec_err
     end
@@ -77,7 +58,7 @@ function Command.start(source_name, args)
   return collector, nil
 end
 
-function Command.reload(bufnr)
+function ReturnValue.reload(bufnr)
   vim.validate({ bufnr = { bufnr, "number", true } })
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
@@ -101,7 +82,7 @@ function Command.reload(bufnr)
   return collector, nil
 end
 
-function Command.resume(source_name)
+function ReturnValue.resume(source_name)
   local old_ctx = Context.get(source_name)
   if old_ctx then
     old_ctx.ui:close()
@@ -119,7 +100,7 @@ function Command.resume(source_name)
   return ctx.collector, nil
 end
 
-function Command.execute(action_name, args)
+function ReturnValue.execute(action_name, args)
   args = args or {}
   local action_opts = args.action_opts or {}
 
@@ -134,7 +115,7 @@ function Command.execute(action_name, args)
   return ctx.executor:actions(items, ctx, action_name, args.fallback_actions, action_opts)
 end
 
-function Command.resume_execute(args)
+function ReturnValue.resume_execute(args)
   args = args or {}
   local action_opts = args.action_opts or {}
   local opts = args.opts or {}
@@ -151,35 +132,35 @@ function Command.resume_execute(args)
   return ctx.executor:action(items, ctx, action_name, action_opts)
 end
 
-function Command.setup(config)
+function ShowError.setup(config)
   vim.validate({ config = { config, "table" } })
-  custom.set(config)
+  return custom.set(config)
 end
 
-function Command.setup_store(name, opts)
+function ShowError.setup_store(name, opts)
   local store, err = Store.new(name, opts)
   if err ~= nil then
-    return nil, err
+    return err
   end
-  return nil, store:start()
+  return store:start()
 end
 
-function Command.add_to_store(name, ...)
+function ShowError.add_to_store(name, ...)
   vim.validate({ name = { name, "string" } })
   local store, err = Store.get(name)
   if err ~= nil then
-    return nil, err
+    return err
   end
-  return nil, store:add(...)
+  return store:add(...)
 end
 
-function Command.save_to_store(name, ...)
+function ShowError.save_to_store(name, ...)
   vim.validate({ name = { name, "string" } })
   local store, err = Store.get(name)
   if err ~= nil then
-    return nil, err
+    return err
   end
-  return nil, store:save(...)
+  return store:save(...)
 end
 
-return M
+return vim.tbl_extend("force", ReturnValue:methods(), ShowError:methods())

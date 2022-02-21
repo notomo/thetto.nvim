@@ -17,11 +17,6 @@ function M.before_each()
 end
 
 function M.after_each()
-  -- avoid segmentation fault??
-  vim.cmd("tabedit")
-  vim.cmd("tabprevious")
-  vim.cmd("quit!")
-
   vim.cmd("tabedit")
   vim.cmd("tabonly!")
   vim.cmd("silent! %bwipeout!")

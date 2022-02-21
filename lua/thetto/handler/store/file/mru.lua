@@ -14,8 +14,8 @@ function M.start(self)
   vim.cmd(([[
 augroup %s
   autocmd!
-  autocmd BufEnter * lua require("thetto.command").Command.add_to_store("file/mru", tonumber(vim.fn.expand('<abuf>')))
-  autocmd QuitPre * lua require("thetto.command").Command.save_to_store("file/mru")
+  autocmd BufEnter * silent lua require("thetto.command").add_to_store("file/mru", tonumber(vim.fn.expand('<abuf>')))
+  autocmd QuitPre * silent lua require("thetto.command").save_to_store("file/mru")
 augroup END
 ]]):format(self.augroup_name))
 end
