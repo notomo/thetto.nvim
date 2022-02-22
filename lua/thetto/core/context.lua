@@ -34,16 +34,20 @@ end
 
 function Context.get_from_path(bufnr, pattern)
   vim.validate({ bufnr = { bufnr, "number", true }, pattern = { pattern, "string", true } })
-  bufnr = bufnr or 0
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
   pattern = pattern or ""
 
   local path = vim.api.nvim_buf_get_name(bufnr)
   local source_name = path:match("^thetto://(.+)/thetto" .. pattern)
   if not source_name then
-    return nil, "not matched path: " .. path
+    return nil, "not found state in: " .. path
   end
 
-  return Context.get(source_name)
+  local ctx, err = Context.get(source_name)
+  if err then
+    return nil, ("buffer=%d: %s"):format(bufnr, err)
+  end
+  return ctx, nil
 end
 
 function Context.resume(source_name)

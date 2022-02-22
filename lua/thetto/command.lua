@@ -1,23 +1,15 @@
-local Collector = require("thetto.core.collector").Collector
-local Executor = require("thetto.core.executor").Executor
-local Options = require("thetto.core.option").Options
 local Context = require("thetto.core.context").Context
 local Store = require("thetto.core.store").Store
 local UI = require("thetto.view.ui").UI
-local custom = require("thetto.core.custom")
-local modelib = require("thetto.lib.mode")
 
 local ReturnValue = require("thetto.lib.error_handler").for_return_value()
 local ShowError = require("thetto.lib.error_handler").for_show_error()
 
-function ReturnValue.start(source_name, args)
-  vim.validate({ source_name = { source_name, "string" }, args = { args, "table", true } })
+function ReturnValue.start(source_name, raw_args)
+  vim.validate({ source_name = { source_name, "string" } })
 
-  args = args or {}
-  local source_opts = args.source_opts or {}
-  local action_opts = args.action_opts or {}
-
-  local opts, opts_err = Options.new(args.opts or {}, source_name)
+  local args = require("thetto.core.argument").StartArgs.new(raw_args)
+  local opts, opts_err = require("thetto.core.option").Options.new(args.opts, source_name)
   if opts_err ~= nil then
     return nil, opts_err
   end
@@ -27,11 +19,16 @@ function ReturnValue.start(source_name, args)
     old_ctx.ui:close()
   end
 
-  local collector, err = Collector.new(source_name, source_opts, opts)
+  local collector, err = require("thetto.core.collector").Collector.new(source_name, args.source_opts, opts)
   if err ~= nil then
     return nil, err
   end
-  local executor = Executor.new(source_name, collector.source.kind_name, action_opts, opts.action)
+  local executor = require("thetto.core.executor").Executor.new(
+    source_name,
+    collector.source.kind_name,
+    args.action_opts,
+    opts.action
+  )
   local ui = UI.new(collector)
   local ctx = Context.new(source_name, collector, ui, executor)
 
@@ -49,7 +46,7 @@ function ReturnValue.start(source_name, args)
   ui:scroll(opts.offset)
 
   if opts.immediately then
-    local _, exec_err = ReturnValue.execute(opts.action, { action_opts = action_opts })
+    local _, exec_err = ReturnValue.execute(opts.action, { action_opts = args.action_opts })
     if exec_err ~= nil then
       return exec_err
     end
@@ -59,12 +56,9 @@ function ReturnValue.start(source_name, args)
 end
 
 function ReturnValue.reload(bufnr)
-  vim.validate({ bufnr = { bufnr, "number", true } })
-  bufnr = bufnr or vim.api.nvim_get_current_buf()
-
-  local ctx = Context.get_from_path(bufnr)
-  if not ctx then
-    return nil, "no context buffer: " .. tostring(bufnr)
+  local ctx, ctx_err = Context.get_from_path(bufnr)
+  if ctx_err then
+    return nil, ctx_err
   end
 
   local collector = ctx.collector
@@ -100,41 +94,35 @@ function ReturnValue.resume(source_name)
   return ctx.collector, nil
 end
 
-function ReturnValue.execute(action_name, args)
-  args = args or {}
-  local action_opts = args.action_opts or {}
-
+function ReturnValue.execute(action_name, raw_args)
   local ctx, ctx_err = Context.get_from_path()
   if ctx_err ~= nil then
-    return nil, "not found state: " .. ctx_err
+    return nil, ctx_err
   end
-  action_name = action_name or ctx.collector.source.default_action or "default"
-
-  local range = modelib.visual_range()
-  local items = ctx.ui:selected_items(action_name, range)
-  return ctx.executor:actions(items, ctx, action_name, args.fallback_actions, action_opts)
+  local args = require("thetto.core.argument").ExecuteArgs.new(
+    action_name or ctx.collector.source.default_action,
+    raw_args
+  )
+  local range = require("thetto.lib.mode").visual_range()
+  local items = ctx.ui:selected_items(args.action_name, range)
+  return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts)
 end
 
-function ReturnValue.resume_execute(args)
-  args = args or {}
-  local action_opts = args.action_opts or {}
-  local opts = args.opts or {}
-
+function ReturnValue.resume_execute(raw_args)
+  local args = require("thetto.core.argument").ResumeExecuteArgs.new(raw_args)
   local ctx, ctx_err = Context.resume(args.source_name)
   if ctx_err ~= nil then
-    return nil, "not found state: " .. ctx_err
+    return nil, ctx_err
   end
-  ctx.ui:update_offset(opts.offset or 0)
+  ctx.ui:update_offset(args.opts.offset)
 
-  local action_name = args.action_name or "default"
-  local range = modelib.visual_range()
-  local items = ctx.ui:selected_items(action_name, range)
-  return ctx.executor:action(items, ctx, action_name, action_opts)
+  local range = require("thetto.lib.mode").visual_range()
+  local items = ctx.ui:selected_items(args.action_name, range)
+  return ctx.executor:action(items, ctx, args.action_name, args.action_opts)
 end
 
 function ShowError.setup(config)
-  vim.validate({ config = { config, "table" } })
-  return custom.set(config)
+  return require("thetto.core.custom").set(config)
 end
 
 function ShowError.setup_store(name, opts)
@@ -146,7 +134,6 @@ function ShowError.setup_store(name, opts)
 end
 
 function ShowError.add_to_store(name, ...)
-  vim.validate({ name = { name, "string" } })
   local store, err = Store.get(name)
   if err ~= nil then
     return err
@@ -155,7 +142,6 @@ function ShowError.add_to_store(name, ...)
 end
 
 function ShowError.save_to_store(name, ...)
-  vim.validate({ name = { name, "string" } })
   local store, err = Store.get(name)
   if err ~= nil then
     return err

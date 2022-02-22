@@ -17,6 +17,7 @@ M.default_config = {
 M.config = vim.deepcopy(M.default_config)
 
 function M.set(config)
+  vim.validate({ config = { config, "table" } })
   M.config = vim.tbl_deep_extend("force", M.config, config)
 end
 
