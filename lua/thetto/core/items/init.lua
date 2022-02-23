@@ -1,7 +1,4 @@
-local M = {}
-
 local Items = {}
-M.Items = Items
 
 function Items.new(result, input_lines, filters, sorters, opts)
   local items = {}
@@ -40,4 +37,4 @@ function Items.length(self)
   return vim.tbl_count(self._items)
 end
 
-return M
+return Items

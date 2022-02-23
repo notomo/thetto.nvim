@@ -34,7 +34,7 @@ describe("thetto.core.sorter", function()
     local expected = vim.inspect(c.expected, { newline = " ", indent = " " })
 
     it(("Sorters.new(%s):apply(%s) == %s"):format(names, items, expected), function()
-      local sorters = require("thetto.core.sorter").Sorters.new(c.names)
+      local sorters = require("thetto.core.items.sorters").new(c.names)
       local actual = sorters:apply(c.items)
       assert.is_same(c.expected, actual)
     end)
