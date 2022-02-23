@@ -9,7 +9,6 @@ M.Options = Options
 
 local default = {
   insert = true,
-  resume = false,
   ignorecase = false,
   smartcase = true,
   input_lines = {},
