@@ -9,12 +9,7 @@ function Items.new(result, input_lines, filters, sorters, opts)
     table.insert(items, item)
   end
 
-  for i, filter in filters:iter() do
-    local input_line = input_lines[i]
-    if input_line ~= nil and input_line ~= "" then
-      items = filter:apply(items, input_line, opts)
-    end
-  end
+  items = filters:apply(items, input_lines, opts)
   items = sorters:apply(items)
 
   local filtered = {}
@@ -34,7 +29,7 @@ function Items.__index(self, k)
 end
 
 function Items.iter(self)
-  return next, self._items, nil
+  return ipairs(self._items)
 end
 
 function Items.values(self)

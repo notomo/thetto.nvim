@@ -222,14 +222,7 @@ function Collector._update_items(self, input_lines)
     return
   end
 
-  local input = nil
-  for i, filter in self.filters:iter() do
-    if filter.is_interactive then
-      input = input_lines[i]
-      break
-    end
-  end
-
+  local input = self.filters:extract_interactive(input_lines)
   if self.opts.pattern == input then
     return
   end

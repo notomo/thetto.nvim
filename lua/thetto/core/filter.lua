@@ -223,15 +223,29 @@ function Filters.has_interactive(self)
 end
 
 function Filters.iter(self)
-  return next, self._filters, nil
-end
-
-function Filters.length(self)
-  return #self._filters
+  return ipairs(self._filters)
 end
 
 function Filters.values(self)
   return self._filters
+end
+
+function Filters.apply(self, items, input_lines, opts)
+  for i, filter in ipairs(self._filters) do
+    local input_line = input_lines[i]
+    if input_line ~= nil and input_line ~= "" then
+      items = filter:apply(items, input_line, opts)
+    end
+  end
+  return items
+end
+
+function Filters.extract_interactive(self, input_lines)
+  for i, filter in ipairs(self._filters) do
+    if filter.is_interactive then
+      return input_lines[i]
+    end
+  end
 end
 
 return M

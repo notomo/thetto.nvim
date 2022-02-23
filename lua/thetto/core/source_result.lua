@@ -78,7 +78,7 @@ function SourceResult.finished(_)
 end
 
 function SourceResult.iter(self)
-  return next, self._all_items, nil
+  return ipairs(self._all_items)
 end
 
 function SourceResult.count(self)
