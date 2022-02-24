@@ -204,11 +204,6 @@ function Collector.update(self)
   self.opts = vim.deepcopy(self.original_opts)
   self.opts.pattern = pattern
   self.opts.interactive = interactive
-  if not self.opts.ignorecase and self.opts.smartcase and table.concat(input_lines, ""):find("[A-Z]") then
-    self.opts.ignorecase = false
-  else
-    self.opts.ignorecase = true
-  end
 
   self.result:apply_selected(self.items)
   self:_update_items(input_lines)

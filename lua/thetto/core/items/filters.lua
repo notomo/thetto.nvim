@@ -113,11 +113,11 @@ function Filters.values(self)
   return self._filters
 end
 
-function Filters.apply(self, items, input_lines, opts)
+function Filters.apply(self, filter_ctx, items, input_lines)
   for i, filter in ipairs(self._filters) do
     local input_line = input_lines[i]
     if input_line ~= nil and input_line ~= "" then
-      items = filter:apply(items, input_line, opts)
+      items = filter:apply(filter_ctx, items, input_line)
     end
   end
   return items
@@ -127,6 +127,15 @@ function Filters.extract_interactive(self, input_lines)
   for i, filter in ipairs(self._filters) do
     if filter.is_interactive then
       return input_lines[i]
+    end
+  end
+end
+
+function Filters.highlight(self, filter_ctx, bufnr, first_line, raw_items, input_lines)
+  for i, filter in ipairs(self._filters) do
+    local input_line = input_lines[i] or ""
+    if filter.highlight ~= nil and input_line ~= "" then
+      filter:highlight(filter_ctx, bufnr, first_line, raw_items, input_line)
     end
   end
 end

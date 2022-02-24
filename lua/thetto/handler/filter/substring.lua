@@ -2,9 +2,9 @@ local vim = vim
 
 local M = {}
 
-local to_texts = function(input_line, opts)
+local to_texts = function(filter_ctx, input_line)
   local line = input_line
-  if opts.ignorecase then
+  if filter_ctx.ignorecase then
     line = input_line:lower()
   end
   return vim.tbl_filter(function(text)
@@ -12,12 +12,12 @@ local to_texts = function(input_line, opts)
   end, vim.split(line, "%s"))
 end
 
-function M.apply(self, items, input_line, opts)
+function M.apply(self, filter_ctx, items, input_line)
   local filtered = {}
-  local texts = to_texts(input_line, opts)
+  local texts = to_texts(filter_ctx, input_line)
   for _, item in ipairs(items) do
     local value = self:to_value(item)
-    if opts.ignorecase then
+    if filter_ctx.ignorecase then
       value = value:lower()
     end
 
@@ -38,13 +38,13 @@ end
 
 vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
 
-function M.highlight(self, bufnr, first_line, items, input_line, opts)
+function M.highlight(self, filter_ctx, bufnr, first_line, items, input_line)
   if self.inversed then
     return
   end
 
   local highlighter = self.highlights:create(bufnr)
-  local texts = to_texts(input_line, opts)
+  local texts = to_texts(filter_ctx, input_line)
   for i, item in ipairs(items) do
     local offsets = item.column_offsets or {}
     if item.desc ~= nil and offsets[self.key] == nil then
@@ -52,7 +52,7 @@ function M.highlight(self, bufnr, first_line, items, input_line, opts)
     end
 
     local value = self:to_value(item)
-    if opts.ignorecase then
+    if filter_ctx.ignorecase then
       value = value:lower()
     end
 

@@ -77,16 +77,15 @@ vim.api.nvim_set_decoration_provider(ns, { on_win = UI._highlight_win })
 
 function UI.highlight(self, first_line, last_line)
   local collector_items = self._collector.items:values()
-  local items = {}
+  local raw_items = {}
   for i = first_line + 1, last_line, 1 do
-    table.insert(items, collector_items[i])
+    table.insert(raw_items, collector_items[i])
   end
 
   local source = self._collector.source
   local input_lines = self._collector.input_lines
-  local filters = self._collector.filters:values()
-  local opts = self._collector.opts
-  self._item_list:highlight(first_line, items, source, input_lines, filters, opts)
+  local filters = self._collector.filters
+  self._item_list:highlight(first_line, raw_items, source, input_lines, filters, self._collector.items.filter_ctx)
 end
 
 function UI.redraw(self, input_lines, row)

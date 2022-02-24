@@ -74,21 +74,16 @@ function ItemList.redraw(self, items)
   end
 end
 
-function ItemList.highlight(self, first_line, items, source, input_lines, filters, opts)
-  source:highlight(self._bufnr, first_line, items)
-  source:highlight_sign(self._bufnr, first_line, items)
+function ItemList.highlight(self, first_line, raw_items, source, input_lines, filters, filter_ctx)
+  source:highlight(self._bufnr, first_line, raw_items)
+  source:highlight_sign(self._bufnr, first_line, raw_items)
 
   local highligher = source.highlights:create(self._bufnr)
-  highligher:filter("ThettoSelected", first_line, items, function(item)
+  highligher:filter("ThettoSelected", first_line, raw_items, function(item)
     return item.selected
   end)
 
-  for i, filter in ipairs(filters) do
-    local input_line = input_lines[i] or ""
-    if filter.highlight ~= nil and input_line ~= "" then
-      filter:highlight(self._bufnr, first_line, items, input_line, opts)
-    end
-  end
+  filters:highlight(filter_ctx, self._bufnr, first_line, raw_items, input_lines)
 end
 
 function ItemList.redraw_selections(self, s, e)

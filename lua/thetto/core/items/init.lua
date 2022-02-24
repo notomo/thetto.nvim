@@ -1,3 +1,5 @@
+local FilterContext = require("thetto.core.items.filter_context")
+
 local Items = {}
 
 function Items.new(result, input_lines, filters, sorters, opts)
@@ -6,7 +8,8 @@ function Items.new(result, input_lines, filters, sorters, opts)
     table.insert(items, item)
   end
 
-  items = filters:apply(items, input_lines, opts)
+  local filter_ctx = FilterContext.new(opts.ignorecase, opts.smartcase, input_lines)
+  items = filters:apply(filter_ctx, items, input_lines)
   items = sorters:apply(items)
 
   local filtered = {}
@@ -14,7 +17,7 @@ function Items.new(result, input_lines, filters, sorters, opts)
     filtered[i] = items[i]
   end
 
-  local tbl = { _items = filtered }
+  local tbl = { _items = filtered, filter_ctx = filter_ctx }
   return setmetatable(tbl, Items)
 end
 
