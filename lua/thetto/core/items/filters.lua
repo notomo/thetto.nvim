@@ -3,18 +3,18 @@ local vim = vim
 
 local Filters = {}
 
-function Filters.new(names, opts)
-  vim.validate({ names = { names, "table" }, opts = { opts, "table" } })
+function Filters.new(names, modifier_factory)
+  vim.validate({ names = { names, "table" }, modifier_factory = { modifier_factory, "table" } })
   local filters = {}
   for _, name in ipairs(names) do
-    local filter, err = Filter.parse(name, opts)
+    local filter, err = Filter.parse(name, modifier_factory)
     if err ~= nil then
       return nil, err
     end
     table.insert(filters, filter)
   end
 
-  local tbl = { _filters = filters }
+  local tbl = { _filters = filters, _modifier_factory = modifier_factory }
   return setmetatable(tbl, Filters)
 end
 
@@ -27,8 +27,8 @@ end
 
 local DISABLED_FILTER_ERR = "filter is disabled: "
 
-function Filters._find(self, name, opts)
-  local f, err = Filter.parse(name, opts)
+function Filters._find(self, name)
+  local f, err = Filter.parse(name, self._modifier_factory)
   if err ~= nil then
     return nil, nil, err
   end
@@ -46,57 +46,61 @@ function Filters._names(self)
   end, self._filters)
 end
 
-function Filters.inverse(self, name, opts)
-  local filter, index, err = self:_find(name, opts)
+function Filters.inverse(self, name)
+  local filter, index, err = self:_find(name)
   if err ~= nil then
     return nil, err
   end
 
   local names = self:_names()
   names[index] = filter:inverse().name
-
-  return Filters.new(names, opts), nil
+  return self:_update(names)
 end
 
-function Filters.add(self, name, opts)
-  local filter, err = Filter.parse(name, opts)
+function Filters.add(self, name)
+  local filter, err = Filter.parse(name, self._modifier_factory)
   if err ~= nil then
     return nil, err
   end
+
   local names = self:_names()
   table.insert(names, filter.name)
-  return Filters.new(names, opts), nil
+  return self:_update(names)
 end
 
-function Filters.remove(self, name, opts)
+function Filters.remove(self, name)
   if #self._filters <= 1 then
     return nil, "the last filter cannot be removed"
   end
 
-  local _, index, err = self:_find(name, opts)
+  local _, index, err = self:_find(name)
   if err ~= nil then
     return nil, err
   end
 
   local names = self:_names()
   table.remove(names, index)
-  return Filters.new(names, opts), nil
+  return self:_update(names)
 end
 
-function Filters.change(self, old, new, opts)
-  local _, index, err = self:_find(old, opts)
+function Filters.change(self, old, new)
+  local _, index, err = self:_find(old)
   if err ~= nil then
     return nil, err
   end
 
-  local filter, ferr = Filter.parse(new, opts)
+  local filter, ferr = Filter.parse(new, self._modifier_factory)
   if ferr ~= nil then
     return nil, ferr
   end
 
   local names = self:_names()
   names[index] = filter.name
-  return Filters.new(names, opts), nil
+  return self:_update(names)
+end
+
+function Filters._update(self, names)
+  return Filters.new(names, self._modifier_factory)
 end
 
 function Filters.has_interactive(self)

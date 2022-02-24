@@ -19,7 +19,8 @@ function Collector.new(source_name, source_opts, opts)
     return nil, err
   end
 
-  local filters, ferr = Filters.new(source.filters, opts)
+  local modifier_factory = require("thetto.core.items.filter_modifier_factory").new(opts.cwd)
+  local filters, ferr = Filters.new(source.filters, modifier_factory)
   if ferr ~= nil then
     return nil, ferr
   end
@@ -135,7 +136,7 @@ function Collector.toggle_all_selections(self)
 end
 
 function Collector.add_filter(self, name)
-  local filters, err = self.filters:add(name, self.opts)
+  local filters, err = self.filters:add(name)
   if err ~= nil then
     return err
   end
@@ -143,7 +144,7 @@ function Collector.add_filter(self, name)
 end
 
 function Collector.remove_filter(self, name)
-  local filters, err = self.filters:remove(name, self.opts)
+  local filters, err = self.filters:remove(name)
   if err ~= nil then
     return err
   end
@@ -151,7 +152,7 @@ function Collector.remove_filter(self, name)
 end
 
 function Collector.inverse_filter(self, name)
-  local filters, err = self.filters:inverse(name, self.opts)
+  local filters, err = self.filters:inverse(name)
   if err ~= nil then
     return err
   end
@@ -159,7 +160,7 @@ function Collector.inverse_filter(self, name)
 end
 
 function Collector.change_filter(self, old, new)
-  local filters, err = self.filters:change(old, new, self.opts)
+  local filters, err = self.filters:change(old, new)
   if err ~= nil then
     return err
   end
