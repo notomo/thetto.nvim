@@ -74,7 +74,7 @@ function ItemList.redraw(self, items)
   end
 end
 
-function ItemList.highlight(self, first_line, raw_items, source, input_lines, filters, filter_ctx)
+function ItemList.highlight(self, first_line, raw_items, source, filters, filter_ctxs)
   source:highlight(self._bufnr, first_line, raw_items)
   source:highlight_sign(self._bufnr, first_line, raw_items)
 
@@ -83,7 +83,7 @@ function ItemList.highlight(self, first_line, raw_items, source, input_lines, fi
     return item.selected
   end)
 
-  filters:highlight(filter_ctx, self._bufnr, first_line, raw_items, input_lines)
+  filters:highlight(filter_ctxs, self._bufnr, first_line, raw_items)
 end
 
 function ItemList.redraw_selections(self, s, e)

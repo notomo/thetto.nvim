@@ -83,9 +83,8 @@ function UI.highlight(self, first_line, last_line)
   end
 
   local source = self._collector.source
-  local input_lines = self._collector.input_lines
   local filters = self._collector.filters
-  self._item_list:highlight(first_line, raw_items, source, input_lines, filters, self._collector.items.filter_ctx)
+  self._item_list:highlight(first_line, raw_items, source, filters, self._collector.items.filter_ctxs)
 end
 
 function UI.redraw(self, input_lines, row)
