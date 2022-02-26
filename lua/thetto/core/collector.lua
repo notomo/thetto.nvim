@@ -32,12 +32,12 @@ function Collector.new(source_name, source_opts, opts)
   end
 
   local tbl = {
-    result = SourceResult.new(source.name),
     source = source,
     selected = {},
     filters = filters,
     sorters = sorters,
     input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
+    _result = SourceResult.new(source.name),
     _source_ctx = SourceContext.new(
       opts.pattern,
       opts.cwd,
@@ -49,16 +49,8 @@ function Collector.new(source_name, source_opts, opts)
     _smartcase = opts.smartcase,
     _display_limit = opts.display_limit,
   }
-  tbl.items = Items.new(
-    tbl.result,
-    tbl.input_lines,
-    filters,
-    sorters,
-    tbl._ignorecase,
-    tbl._smartcase,
-    tbl._display_limit
-  )
   local self = setmetatable(tbl, Collector)
+  self.items = self:_items()
 
   self.update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
     return self:update()
@@ -94,11 +86,11 @@ end
 
 function Collector.start(self, input_pattern)
   local on_update_job = function(items)
-    self.result:append(items)
+    self._result:append(items)
     return self:update_with_debounce()
   end
   local reset = function()
-    self.result:reset()
+    self._result:reset()
   end
 
   local source_ctx = self._source_ctx:from(input_pattern or self._source_ctx.pattern)
@@ -106,26 +98,30 @@ function Collector.start(self, input_pattern)
   if err ~= nil then
     return err
   end
-  self.result = result
+  self._result = result
   self._source_ctx = source_ctx
 
   return nil
 end
 
 function Collector.wait(self, ms)
-  return self.result:wait(ms)
+  return self._result:wait(ms)
 end
 
 function Collector.discard(self)
-  return self.result:discard()
+  return self._result:discard()
 end
 
 function Collector.stop(self)
-  return self.result:stop()
+  return self._result:stop()
 end
 
 function Collector.finished(self)
-  return self.result:finished()
+  return self._result:finished()
+end
+
+function Collector.all_count(self)
+  return self._result:count()
 end
 
 function Collector.toggle_selections(self, items)
@@ -212,13 +208,13 @@ function Collector._update_sorters(self, sorters)
 end
 
 function Collector.update(self)
-  self.result:apply_selected(self.items)
+  self._result:apply_selected(self.items)
   return self:_update_items()
 end
 
-function Collector._update_items(self)
-  self.items = Items.new(
-    self.result,
+function Collector._items(self)
+  return Items.new(
+    self._result,
     self.input_lines,
     self.filters,
     self.sorters,
@@ -226,6 +222,10 @@ function Collector._update_items(self)
     self._smartcase,
     self._display_limit
   )
+end
+
+function Collector._update_items(self)
+  self.items = self:_items()
 
   if not self._source_ctx.interactive then
     return self:_send_redraw_event()

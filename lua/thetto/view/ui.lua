@@ -101,7 +101,7 @@ function UI.redraw(self, input_lines, row)
     local filters = self._collector.filters:values()
     local sorters = self._collector.sorters:values()
     local source = self._collector.source
-    local result_count = self._collector.result:count()
+    local result_count = self._collector:all_count()
     local items = self._collector.items:values()
     local finished = self._collector:finished()
 
