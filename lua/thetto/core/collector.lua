@@ -66,8 +66,8 @@ end
 
 function Collector.attach_ui(self, ui)
   vim.validate({ ui = { ui, "table" } })
-  self._send_redraw_event = function(_, input_lines)
-    return ui:redraw(input_lines)
+  self._send_redraw_event = function()
+    return ui:redraw(self.input_lines)
   end
   self._send_redraw_selection_event = function(_, s, e)
     return ui:redraw_selections(s, e)
@@ -146,7 +146,7 @@ function Collector.add_filter(self, name)
   if err ~= nil then
     return err
   end
-  self:_update_filters(filters)
+  return self:_update_filters(filters)
 end
 
 function Collector.remove_filter(self, name)
@@ -154,7 +154,7 @@ function Collector.remove_filter(self, name)
   if err ~= nil then
     return err
   end
-  self:_update_filters(filters)
+  return self:_update_filters(filters)
 end
 
 function Collector.inverse_filter(self, name)
@@ -162,7 +162,7 @@ function Collector.inverse_filter(self, name)
   if err ~= nil then
     return err
   end
-  self:_update_filters(filters)
+  return self:_update_filters(filters)
 end
 
 function Collector.change_filter(self, old, new)
@@ -170,13 +170,12 @@ function Collector.change_filter(self, old, new)
   if err ~= nil then
     return err
   end
-  self:_update_filters(filters)
+  return self:_update_filters(filters)
 end
 
 function Collector._update_filters(self, filters)
   self.filters = filters
-  self:_update_items(self.input_lines)
-  return self:_send_redraw_event(self.input_lines)
+  return self:_update_items()
 end
 
 function Collector.reverse_sorter(self, name)
@@ -184,7 +183,7 @@ function Collector.reverse_sorter(self, name)
   if err ~= nil then
     return err
   end
-  self:_update_sorters(sorters)
+  return self:_update_sorters(sorters)
 end
 
 function Collector.toggle_sorter(self, name)
@@ -192,35 +191,38 @@ function Collector.toggle_sorter(self, name)
   if err ~= nil then
     return err
   end
-  self:_update_sorters(sorters)
+  return self:_update_sorters(sorters)
 end
 
 function Collector._update_sorters(self, sorters)
   self.sorters = sorters
-  self:_update_items(self.input_lines)
-  return self:_send_redraw_event(self.input_lines)
+  return self:_update_items()
 end
 
 function Collector.update(self)
   self.result:apply_selected(self.items)
-  self:_update_items(self.input_lines)
-  return self:_send_redraw_event(self.input_lines)
+  return self:_update_items()
 end
 
-function Collector._update_items(self, input_lines)
-  self.items = Items.new(self.result, input_lines, self.filters, self.sorters, self.opts)
+function Collector._update_items(self)
+  self.items = Items.new(self.result, self.input_lines, self.filters, self.sorters, self.opts)
 
   if not self._source_ctx.interactive then
-    return
+    return self:_send_redraw_event()
   end
 
-  local input_pattern = self.filters:extract_interactive(input_lines)
+  local input_pattern = self.filters:extract_interactive(self.input_lines)
   if self._source_ctx.pattern == input_pattern then
-    return
+    return self:_send_redraw_event()
   end
 
   self:discard()
-  return self:start(input_pattern)
+
+  local err = self:start(input_pattern)
+  if err then
+    return err
+  end
+  return self:_send_redraw_event()
 end
 
 return M
