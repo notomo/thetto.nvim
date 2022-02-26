@@ -33,8 +33,7 @@ function Collector.new(source_name, source_opts, opts)
   local tbl = {
     result = SourceResult.new(source.name),
     source = source,
-    original_opts = opts,
-    opts = vim.deepcopy(opts),
+    opts = opts,
     selected = {},
     filters = filters,
     sorters = sorters,
@@ -42,7 +41,6 @@ function Collector.new(source_name, source_opts, opts)
   }
   tbl.items = Items.new(tbl.result, tbl.input_lines, filters, sorters, tbl.opts)
   local self = setmetatable(tbl, Collector)
-  self.opts.interactive = self.filters:has_interactive()
 
   self.update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
     return self:update()
@@ -76,7 +74,7 @@ function Collector.attach_ui(self, ui)
   end
 end
 
-function Collector.start(self)
+function Collector.start(self, input_pattern)
   local on_update_job = function(items)
     self.result:append(items)
     return self:update_with_debounce()
@@ -85,11 +83,19 @@ function Collector.start(self)
     self.result:reset()
   end
 
-  local result, err = self.source:collect(self.opts, on_update_job, reset)
+  local source_ctx = require("thetto.core.source_context").new(
+    input_pattern or self.opts.pattern,
+    self.opts.cwd,
+    self.opts.debounce_ms,
+    self.opts.allow_empty,
+    self.filters:has_interactive()
+  )
+  local result, err = self.source:collect(source_ctx, on_update_job, reset)
   if err ~= nil then
     return err
   end
   self.result = result
+  self._source_ctx = source_ctx
 
   return nil
 end
@@ -169,7 +175,6 @@ end
 
 function Collector._update_filters(self, filters)
   self.filters = filters
-  self.opts.interactive = self.filters:has_interactive()
   self:_update_items(self.input_lines)
   return self:_send_redraw_event(self.input_lines)
 end
@@ -197,39 +202,25 @@ function Collector._update_sorters(self, sorters)
 end
 
 function Collector.update(self)
-  local input_lines = self.input_lines
-  local pattern = self.opts.pattern
-  local interactive = self.opts.interactive
-
-  self.opts = vim.deepcopy(self.original_opts)
-  self.opts.pattern = pattern
-  self.opts.interactive = interactive
-
   self.result:apply_selected(self.items)
-  self:_update_items(input_lines)
-
-  return self:_send_redraw_event(input_lines)
+  self:_update_items(self.input_lines)
+  return self:_send_redraw_event(self.input_lines)
 end
 
 function Collector._update_items(self, input_lines)
   self.items = Items.new(self.result, input_lines, self.filters, self.sorters, self.opts)
 
-  if not self.opts.interactive then
+  if not self._source_ctx.interactive then
     return
   end
 
-  local input = self.filters:extract_interactive(input_lines)
-  if self.opts.pattern == input then
+  local input_pattern = self.filters:extract_interactive(input_lines)
+  if self._source_ctx.pattern == input_pattern then
     return
   end
-  self.opts.pattern = input
 
   self:discard()
-
-  local err = self:start()
-  if err ~= nil then
-    return err
-  end
+  return self:start(input_pattern)
 end
 
 return M
