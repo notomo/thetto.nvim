@@ -13,8 +13,17 @@ local UI = {}
 UI.__index = UI
 M.UI = UI
 
-function UI.new(collector)
-  local tbl = { _collector = collector, _state = State.new(collector.opts.insert) }
+function UI.new(collector, insert, display_limit)
+  vim.validate({
+    collector = { collector, "table" },
+    insert = { insert, "boolean" },
+    display_limit = { display_limit, "number" },
+  })
+  local tbl = {
+    _collector = collector,
+    _state = State.new(insert),
+    _display_limit = display_limit,
+  }
   return setmetatable(tbl, UI)
 end
 
@@ -120,7 +129,7 @@ function UI.on_move(self)
 end
 
 function UI.update_offset(self, offset)
-  self._state:update_row(offset, self._collector.items:length(), self._collector.opts.display_limit)
+  self._state:update_row(offset, self._collector.items:length(), self._display_limit)
 end
 
 function UI.close(self)

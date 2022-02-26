@@ -29,10 +29,10 @@ function ReturnValue.start(source_name, raw_args)
     args.action_opts,
     opts.action
   )
-  local ui = UI.new(collector)
+  local ui = UI.new(collector, opts.insert, opts.display_limit)
   local ctx = Context.new(source_name, collector, ui, executor)
 
-  local start_err = collector:start()
+  local start_err = collector:start(opts.pattern)
   if start_err ~= nil then
     return nil, start_err
   end

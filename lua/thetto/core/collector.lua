@@ -1,4 +1,5 @@
 local Source = require("thetto.core.source").Source
+local SourceContext = require("thetto.core.source_context")
 local SourceResult = require("thetto.core.source_result").SourceResult
 local Items = require("thetto.core.items")
 local Filters = require("thetto.core.items.filters")
@@ -33,13 +34,30 @@ function Collector.new(source_name, source_opts, opts)
   local tbl = {
     result = SourceResult.new(source.name),
     source = source,
-    opts = opts,
     selected = {},
     filters = filters,
     sorters = sorters,
     input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
+    _source_ctx = SourceContext.new(
+      opts.pattern,
+      opts.cwd,
+      opts.debounce_ms,
+      opts.allow_empty,
+      filters:has_interactive()
+    ),
+    _ignorecase = opts.ignorecase,
+    _smartcase = opts.smartcase,
+    _display_limit = opts.display_limit,
   }
-  tbl.items = Items.new(tbl.result, tbl.input_lines, filters, sorters, tbl.opts)
+  tbl.items = Items.new(
+    tbl.result,
+    tbl.input_lines,
+    filters,
+    sorters,
+    tbl._ignorecase,
+    tbl._smartcase,
+    tbl._display_limit
+  )
   local self = setmetatable(tbl, Collector)
 
   self.update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
@@ -61,7 +79,7 @@ function Collector.attach(self, input_bufnr)
     end
     return self:update()
   end
-  self.update_with_debounce = wraplib.debounce(self.opts.debounce_ms, on_input)
+  self.update_with_debounce = wraplib.debounce(self._source_ctx.debounce_ms, on_input)
 end
 
 function Collector.attach_ui(self, ui)
@@ -83,13 +101,7 @@ function Collector.start(self, input_pattern)
     self.result:reset()
   end
 
-  local source_ctx = require("thetto.core.source_context").new(
-    input_pattern or self.opts.pattern,
-    self.opts.cwd,
-    self.opts.debounce_ms,
-    self.opts.allow_empty,
-    self.filters:has_interactive()
-  )
+  local source_ctx = self._source_ctx:from(input_pattern or self._source_ctx.pattern)
   local result, err = self.source:collect(source_ctx, on_update_job, reset)
   if err ~= nil then
     return err
@@ -205,7 +217,15 @@ function Collector.update(self)
 end
 
 function Collector._update_items(self)
-  self.items = Items.new(self.result, self.input_lines, self.filters, self.sorters, self.opts)
+  self.items = Items.new(
+    self.result,
+    self.input_lines,
+    self.filters,
+    self.sorters,
+    self._ignorecase,
+    self._smartcase,
+    self._display_limit
+  )
 
   if not self._source_ctx.interactive then
     return self:_send_redraw_event()

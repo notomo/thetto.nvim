@@ -2,18 +2,18 @@ local FilterContexts = require("thetto.core.items.filter_contexts")
 
 local Items = {}
 
-function Items.new(result, input_lines, filters, sorters, opts)
+function Items.new(result, input_lines, filters, sorters, ignorecase, smartcase, display_limit)
   local items = {}
   for _, item in result:iter() do
     table.insert(items, item)
   end
 
-  local filter_ctxs = FilterContexts.new(opts.ignorecase, opts.smartcase, input_lines)
+  local filter_ctxs = FilterContexts.new(ignorecase, smartcase, input_lines)
   items = filters:apply(filter_ctxs, items)
   items = sorters:apply(items)
 
   local filtered = {}
-  for i = 1, opts.display_limit, 1 do
+  for i = 1, display_limit, 1 do
     filtered[i] = items[i]
   end
 

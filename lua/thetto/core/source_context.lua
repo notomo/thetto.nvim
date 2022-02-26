@@ -12,4 +12,8 @@ function M.new(pattern, cwd, debounce_ms, allow_empty, is_interactive)
   return setmetatable(tbl, M)
 end
 
+function M.from(self, pattern)
+  return M.new(pattern, self.cwd, self.debounce_ms, self.allow_empty, self.interactive)
+end
+
 return M
