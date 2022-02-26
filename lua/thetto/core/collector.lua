@@ -37,14 +37,14 @@ function Collector.new(source_name, source_opts, opts)
     filters = filters,
     sorters = sorters,
     input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
-    _result = SourceResult.new(source.name),
-    _source_ctx = SourceContext.new(
+    source_ctx = SourceContext.new(
       opts.pattern,
       opts.cwd,
       opts.debounce_ms,
       opts.allow_empty,
       filters:has_interactive()
     ),
+    _result = SourceResult.new(source.name),
     _ignorecase = opts.ignorecase,
     _smartcase = opts.smartcase,
     _display_limit = opts.display_limit,
@@ -71,7 +71,7 @@ function Collector.attach(self, input_bufnr)
     end
     return self:update()
   end
-  self.update_with_debounce = wraplib.debounce(self._source_ctx.debounce_ms, on_input)
+  self.update_with_debounce = wraplib.debounce(self.source_ctx.debounce_ms, on_input)
 end
 
 function Collector.attach_ui(self, ui)
@@ -93,13 +93,13 @@ function Collector.start(self, input_pattern)
     self._result:reset()
   end
 
-  local source_ctx = self._source_ctx:from(input_pattern or self._source_ctx.pattern)
+  local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
   local result, err = self.source:collect(source_ctx, on_update_job, reset)
   if err ~= nil then
     return err
   end
   self._result = result
-  self._source_ctx = source_ctx
+  self.source_ctx = source_ctx
 
   return nil
 end
@@ -227,12 +227,12 @@ end
 function Collector._update_items(self)
   self.items = self:_items()
 
-  if not self._source_ctx.interactive then
+  if not self.source_ctx.interactive then
     return self:_send_redraw_event()
   end
 
   local input_pattern = self.filters:extract_interactive(self.input_lines)
-  if self._source_ctx.pattern == input_pattern then
+  if self.source_ctx.pattern == input_pattern then
     return self:_send_redraw_event()
   end
 

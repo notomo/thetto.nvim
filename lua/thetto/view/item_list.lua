@@ -74,8 +74,8 @@ function ItemList.redraw(self, items)
   end
 end
 
-function ItemList.highlight(self, first_line, raw_items, source, filters, filter_ctxs)
-  source:highlight(self._bufnr, first_line, raw_items)
+function ItemList.highlight(self, first_line, raw_items, source, filters, filter_ctxs, source_ctx)
+  source:highlight(self._bufnr, first_line, raw_items, source_ctx)
   source:highlight_sign(self._bufnr, first_line, raw_items)
 
   local highligher = source.highlights:create(self._bufnr)

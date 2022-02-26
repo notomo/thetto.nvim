@@ -45,7 +45,6 @@ function Source.new(name, source_opts, opts)
     compiled_colors = vim.tbl_map(function(color)
       return { regex = vim.regex(color.pattern), chunks = color.chunks }
     end, origin.colors or source_config.colors or base.colors),
-    ctx = {},
     _origin = origin,
   }
 
@@ -57,14 +56,8 @@ function Source.__index(self, k)
 end
 
 function Source.collect(self, opts, append, reset)
-  self.append = function(_, items, source_ctx)
-    local err = append(items)
-    if err ~= nil then
-      return err
-    end
-    if source_ctx ~= nil then
-      self.ctx = source_ctx
-    end
+  self.append = function(_, items)
+    return append(items)
   end
   self.reset = reset
 

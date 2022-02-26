@@ -9,7 +9,7 @@ function M.collect(self, opts)
       return { value = line }
     end, lines)
     if opts.interactive then
-      self:append(items, { items = items })
+      self:append(items)
     end
     return items, nil, self.errors.skip_empty_pattern
   end
@@ -22,7 +22,7 @@ function M.collect(self, opts)
       local items = vim.tbl_map(function(output)
         return { value = output }
       end, job_self:get_stdout())
-      self:append(items, { items = items })
+      self:append(items)
     end,
     on_stderr = function(job_self)
       local items = vim.tbl_map(function(output)
@@ -31,7 +31,6 @@ function M.collect(self, opts)
       if #items == 0 then
         return
       end
-      vim.list_extend(items, self.ctx.items)
       self:reset()
       self:append(items)
     end,

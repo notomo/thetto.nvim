@@ -61,7 +61,7 @@ function M.collect(self, opts)
       })
       ::continue::
     end
-    self:append(items, { pattern = pattern })
+    self:append(items)
     items = {}
   end)
 
@@ -85,9 +85,9 @@ vim.cmd("highlight default link ThettoFileGrepMatch Define")
 -- NOTICE: support only this pattern
 local highlight_target = vim.regex("\\v[[:alnum:]_]+")
 
-function M.highlight(self, bufnr, first_line, items)
+function M.highlight(self, bufnr, first_line, items, source_ctx)
   local highlighter = self.highlights:create(bufnr)
-  local pattern = (self.ctx.pattern or ""):lower()
+  local pattern = (source_ctx.pattern or ""):lower()
   local ok = ({ highlight_target:match_str(pattern) })[1] ~= nil
   for i, item in ipairs(items) do
     highlighter:add("ThettoFileGrepPath", first_line + i - 1, 0, item.column_offsets.value - 1)
