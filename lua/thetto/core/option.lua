@@ -1,4 +1,3 @@
-local inputs = require("thetto.core.input")
 local targets = require("thetto.core.target")
 
 local M = {}
@@ -12,8 +11,9 @@ local default = {
   ignorecase = false,
   smartcase = true,
   input_lines = {},
-  pattern = nil,
-  pattern_type = nil,
+  pattern = function()
+    return nil
+  end,
   offset = 0,
   cwd = ".",
   target = nil,
@@ -51,25 +51,11 @@ function Options.new(raw, source_name)
   end
   opts.cwd = cwd
 
-  if opts.pattern_type ~= nil then
-    local p, err = inputs.get(opts.pattern_type)
-    if err ~= nil then
-      return nil, err
-    end
-    opts.pattern = p
+  if type(opts.pattern) == "function" then
+    opts.pattern = opts.pattern()
   end
 
   return setmetatable(opts, Options), nil
-end
-
-function Options.default_empty()
-  local opts = {}
-  for key, value in pairs(default) do
-    if type(value) == "table" then
-      opts[key] = value
-    end
-  end
-  return opts
 end
 
 return M

@@ -32,7 +32,14 @@ foo]])
     vim.cmd("setlocal buftype=nofile")
     helper.search("hoge")
 
-    helper.sync_open("file/grep", { opts = { insert = false, pattern_type = "word" } })
+    helper.sync_open("file/grep", {
+      opts = {
+        insert = false,
+        pattern = function()
+          return vim.fn.expand("<cword>")
+        end,
+      },
+    })
 
     assert.exists_pattern("hoge")
 
