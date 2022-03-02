@@ -115,8 +115,8 @@ end
 
 function Filters.apply(self, filter_ctxs, items)
   for i, filter in ipairs(self._filters) do
-    local filter_ctx = filter_ctxs[i]
-    if filter_ctx and filter_ctx.input_line ~= "" then
+    local filter_ctx = filter_ctxs:index(i)
+    if filter_ctx.input_line ~= "" then
       items = filter:apply(filter_ctx, items)
     end
   end
@@ -133,8 +133,8 @@ end
 
 function Filters.highlight(self, filter_ctxs, bufnr, first_line, raw_items)
   for i, filter in ipairs(self._filters) do
-    local filter_ctx = filter_ctxs[i]
-    if filter.highlight ~= nil and filter_ctx and filter_ctx.input_line ~= "" then
+    local filter_ctx = filter_ctxs:index(i)
+    if filter.highlight ~= nil and filter_ctxs:index(i).input_line ~= "" then
       filter:highlight(filter_ctx, bufnr, first_line, raw_items)
     end
   end
