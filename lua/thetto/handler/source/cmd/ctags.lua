@@ -1,3 +1,5 @@
+local filelib = require("thetto.lib.file")
+
 local vim = vim
 
 local M = {}
@@ -6,7 +8,7 @@ M.opts = { ignore = {} }
 
 function M.collect(self, opts)
   local file_path = vim.api.nvim_buf_get_name(0)
-  if not self.filelib.readable(file_path) then
+  if not filelib.readable(file_path) then
     return {}, nil
   end
 

@@ -1,9 +1,6 @@
 local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local jobs = require("thetto.lib.job")
 local pathlib = require("thetto.lib.path")
-local filelib = require("thetto.lib.file")
-local listlib = require("thetto.lib.list")
-local timelib = require("thetto.lib.time")
 local modulelib = require("thetto.lib.module")
 local SourceResult = require("thetto.core.source_result").SourceResult
 local base = require("thetto.handler.source.base")
@@ -14,10 +11,6 @@ local M = {}
 local Source = {
   errors = { skip_empty_pattern = "skip_empty_pattern" },
   jobs = jobs,
-  pathlib = pathlib,
-  filelib = filelib,
-  listlib = listlib,
-  timelib = timelib,
 }
 M.Source = Source
 

@@ -1,9 +1,11 @@
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 M.opts = { merged = false }
 
 function M.collect(self, opts)
-  local _, err = self.filelib.find_git_root()
+  local _, err = filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err
   end

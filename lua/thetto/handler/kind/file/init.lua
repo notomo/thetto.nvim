@@ -1,3 +1,5 @@
+local filelib = require("thetto.lib.file")
+
 local M = {}
 M.__index = M
 
@@ -31,46 +33,46 @@ function M.escape(path)
   return ([[`='%s'`]]):format(path:gsub("'", "''"))
 end
 
-function M.action_open(self, items)
+function M.action_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd("buffer " .. bufnr)
     else
-      vim.cmd("edit " .. self.filelib.escape(item.path))
+      vim.cmd("edit " .. filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
 end
 
-function M.action_tab_open(self, items)
+function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd("tabedit")
       vim.cmd("buffer " .. bufnr)
     else
-      vim.cmd("tabedit " .. self.filelib.escape(item.path))
+      vim.cmd("tabedit " .. filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
 end
 
-function M.action_tab_drop(self, items)
+function M.action_tab_drop(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("tab drop " .. self.filelib.escape(item.path))
+    vim.cmd("tab drop " .. filelib.escape(item.path))
     adjust_cursor(item)
   end
 end
 
-function M.action_vsplit_open(self, items)
+function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd("vsplit")
       vim.cmd("buffer " .. bufnr)
     else
-      vim.cmd("vsplit" .. self.filelib.escape(item.path))
+      vim.cmd("vsplit" .. filelib.escape(item.path))
     end
     adjust_cursor(item)
   end

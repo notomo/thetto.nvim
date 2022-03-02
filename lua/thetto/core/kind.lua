@@ -1,6 +1,5 @@
 local jobs = require("thetto.lib.job")
 local modulelib = require("thetto.lib.module")
-local filelib = require("thetto.lib.file")
 local base = require("thetto.handler.kind.base")
 local vim = vim
 
@@ -26,7 +25,6 @@ local Kind = {}
 M.Kind = Kind
 
 Kind.jobs = jobs
-Kind.filelib = filelib
 
 function Kind.new(executor, name)
   vim.validate({ executor = { executor, "table" }, name = { name, "string" } })

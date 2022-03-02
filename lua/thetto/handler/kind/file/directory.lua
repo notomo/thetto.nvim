@@ -1,26 +1,28 @@
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 function M.after(_) end
 
-function M.action_cd(self, items)
+function M.action_cd(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("lcd " .. self.filelib.escape(item.path))
+    vim.cmd("lcd " .. filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
-function M.action_tab_open(self, items)
+function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
-    vim.cmd("lcd " .. self.filelib.escape(item.path))
+    vim.cmd("lcd " .. filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
-function M.action_vsplit_open(self, items)
+function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
     vim.cmd("vsplit")
-    vim.cmd("lcd " .. self.filelib.escape(item.path))
+    vim.cmd("lcd " .. filelib.escape(item.path))
     M.after(item.path)
   end
 end

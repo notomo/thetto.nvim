@@ -1,14 +1,17 @@
+local pathlib = require("thetto.lib.path")
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
-function M._load(self, path, cwd)
-  if not self.filelib.readable(path) then
+function M._load(_, path, cwd)
+  if not filelib.readable(path) then
     return {}
   end
 
   local items = {}
   local row = 1
   local f = io.open(path, "r")
-  local to_relative = self.pathlib.relative_modifier(cwd)
+  local to_relative = pathlib.relative_modifier(cwd)
   for line in f:lines() do
     local target = vim.fn.matchstr(line, "\\v^\\zs\\S*\\ze:[^=]*$")
     if not (target == "" or target == ".PHONY" or target:find(":") ~= nil) then

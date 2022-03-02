@@ -1,8 +1,10 @@
+local pathlib = require("thetto.lib.path")
+
 local M = {}
 
-function M.collect(self)
+function M.collect()
   local items = {}
-  local home = self.pathlib.home()
+  local home = pathlib.home()
   local paths = vim.api.nvim_list_runtime_paths()
   for _, path in ipairs(paths) do
     local value = path:gsub(home, "~")

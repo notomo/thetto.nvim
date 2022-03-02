@@ -1,3 +1,5 @@
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 function M.action_open(_, items)
@@ -20,11 +22,11 @@ function M.action_vsplit_open(_, items)
   end
 end
 
-function M.action_tab_drop(self, items)
+function M.action_tab_drop(_, items)
   for _, item in ipairs(items) do
     local path = vim.api.nvim_buf_get_name(item.bufnr)
     if path ~= "" then
-      vim.cmd("tab drop " .. self.filelib.escape(path))
+      vim.cmd("tab drop " .. filelib.escape(path))
     end
   end
 end

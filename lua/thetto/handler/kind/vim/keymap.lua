@@ -1,3 +1,5 @@
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 function M.action_execute(_, items)
@@ -12,7 +14,7 @@ function M.action_execute(_, items)
   end
 end
 
-local to_files = function(self, items)
+local to_files = function(_, items)
   local files = {}
   for _, item in ipairs(items) do
     local result = vim.api.nvim_exec("verbose map " .. item.keymap.lhs, true)
@@ -20,7 +22,7 @@ local to_files = function(self, items)
     -- NOTICE: cannot jump to anonymous :source line
     for _, output in ipairs(outputs) do
       local path = output:match("^%s+Last%s+set%s+from%s+(%S+)")
-      if path ~= nil and self.filelib.readable(vim.fn.expand(path)) then
+      if path ~= nil and filelib.readable(vim.fn.expand(path)) then
         table.insert(files, { path = path, row = item.keymap.row })
         break
       end

@@ -1,10 +1,14 @@
+local pathlib = require("thetto.lib.path")
+local listlib = require("thetto.lib.list")
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 M.opts = { file_path = nil, default_paths = {} }
 
 function M.collect(self)
-  local file_path = self.opts.file_path or self.pathlib.user_data_path("file_bookmark.txt")
-  if self.filelib.create_if_need(file_path) then
+  local file_path = self.opts.file_path or pathlib.user_data_path("file_bookmark.txt")
+  if filelib.create_if_need(file_path) then
     local f = io.open(file_path, "w")
     for _, path in ipairs(self.opts.default_paths) do
       f:write(path .. "\n")
@@ -18,7 +22,7 @@ function M.collect(self)
     table.insert(lines, line)
   end
   f:close()
-  lines = self.listlib.unique(lines)
+  lines = listlib.unique(lines)
 
   local paths = {}
   for _, line in ipairs(lines) do

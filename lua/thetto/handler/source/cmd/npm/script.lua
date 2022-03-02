@@ -1,7 +1,9 @@
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
-function M._load(self, path)
-  if not self.filelib.readable(path) then
+function M._load(_, path)
+  if not filelib.readable(path) then
     return {}
   end
 

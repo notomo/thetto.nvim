@@ -1,3 +1,5 @@
+local pathlib = require("thetto.lib.path")
+
 local M = {}
 
 M.opts = {
@@ -36,7 +38,7 @@ function M.collect(self, opts)
     ::continue::
   end
 
-  local to_relative = self.pathlib.relative_modifier(opts.cwd)
+  local to_relative = pathlib.relative_modifier(opts.cwd)
 
   local items = {}
   local item_appender = self.jobs.loop(opts.debounce_ms, function(co)
@@ -45,7 +47,7 @@ function M.collect(self, opts)
       if not ok or output == nil then
         break
       end
-      local path, row, matched_line = self.pathlib.parse_with_row(output)
+      local path, row, matched_line = pathlib.parse_with_row(output)
       if path == nil then
         goto continue
       end

@@ -1,3 +1,4 @@
+local pathlib = require("thetto.lib.path")
 local vim = vim
 
 local M = {}
@@ -31,7 +32,7 @@ end
 
 function M.collect(self, opts)
   local cmd = self.opts.get_command(opts.cwd, self.opts.max_depth)
-  local to_relative = self.pathlib.relative_modifier(opts.cwd)
+  local to_relative = pathlib.relative_modifier(opts.cwd)
 
   local items = {}
   local item_appender = self.jobs.loop(opts.debounce_ms, function(co)

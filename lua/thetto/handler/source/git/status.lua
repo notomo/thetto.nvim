@@ -1,7 +1,10 @@
+local pathlib = require("thetto.lib.path")
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 function M.collect(self, _)
-  local git_root, err = self.filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err
   end
@@ -12,9 +15,9 @@ function M.collect(self, _)
       local items = {}
       for _, output in ipairs(job_self:get_stdout()) do
         local status, path = unpack(vim.split(vim.trim(output), "%s+"))
-        local abs_path = self.pathlib.join(git_root, path)
+        local abs_path = pathlib.join(git_root, path)
         local kind_name
-        if not self.filelib.readable(abs_path) then
+        if not filelib.readable(abs_path) then
           kind_name = "word"
         end
         local value = ("%2s %s"):format(status, path)

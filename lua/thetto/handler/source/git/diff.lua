@@ -1,3 +1,6 @@
+local pathlib = require("thetto.lib.path")
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 local to_hunks = function(lines)
@@ -32,7 +35,7 @@ end
 M.opts = { expr = nil }
 
 function M.collect(self, opts)
-  local git_root, err = self.filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err
   end
@@ -51,7 +54,7 @@ function M.collect(self, opts)
         table.insert(items, {
           value = hunk.desc,
           row = hunk.row,
-          path = path or self.pathlib.join(git_root, hunk.path),
+          path = path or pathlib.join(git_root, hunk.path),
         })
       end
       self:append(items)

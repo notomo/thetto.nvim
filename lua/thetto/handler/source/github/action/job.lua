@@ -1,3 +1,5 @@
+local timelib = require("thetto.lib.time")
+
 local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", run_id = nil }
@@ -36,8 +38,8 @@ function M.collect(self, opts)
           table.insert(states, job.conclusion)
         end
         local state = ("(%s)"):format(table.concat(states, ","))
-        local elapsed_seconds = self.timelib.elapsed_seconds_for_iso_8601(job.started_at, job.completed_at)
-        local desc = ("%s %s %s"):format(title, state, self.timelib.readable(elapsed_seconds))
+        local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(job.started_at, job.completed_at)
+        local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
         table.insert(items, {
           value = job.name,
           url = job.html_url,

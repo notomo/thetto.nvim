@@ -1,8 +1,9 @@
+local listlib = require("thetto.lib.list")
 local vim = vim
 
 local M = {}
 
-function M.collect(self)
+function M.collect()
   local items = {}
 
   local paths = vim.api.nvim_get_runtime_file("doc/tags", true)
@@ -12,7 +13,7 @@ function M.collect(self)
   local pattern = pack_path .. "pack/*/opt/*/doc/tags"
   vim.list_extend(paths, vim.fn.glob(pattern, false, true))
 
-  paths = self.listlib.unique(paths)
+  paths = listlib.unique(paths)
   for _, tags_path in ipairs(paths) do
     local f = io.open(tags_path, "r")
     local doc_path = tags_path:gsub("tags$", "")

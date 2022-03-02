@@ -1,3 +1,5 @@
+local pathlib = require("thetto.lib.path")
+
 local M = {}
 
 function M._find_dir(name, paths)
@@ -38,7 +40,7 @@ function M.collect(self, opts)
         local factors = vim.split(output, "%s+")
         local name = factors[1]
         local version = factors[2]
-        local path = self.pathlib.join(factors[4], name, version)
+        local path = pathlib.join(factors[4], name, version)
 
         local source_path = M._find_dir(name, package_paths)
         path = source_path or path

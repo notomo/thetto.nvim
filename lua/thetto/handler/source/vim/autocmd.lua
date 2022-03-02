@@ -1,3 +1,5 @@
+local pathlib = require("thetto.lib.path")
+
 local M = {}
 
 local Autocmd = {}
@@ -110,7 +112,7 @@ function M.collect(self)
   table.remove(outputs, 1)
 
   local items = {}
-  local parser = Parser.new(self.pathlib.home())
+  local parser = Parser.new(pathlib.home())
   for _, output in ipairs(outputs) do
     parser:eat(output)
   end

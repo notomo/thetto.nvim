@@ -1,3 +1,5 @@
+local pathlib = require("thetto.lib.path")
+local listlib = require("thetto.lib.list")
 local Store = require("thetto.core.store").Store
 local vim = vim
 
@@ -26,12 +28,12 @@ function M.collect(self, opts)
     ::continue::
   end
   vim.list_extend(paths, vim.v.oldfiles)
-  paths = self.listlib.unique(paths)
+  paths = listlib.unique(paths)
 
-  local to_relative = self.pathlib.relative_modifier(opts.cwd)
+  local to_relative = pathlib.relative_modifier(opts.cwd)
   local dir = vim.fn.fnamemodify(opts.cwd, ":t")
   local cwd_marker = self.opts.cwd_marker:format(dir)
-  local home = self.pathlib.home()
+  local home = pathlib.home()
 
   local items = {}
   for _, path in ipairs(vim.tbl_filter(store:validator(), paths)) do

@@ -1,3 +1,6 @@
+local pathlib = require("thetto.lib.path")
+local filelib = require("thetto.lib.file")
+
 local M = {}
 
 function M.collect(self)
@@ -29,7 +32,7 @@ function M._to_items(self, patterns, path)
   table.remove(candidates, index)
 
   local items = {}
-  local home = self.pathlib.home()
+  local home = pathlib.home()
   for _, pattern in ipairs(candidates) do
     local format_pattern, count = pattern:gsub("%%", "%%s")
     if count ~= #matches then
@@ -38,7 +41,7 @@ function M._to_items(self, patterns, path)
 
     local abs_path = format_pattern:format(unpack(matches))
     local value = abs_path:gsub(home, "~")
-    if self.filelib.readable(abs_path) then
+    if filelib.readable(abs_path) then
       table.insert(items, { value = value, path = abs_path })
     elseif self.opts.allow_new then
       table.insert(items, { value = value, path = abs_path, kind_name = "file/new" })
