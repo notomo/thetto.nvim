@@ -1,12 +1,16 @@
 local M = {}
 
-function M.unique(list)
+function M.unique(list, make_key)
+  make_key = make_key or function(v)
+    return v
+  end
   local hash = {}
   local new_list = {}
   for _, v in ipairs(list) do
-    if not hash[v] then
+    local key = make_key(v)
+    if not hash[key] then
       new_list[#new_list + 1] = v
-      hash[v] = true
+      hash[key] = true
     end
   end
   return new_list

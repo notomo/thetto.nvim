@@ -13,6 +13,10 @@ local to_texts = function(filter_ctx)
 end
 
 function M.apply(self, filter_ctx, items)
+  if filter_ctx.input_line == "" then
+    return items
+  end
+
   local filtered = {}
   local texts = to_texts(filter_ctx)
   for _, item in ipairs(items) do
@@ -39,7 +43,7 @@ end
 vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
 
 function M.highlight(self, filter_ctx, bufnr, first_line, items)
-  if self.inversed then
+  if self.inversed or filter_ctx.input_line == "" then
     return
   end
 
