@@ -30,18 +30,18 @@ else
   end
 end
 
-function M.collect(self, opts)
-  local cmd = self.opts.get_command(opts.cwd, self.opts.max_depth)
-  local to_relative = pathlib.relative_modifier(opts.cwd)
+function M.collect(self, source_ctx)
+  local cmd = self.opts.get_command(source_ctx.cwd, self.opts.max_depth)
+  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
 
   local items = {}
-  local item_appender = self.jobs.loop(opts.debounce_ms, function(co)
+  local item_appender = self.jobs.loop(source_ctx.debounce_ms, function(co)
     for _ = 0, self.chunk_max_count do
       local ok, path = coroutine.resume(co)
       if not ok or path == nil then
         break
       end
-      if path == "" or path == opts.cwd then
+      if path == "" or path == source_ctx.cwd then
         goto continue
       end
 
@@ -77,7 +77,7 @@ function M.collect(self, opts)
     on_exit = function(_) end,
     stdout_buffered = false,
     stderr_buffered = false,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
 
   return {}, job

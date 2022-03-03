@@ -34,7 +34,7 @@ end
 
 M.opts = { expr = nil }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return {}, nil, err
@@ -60,7 +60,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
 
   return {}, job

@@ -1,7 +1,7 @@
 local M = {}
 
-function M.collect(self, opts)
-  local pattern = opts.pattern
+function M.collect(self, source_ctx)
+  local pattern = source_ctx.pattern
   if not pattern then
     pattern = vim.fn.input("Pattern: ")
   end
@@ -28,7 +28,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

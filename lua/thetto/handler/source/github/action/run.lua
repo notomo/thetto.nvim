@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", workflow_file_name = nil }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local path
   if self.opts.workflow_file_name then
     path = ("repos/%s/%s/actions/workflows/%s/runs"):format(
@@ -54,7 +54,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

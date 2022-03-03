@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local cmd = { "gh", "api", "-X", "GET", "user/starred", "-F", "per_page=100" }
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self, code)
@@ -20,7 +20,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

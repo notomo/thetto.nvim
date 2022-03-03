@@ -14,16 +14,16 @@ M.opts = {
   },
 }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local items = {}
   for name, c in pairs(self.opts.commands) do
     local range_part = self.opts.range
     local range = nil
-    if opts.range ~= nil then
-      range_part = ("%d,%d"):format(opts.range.first, opts.range.last)
-      range = opts.range
+    if source_ctx.range ~= nil then
+      range_part = ("%d,%d"):format(source_ctx.range.first, source_ctx.range.last)
+      range = source_ctx.range
     end
 
     local flags = c.flags

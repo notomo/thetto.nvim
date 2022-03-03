@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = { owner = ":owner", is_org = false }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local typ = "users"
   if self.opts.is_org then
     typ = "orgs"
@@ -47,7 +47,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

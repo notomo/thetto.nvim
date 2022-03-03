@@ -48,18 +48,20 @@ function Source.__index(self, k)
   return rawget(Source, k) or self._origin[k] or base[k]
 end
 
-function Source.collect(self, opts, append, reset)
+function Source.collect(self, source_ctx, append, reset)
   self.append = function(_, items)
     return append(items)
   end
   self.reset = reset
 
-  local all_items, job, err = self._origin.collect(self, opts)
+  local all_items, job, err = self._origin.collect(self, source_ctx)
   if err ~= nil and err ~= Source.errors.skip_empty_pattern then
     return nil, err
   end
 
-  local empty_is_err = not ((opts.interactive and err == Source.errors.skip_empty_pattern) or opts.allow_empty)
+  local empty_is_err = not (
+      (source_ctx.interactive and err == Source.errors.skip_empty_pattern) or source_ctx.allow_empty
+    )
   local result, res_err = SourceResult.new(self.name, all_items, job, empty_is_err)
   if res_err ~= nil then
     return nil, res_err

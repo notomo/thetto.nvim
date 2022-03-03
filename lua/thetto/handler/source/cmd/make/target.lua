@@ -32,14 +32,14 @@ function M._load(_, path, cwd)
   return items
 end
 
-function M.collect(self, opts)
-  local path = opts.cwd .. "/Makefile"
+function M.collect(self, source_ctx)
+  local path = source_ctx.cwd .. "/Makefile"
   local dir_path = vim.fn.fnamemodify(path, ":h")
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
 
   local items = {}
   for _, p in ipairs(vim.list_extend({ path }, paths)) do
-    items = vim.list_extend(items, M._load(self, p, opts.cwd))
+    items = vim.list_extend(items, M._load(self, p, source_ctx.cwd))
   end
   return items
 end

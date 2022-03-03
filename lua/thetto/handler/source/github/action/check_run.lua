@@ -4,7 +4,7 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", ref = ":branch" }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local path = ("repos/%s/%s/commits/%s/check-runs"):format(self.opts.owner, self.opts.repo, self.opts.ref)
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
   local job = self.jobs.new(cmd, {
@@ -47,7 +47,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

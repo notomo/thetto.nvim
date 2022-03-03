@@ -2,7 +2,7 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local file_path = vim.api.nvim_buf_get_name(0)
   if not filelib.readable(file_path) then
     return {}, nil
@@ -19,7 +19,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
 
   return {}, job

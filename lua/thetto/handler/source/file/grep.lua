@@ -10,19 +10,19 @@ M.opts = {
   separator = "--",
 }
 
-function M.collect(self, opts)
-  local pattern = opts.pattern
-  if not opts.interactive and pattern == nil then
+function M.collect(self, source_ctx)
+  local pattern = source_ctx.pattern
+  if not source_ctx.interactive and pattern == nil then
     pattern = vim.fn.input("Pattern: ")
   end
   if pattern == nil or pattern == "" then
-    if opts.interactive then
+    if source_ctx.interactive then
       self:append({})
     end
     return {}, nil, self.errors.skip_empty_pattern
   end
 
-  local paths = opts.cwd
+  local paths = source_ctx.cwd
   local cmd = vim.list_extend({ self.opts.command }, self.opts.command_opts)
   for _, x in ipairs({
     self.opts.recursive_opt,
@@ -38,10 +38,10 @@ function M.collect(self, opts)
     ::continue::
   end
 
-  local to_relative = pathlib.relative_modifier(opts.cwd)
+  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
 
   local items = {}
-  local item_appender = self.jobs.loop(opts.debounce_ms, function(co)
+  local item_appender = self.jobs.loop(source_ctx.debounce_ms, function(co)
     for _ = 0, self.chunk_max_count do
       local ok, output = coroutine.resume(co)
       if not ok or output == nil then
@@ -75,7 +75,7 @@ function M.collect(self, opts)
     on_exit = function(_) end,
     stdout_buffered = false,
     stderr_buffered = false,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
 
   return {}, job

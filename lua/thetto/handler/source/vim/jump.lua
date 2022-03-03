@@ -4,12 +4,12 @@ local M = {}
 
 M.opts = { per_file = false }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local items = {}
 
   local jumps = vim.fn.reverse(vim.fn.getjumplist(0)[1])
   local home = pathlib.home()
-  local to_relative = pathlib.relative_modifier(opts.cwd)
+  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local current_path = vim.api.nvim_buf_get_name(0)
   for _, jump in ipairs(jumps) do
     local bufnr = jump.bufnr

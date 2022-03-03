@@ -1,14 +1,14 @@
 local M = {}
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local lines = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)
 
-  local pattern = opts.pattern
+  local pattern = source_ctx.pattern
   if pattern == nil or pattern == "" then
     local items = vim.tbl_map(function(line)
       return { value = line }
     end, lines)
-    if opts.interactive then
+    if source_ctx.interactive then
       self:append(items)
     end
     return items, nil, self.errors.skip_empty_pattern

@@ -29,7 +29,7 @@ function M._find_dir(name, paths)
   return nil
 end
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local package_paths = vim.split(package.path, ";", true)
   vim.list_extend(package_paths, vim.split(package.cpath, ";", true))
 
@@ -57,7 +57,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
 
   return {}, job

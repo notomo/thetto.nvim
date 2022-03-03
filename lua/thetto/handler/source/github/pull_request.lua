@@ -8,7 +8,7 @@ M.opts = {
   sort_direction = "desc",
 }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   local cmd = {
     "gh",
     "api",
@@ -54,7 +54,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

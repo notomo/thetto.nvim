@@ -20,8 +20,8 @@ function M._load(_, path)
   return items
 end
 
-function M.collect(self, opts)
-  local path = opts.cwd .. "/package.json"
+function M.collect(self, source_ctx)
+  local path = source_ctx.cwd .. "/package.json"
   return M._load(self, path)
 end
 

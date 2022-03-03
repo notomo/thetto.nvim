@@ -4,7 +4,7 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", job_id = nil }
 
-function M.collect(self, opts)
+function M.collect(self, source_ctx)
   if not self.opts.job_id then
     return {}
   end
@@ -51,7 +51,7 @@ function M.collect(self, opts)
       self:append(items)
     end,
     on_stderr = self.jobs.print_stderr,
-    cwd = opts.cwd,
+    cwd = source_ctx.cwd,
   })
   return {}, job
 end

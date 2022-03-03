@@ -1,9 +1,9 @@
 local M = {}
 
-function M.collect(_, opts)
+function M.collect(_, source_ctx)
   local paths = {}
-  for _, path in ipairs(vim.fn.readdir(opts.cwd)) do
-    local abs_path = vim.fn.fnamemodify(opts.cwd .. "/" .. path, ":p:gs?\\?\\/?")
+  for _, path in ipairs(vim.fn.readdir(source_ctx.cwd)) do
+    local abs_path = vim.fn.fnamemodify(source_ctx.cwd .. "/" .. path, ":p:gs?\\?\\/?")
     table.insert(paths, abs_path)
   end
 
