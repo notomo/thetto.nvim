@@ -6,12 +6,16 @@ local Context = {}
 Context.__index = Context
 M.Context = Context
 
+local now = function()
+  return vim.fn.reltimestr(vim.fn.reltime())
+end
+
 function Context.new(source_name, collector, ui, executor)
   local tbl = {
     collector = collector,
     ui = ui,
     executor = executor,
-    _updated_at = vim.fn.reltimestr(vim.fn.reltime()),
+    _updated_at = now(),
   }
   local self = setmetatable(tbl, Context)
   repository:set(source_name, self)
@@ -36,6 +40,10 @@ function Context.get_from_path(bufnr, pattern)
   vim.validate({ bufnr = { bufnr, "number", true }, pattern = { pattern, "string", true } })
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   pattern = pattern or ""
+
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return nil, "invalid buffer: " .. bufnr
+  end
 
   local path = vim.api.nvim_buf_get_name(bufnr)
   local source_name = path:match("^thetto://(.+)/thetto" .. pattern)
@@ -107,6 +115,10 @@ function Context.resume_next(self)
     return nil, "not found state for resume"
   end
   return resumed, nil
+end
+
+function Context.on_close(self)
+  self._updated_at = now()
 end
 
 function Context.resume_last()

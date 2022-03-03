@@ -565,6 +565,26 @@ test2]])
 
     assert.current_line("")
   end)
+
+  it("can resume source that is closed latest", function()
+    helper.set_lines([[
+test1
+test2]])
+
+    thetto.start("line", { opts = { insert = false } })
+    thetto.execute("quit")
+
+    thetto.start("vim/runtimepath", { opts = { insert = false } })
+    thetto.execute("quit")
+
+    thetto.resume()
+    thetto.execute("resume_previous")
+    thetto.execute("quit")
+
+    thetto.resume()
+
+    assert.exists_pattern("test1")
+  end)
 end)
 
 describe("thetto.resume_execute()", function()

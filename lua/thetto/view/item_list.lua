@@ -132,6 +132,11 @@ function ItemList.close(self)
   end
   self._closed = true
 
+  local ctx = Context.get_from_path(self._bufnr)
+  if ctx then
+    ctx:on_close()
+  end
+
   vim.cmd("autocmd! " .. "theto_closed_" .. self._bufnr)
   windowlib.close(self._window)
 end
