@@ -42,6 +42,7 @@ function Collector.new(source_name, source_opts, opts)
       opts.cwd,
       opts.debounce_ms,
       opts.allow_empty,
+      opts.range,
       filters:has_interactive()
     ),
     _result = SourceResult.new(source.name),

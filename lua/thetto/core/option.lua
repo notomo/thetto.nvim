@@ -55,6 +55,10 @@ function Options.new(raw, source_name)
     opts.pattern = opts.pattern()
   end
 
+  if not opts.range then
+    opts.range = require("thetto.lib.mode").visual_range()
+  end
+
   return setmetatable(opts, Options), nil
 end
 
