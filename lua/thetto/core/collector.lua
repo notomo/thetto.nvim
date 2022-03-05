@@ -37,14 +37,7 @@ function Collector.new(source_name, source_opts, opts)
     filters = filters,
     sorters = sorters,
     input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
-    source_ctx = SourceContext.new(
-      opts.pattern,
-      opts.cwd,
-      opts.debounce_ms,
-      opts.allow_empty,
-      opts.range,
-      filters:has_interactive()
-    ),
+    source_ctx = SourceContext.new(opts.pattern, opts.cwd, opts.debounce_ms, opts.range, filters:has_interactive()),
     _result = SourceResult.new(source.name),
     _ignorecase = opts.ignorecase,
     _smartcase = opts.smartcase,

@@ -59,9 +59,7 @@ function Source.collect(self, source_ctx, append, reset)
     return nil, err
   end
 
-  local empty_is_err = not (
-      (source_ctx.interactive and err == Source.errors.skip_empty_pattern) or source_ctx.allow_empty
-    )
+  local empty_is_err = not (source_ctx.interactive and err == Source.errors.skip_empty_pattern)
   local result, res_err = SourceResult.new(self.name, all_items, job, empty_is_err)
   if res_err ~= nil then
     return nil, res_err

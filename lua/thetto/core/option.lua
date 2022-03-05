@@ -23,7 +23,6 @@ local default = {
   debounce_ms = 50,
   filters = nil,
   sorters = nil,
-  allow_empty = false,
   auto = nil,
   immediately = false,
   range = nil,
