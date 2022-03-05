@@ -26,11 +26,9 @@ function M.highlight_sign(self, bufnr, first_line, items)
 end
 
 M.color_label_key = "value"
-M.colors = { { always = true, pattern = "", chunks = { { " ", "ThettoColorLabelOthers" } } } }
 M.filters = { "substring" }
 M.sorters = {}
 M.kind_name = "base"
-M.opts = {}
 M.chunk_max_count = 10000
 
 return M
