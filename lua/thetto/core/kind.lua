@@ -34,35 +34,25 @@ function Kind.new(executor, name)
     return nil, err
   end
 
-  local source_name = executor.source_name
-  local source_user_opts = {}
-  local source_user_behaviors = {}
-  local config = require("thetto.core.custom").config
-  if config.source_actions ~= nil and config.source_actions[source_name] ~= nil then
-    source_user_opts = config.source_actions[source_name].opts or {}
-    source_user_behaviors = config.source_actions[source_name].behaviors or {}
-  end
+  local execute_opts = executor.execute_opts
 
-  local user_opts = {}
-  local user_behaviors = {}
-  if config.kind_actions ~= nil and config.kind_actions[name] ~= nil then
-    user_opts = config.kind_actions[name].opts or {}
-    user_behaviors = config.kind_actions[name].behaviors or {}
-  end
+  local kind_actions = execute_opts.kind_actions[name] or {}
+  local user_opts = kind_actions.opts or {}
+  local user_behaviors = kind_actions.behaviors or {}
 
   local tbl = {
     name = name,
     executor = executor,
     default_action = executor.default_action_name,
-    source_name = source_name,
-    opts = vim.tbl_deep_extend("force", base.opts, origin.opts or {}, user_opts, source_user_opts),
+    opts = vim.tbl_deep_extend("force", base.opts, origin.opts or {}, user_opts, execute_opts.source_actions.opts),
     behaviors = vim.tbl_deep_extend(
       "force",
       base.behaviors,
       origin.behaviors or {},
       user_behaviors,
-      source_user_behaviors
+      execute_opts.source_actions.behaviors
     ),
+    _execute_opts = executor.execute_opts,
     _origin = origin,
   }
   return setmetatable(tbl, Kind)
@@ -92,24 +82,22 @@ function Kind._action_key(self, action_name)
 end
 
 function Kind.find_action(self, action_name, action_opts)
-  local config = require("thetto.core.custom").config
-
   local key, name = self:_action_key(action_name)
   local opts = vim.tbl_extend("force", self.opts[name] or {}, action_opts)
   local behavior = vim.tbl_deep_extend("force", { quit = true }, self.behaviors[name] or {})
 
-  local source_action = config.source_actions[self.source_name]
-  if source_action ~= nil and source_action[key] then
-    return Action.new(self, source_action[key], opts, behavior), nil
+  local source_actions = self._execute_opts.source_actions
+  if source_actions[key] then
+    return Action.new(self, source_actions[key], opts, behavior), nil
   end
 
-  local kind_action = config.kind_actions[self.name]
+  local kind_action = self._execute_opts.kind_actions[self.name]
   if kind_action ~= nil and kind_action[key] then
     return Action.new(self, kind_action[key], opts, behavior), nil
   end
 
   for _, extend in ipairs(self._origin.extends or {}) do
-    local action = config.kind_actions[extend.name]
+    local action = self._execute_opts.kind_actions[extend.name]
     if action ~= nil and action[key] then
       return Action.new(self, action[key], opts, behavior), nil
     end
@@ -125,7 +113,6 @@ end
 
 function Kind.action_names(self)
   local names = {}
-  local config = require("thetto.core.custom").config
 
   local extends = vim.tbl_map(function(e)
     return getmetatable(e)
@@ -139,8 +126,8 @@ function Kind.action_names(self)
     "force",
     actions,
     base,
-    config.source_actions[self.source_name] or {},
-    config.kind_actions[self.name] or {}
+    self._execute_opts.source_actions,
+    self._execute_opts.kind_actions[self.name] or {}
   )
   for key in pairs(actions) do
     if vim.startswith(key, Action.PREFIX) then

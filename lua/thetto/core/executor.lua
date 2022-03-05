@@ -7,17 +7,17 @@ local Executor = {}
 Executor.__index = Executor
 M.Executor = Executor
 
-function Executor.new(source_name, default_kind_name, default_action_opts, default_action_name)
+function Executor.new(default_kind_name, default_action_opts, default_action_name, execute_opts)
   vim.validate({
-    source_name = { source_name, "string" },
     default_kind_name = { default_kind_name, "string" },
     default_action_opts = { default_action_opts, "table" },
     default_action_name = { default_action_name, "string", true },
+    execute_opts = { execute_opts, "table" },
   })
   local tbl = {
-    source_name = source_name,
-    _default_action_opts = default_action_opts,
     default_action_name = default_action_name,
+    execute_opts = execute_opts,
+    _default_action_opts = default_action_opts,
     _default_kind_name = default_kind_name,
   }
   return setmetatable(tbl, Executor)

@@ -13,6 +13,7 @@ function ReturnValue.start(source_name, raw_args)
   if opts_err ~= nil then
     return nil, opts_err
   end
+  local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name)
 
   local old_ctx = Context.get(source_name)
   if old_ctx then
@@ -24,10 +25,10 @@ function ReturnValue.start(source_name, raw_args)
     return nil, err
   end
   local executor = require("thetto.core.executor").Executor.new(
-    source_name,
     collector.source.kind_name,
     args.action_opts,
-    opts.action
+    opts.action,
+    execute_opts
   )
   local ui = UI.new(collector, opts.insert, opts.display_limit)
   local ctx = Context.new(source_name, collector, ui, executor)

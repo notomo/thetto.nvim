@@ -45,8 +45,6 @@ function Option.new(raw_opts, raw_source_opts, source_name)
     return sorters or source_config.sorters or source_sorters or config.sorters
   end
 
-  local source_opts = vim.tbl_extend("force", source_config.opts or {}, raw_source_opts)
-
   local cwd = vim.fn.expand(opts.cwd)
   if cwd == "." then
     cwd = vim.fn.fnamemodify(".", ":p")
@@ -72,7 +70,26 @@ function Option.new(raw_opts, raw_source_opts, source_name)
     opts.range = require("thetto.lib.mode").visual_range()
   end
 
+  local source_opts = vim.tbl_extend("force", source_config.opts or {}, raw_source_opts)
   return opts, source_opts, nil
+end
+
+local ExecuteOption = {}
+ExecuteOption.__index = ExecuteOption
+M.ExecuteOption = ExecuteOption
+
+function ExecuteOption.new(source_name)
+  local config = require("thetto.core.custom").config
+
+  local source_actions = config.source_actions[source_name] or {}
+  source_actions.opts = source_actions.opts or {}
+  source_actions.behaviors = source_actions.behaviors or {}
+
+  local tbl = {
+    kind_actions = config.kind_actions,
+    source_actions = source_actions,
+  }
+  return setmetatable(tbl, ExecuteOption)
 end
 
 return M

@@ -1,13 +1,10 @@
 local M = {}
 
 M.default_config = {
-  kind = {},
   kind_actions = {},
 
   source = {},
   source_actions = {},
-
-  store = {},
 
   filters = nil,
   sorters = nil,
