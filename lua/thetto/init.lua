@@ -20,8 +20,8 @@ function M.resume_execute(args)
   return require("thetto.command").resume_execute(args)
 end
 
-function M.setup(config)
-  return require("thetto.command").setup(config)
+function M.setup(setting)
+  return require("thetto.command").setup(setting)
 end
 
 function M.setup_store(name, opts)

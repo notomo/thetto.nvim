@@ -2,6 +2,21 @@ local targets = require("thetto.core.target")
 
 local M = {}
 
+M.user_default = {
+  kind_actions = {},
+
+  source = {},
+  source_actions = {},
+
+  filters = nil,
+  sorters = nil,
+  global_opts = {},
+}
+function M.set_default(setting)
+  vim.validate({ setting = { setting, "table" } })
+  M.user_default = vim.tbl_deep_extend("force", M.user_default, setting)
+end
+
 local Option = {}
 Option.__index = Option
 M.Option = Option
@@ -29,20 +44,19 @@ local default = {
 }
 
 function Option.new(raw_opts, raw_source_opts, source_name)
-  local config = require("thetto.core.custom").config
-  local source_config = config.source[source_name] or {}
+  local source_config = M.user_default.source[source_name] or {}
 
-  local opts = vim.tbl_extend("force", default, config.global_opts, source_config.global_opts or {}, raw_opts)
+  local opts = vim.tbl_extend("force", default, M.user_default.global_opts, source_config.global_opts or {}, raw_opts)
   opts.colors = source_config.colors or {}
 
   local filters = opts.filters
   opts.filters = function(source_filters)
-    return filters or source_config.filters or source_filters or config.filters
+    return filters or source_config.filters or source_filters or M.user_default.filters
   end
 
   local sorters = opts.sorters
   opts.sorters = function(source_sorters)
-    return sorters or source_config.sorters or source_sorters or config.sorters
+    return sorters or source_config.sorters or source_sorters or M.user_default.sorters
   end
 
   local cwd = vim.fn.expand(opts.cwd)
@@ -79,14 +93,12 @@ ExecuteOption.__index = ExecuteOption
 M.ExecuteOption = ExecuteOption
 
 function ExecuteOption.new(source_name)
-  local config = require("thetto.core.custom").config
-
-  local source_actions = config.source_actions[source_name] or {}
+  local source_actions = M.user_default.source_actions[source_name] or {}
   source_actions.opts = source_actions.opts or {}
   source_actions.behaviors = source_actions.behaviors or {}
 
   local tbl = {
-    kind_actions = config.kind_actions,
+    kind_actions = M.user_default.kind_actions,
     source_actions = source_actions,
   }
   return setmetatable(tbl, ExecuteOption)

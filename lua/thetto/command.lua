@@ -122,8 +122,8 @@ function ReturnValue.resume_execute(raw_args)
   return ctx.executor:action(items, ctx, args.action_name, args.action_opts)
 end
 
-function ShowError.setup(config)
-  return require("thetto.core.custom").set(config)
+function ShowError.setup(setting)
+  return require("thetto.core.option").set_default(setting)
 end
 
 function ShowError.setup_store(name, opts)
