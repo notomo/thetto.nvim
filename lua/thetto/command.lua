@@ -9,7 +9,7 @@ function ReturnValue.start(source_name, raw_args)
   vim.validate({ source_name = { source_name, "string" } })
 
   local args = require("thetto.core.argument").StartArgs.new(raw_args)
-  local opts, opts_err = require("thetto.core.option").Options.new(args.opts, source_name)
+  local opts, source_opts, opts_err = require("thetto.core.option").Option.new(args.opts, args.source_opts, source_name)
   if opts_err ~= nil then
     return nil, opts_err
   end
@@ -19,7 +19,7 @@ function ReturnValue.start(source_name, raw_args)
     old_ctx.ui:close()
   end
 
-  local collector, err = require("thetto.core.collector").Collector.new(source_name, args.source_opts, opts)
+  local collector, err = require("thetto.core.collector").Collector.new(source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
