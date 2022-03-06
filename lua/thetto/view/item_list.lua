@@ -6,11 +6,8 @@ local modelib = require("thetto.lib.mode")
 local highlightlib = require("thetto.lib.highlight")
 local vim = vim
 
-local M = {}
-
 local ItemList = {}
 ItemList.__index = ItemList
-M.ItemList = ItemList
 
 local FILETYPE = "thetto"
 
@@ -36,7 +33,7 @@ function ItemList.new(source_name, width, height, row, column)
     style = "minimal",
     border = {
       { " ", "NormalFloat" },
-      { border_char, M._ThettoAboveBorder() },
+      { border_char, ItemList._ThettoAboveBorder() },
       { " ", "NormalFloat" },
       { " ", "NormalFloat" },
       { "", "NormalFloat" },
@@ -183,7 +180,7 @@ function ItemList.has(self, id)
   return self._window == id
 end
 
-M._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl_group)
+ItemList._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl_group)
   return highlightlib.default(hl_group, {
     ctermbg = { "NormalFloat", 235 },
     guibg = { "NormalFloat", "#213243" },
@@ -192,4 +189,4 @@ M._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl
   })
 end)
 
-return M
+return ItemList

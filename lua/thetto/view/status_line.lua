@@ -4,11 +4,8 @@ local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
-local M = {}
-
 local StatusLine = {}
 StatusLine.__index = StatusLine
-M.StatusLine = StatusLine
 
 function StatusLine.new(source_name, width, height, row, column)
   local bufnr = bufferlib.scratch(function(b)
@@ -95,4 +92,4 @@ function StatusLine.has(self, id)
   return self._window == id
 end
 
-return M
+return StatusLine

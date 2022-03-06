@@ -3,11 +3,8 @@ local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
-local M = {}
-
 local Inputter = {}
 Inputter.__index = Inputter
-M.Inputter = Inputter
 
 local FILETYPE = "thetto-input"
 
@@ -138,4 +135,4 @@ function Inputter.has(self, id)
   return self._window == id
 end
 
-return M
+return Inputter

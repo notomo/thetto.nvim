@@ -1,8 +1,5 @@
-local M = {}
-
 local State = {}
 State.__index = State
-M.State = State
 
 function State.new(insert)
   local active = "list"
@@ -79,4 +76,4 @@ function State.update_row(self, offset, item_count, display_limit)
   self.row = row
 end
 
-return M
+return State

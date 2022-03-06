@@ -3,11 +3,8 @@ local windowlib = require("thetto.lib.window")
 local filelib = require("thetto.lib.file")
 local vim = vim
 
-local M = {}
-
 local Sidecar = {}
 Sidecar.__index = Sidecar
-M.Sidecar = Sidecar
 
 function Sidecar.new()
   local tbl = { _window = nil, _hl_factory = HighlighterFactory.new("thetto-preview") }
@@ -106,4 +103,4 @@ function Sidecar._opened(self)
   return self._window ~= nil and vim.api.nvim_win_is_valid(self._window)
 end
 
-return M
+return Sidecar

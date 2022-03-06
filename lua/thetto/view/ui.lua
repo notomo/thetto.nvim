@@ -1,9 +1,9 @@
 local Context = require("thetto.core.context")
-local ItemList = require("thetto.view.item_list").ItemList
-local Inputter = require("thetto.view.inputter").Inputter
-local StatusLine = require("thetto.view.status_line").StatusLine
-local Sidecar = require("thetto.view.sidecar").Sidecar
-local State = require("thetto.view.state").State
+local ItemList = require("thetto.view.item_list")
+local Inputter = require("thetto.view.inputter")
+local StatusLine = require("thetto.view.status_line")
+local Sidecar = require("thetto.view.sidecar")
+local State = require("thetto.view.state")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
