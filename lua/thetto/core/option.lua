@@ -1,5 +1,3 @@
-local targets = require("thetto.core.target")
-
 local M = {}
 
 M.user_default = {
@@ -30,9 +28,9 @@ local default = {
     return nil
   end,
   offset = 0,
-  cwd = ".",
-  target = nil,
-  target_patterns = {},
+  cwd = function()
+    return "."
+  end,
   action = nil,
   display_limit = 100,
   debounce_ms = 50,
@@ -59,20 +57,16 @@ function Option.new(raw_opts, raw_source_opts, source_name)
     return sorters or source_config.sorters or source_sorters or M.user_default.sorters
   end
 
-  local cwd = vim.fn.expand(opts.cwd)
+  local cwd = opts.cwd
+  if type(cwd) == "function" then
+    cwd = cwd()
+  end
+  cwd = vim.fn.expand(cwd)
   if cwd == "." then
     cwd = vim.fn.fnamemodify(".", ":p")
   end
   if cwd ~= "/" and vim.endswith(cwd, "/") then
     cwd = cwd:sub(1, #cwd - 1)
-  end
-
-  if opts.target ~= nil then
-    local target_cwd, err = targets.get(opts.target, opts.target_patterns)
-    if err then
-      return nil, nil, err
-    end
-    cwd = target_cwd
   end
   opts.cwd = cwd
 

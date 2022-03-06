@@ -1,5 +1,6 @@
 local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
+local util = helper.require("thetto.util")
 
 describe("file/in_dir source", function()
   before_each(helper.before_each)
@@ -28,13 +29,11 @@ describe("file/in_dir source", function()
   end)
 
   it("can show files in project dir", function()
-    require("thetto.core.target").project_root_patterns = { "0_root_pattern" }
-
     helper.new_directory("0_root_pattern")
     helper.new_directory("dir")
     helper.cd("dir")
 
-    thetto.start("file/in_dir", { opts = { insert = false, target = "project" } })
+    thetto.start("file/in_dir", { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }) } })
 
     vim.cmd("normal! gg")
     assert.current_line("0_root_pattern/")
