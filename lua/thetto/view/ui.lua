@@ -1,4 +1,4 @@
-local Context = require("thetto.core.context").Context
+local Context = require("thetto.core.context")
 local ItemList = require("thetto.view.item_list").ItemList
 local Inputter = require("thetto.view.inputter").Inputter
 local StatusLine = require("thetto.view.status_line").StatusLine
@@ -7,11 +7,8 @@ local State = require("thetto.view.state").State
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
-local M = {}
-
 local UI = {}
 UI.__index = UI
-M.UI = UI
 
 function UI.new(collector, insert, display_limit)
   vim.validate({
@@ -122,7 +119,7 @@ function UI.redraw(self, input_lines, row)
     return err
   end
 
-  M._changed_after(input_lines)
+  UI._changed_after(input_lines)
 end
 
 function UI.on_move(self)
@@ -259,7 +256,7 @@ function UI._column(self)
 end
 
 -- for testing
-function M._changed_after(_) end
+function UI._changed_after(_) end
 
 vim.cmd("highlight default link ThettoSelected Statement")
 vim.cmd("highlight default link ThettoInfo StatusLine")
@@ -269,4 +266,4 @@ vim.cmd("highlight default link ThettoInput NormalFloat")
 vim.cmd("highlight default link ThettoPreview Search")
 vim.cmd("highlight default link ThettoFilterInfo Comment")
 
-return M
+return UI

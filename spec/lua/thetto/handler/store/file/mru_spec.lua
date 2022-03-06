@@ -11,7 +11,7 @@ describe("file/mru store", function()
   end)
 
   after_each(function()
-    store.Store.get("file/mru"):quit()
+    store.get("file/mru"):quit()
     helper.after_each()
   end)
 
@@ -23,12 +23,12 @@ describe("file/mru store", function()
     vim.cmd("edit file1")
     vim.cmd("edit file2")
 
-    local data = store.Store.get("file/mru"):data()
+    local data = store.get("file/mru"):data()
 
     assert.equals(helper.test_data_dir .. "file2", data[1])
     assert.equals(helper.test_data_dir .. "file1", data[2])
 
-    store.Store.get("file/mru"):save()
+    store.get("file/mru"):save()
 
     local f = io.open(store_file_path)
     local content = vim.fn.split(f:read("*a"), "\n", false)

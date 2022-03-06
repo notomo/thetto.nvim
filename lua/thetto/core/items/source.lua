@@ -2,17 +2,14 @@ local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local jobs = require("thetto.lib.job")
 local pathlib = require("thetto.lib.path")
 local modulelib = require("thetto.lib.module")
-local SourceResult = require("thetto.core.items.source_result").SourceResult
+local SourceResult = require("thetto.core.items.source_result")
 local base = require("thetto.handler.source.base")
 local vim = vim
-
-local M = {}
 
 local Source = {
   errors = { skip_empty_pattern = "skip_empty_pattern" },
   jobs = jobs,
 }
-M.Source = Source
 
 function Source.new(name, source_opts, opts)
   vim.validate({
@@ -85,4 +82,4 @@ function Source.all_names()
   return names
 end
 
-return M
+return Source

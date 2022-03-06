@@ -1,11 +1,8 @@
-local Kind = require("thetto.core.kind").Kind
+local Kind = require("thetto.core.kind")
 local listlib = require("thetto.lib.list")
-
-local M = {}
 
 local Executor = {}
 Executor.__index = Executor
-M.Executor = Executor
 
 function Executor.new(default_kind_name, default_action_opts, default_action_name, execute_opts)
   vim.validate({
@@ -137,4 +134,4 @@ function Executor.auto(self, ctx, action_name)
   end
 end
 
-return M
+return Executor

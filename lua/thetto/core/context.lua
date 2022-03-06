@@ -1,10 +1,7 @@
 local repository = require("thetto.lib.repository").Repository.new("context")
 
-local M = {}
-
 local Context = {}
 Context.__index = Context
-M.Context = Context
 
 local now = function()
   return vim.fn.reltimestr(vim.fn.reltime())
@@ -140,4 +137,4 @@ function Context.all()
   return repository:all()
 end
 
-return M
+return Context

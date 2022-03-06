@@ -3,8 +3,6 @@ local modulelib = require("thetto.lib.module")
 local base = require("thetto.handler.kind.base")
 local vim = vim
 
-local M = {}
-
 local Action = {}
 Action.PREFIX = "action_"
 
@@ -21,15 +19,14 @@ function Action.__index(self, k)
   return rawget(Action, k) or self._kind[k]
 end
 
-local Kind = {}
-M.Kind = Kind
-
-Kind.jobs = jobs
+local Kind = {
+  jobs = jobs,
+}
 
 function Kind.new(executor, name)
   vim.validate({ executor = { executor, "table" }, name = { name, "string" } })
 
-  local origin, err = M._find(name)
+  local origin, err = Kind._find(name)
   if err then
     return nil, err
   end
@@ -138,7 +135,7 @@ function Kind.action_names(self)
   return names
 end
 
-function M._find(name)
+function Kind._find(name)
   local origin = modulelib.find("thetto.handler.kind." .. name)
   if origin == nil then
     return nil, "not found kind: " .. name
@@ -146,11 +143,11 @@ function M._find(name)
   return origin, nil
 end
 
-function M.extend(raw_kind, ...)
+function Kind.extend(raw_kind, ...)
   local extend_names = { ... }
   local extends = {}
   for _, name in ipairs(extend_names) do
-    local extend, err = M._find(name)
+    local extend, err = Kind._find(name)
     if err then
       error(err)
     end
@@ -175,4 +172,4 @@ function M.extend(raw_kind, ...)
   })
 end
 
-return M
+return Kind

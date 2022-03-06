@@ -1,4 +1,4 @@
-local Context = require("thetto.core.context").Context
+local Context = require("thetto.core.context")
 local windowlib = require("thetto.lib.window")
 local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")

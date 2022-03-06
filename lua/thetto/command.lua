@@ -1,7 +1,7 @@
 local ReturnValue = require("thetto.lib.error_handler").for_return_value()
 local ShowError = require("thetto.lib.error_handler").for_show_error()
 
-local Context = require("thetto.core.context").Context
+local Context = require("thetto.core.context")
 
 function ReturnValue.start(source_name, raw_args)
   vim.validate({ source_name = { source_name, "string" } })
@@ -18,17 +18,17 @@ function ReturnValue.start(source_name, raw_args)
     old_ctx.ui:close()
   end
 
-  local collector, err = require("thetto.core.collector").Collector.new(source_name, source_opts, opts)
+  local collector, err = require("thetto.core.collector").new(source_name, source_opts, opts)
   if err ~= nil then
     return nil, err
   end
-  local executor = require("thetto.core.executor").Executor.new(
+  local executor = require("thetto.core.executor").new(
     collector.source.kind_name,
     args.action_opts,
     opts.action,
     execute_opts
   )
-  local ui = require("thetto.view.ui").UI.new(collector, opts.insert, opts.display_limit)
+  local ui = require("thetto.view.ui").new(collector, opts.insert, opts.display_limit)
   local ctx = Context.new(source_name, collector, ui, executor)
 
   local start_err = collector:start(opts.pattern)
@@ -125,7 +125,7 @@ function ShowError.setup(setting)
 end
 
 function ShowError.setup_store(name, opts)
-  local store, err = require("thetto.core.store").Store.new(name, opts)
+  local store, err = require("thetto.core.store").new(name, opts)
   if err ~= nil then
     return err
   end

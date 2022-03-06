@@ -1,8 +1,5 @@
-local M = {}
-
 local SourceResult = {}
 SourceResult.__index = SourceResult
-M.SourceResult = SourceResult
 
 local SourcePendingResult = {}
 
@@ -105,4 +102,4 @@ function SourceResult.apply_selected(self, items)
   end
 end
 
-return M
+return SourceResult

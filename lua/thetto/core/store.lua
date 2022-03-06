@@ -2,10 +2,7 @@ local modulelib = require("thetto.lib.module")
 local pathlib = require("thetto.lib.path")
 local repository = require("thetto.lib.repository").Repository.new("store")
 
-local M = {}
-
 local Store = {}
-M.Store = Store
 
 function Store.new(name, opts)
   vim.validate({ name = { name, "string" }, opts = { opts, "table", true } })
@@ -55,4 +52,4 @@ function Store.new_or_get(name)
   return Store.new(name)
 end
 
-return M
+return Store

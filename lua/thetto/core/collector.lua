@@ -1,6 +1,6 @@
-local Source = require("thetto.core.items.source").Source
+local Source = require("thetto.core.items.source")
 local SourceContext = require("thetto.core.items.source_context")
-local SourceResult = require("thetto.core.items.source_result").SourceResult
+local SourceResult = require("thetto.core.items.source_result")
 local Items = require("thetto.core.items")
 local Filters = require("thetto.core.items.filters")
 local Sorters = require("thetto.core.items.sorters")
@@ -8,11 +8,8 @@ local wraplib = require("thetto.lib.wrap")
 local listlib = require("thetto.lib.list")
 local vim = vim
 
-local M = {}
-
 local Collector = {}
 Collector.__index = Collector
-M.Collector = Collector
 
 function Collector.new(source_name, source_opts, opts)
   local source, err = Source.new(source_name, source_opts, opts)
@@ -239,4 +236,4 @@ function Collector._update_items(self)
   return self:_send_redraw_event()
 end
 
-return M
+return Collector
