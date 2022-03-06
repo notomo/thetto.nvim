@@ -11,13 +11,22 @@ function M.start(self)
   local paths = filelib.read_lines(self.file_path, 0, self.limit)
   self.persist.paths = vim.tbl_filter(self:validator(), paths)
 
-  vim.cmd(([[
-augroup %s
-  autocmd!
-  autocmd BufEnter * silent lua require("thetto.command").add_to_store("file/mru", tonumber(vim.fn.expand('<abuf>')))
-  autocmd QuitPre * silent lua require("thetto.command").save_to_store("file/mru")
-augroup END
-]]):format(self.augroup_name))
+  vim.api.nvim_create_augroup(self.augroup_name, {})
+  vim.api.nvim_create_autocmd({ "BufEnter" }, {
+    group = self.augroup_name,
+    pattern = { "*" },
+    callback = function()
+      local bufnr = tonumber(vim.fn.expand("<abuf>"))
+      self:add(bufnr)
+    end,
+  })
+  vim.api.nvim_create_autocmd({ "QuitPre" }, {
+    group = self.augroup_name,
+    pattern = { "*" },
+    callback = function()
+      self:save()
+    end,
+  })
 end
 
 function M.data(self)

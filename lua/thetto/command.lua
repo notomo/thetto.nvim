@@ -1,9 +1,7 @@
-local Context = require("thetto.core.context").Context
-local Store = require("thetto.core.store").Store
-local UI = require("thetto.view.ui").UI
-
 local ReturnValue = require("thetto.lib.error_handler").for_return_value()
 local ShowError = require("thetto.lib.error_handler").for_show_error()
+
+local Context = require("thetto.core.context").Context
 
 function ReturnValue.start(source_name, raw_args)
   vim.validate({ source_name = { source_name, "string" } })
@@ -30,7 +28,7 @@ function ReturnValue.start(source_name, raw_args)
     opts.action,
     execute_opts
   )
-  local ui = UI.new(collector, opts.insert, opts.display_limit)
+  local ui = require("thetto.view.ui").UI.new(collector, opts.insert, opts.display_limit)
   local ctx = Context.new(source_name, collector, ui, executor)
 
   local start_err = collector:start(opts.pattern)
@@ -127,27 +125,11 @@ function ShowError.setup(setting)
 end
 
 function ShowError.setup_store(name, opts)
-  local store, err = Store.new(name, opts)
+  local store, err = require("thetto.core.store").Store.new(name, opts)
   if err ~= nil then
     return err
   end
   return store:start()
-end
-
-function ShowError.add_to_store(name, ...)
-  local store, err = Store.get(name)
-  if err ~= nil then
-    return err
-  end
-  return store:add(...)
-end
-
-function ShowError.save_to_store(name, ...)
-  local store, err = Store.get(name)
-  if err ~= nil then
-    return err
-  end
-  return store:save(...)
 end
 
 return vim.tbl_extend("force", ReturnValue:methods(), ShowError:methods())

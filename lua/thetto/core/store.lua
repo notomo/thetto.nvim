@@ -35,7 +35,7 @@ end
 
 function Store.quit(self)
   repository:delete(self.name)
-  vim.cmd("silent! augroup! " .. self.augroup_name)
+  vim.api.nvim_create_augroup(self.augroup_name, {})
 end
 
 function Store.get(name)

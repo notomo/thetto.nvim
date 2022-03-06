@@ -35,11 +35,16 @@ function StatusLine.new(source_name, width, height, row, column)
     },
   })
   vim.wo[window].winhighlight = "Normal:ThettoInfo,CursorLine:ThettoInfo"
-  local on_info_enter = ("autocmd WinEnter <buffer=%s> lua require('thetto.view.status_line')._on_enter('%s')"):format(
-    bufnr,
-    source_name
-  )
-  vim.cmd(on_info_enter)
+  vim.api.nvim_create_autocmd({ "WinEnter" }, {
+    buffer = bufnr,
+    callback = function()
+      local ctx = Context.get(source_name)
+      if not ctx then
+        return
+      end
+      ctx.ui:into_inputter()
+    end,
+  })
 
   local tbl = { _window = window, _hl_factory = HighlighterFactory.new("thetto-info-text", bufnr) }
   return setmetatable(tbl, StatusLine)
@@ -88,14 +93,6 @@ end
 
 function StatusLine.has(self, id)
   return self._window == id
-end
-
-function M._on_enter(key)
-  local ctx = Context.get(key)
-  if not ctx then
-    return
-  end
-  ctx.ui:into_inputter()
 end
 
 return M

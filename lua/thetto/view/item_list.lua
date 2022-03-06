@@ -47,16 +47,35 @@ function ItemList.new(source_name, width, height, row, column)
   })
 
   local group_name = "theto_closed_" .. bufnr
-  vim.cmd(("augroup %s"):format(group_name))
-  local on_win_closed = (
-    "autocmd %s WinClosed * lua require('thetto.view.item_list')._on_close('%s', tonumber(vim.fn.expand('<afile>')))"
-  ):format(group_name, source_name)
-  vim.cmd(on_win_closed)
-  vim.cmd("augroup END")
+  vim.api.nvim_create_augroup(group_name, {})
+  vim.api.nvim_create_autocmd({ "WinClosed" }, {
+    group = group_name,
+    pattern = { "*" },
+    callback = function()
+      local ctx = Context.get(source_name)
+      if not ctx then
+        return
+      end
+      local id = tonumber(vim.fn.expand("<afile>"))
+      if not ctx.ui:has_window(id) then
+        return
+      end
+      ctx.ui:close()
+    end,
+  })
 
-  vim.cmd(("autocmd BufReadCmd <buffer=%s> lua require('thetto.command').reload(%s)"):format(bufnr, bufnr))
+  vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
+    buffer = bufnr,
+    callback = function()
+      require("thetto.command").reload(bufnr)
+    end,
+  })
 
-  local tbl = { _bufnr = bufnr, _window = window }
+  local tbl = {
+    _bufnr = bufnr,
+    _window = window,
+    _group_name = group_name,
+  }
   return setmetatable(tbl, ItemList)
 end
 
@@ -108,14 +127,24 @@ function ItemList.is_active(self)
 end
 
 function ItemList.enable_on_moved(self, source_name)
-  local on_moved = ("autocmd CursorMoved <buffer=%s> lua require('thetto.view.item_list')._on_moved('%s')"):format(
-    self._bufnr,
-    source_name
-  )
-  vim.cmd(on_moved)
+  vim.api.nvim_create_autocmd({ "CursorMoved" }, {
+    buffer = self._bufnr,
+    callback = function()
+      if modelib.is_visual() then
+        return
+      end
+      local ctx = Context.get(source_name)
+      if not ctx then
+        return
+      end
+      ctx.ui:on_move()
+    end,
+  })
 
-  local on_moved_i = ("autocmd CursorMovedI <buffer=%s> stopinsert"):format(self._bufnr)
-  vim.cmd(on_moved_i)
+  vim.api.nvim_create_autocmd({ "CursorMovedI" }, {
+    buffer = self._bufnr,
+    command = "stopinsert",
+  })
 end
 
 function ItemList.set_row(self, row)
@@ -137,7 +166,7 @@ function ItemList.close(self)
     ctx:on_close()
   end
 
-  vim.cmd("autocmd! " .. "theto_closed_" .. self._bufnr)
+  vim.api.nvim_create_augroup(self._group_name, {})
   windowlib.close(self._window)
 end
 
@@ -152,28 +181,6 @@ end
 
 function ItemList.has(self, id)
   return self._window == id
-end
-
-function M._on_moved(key)
-  if modelib.is_visual() then
-    return
-  end
-  local ctx = Context.get(key)
-  if not ctx then
-    return
-  end
-  ctx.ui:on_move()
-end
-
-function M._on_close(key, id)
-  local ctx = Context.get(key)
-  if not ctx then
-    return
-  end
-  if not ctx.ui:has_window(id) then
-    return
-  end
-  ctx.ui:close()
 end
 
 M._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl_group)
