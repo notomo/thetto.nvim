@@ -66,7 +66,7 @@ function Filter.inverse(self)
   return Filter.new(self.short_name, not self.inversed, self._key, self._modifier)
 end
 
-function Filter.__eq(self, filter)
+function Filter.equals(self, filter)
   return self.short_name == filter.short_name and self.inversed == filter.inversed and self.key == filter.key
 end
 

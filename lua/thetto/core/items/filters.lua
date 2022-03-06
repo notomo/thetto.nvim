@@ -33,7 +33,7 @@ function Filters._find(self, name)
     return nil, nil, err
   end
   for i, filter in ipairs(self._filters) do
-    if filter == f then
+    if filter:equals(f) then
       return filter, i, nil
     end
   end
