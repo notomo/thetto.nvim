@@ -33,7 +33,7 @@ local ExecuteArgs = {}
 ExecuteArgs.__index = ExecuteArgs
 M.ExecuteArgs = ExecuteArgs
 ExecuteArgs.default = {
-  fallback_actions = nil,
+  fallback_actions = {},
   action_opts = {},
 }
 function ExecuteArgs.new(action_name, raw_args)

@@ -99,6 +99,9 @@ function Executor.action(self, items, ctx, action_name, action_opts)
 end
 
 function Executor.actions(self, items, ctx, main_action_name, fallback_action_names, action_opts)
+  vim.validate({
+    fallback_action_names = { fallback_action_names, "table" },
+  })
   local action_result, action_err = self:action(items, ctx, main_action_name, action_opts)
   if not action_err then
     return action_result, nil
@@ -108,7 +111,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
   end
 
   local errs = { action_err }
-  for _, action_name in ipairs(fallback_action_names or {}) do
+  for _, action_name in ipairs(fallback_action_names) do
     local result, err = self:action(items, ctx, action_name, action_opts)
     if not err then
       return result, nil
