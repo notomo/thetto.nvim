@@ -47,7 +47,7 @@ function ReturnValue.start(source_name, raw_args)
   if opts.immediately then
     local _, exec_err = ReturnValue.execute(opts.action, { action_opts = args.action_opts })
     if exec_err ~= nil then
-      return exec_err
+      return nil, exec_err
     end
   end
 
