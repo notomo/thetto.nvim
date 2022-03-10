@@ -1,7 +1,11 @@
 local M = {}
 
-function M.collect()
-  local bufnr = vim.api.nvim_get_current_buf()
+M.opts = {
+  bufnr = nil,
+}
+
+function M.collect(self)
+  local bufnr = self.opts.bufnr or vim.api.nvim_get_current_buf()
   local kind_name = nil
   local path = vim.api.nvim_buf_get_name(bufnr)
   if not vim.bo.modified and vim.fn.filereadable(path) == 1 then
