@@ -47,7 +47,7 @@ function UI.open(self, on_move)
   self._status_line = StatusLine.new(source_name, width, height, row, column)
   self._sidecar = Sidecar.new()
 
-  self._state:resume(self._item_list, self._inputter)
+  self._state = self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
   self._on_move = on_move or function() end
 
@@ -128,7 +128,7 @@ function UI.on_move(self)
 end
 
 function UI.update_offset(self, offset)
-  self._state:update_row(offset, self._collector.items:length(), self._display_limit)
+  self._state = self._state:update_row(offset, self._collector.items:length(), self._display_limit)
 end
 
 function UI.close(self)
@@ -137,7 +137,8 @@ function UI.close(self)
   end
 
   local current_window = vim.api.nvim_get_current_win()
-  local origin_window = self._state:save(self._item_list, self._inputter)
+  local origin_window, new_state = self._state:save(self._item_list, self._inputter)
+  self._state = new_state
 
   self._item_list:close()
   self._inputter:close()
