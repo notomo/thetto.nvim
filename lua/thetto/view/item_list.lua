@@ -48,12 +48,12 @@ function ItemList.new(source_name, width, height, row, column)
   vim.api.nvim_create_autocmd({ "WinClosed" }, {
     group = group_name,
     pattern = { "*" },
-    callback = function()
+    callback = function(args)
       local ctx = Context.get(source_name)
       if not ctx then
         return
       end
-      local id = tonumber(vim.fn.expand("<afile>"))
+      local id = tonumber(args.file)
       if not ctx.ui:has_window(id) then
         return
       end

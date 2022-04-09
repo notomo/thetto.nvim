@@ -15,9 +15,8 @@ function M.start(self)
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     group = self.augroup_name,
     pattern = { "*" },
-    callback = function()
-      local bufnr = tonumber(vim.fn.expand("<abuf>"))
-      self:add(bufnr)
+    callback = function(args)
+      self:add(args.buf)
     end,
   })
   vim.api.nvim_create_autocmd({ "QuitPre" }, {
