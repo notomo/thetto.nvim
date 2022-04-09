@@ -11,6 +11,25 @@ local Source = {
   jobs = jobs,
 }
 
+local _registered = {}
+function Source.register(name, handler)
+  _registered[name] = handler
+end
+
+local find = function(name)
+  local registered = _registered[name]
+  if registered then
+    return registered, nil
+  end
+
+  local origin = modulelib.find("thetto.handler.source." .. name)
+  if origin == nil then
+    return nil, "not found source: " .. name
+  end
+
+  return origin, nil
+end
+
 function Source.new(name, source_opts, opts)
   vim.validate({
     name = { name, "string" },
@@ -18,9 +37,9 @@ function Source.new(name, source_opts, opts)
     opts = { opts, "table" },
   })
 
-  local origin = modulelib.find("thetto.handler.source." .. name)
-  if origin == nil then
-    return nil, "not found source: " .. name
+  local origin, err = find(name)
+  if err then
+    return nil, err
   end
 
   local tbl = {

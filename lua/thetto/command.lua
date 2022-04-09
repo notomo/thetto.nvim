@@ -132,4 +132,8 @@ function ShowError.setup_store(name, opts)
   return store:start()
 end
 
+function ShowError.register_source(name, handler)
+  return require("thetto.core.items.source").register(name, handler)
+end
+
 return vim.tbl_extend("force", ReturnValue:methods(), ShowError:methods())

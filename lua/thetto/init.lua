@@ -28,4 +28,8 @@ function M.setup_store(name, opts)
   return require("thetto.command").setup_store(name, opts)
 end
 
+function M.register_source(name, handler)
+  return require("thetto.command").register_source(name, handler)
+end
+
 return M
