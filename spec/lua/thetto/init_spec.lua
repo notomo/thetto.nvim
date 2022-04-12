@@ -88,7 +88,7 @@ describe("thetto", function()
     assert.window_count(4)
   end)
 
-  it("can filter by substring", function()
+  it("can filter by substring #slow", function()
     thetto.setup({ sorters = { "length" } })
 
     thetto.start(test_source1)
@@ -100,7 +100,7 @@ describe("thetto", function()
     assert.no.exists_pattern("test1")
   end)
 
-  it("can filter with ignorecase", function()
+  it("can filter with ignorecase #slow", function()
     test_items1 = {
       "test1",
       "TEST2",
@@ -116,7 +116,7 @@ describe("thetto", function()
     assert.current_line("TEST2")
   end)
 
-  it("can filter with smartcase", function()
+  it("can filter with smartcase #slow", function()
     test_items1 = {
       "TEST1",
       "test1",
@@ -150,7 +150,7 @@ describe("thetto", function()
     assert.window_count(1)
   end)
 
-  it("can input lua escape character", function()
+  it("can input lua escape character #slow", function()
     test_items1 = {
       "test1",
       "test%",
@@ -181,7 +181,7 @@ describe("thetto", function()
     assert.is_false(job:is_running())
   end)
 
-  it("can open with action opts", function()
+  it("can open with action opts #slow", function()
     test_items1 = {
       "test1",
       "test2",
@@ -241,7 +241,7 @@ describe("thetto", function()
     assert.exists_message(source .. ": empty")
   end)
 
-  it("cannot delete input lines", function()
+  it("cannot delete input lines #slow", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
     thetto.start(test_source1)
@@ -252,7 +252,7 @@ describe("thetto", function()
     assert.line_count(2)
   end)
 
-  it("can move to input with behavior as `i`", function()
+  it("can move to input with behavior as `i` #slow", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
     thetto.start(test_source1)
@@ -264,7 +264,7 @@ describe("thetto", function()
     assert.current_column(#"hoge")
   end)
 
-  it("can move to input with behavior as `a`", function()
+  it("can move to input with behavior as `a` #slow", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
     thetto.start(test_source1)
@@ -276,7 +276,7 @@ describe("thetto", function()
     assert.current_column(#"hoge" + 1)
   end)
 
-  it("can filter by regex", function()
+  it("can filter by regex #slow", function()
     thetto.setup({ filters = { "regex" } })
 
     thetto.start(test_source1)
@@ -304,7 +304,7 @@ describe("thetto", function()
     end
   end)
 
-  it("can execute action automatically", function()
+  it("can execute action automatically #slow", function()
     local value = nil
     thetto.setup({
       source_actions = {
@@ -389,7 +389,7 @@ describe("thetto.execute()", function()
     assert.exists_message("not found action: invalid")
   end)
 
-  it("shows error if items is empty because filtered", function()
+  it("shows error if items is empty because filtered #slow", function()
     thetto.start(test_source1)
     helper.sync_input({ "hoge" })
 
@@ -398,7 +398,7 @@ describe("thetto.execute()", function()
     assert.exists_message("not found action: open")
   end)
 
-  it("cannot execute open if there is no items", function()
+  it("cannot execute open if there is no items #slow", function()
     thetto.start(test_source1)
     helper.sync_input({ "hoge" })
 
@@ -515,7 +515,7 @@ describe("thetto.resume()", function()
     assert.window(current)
   end)
 
-  it("can resume latest", function()
+  it("can resume latest #slow", function()
     test_items1 = {
       "test11",
       "test21",
@@ -543,7 +543,7 @@ describe("thetto.resume()", function()
     assert.current_line("test21")
   end)
 
-  it("can resume by source", function()
+  it("can resume by source #slow", function()
     test_items1 = {
       "test11",
       "test21",
@@ -733,7 +733,7 @@ describe("remove_filter action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can remove filter", function()
+  it("can remove filter #slow", function()
     thetto.setup({ source = { [test_source1] = { filters = { "substring", "-substring" } } } })
 
     thetto.start(test_source1)
@@ -804,7 +804,7 @@ describe("add_filter action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can add filter", function()
+  it("can add filter #slow", function()
     test_items1 = {
       "test1",
       "test2",
@@ -828,7 +828,7 @@ describe("inverse_filter action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can inverse filter", function()
+  it("can inverse filter #slow", function()
     thetto.setup({ filters = { "-substring" } })
 
     test_items1 = {
@@ -850,7 +850,7 @@ describe("change_filter action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can change filter", function()
+  it("can change filter #slow", function()
     thetto.setup({ filters = { "substring" } })
 
     test_items1 = {
@@ -1007,7 +1007,7 @@ describe("append action", function()
   end)
 end)
 
-describe("yank action", function()
+describe("yank action #slow", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
@@ -1120,7 +1120,7 @@ describe("move_to_list action", function()
     assert.filetype("thetto")
   end)
 
-  it("can move to list even if empty", function()
+  it("can move to list even if empty #slow", function()
     thetto.start(test_source1)
     helper.sync_input({ "test" })
     assert.filetype("thetto-input")

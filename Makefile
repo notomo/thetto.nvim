@@ -8,6 +8,9 @@
 # - apropos
 
 test:
-	vusted --shuffle
-	@# vusted --shuffle -v --seed=SEED
+	vusted --shuffle ./spec/lua/thetto/init_spec.lua --exclude-tags=slow
 .PHONY: test
+
+test_all:
+	vusted --shuffle
+.PHONY: test_all
