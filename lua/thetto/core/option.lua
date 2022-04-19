@@ -39,6 +39,7 @@ local default = {
   auto = nil,
   immediately = false,
   range = nil,
+  can_resume = true,
 }
 
 function Option.new(raw_opts, raw_source_opts, source_name)

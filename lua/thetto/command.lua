@@ -29,7 +29,7 @@ function ReturnValue.start(source_name, raw_args)
     execute_opts
   )
   local ui = require("thetto.view.ui").new(collector, opts.insert, opts.display_limit)
-  local ctx = Context.new(source_name, collector, ui, executor)
+  local ctx = Context.new(source_name, collector, ui, executor, opts.can_resume)
 
   local start_err = collector:start(opts.pattern)
   if start_err ~= nil then

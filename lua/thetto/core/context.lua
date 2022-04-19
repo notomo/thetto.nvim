@@ -7,12 +7,13 @@ local now = function()
   return vim.fn.reltimestr(vim.fn.reltime())
 end
 
-function Context.new(source_name, collector, ui, executor)
+function Context.new(source_name, collector, ui, executor, can_resume)
   local tbl = {
     collector = collector,
     ui = ui,
     executor = executor,
     _updated_at = now(),
+    _can_resume = can_resume,
   }
   local self = setmetatable(tbl, Context)
   repository:set(source_name, self)
@@ -55,18 +56,31 @@ function Context.get_from_path(bufnr, pattern)
   return ctx, nil
 end
 
+local resume_candidates = function()
+  local ctxs = {}
+  for _, ctx in repository:all() do
+    if ctx._can_resume then
+      table.insert(ctxs, ctx)
+    end
+  end
+  return ipairs(ctxs)
+end
+
 function Context.resume(source_name)
   if source_name ~= nil then
     local ctx, err = Context.get(source_name)
     if err then
       return nil, err
     end
+    if not ctx._can_resume then
+      return nil, "no context that can resume: " .. source_name
+    end
     return ctx, nil
   end
 
   local recent = nil
   local recent_time = 0
-  for _, ctx in repository:all() do
+  for _, ctx in resume_candidates() do
     local time = tonumber(ctx._updated_at)
     if recent_time < time then
       recent = ctx
@@ -84,7 +98,7 @@ function Context.resume_previous(self)
   local resumed = nil
   local at = 0
   local max_at = tonumber(self._updated_at)
-  for _, ctx in repository:all() do
+  for _, ctx in resume_candidates() do
     local updated_at = tonumber(ctx._updated_at)
     if at < updated_at and updated_at < max_at then
       resumed = ctx
@@ -101,7 +115,7 @@ function Context.resume_next(self)
   local resumed = nil
   local min_at = tonumber(self._updated_at)
   local at = min_at
-  for _, ctx in repository:all() do
+  for _, ctx in resume_candidates() do
     local updated_at = tonumber(ctx._updated_at)
     if min_at <= at and at < updated_at then
       resumed = ctx
@@ -120,7 +134,7 @@ end
 
 function Context.resume_last()
   local all = {}
-  for _, ctx in repository:all() do
+  for _, ctx in resume_candidates() do
     table.insert(all, ctx)
   end
   table.sort(all, function(a, b)

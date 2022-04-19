@@ -591,6 +591,10 @@ describe("thetto.resume()", function()
   end)
 
   it("can resume source that is closed latest", function()
+    test_items1 = {
+      "resumed",
+    }
+
     thetto.start(test_source1, { opts = { insert = false } })
     thetto.execute("quit")
 
@@ -603,7 +607,23 @@ describe("thetto.resume()", function()
 
     thetto.resume()
 
-    assert.exists_pattern("test1")
+    assert.exists_pattern("resumed")
+  end)
+
+  it("can disable resume by can_resume=false", function()
+    test_items1 = {
+      "resumed",
+    }
+
+    thetto.start(test_source1, { opts = { insert = false } })
+    thetto.execute("quit")
+
+    thetto.start(test_source2, { opts = { insert = false, can_resume = false } })
+    thetto.execute("quit")
+
+    thetto.resume()
+
+    assert.exists_pattern("resumed")
   end)
 end)
 
