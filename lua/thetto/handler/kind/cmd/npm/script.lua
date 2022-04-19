@@ -1,10 +1,18 @@
 local M = {}
 
-function M.action_execute(_, items)
+local driver = function(cmd, opts)
+  vim.fn.termopen(cmd, opts)
+end
+
+M.opts = {}
+M.opts.execute = { driver = driver }
+
+function M.action_execute(self, items)
   for _, item in ipairs(items) do
     vim.cmd("tabedit")
     local cmd = { "npm", "run", item.value }
-    vim.fn.termopen(cmd, { cwd = vim.fn.fnamemodify(item.path, ":h") })
+    local opts = { cwd = vim.fn.fnamemodify(item.path, ":h") }
+    self.action_opts.driver(cmd, opts)
   end
 end
 
