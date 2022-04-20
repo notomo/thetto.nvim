@@ -1,6 +1,7 @@
 local modulelib = require("thetto.vendor.misclib.module")
 local pathlib = require("thetto.lib.path")
-local repository = require("thetto.lib.repository").Repository.new("store")
+
+local _stores = {}
 
 local Store = {}
 
@@ -22,7 +23,7 @@ function Store.new(name, opts)
     _store = store,
   }
   local self = setmetatable(tbl, Store)
-  repository:set(name, self)
+  _stores[name] = self
   return self, nil
 end
 
@@ -31,13 +32,13 @@ function Store.__index(self, k)
 end
 
 function Store.quit(self)
-  repository:delete(self.name)
+  _stores[self.name] = nil
   vim.api.nvim_create_augroup(self.augroup_name, {})
 end
 
 function Store.get(name)
   vim.validate({ name = { name, "string" } })
-  local store = repository:get(name)
+  local store = _stores[name]
   if not store then
     return nil, "no store: " .. name
   end

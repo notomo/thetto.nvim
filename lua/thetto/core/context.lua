@@ -1,4 +1,4 @@
-local repository = require("thetto.lib.repository").Repository.new("context")
+local _contexts = {}
 
 local Context = {}
 Context.__index = Context
@@ -16,7 +16,7 @@ function Context.new(source_name, collector, ui, executor, can_resume)
     _can_resume = can_resume,
   }
   local self = setmetatable(tbl, Context)
-  repository:set(source_name, self)
+  _contexts[source_name] = self
   return self
 end
 
@@ -27,7 +27,7 @@ function Context.get(source_name)
     return nil, "no source_name"
   end
 
-  local ctx = repository:get(source_name)
+  local ctx = _contexts[source_name]
   if not ctx then
     return nil, "no context: " .. source_name
   end
@@ -58,7 +58,7 @@ end
 
 local resume_candidates = function()
   local ctxs = {}
-  for _, ctx in repository:all() do
+  for _, ctx in pairs(_contexts) do
     if ctx._can_resume then
       table.insert(ctxs, ctx)
     end
@@ -148,7 +148,7 @@ function Context.resume_last()
 end
 
 function Context.all()
-  return repository:all()
+  return pairs(_contexts)
 end
 
 return Context
