@@ -1,8 +1,8 @@
 local Context = require("thetto.core.context")
-local windowlib = require("thetto.lib.window")
+local windowlib = require("thetto.vendor.misclib.window")
 local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")
-local modelib = require("thetto.lib.mode")
+local visual_mode = require("thetto.vendor.misclib.visual_mode")
 local highlightlib = require("thetto.lib.highlight")
 local vim = vim
 
@@ -127,7 +127,7 @@ function ItemList.enable_on_moved(self, source_name)
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
     buffer = self._bufnr,
     callback = function()
-      if modelib.is_visual() then
+      if visual_mode.is_current() then
         return
       end
       local ctx = Context.get(source_name)
@@ -149,7 +149,7 @@ function ItemList.set_row(self, row)
 end
 
 function ItemList.enter(self)
-  windowlib.enter(self._window)
+  windowlib.safe_enter(self._window)
 end
 
 function ItemList.close(self)
@@ -164,7 +164,7 @@ function ItemList.close(self)
   end
 
   vim.api.nvim_create_augroup(self._group_name, {})
-  windowlib.close(self._window)
+  windowlib.safe_close(self._window)
 end
 
 function ItemList.position(self)

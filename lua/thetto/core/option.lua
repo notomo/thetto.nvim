@@ -76,7 +76,7 @@ function Option.new(raw_opts, raw_source_opts, source_name)
   end
 
   if not opts.range then
-    opts.range = require("thetto.lib.mode").visual_range()
+    opts.range = require("thetto.vendor.misclib.visual_mode").row_range()
   end
 
   local source_opts = vim.tbl_extend("force", source_config.opts or {}, raw_source_opts)

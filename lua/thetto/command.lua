@@ -1,5 +1,5 @@
-local ReturnValue = require("thetto.lib.error_handler").for_return_value()
-local ShowError = require("thetto.lib.error_handler").for_show_error()
+local ReturnValue = require("thetto.vendor.misclib.error_handler").for_return_value()
+local ShowError = require("thetto.vendor.misclib.error_handler").for_show_error()
 
 local Context = require("thetto.core.context")
 
@@ -102,7 +102,7 @@ function ReturnValue.execute(action_name, raw_args)
     action_name or ctx.collector.source.default_action,
     raw_args
   )
-  local range = require("thetto.lib.mode").visual_range()
+  local range = require("thetto.vendor.misclib.visual_mode").row_range()
   local items = ctx.ui:selected_items(args.action_name, range)
   return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts)
 end
@@ -115,7 +115,7 @@ function ReturnValue.resume_execute(raw_args)
   end
   ctx.ui:update_offset(args.opts.offset)
 
-  local range = require("thetto.lib.mode").visual_range()
+  local range = require("thetto.vendor.misclib.visual_mode").row_range()
   local items = ctx.ui:selected_items(args.action_name, range)
   return ctx.executor:action(items, ctx, args.action_name, args.action_opts)
 end

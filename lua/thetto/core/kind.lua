@@ -1,5 +1,5 @@
 local jobs = require("thetto.lib.job")
-local modulelib = require("thetto.lib.module")
+local modulelib = require("thetto.vendor.misclib.module")
 local base = require("thetto.handler.kind.base")
 local vim = vim
 

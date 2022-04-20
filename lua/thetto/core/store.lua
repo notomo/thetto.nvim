@@ -1,4 +1,4 @@
-local modulelib = require("thetto.lib.module")
+local modulelib = require("thetto.vendor.misclib.module")
 local pathlib = require("thetto.lib.path")
 local repository = require("thetto.lib.repository").Repository.new("store")
 

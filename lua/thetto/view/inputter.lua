@@ -1,5 +1,5 @@
 local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
-local windowlib = require("thetto.lib.window")
+local windowlib = require("thetto.vendor.misclib.window")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
@@ -91,7 +91,7 @@ function Inputter.move_to(self, left_column)
 end
 
 function Inputter.enter(self)
-  windowlib.enter(self._window)
+  windowlib.safe_enter(self._window)
 end
 
 function Inputter.close(self)
@@ -100,7 +100,7 @@ function Inputter.close(self)
   end
   self._closed = true
 
-  windowlib.close(self._window)
+  windowlib.safe_close(self._window)
 end
 
 function Inputter.is_valid(self)

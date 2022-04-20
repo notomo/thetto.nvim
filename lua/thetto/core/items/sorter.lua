@@ -1,4 +1,4 @@
-local modulelib = require("thetto.lib.module")
+local modulelib = require("thetto.vendor.misclib.module")
 local vim = vim
 
 local Sorter = {}

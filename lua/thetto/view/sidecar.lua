@@ -1,5 +1,5 @@
 local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
-local windowlib = require("thetto.lib.window")
+local windowlib = require("thetto.vendor.misclib.window")
 local filelib = require("thetto.lib.file")
 local vim = vim
 
@@ -96,7 +96,10 @@ function Sidecar.exists_same(self, item)
 end
 
 function Sidecar.close(self)
-  windowlib.close(self._window)
+  if not self._window then
+    return
+  end
+  windowlib.safe_close(self._window)
 end
 
 function Sidecar._opened(self)
