@@ -1,46 +1,35 @@
 local plugin_name = vim.split((...):gsub("%.", "/"), "/", true)[1]
-local M = require("vusted.helper")
+local helper = require("vusted.helper")
 
-M.root = M.find_plugin_root(plugin_name)
+helper.root = helper.find_plugin_root(plugin_name)
 
-M.test_data_path = "spec/test_data/"
-M.test_data_dir = M.root .. "/" .. M.test_data_path
+helper.test_data_path = "spec/test_data/"
+helper.test_data_dir = helper.root .. "/" .. helper.test_data_path
 
--- HACK
-vim.cmd("autocmd SwapExists * lua vim.v.swapchoice = 'd'")
-
-function M.before_each()
-  vim.cmd("filetype on")
-  vim.cmd("syntax enable")
-  M.new_directory("")
-  vim.api.nvim_set_current_dir(M.test_data_dir)
+function helper.before_each()
+  helper.new_directory("")
+  vim.api.nvim_set_current_dir(helper.test_data_dir)
 end
 
-function M.after_each()
-  vim.cmd("tabedit")
-  vim.cmd("tabonly!")
-  vim.cmd("silent! %bwipeout!")
-  vim.cmd("filetype off")
-  vim.cmd("syntax off")
-  vim.cmd("messages clear")
+function helper.after_each()
+  helper.cleanup()
+  helper.cleanup_loaded_modules(plugin_name)
+  helper.delete("")
   print(" \n")
-
-  M.cleanup_loaded_modules(plugin_name)
-  M.delete("")
 end
 
-function M.buffer_log()
+function helper.buffer_log()
   local lines = vim.fn.getbufline("%", 1, "$")
   for _, line in ipairs(lines) do
     print(line)
   end
 end
 
-function M.set_lines(lines)
+function helper.set_lines(lines)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
 end
 
-function M.sync_input(texts)
+function helper.sync_input(texts)
   local text = texts[1]
   local finished = false
   require("thetto.view.ui")._changed_after = function(input_lines)
@@ -59,7 +48,7 @@ function M.sync_input(texts)
   end
 end
 
-function M.sync_open(...)
+function helper.sync_open(...)
   local collector = require("thetto").start(...)
   if collector == nil then
     return
@@ -83,7 +72,7 @@ function M.sync_open(...)
   return collector
 end
 
-function M.sync_execute(...)
+function helper.sync_execute(...)
   local job = require("thetto").execute(...)
   if job == nil then
     return
@@ -94,7 +83,7 @@ function M.sync_execute(...)
   end
 end
 
-function M.sync_reload()
+function helper.sync_reload()
   -- vim.cmd("edit!") not work?
   local collector = require("thetto").reload()
   if collector == nil then
@@ -107,7 +96,7 @@ function M.sync_reload()
   return collector
 end
 
-function M.wait_ui(f)
+function helper.wait_ui(f)
   local finished = false
   require("thetto.view.ui")._changed_after = function(_)
     finished = true
@@ -123,7 +112,7 @@ function M.wait_ui(f)
   end
 end
 
-function M.search(pattern)
+function helper.search(pattern)
   local result = vim.fn.search(pattern)
   if result == 0 then
     local info = debug.getinfo(2)
@@ -135,35 +124,35 @@ function M.search(pattern)
   return result
 end
 
-function M.new_file(path, ...)
-  local f = io.open(M.test_data_dir .. path, "w")
+function helper.new_file(path, ...)
+  local f = io.open(helper.test_data_dir .. path, "w")
   for _, line in ipairs({ ... }) do
     f:write(line .. "\n")
   end
   f:close()
 end
 
-function M.new_directory(path)
-  vim.fn.mkdir(M.test_data_dir .. path, "p")
+function helper.new_directory(path)
+  vim.fn.mkdir(helper.test_data_dir .. path, "p")
 end
 
-function M.delete(path)
-  vim.fn.delete(M.test_data_dir .. path, "rf")
+function helper.delete(path)
+  vim.fn.delete(helper.test_data_dir .. path, "rf")
 end
 
-function M.cd(path)
-  vim.api.nvim_set_current_dir(M.test_data_dir .. path)
+function helper.cd(path)
+  vim.api.nvim_set_current_dir(helper.test_data_dir .. path)
 end
 
-function M.path(path)
-  return M.test_data_dir .. (path or "")
+function helper.path(path)
+  return helper.test_data_dir .. (path or "")
 end
 
-function M.window_count()
+function helper.window_count()
   return vim.fn.tabpagewinnr(vim.fn.tabpagenr(), "$")
 end
 
-function M.sub_windows()
+function helper.sub_windows()
   local windows = {}
   for bufnr, id in require("thetto.lib.buffer").in_tabpage(0) do
     local config = vim.api.nvim_win_get_config(id)
@@ -181,7 +170,7 @@ asserts.create("window"):register_eq(function()
 end)
 
 asserts.create("window_count"):register_eq(function()
-  return M.window_count()
+  return helper.window_count()
 end)
 
 asserts.create("current_line"):register_eq(function()
@@ -221,7 +210,7 @@ asserts.create("filetype"):register_eq(function()
 end)
 
 asserts.create("current_dir"):register_eq(function()
-  return vim.fn.getcwd():gsub(M.test_data_dir .. "?", "")
+  return vim.fn.getcwd():gsub(helper.test_data_dir .. "?", "")
 end)
 
 asserts.create("exists_pattern"):register(function(self)
@@ -249,4 +238,4 @@ asserts.create("exists_message"):register(function(self)
   end
 end)
 
-return M
+return helper
