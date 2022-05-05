@@ -4,8 +4,8 @@ function M.collect()
   local items = {}
   for _, autocmd in ipairs(vim.api.nvim_get_autocmds({})) do
     local parts = {}
-    if autocmd.group then
-      table.insert(parts, autocmd.group)
+    if autocmd.group_name then
+      table.insert(parts, autocmd.group_name)
     end
 
     table.insert(parts, autocmd.event)

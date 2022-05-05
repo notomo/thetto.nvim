@@ -6,7 +6,10 @@ describe("vim/autocmd source", function()
   after_each(helper.after_each)
 
   it("can show autocmds", function()
-    vim.cmd("autocmd VimResume <buffer> echomsg 'hoge_autocmd'")
+    vim.api.nvim_create_autocmd({ "VimResume" }, {
+      buffer = 0,
+      command = [[echomsg 'hoge_autocmd']],
+    })
 
     thetto.start("vim/autocmd")
     helper.sync_input({ "hoge_autocmd" })
@@ -18,9 +21,16 @@ describe("vim/autocmd source", function()
   end)
 
   it("can delete autocmd group", function()
-    vim.cmd("augroup target_group")
-    vim.cmd("autocmd VimResume <buffer> echomsg 'target_autocmd'")
-    vim.cmd("augroup END")
+    local group = vim.api.nvim_create_augroup("target_group", {})
+    vim.api.nvim_create_autocmd({ "VimResume" }, {
+      group = group,
+      buffer = 0,
+      command = [[echomsg 'target_autocmd']],
+    })
+    vim.api.nvim_create_autocmd({ "FocusLost" }, {
+      buffer = 0,
+      command = [[echomsg 'other_autocmd']],
+    })
 
     thetto.start("vim/autocmd")
     helper.sync_input({ "target_autocmd" })
@@ -38,10 +48,17 @@ describe("vim/autocmd source", function()
   end)
 
   it("can delete an autocmd by pattern", function()
-    vim.cmd("augroup target_group")
-    vim.cmd("autocmd VimResume test1 echomsg 'the_target_autocmd'")
-    vim.cmd("autocmd VimResume test2 echomsg 'not_target_autocmd'")
-    vim.cmd("augroup END")
+    local group = vim.api.nvim_create_augroup("target_group", {})
+    vim.api.nvim_create_autocmd({ "VimResume" }, {
+      group = group,
+      pattern = "test1",
+      command = [[echomsg 'the_target_autocmd']],
+    })
+    vim.api.nvim_create_autocmd({ "VimResume" }, {
+      group = group,
+      pattern = "test2",
+      command = [[echomsg 'not_target_autocmd']],
+    })
 
     thetto.start("vim/autocmd")
     helper.sync_input({ "target_autocmd" })
