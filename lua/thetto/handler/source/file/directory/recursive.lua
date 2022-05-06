@@ -1,6 +1,11 @@
 local M = {}
 
-M.opts = { max_depth = 100 }
+M.opts = {
+  max_depth = 100,
+  to_absolute = function(_, path)
+    return path
+  end,
+}
 
 if vim.fn.has("win32") == 1 then
   M.opts.get_command = function(path, _)

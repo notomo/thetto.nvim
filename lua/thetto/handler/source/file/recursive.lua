@@ -3,7 +3,12 @@ local vim = vim
 
 local M = {}
 
-M.opts = { max_depth = 100 }
+M.opts = {
+  max_depth = 10,
+  to_absolute = function(_, path)
+    return path
+  end,
+}
 
 if vim.fn.has("win32") == 1 then
   M.opts.get_command = function(path, _)
@@ -46,7 +51,7 @@ function M.collect(self, source_ctx)
       end
 
       local relative_path = self:_modify_path(to_relative(path))
-      table.insert(items, { value = relative_path, path = path })
+      table.insert(items, { value = relative_path, path = self.opts.to_absolute(source_ctx.cwd, path) })
       ::continue::
     end
     self:append(items)
