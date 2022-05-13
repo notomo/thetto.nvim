@@ -20,6 +20,7 @@ function UI.new(collector, insert, display_limit)
     _collector = collector,
     _state = State.new(insert),
     _display_limit = display_limit,
+    _max_width = 90,
   }
   return setmetatable(tbl, UI)
 end
@@ -207,8 +208,8 @@ function UI.open_preview(self, item, open_target)
 
   local pos = self._item_list:position()
   local height = pos.height + self._inputter.height + 1
-  local left_column = 2
   local width = self:_width()
+  local left_column = (vim.o.columns - width) / 2
   local row = pos.row
 
   self:_move_to(left_column)
@@ -244,8 +245,12 @@ function UI._height()
   return math.floor(vim.o.lines * 0.5)
 end
 
-function UI._width()
-  return math.floor(vim.o.columns * 0.6)
+function UI._width(self)
+  local width = math.floor(vim.o.columns * 0.6)
+  if width > self._max_width then
+    return self._max_width
+  end
+  return width
 end
 
 function UI._row(self, input_lines)
