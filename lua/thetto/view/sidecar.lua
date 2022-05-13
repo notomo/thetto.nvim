@@ -36,9 +36,14 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     lines = {}
   end
 
-  local bufnr = vim.api.nvim_create_buf(false, true)
-  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-  vim.bo[bufnr].bufhidden = "wipe"
+  local bufnr
+  if open_target.raw_bufnr then
+    bufnr = open_target.raw_bufnr
+  else
+    bufnr = vim.api.nvim_create_buf(false, true)
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    vim.bo[bufnr].bufhidden = "wipe"
+  end
 
   if not self:_opened() then
     self._window = vim.api.nvim_open_win(bufnr, false, {

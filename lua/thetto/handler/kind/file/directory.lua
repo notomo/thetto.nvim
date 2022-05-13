@@ -2,7 +2,7 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.after(_) end
+function M.after(_, _) end
 
 function M.action_cd(_, items)
   for _, item in ipairs(items) do
@@ -33,6 +33,18 @@ function M.action_enter(_, items)
     return
   end
   require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
+end
+
+function M.action_preview(_, items, ctx)
+  local item = items[1]
+  if item == nil then
+    return
+  end
+  local is_preview = true
+  local bufnr = M.after(item.path, is_preview)
+  if bufnr and vim.api.nvim_buf_is_loaded(bufnr) then
+    ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  end
 end
 
 M.action_open = M.action_cd
