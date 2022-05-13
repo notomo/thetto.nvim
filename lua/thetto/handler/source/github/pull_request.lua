@@ -71,6 +71,6 @@ function M.highlight(self, bufnr, first_line, items)
   end
 end
 
-M.kind_name = "url"
+M.kind_name = "github/pull_request"
 
 return M
