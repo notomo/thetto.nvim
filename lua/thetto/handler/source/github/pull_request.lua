@@ -42,7 +42,8 @@ function M.collect(self, source_ctx)
         local title = ("%s %s"):format(mark, pr.title)
         local at = pr.created_at
         local by = "by " .. pr.user.login
-        local desc = ("%s %s %s"):format(title, at, by)
+        local branch = pr.head.ref
+        local desc = ("%s %s %s (%s)"):format(title, at, by, branch)
         table.insert(items, {
           value = pr.title,
           url = pr.html_url,
