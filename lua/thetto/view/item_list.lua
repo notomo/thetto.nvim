@@ -131,6 +131,7 @@ function ItemList.enable_cursorline(self)
 end
 
 function ItemList.enable_on_moved(self, source_name)
+  local prev_row
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
     buffer = self._bufnr,
     callback = function()
@@ -141,6 +142,13 @@ function ItemList.enable_on_moved(self, source_name)
       if not ctx then
         return
       end
+
+      local row = self:cursor()[1]
+      if prev_row == row then
+        return
+      end
+      prev_row = row
+
       ctx.ui:on_move()
     end,
   })
