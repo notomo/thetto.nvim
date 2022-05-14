@@ -15,7 +15,6 @@ function helper.after_each()
   helper.cleanup()
   helper.cleanup_loaded_modules(plugin_name)
   helper.delete("")
-  print(" \n")
 end
 
 function helper.buffer_log()

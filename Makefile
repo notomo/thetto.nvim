@@ -10,7 +10,7 @@ SPEC_DIR:=./spec/lua/${PLUGIN_NAME}
 # - apropos
 
 test:
-	vusted --shuffle ./spec/lua/thetto/init_spec.lua --exclude-tags=slow
+	vusted --shuffle ./spec/lua/thetto/init_spec.lua ./spec/lua/thetto/handler/init_spec.lua --exclude-tags=slow
 .PHONY: test
 
 test_all:
