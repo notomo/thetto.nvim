@@ -73,7 +73,9 @@ function ItemList.new(source_name, width, height, row, column)
     _window = window,
     _group_name = group_name,
   }
-  return setmetatable(tbl, ItemList)
+  local self = setmetatable(tbl, ItemList)
+  self:enable_cursorline()
+  return self
 end
 
 function ItemList.redraw(self, items)
@@ -113,6 +115,7 @@ function ItemList.move_to(self, left_column)
     col = left_column,
     row = list_config.row,
   })
+  self:enable_cursorline()
 end
 
 function ItemList.is_valid(self)
@@ -121,6 +124,10 @@ end
 
 function ItemList.is_active(self)
   return vim.api.nvim_get_current_win() == self._window
+end
+
+function ItemList.enable_cursorline(self)
+  vim.wo[self._window].cursorline = true
 end
 
 function ItemList.enable_on_moved(self, source_name)

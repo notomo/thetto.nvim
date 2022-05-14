@@ -162,6 +162,7 @@ end
 
 function UI.into_inputter(self)
   self._inputter:enter()
+  self._item_list:enable_cursorline()
 end
 
 function UI.current_position_filter(self)
