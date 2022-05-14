@@ -47,6 +47,15 @@ function M.action_preview(_, items, ctx)
   end
 end
 
+function M.action_list_parents(_, items)
+  local item = items[1]
+  if item == nil then
+    return
+  end
+  local path = vim.fn.fnamemodify(item.path, ":h:h:h")
+  require("thetto").start("file/in_dir", { opts = { cwd = path } })
+end
+
 M.action_open = M.action_cd
 M.action_directory_open = M.action_open
 M.action_directory_tab_open = M.action_tab_open
