@@ -192,10 +192,8 @@ function UI.selected_items(self, action_name, range)
   end
 
   local index
-  if self._inputter:is_active() then
-    index = 1
-  elseif self._item_list:is_active() then
-    index = vim.fn.line(".")
+  if self._item_list:is_valid() then
+    index = self._item_list:cursor()[1]
   else
     index = self._state.row
   end
