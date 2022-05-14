@@ -6,7 +6,7 @@ end
 
 function M.action_execute(_, items)
   for _, item in ipairs(items) do
-    local cmd = item.range_part .. item.excmd
+    local cmd = item.cmd_prefix .. item.excmd
     vim.cmd(cmd)
     M.after(item.value, cmd)
   end
@@ -27,7 +27,7 @@ function M.action_preview(self, items, ctx)
 
   local lines = vim.api.nvim_buf_get_lines(item.bufnr, first, last, false)
   local preview_item = vim.deepcopy(item)
-  preview_item.range_part = ("1,%d"):format(#lines)
+  preview_item.cmd_prefix = ("silent! 1,%d"):format(#lines)
 
   ctx.ui:open_preview(preview_item, {
     lines = lines,

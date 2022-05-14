@@ -19,10 +19,10 @@ function M.collect(self, source_ctx)
 
   local items = {}
   for name, c in pairs(self.opts.commands) do
-    local range_part = self.opts.range
+    local cmd_prefix = self.opts.range
     local range = nil
     if source_ctx.range ~= nil then
-      range_part = ("%d,%d"):format(source_ctx.range.first, source_ctx.range.last)
+      cmd_prefix = ("%d,%d"):format(source_ctx.range.first, source_ctx.range.last)
       range = source_ctx.range
     end
 
@@ -37,7 +37,7 @@ function M.collect(self, source_ctx)
     end
 
     local excmd = ("s/%s%s/%s/%s"):format(magic, c.pattern, c.after, flags)
-    local desc = ("%s %s%s"):format(name, range_part, excmd)
+    local desc = ("%s %s%s"):format(name, cmd_prefix, excmd)
 
     table.insert(items, {
       desc = desc,
@@ -45,7 +45,7 @@ function M.collect(self, source_ctx)
       excmd = excmd,
       bufnr = bufnr,
       range = range,
-      range_part = range_part,
+      range_part = cmd_prefix,
       column_offsets = { excmd = #name + 1, value = 0 },
     })
   end
