@@ -5,10 +5,10 @@ describe("git/status source", function()
   after_each(helper.after_each)
 
   it("can show status files", function()
-    helper.new_file("test_file")
+    helper.test_data:create_file("test_file")
 
     helper.sync_open("git/status", { opts = { insert = false } })
 
-    assert.exists_pattern("?? " .. helper.test_data_path)
+    assert.exists_pattern("?? test_data/")
   end)
 end)

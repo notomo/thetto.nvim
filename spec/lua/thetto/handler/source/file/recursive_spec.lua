@@ -7,8 +7,8 @@ describe("file/recursive source", function()
   after_each(helper.after_each)
 
   it("can show files recursively", function()
-    helper.new_directory("dir")
-    helper.new_file("dir/file")
+    helper.test_data:create_dir("dir")
+    helper.test_data:create_file("dir/file")
 
     helper.sync_open("file/recursive", { opts = { insert = false } })
 
@@ -21,8 +21,8 @@ describe("file/recursive source", function()
   end)
 
   it("can show files in project dir", function()
-    helper.new_directory("0_root_pattern")
-    helper.new_file("0_root_pattern/in_root_pattern")
+    helper.test_data:create_dir("0_root_pattern")
+    helper.test_data:create_file("0_root_pattern/in_root_pattern")
 
     helper.sync_open("file/recursive", { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }) } })
 

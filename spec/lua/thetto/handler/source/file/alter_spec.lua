@@ -8,8 +8,8 @@ describe("alter source", function()
   it("can show alternative readable files", function()
     thetto.setup({ source = { ["file/alter"] = { opts = { pattern_groups = { { "%_test.lua", "%.lua" } } } } } })
 
-    helper.new_file("file.lua")
-    helper.new_file("file_test.lua")
+    helper.test_data:create_file("file.lua")
+    helper.test_data:create_file("file_test.lua")
     vim.cmd("edit file.lua")
 
     thetto.start("file/alter", { opts = { insert = false, immediately = true } })
@@ -22,9 +22,9 @@ describe("alter source", function()
       source = { ["file/alter"] = { opts = { pattern_groups = { { "%/from/%_test.lua", "%/to/%.lua" } } } } },
     })
 
-    helper.new_directory("from")
-    helper.new_directory("from/dir")
-    helper.new_file("from/file_test.lua")
+    helper.test_data:create_dir("from")
+    helper.test_data:create_dir("from/dir")
+    helper.test_data:create_file("from/file_test.lua")
     vim.cmd("edit ./from/file_test.lua")
 
     thetto.start("file/alter", {

@@ -45,7 +45,7 @@ function M.collect(self, source_ctx)
       excmd = excmd,
       bufnr = bufnr,
       range = range,
-      range_part = cmd_prefix,
+      cmd_prefix = cmd_prefix,
       column_offsets = { excmd = #name + 1, value = 0 },
     })
   end

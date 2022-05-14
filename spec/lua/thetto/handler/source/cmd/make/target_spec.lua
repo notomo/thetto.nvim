@@ -5,7 +5,7 @@ local util = helper.require("thetto.util")
 describe("cmd/make/target source", function()
   before_each(function()
     helper.before_each()
-    helper.new_file(
+    helper.test_data:create_file(
       "Makefile",
       [[
 start:
@@ -23,7 +23,7 @@ test:
 
 ]]
     )
-    helper.new_file(
+    helper.test_data:create_file(
       "test.mk",
       [[
 build:
@@ -31,8 +31,8 @@ build:
 ]]
     )
 
-    helper.new_directory("sub")
-    helper.new_file(
+    helper.test_data:create_dir("sub")
+    helper.test_data:create_file(
       "sub/Makefile",
       [[
 sub_test:
@@ -58,7 +58,7 @@ sub_test:
   end)
 
   it("can use the nearest upward Makefile", function()
-    helper.cd("sub")
+    helper.test_data:cd("sub")
     thetto.start("cmd/make/target", {
       opts = { insert = false, cwd = util.cwd.project({ "Makefile" }) },
     })

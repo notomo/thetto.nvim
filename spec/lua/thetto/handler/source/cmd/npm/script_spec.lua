@@ -4,7 +4,7 @@ local thetto = helper.require("thetto")
 describe("cmd/npm/script source", function()
   before_each(function()
     helper.before_each()
-    helper.new_file(
+    helper.test_data:create_file(
       "package.json",
       [[{
   "scripts": {

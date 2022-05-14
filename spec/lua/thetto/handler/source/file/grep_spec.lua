@@ -5,7 +5,7 @@ local util = helper.require("thetto.util")
 describe("file/grep source", function()
   before_each(function()
     helper.before_each()
-    helper.new_file(
+    helper.test_data:create_file(
       "target",
       [[
 hoge
@@ -51,8 +51,8 @@ foo]])
   end)
 
   it("can show grep results in project dir", function()
-    helper.new_directory("0_root_pattern")
-    helper.new_file("0_root_pattern/in_root_pattern", [[hoge in root_pattern]])
+    helper.test_data:create_dir("0_root_pattern")
+    helper.test_data:create_file("0_root_pattern/in_root_pattern", [[hoge in root_pattern]])
 
     helper.sync_open(
       "file/grep",
@@ -121,7 +121,7 @@ foo]])
   end)
 
   it("can show grep results with including :digits: text", function()
-    helper.new_file("file", [[  test :111:  ]])
+    helper.test_data:create_file("file", [[  test :111:  ]])
 
     helper.sync_open("file/grep", { opts = { insert = false, pattern = "test" } })
 

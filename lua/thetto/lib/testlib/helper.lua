@@ -3,18 +3,16 @@ local helper = require("vusted.helper")
 
 helper.root = helper.find_plugin_root(plugin_name)
 
-helper.test_data_path = "spec/test_data/"
-helper.test_data_dir = helper.root .. "/" .. helper.test_data_path
-
 function helper.before_each()
-  helper.new_directory("")
-  vim.api.nvim_set_current_dir(helper.test_data_dir)
+  helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root)
+  helper.test_data:cd("")
 end
 
 function helper.after_each()
+  helper.test_data:teardown()
   helper.cleanup()
   helper.cleanup_loaded_modules(plugin_name)
-  helper.delete("")
+  print(" \n")
 end
 
 function helper.buffer_log()
@@ -123,28 +121,8 @@ function helper.search(pattern)
   return result
 end
 
-function helper.new_file(path, ...)
-  local f = io.open(helper.test_data_dir .. path, "w")
-  for _, line in ipairs({ ... }) do
-    f:write(line .. "\n")
-  end
-  f:close()
-end
-
-function helper.new_directory(path)
-  vim.fn.mkdir(helper.test_data_dir .. path, "p")
-end
-
-function helper.delete(path)
-  vim.fn.delete(helper.test_data_dir .. path, "rf")
-end
-
-function helper.cd(path)
-  vim.api.nvim_set_current_dir(helper.test_data_dir .. path)
-end
-
 function helper.path(path)
-  return helper.test_data_dir .. (path or "")
+  return helper.test_data.full_path .. (path or "")
 end
 
 function helper.window_count()
@@ -209,7 +187,7 @@ asserts.create("filetype"):register_eq(function()
 end)
 
 asserts.create("current_dir"):register_eq(function()
-  return vim.fn.getcwd():gsub(helper.test_data_dir .. "?", "")
+  return vim.fn.getcwd():gsub(helper.test_data.full_path .. "?", "")
 end)
 
 asserts.create("exists_pattern"):register(function(self)

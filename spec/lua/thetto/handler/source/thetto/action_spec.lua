@@ -41,7 +41,7 @@ test1
   end)
 
   it("can show exnteded actions", function()
-    helper.new_file(
+    helper.test_data:create_file(
       "Makefile",
       [[
 build:

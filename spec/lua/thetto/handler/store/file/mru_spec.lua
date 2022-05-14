@@ -6,8 +6,8 @@ describe("file/mru store", function()
   local store_file_path
   before_each(function()
     helper.before_each()
-    helper.new_file("store.txt")
-    store_file_path = helper.test_data_dir .. "store"
+    helper.test_data:create_file("store.txt")
+    store_file_path = helper.test_data.full_path .. "store"
   end)
 
   after_each(function()
@@ -16,8 +16,8 @@ describe("file/mru store", function()
   end)
 
   it("can store mru file paths", function()
-    helper.new_file("file1")
-    helper.new_file("file2")
+    helper.test_data:create_file("file1")
+    helper.test_data:create_file("file2")
 
     thetto.setup_store("file/mru", { file_path = store_file_path })
     vim.cmd("edit file1")
@@ -25,8 +25,8 @@ describe("file/mru store", function()
 
     local data = store.get("file/mru"):data()
 
-    assert.equals(helper.test_data_dir .. "file2", data[1])
-    assert.equals(helper.test_data_dir .. "file1", data[2])
+    assert.equals(helper.test_data.full_path .. "file2", data[1])
+    assert.equals(helper.test_data.full_path .. "file1", data[2])
 
     store.get("file/mru"):save()
 

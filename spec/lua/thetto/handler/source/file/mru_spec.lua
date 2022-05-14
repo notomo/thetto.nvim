@@ -6,7 +6,7 @@ describe("file/mru source", function()
   after_each(helper.after_each)
 
   it("can show mru files", function()
-    helper.new_file("oldfile")
+    helper.test_data:create_file("oldfile")
     vim.cmd("edit oldfile")
 
     thetto.start("file/mru", { opts = { insert = false } })
@@ -18,7 +18,7 @@ describe("file/mru source", function()
   end)
 
   it("can execute directory_open", function()
-    helper.new_file("oldfile")
+    helper.test_data:create_file("oldfile")
     vim.cmd("edit oldfile")
 
     thetto.start("file/mru", { opts = { insert = false } })

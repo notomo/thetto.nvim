@@ -7,9 +7,9 @@ describe("file/in_dir source", function()
   after_each(helper.after_each)
 
   it("can show current dir files", function()
-    helper.new_file("oldfile", [[for mru test]])
-    helper.new_directory("dir")
-    helper.new_file("dir/file")
+    helper.test_data:create_file("oldfile", [[for mru test]])
+    helper.test_data:create_dir("dir")
+    helper.test_data:create_file("dir/file")
 
     thetto.start("file/in_dir", { opts = { insert = false } })
 
@@ -29,9 +29,9 @@ describe("file/in_dir source", function()
   end)
 
   it("can show files in project dir", function()
-    helper.new_directory("0_root_pattern")
-    helper.new_directory("dir")
-    helper.cd("dir")
+    helper.test_data:create_dir("0_root_pattern")
+    helper.test_data:create_dir("dir")
+    helper.test_data:cd("dir")
 
     thetto.start("file/in_dir", { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }) } })
 
@@ -40,8 +40,8 @@ describe("file/in_dir source", function()
   end)
 
   it("can unselect by toggle_all_selection", function()
-    helper.new_file("file")
-    helper.new_directory("dir")
+    helper.test_data:create_file("file")
+    helper.test_data:create_dir("dir")
 
     thetto.start("file/in_dir", { opts = { insert = false } })
 

@@ -5,7 +5,7 @@ describe("cmd/ctags source", function()
   after_each(helper.after_each)
 
   it("can show ctags output", function()
-    helper.new_file(
+    helper.test_data:create_file(
       "Makefile",
       [[
 test:
