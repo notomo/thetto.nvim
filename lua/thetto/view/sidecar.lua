@@ -47,7 +47,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
 
   if not self:_opened() then
     self._window = vim.api.nvim_open_win(bufnr, false, {
-      width = vim.o.columns - left_column - width - 3 - 2,
+      width = math.ceil(vim.o.columns - left_column - width - 3 - 2),
       height = height,
       relative = "editor",
       row = pos_row,
