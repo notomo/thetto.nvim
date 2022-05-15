@@ -353,6 +353,10 @@ describe("thetto", function()
 
     assert.current_line("test1test2")
   end)
+
+  it("can use broad ui", function()
+    thetto.start(test_source1, { opts = { view_type = "broad", insert = false } })
+  end)
 end)
 
 describe("thetto.reload()", function()
