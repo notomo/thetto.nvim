@@ -28,7 +28,7 @@ function UI.new(collector, insert, display_limit, typ)
   return setmetatable(tbl, UI)
 end
 
-function UI.open(self, on_move)
+function UI.open(self, on_move, needs_preview)
   vim.validate({ on_move = { on_move, "function", true } })
 
   for bufnr in bufferlib.in_tabpage(0) do
@@ -54,9 +54,14 @@ function UI.open(self, on_move)
   self._state = self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
   self._on_move = on_move or function() end
+  self._debounced_on_move = require("thetto.lib.wrap").debounce(50, self._on_move)
 
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)
+
+  if needs_preview then
+    self:open_preview(nil, {})
+  end
 end
 
 function UI.scroll(self, offset)
@@ -128,7 +133,7 @@ end
 
 function UI.on_move(self)
   local items = self:selected_items()
-  return self._on_move(items)
+  return self._debounced_on_move(items)
 end
 
 function UI.update_offset(self, offset)

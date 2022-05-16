@@ -25,6 +25,10 @@ function M.action_preview(self, items, ctx)
     last = item.range.last
   end
 
+  if not vim.api.nvim_buf_is_valid(item.bufnr) then
+    return
+  end
+
   local lines = vim.api.nvim_buf_get_lines(item.bufnr, first, last, false)
   local preview_item = vim.deepcopy(item)
   preview_item.cmd_prefix = ("silent! 1,%d"):format(#lines)

@@ -128,13 +128,15 @@ function Executor.auto(self, ctx, action_name)
   vim.validate({ action_name = { action_name, "string", true } })
 
   if action_name == nil then
-    return function() end
+    return function() end, false
   end
 
+  local needs_preview = action_name == "preview"
   return function(items)
     local _, err = self:action(items, ctx, action_name, self._default_action_opts)
     return err
-  end
+  end,
+    needs_preview
 end
 
 return Executor
