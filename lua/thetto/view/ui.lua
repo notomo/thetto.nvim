@@ -24,6 +24,7 @@ function UI.new(collector, insert, display_limit, typ)
     _state = State.new(insert),
     _display_limit = display_limit,
     _type = typ,
+    _initialized_preview = false,
   }
   return setmetatable(tbl, UI)
 end
@@ -61,6 +62,7 @@ function UI.open(self, on_move, needs_preview)
 
   if needs_preview then
     self:open_preview(nil, {})
+    self._initialized_preview = needs_preview
   end
 end
 
@@ -73,7 +75,7 @@ end
 
 function UI.resume(self)
   self:close()
-  self:open(self._on_move)
+  self:open(self._on_move, self._initialized_preview)
   return self:redraw(self._collector.input_lines, self._state.row)
 end
 
