@@ -77,10 +77,9 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   self._index = index
 
   if open_target.execute ~= nil then
-    local origin = vim.api.nvim_get_current_win()
-    vim.api.nvim_set_current_win(self._window)
-    open_target.execute()
-    vim.api.nvim_set_current_win(origin)
+    vim.api.nvim_win_call(self._window, function()
+      open_target.execute()
+    end)
   end
 
   if row ~= nil then
