@@ -260,16 +260,8 @@ function UI._height()
   return math.floor(vim.o.lines * 0.5)
 end
 
-local _width = {
-  [CENTER_TYPE] = function()
-    return math.floor(vim.o.columns * 0.4)
-  end,
-  [BROAD_TYPE] = function()
-    return math.floor(vim.o.columns * 0.6)
-  end,
-}
-function UI._width(self)
-  return _width[self._type]()
+function UI._width()
+  return math.floor(vim.o.columns * 0.6)
 end
 
 function UI._row(self, input_lines)
