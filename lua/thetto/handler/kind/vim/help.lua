@@ -32,6 +32,33 @@ function M._open(self, item, help_prefix, edit_action)
   vim.bo.modifiable = false
 end
 
+function M.action_preview(_, items, ctx)
+  local item = items[1]
+  if item == nil then
+    return
+  end
+
+  local help_bufnr = vim.fn.bufadd(item.path)
+  vim.fn.bufload(help_bufnr)
+  local lines = vim.api.nvim_buf_get_lines(help_bufnr, 0, -1, false)
+
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.bo[bufnr].buftype = "help"
+  vim.bo[bufnr].filetype = "help"
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, lines)
+
+  local cursor = vim.api.nvim_buf_call(bufnr, function()
+    vim.fn.search(item.pattern)
+    vim.cmd([[nohlsearch]])
+    return vim.api.nvim_win_get_cursor(0)
+  end)
+
+  ctx.ui:open_preview(
+    item,
+    { raw_bufnr = bufnr, row = cursor[1], range = { s = { column = cursor[2] }, e = { column = -1 } } }
+  )
+end
+
 M.default_action = "open"
 
 return require("thetto.core.kind").extend(M, "file")

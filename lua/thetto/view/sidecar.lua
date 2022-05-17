@@ -20,7 +20,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
 
   local top_row = 1
   local row = open_target.row
-  if open_target.row ~= nil and open_target.row > half_height then
+  if open_target.row ~= nil and open_target.row > half_height and not open_target.raw_bufnr then
     top_row = open_target.row - half_height + 1
     row = half_height
   end
@@ -68,6 +68,9 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     })
   else
     vim.api.nvim_win_set_buf(self._window, bufnr)
+  end
+  if open_target.raw_bufnr then
+    vim.api.nvim_win_set_cursor(self._window, { row, 0 })
   end
 
   local index

@@ -21,7 +21,7 @@ function M.collect()
       local splitted = vim.split(line, "\t")
       local tag = splitted[1]
       local path = splitted[2]
-      local tag_pattern = splitted[3]:sub(2)
+      local tag_pattern = splitted[3]:sub(2):gsub("%*", [[\*]])
       table.insert(items, { value = tag, path = doc_path .. path, pattern = tag_pattern })
     end
     f:close()
