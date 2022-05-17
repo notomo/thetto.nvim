@@ -69,7 +69,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   else
     vim.api.nvim_win_set_buf(self._window, bufnr)
   end
-  if open_target.raw_bufnr then
+  if open_target.raw_bufnr and row then
     vim.api.nvim_win_set_cursor(self._window, { row, 0 })
   end
 
