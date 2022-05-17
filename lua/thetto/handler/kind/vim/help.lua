@@ -43,7 +43,6 @@ function M.action_preview(_, items, ctx)
   local lines = vim.api.nvim_buf_get_lines(help_bufnr, 0, -1, false)
 
   local bufnr = vim.api.nvim_create_buf(false, true)
-  vim.bo[bufnr].buftype = "help"
   vim.bo[bufnr].filetype = "help"
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, true, lines)
 
