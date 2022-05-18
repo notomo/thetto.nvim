@@ -23,6 +23,7 @@ function UI.new(collector, insert, display_limit, typ)
     _collector = collector,
     _state = State.new(insert),
     _display_limit = display_limit,
+    _debounce_ms_on_move = 70,
     _type = typ,
     _initialized_preview = false,
   }
@@ -55,7 +56,7 @@ function UI.open(self, on_move, needs_preview)
   self._state = self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
   self._on_move = on_move or function() end
-  self._debounced_on_move = require("thetto.lib.wrap").debounce(50, self._on_move)
+  self._debounced_on_move = require("thetto.lib.wrap").debounce(self._debounce_ms_on_move, self._on_move)
 
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)
