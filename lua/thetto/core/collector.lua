@@ -80,12 +80,9 @@ function Collector.start(self, input_pattern)
     self._result:append(items)
     return self:update_with_debounce()
   end
-  local reset = function()
-    self._result:reset()
-  end
 
   local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
-  local result, err = self.source:collect(source_ctx, on_update_job, reset)
+  local result, err = self.source:collect(source_ctx, on_update_job)
   if err ~= nil then
     return err
   end

@@ -90,10 +90,6 @@ function SourceResult.append(self, items)
   vim.list_extend(self._all_items, items)
 end
 
-function SourceResult.reset(self)
-  self._all_items = {}
-end
-
 function SourceResult.apply_selected(self, items)
   for _, item in items:iter() do
     if item.selected ~= nil then

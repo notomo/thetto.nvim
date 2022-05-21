@@ -16,22 +16,10 @@ function M.collect(self, source_ctx)
 
   local job = self.jobs.new({ "jq", pattern }, {
     on_exit = function(job_self, code)
-      if code ~= 0 then
-        return
-      end
+      local is_error = code ~= 0
       local items = vim.tbl_map(function(output)
-        return { value = output }
-      end, job_self:get_stdout())
-      self:append(items)
-    end,
-    on_stderr = function(job_self)
-      local items = vim.tbl_map(function(output)
-        return { value = output, is_error = true }
-      end, job_self:get_stderr())
-      if #items == 0 then
-        return
-      end
-      self:reset()
+        return { value = output, is_error = is_error }
+      end, job_self:get_output())
       self:append(items)
     end,
   })

@@ -61,11 +61,10 @@ function Source.__index(self, k)
   return rawget(Source, k) or self._origin[k] or base[k]
 end
 
-function Source.collect(self, source_ctx, append, reset)
+function Source.collect(self, source_ctx, append)
   self.append = function(_, items)
     return append(items)
   end
-  self.reset = reset
 
   local all_items, job, err = self._origin.collect(self, source_ctx)
   if err ~= nil and err ~= Source.errors.skip_empty_pattern then

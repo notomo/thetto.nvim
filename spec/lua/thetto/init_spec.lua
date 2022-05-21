@@ -323,7 +323,7 @@ describe("thetto", function()
     }
 
     thetto.start(test_source1, { opts = { auto = "hoge", insert = false } })
-    vim.wait(50, function() end) -- HACk: wait debounce
+    vim.wait(100, function() end) -- HACk: wait debounce
     assert.equals("test_auto_1", value)
 
     thetto.execute("move_to_input")
