@@ -40,12 +40,14 @@ end
 
 vim.cmd("highlight default link ThettoFileBookmarkDirectory String")
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  highlighter:filter("ThettoFileBookmarkDirectory", first_line, items, function(item)
-    return item.kind_name == "file/directory"
-  end)
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "ThettoFileBookmarkDirectory",
+    filter = function(item)
+      return item.kind_name == "file/directory"
+    end,
+  },
+})
 
 M.kind_name = "file"
 

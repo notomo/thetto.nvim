@@ -39,12 +39,14 @@ end
 
 vim.cmd("highlight default link ThettoJqError WarningMsg")
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  highlighter:filter("ThettoJqError", first_line, items, function(item)
-    return item.is_error
-  end)
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "ThettoJqError",
+    filter = function(item)
+      return item.is_error
+    end,
+  },
+})
 
 M.kind_name = "word"
 

@@ -60,17 +60,21 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    if not item.pr.is_draft then
-      highlighter:add("Character", first_line + i - 1, 0, 1)
-    else
-      highlighter:add("Comment", first_line + i - 1, 0, 1)
-    end
-    highlighter:add("Comment", first_line + i - 1, item.column_offsets.at, item.column_offsets.by)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "Character",
+    else_group = "Comment",
+    end_column = 1,
+    filter = function(item)
+      return not item.pr.is_draft
+    end,
+  },
+  {
+    group = "Comment",
+    start_key = "at",
+    end_key = "by",
+  },
+})
 
 M.kind_name = "github/pull_request"
 

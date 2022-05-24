@@ -27,12 +27,12 @@ end
 
 vim.cmd("highlight default link ThettoManualDescription Comment")
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    highlighter:add("ThettoManualDescription", first_line + i - 1, item.column_offsets._desc, -1)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "ThettoManualDescription",
+    start_key = "_desc",
+  },
+})
 
 M.kind_name = "env/manual"
 

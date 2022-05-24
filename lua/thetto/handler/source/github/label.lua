@@ -42,12 +42,12 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    highlighter:add("Comment", first_line + i - 1, item.column_offsets.description, -1)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "Comment",
+    start_key = "description",
+  },
+})
 
 M.kind_name = "github/label"
 

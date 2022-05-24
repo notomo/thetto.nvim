@@ -79,13 +79,14 @@ function M.collect()
   return items
 end
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  local end_col = #colored
-  for i, item in ipairs(items) do
-    highlighter:add(item.value, first_line + i - 1, 0, end_col)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = function(item)
+      return item.value
+    end,
+    end_column = #colored,
+  },
+})
 
 M.kind_name = "vim/highlight_group"
 

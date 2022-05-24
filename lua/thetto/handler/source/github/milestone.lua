@@ -61,17 +61,20 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    if item.milestone.is_opened then
-      highlighter:add("Character", first_line + i - 1, 0, 1)
-    else
-      highlighter:add("Boolean", first_line + i - 1, 0, 1)
-    end
-    highlighter:add("Comment", first_line + i - 1, item.column_offsets.description, -1)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "Character",
+    else_group = "Boolean",
+    end_column = 1,
+    filter = function(item)
+      return item.milestone.is_opened
+    end,
+  },
+  {
+    group = "Comment",
+    start_key = "description",
+  },
+})
 
 M.kind_name = "github/milestone"
 

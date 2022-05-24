@@ -21,12 +21,12 @@ end
 
 vim.cmd("highlight default link ThettoVimCommandDefinition Comment")
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    highlighter:add("ThettoVimCommandDefinition", first_line + i - 1, item.column_offsets.definition, -1)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "ThettoVimCommandDefinition",
+    start_key = "definition",
+  },
+})
 
 M.kind_name = "vim/command"
 

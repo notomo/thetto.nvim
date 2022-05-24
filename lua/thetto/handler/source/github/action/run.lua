@@ -59,13 +59,17 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    highlighter:add("Conditional", first_line + i - 1, item.column_offsets.branch, item.column_offsets.state)
-    highlighter:add("Comment", first_line + i - 1, item.column_offsets.state, -1)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "Conditional",
+    start_key = "branch",
+    end_key = "state",
+  },
+  {
+    group = "Comment",
+    start_key = "state",
+  },
+})
 
 M.kind_name = "github/action/run"
 

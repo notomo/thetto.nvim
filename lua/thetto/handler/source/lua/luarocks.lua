@@ -65,12 +65,12 @@ end
 
 vim.cmd("highlight default link ThettoLuaLuarocksVersion Comment")
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    highlighter:add("ThettoLuaLuarocksVersion", first_line + i - 1, item.column_offsets.version, -1)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "ThettoLuaLuarocksVersion",
+    start_key = "version",
+  },
+})
 
 M.kind_name = "file/directory"
 

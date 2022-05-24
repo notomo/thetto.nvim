@@ -53,14 +53,15 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    if item.repo.is_archived then
-      highlighter:add("Comment", first_line + i - 1, 0, 1)
-    end
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "Comment",
+    end_column = 1,
+    filter = function(item)
+      return item.repo.is_archived
+    end,
+  },
+})
 
 M.kind_name = "github/repository"
 

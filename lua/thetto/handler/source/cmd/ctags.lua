@@ -41,16 +41,20 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoCtagsLine Comment")
 vim.cmd("highlight default link ThettoCtagsType Statement")
+vim.cmd("highlight default link ThettoCtagsLine Comment")
 
-function M.highlight(self, bufnr, first_line, items)
-  local highlighter = self.highlights:create(bufnr)
-  for i, item in ipairs(items) do
-    highlighter:add("ThettoCtagsLine", first_line + i - 1, item.column_offsets.line, -1)
-    highlighter:add("ThettoCtagsType", first_line + i - 1, item.column_offsets.type, item.column_offsets.line)
-  end
-end
+M.highlight = require("thetto.util").highlight.columns({
+  {
+    group = "ThettoCtagsType",
+    start_key = "type",
+    end_key = "line",
+  },
+  {
+    group = "ThettoCtagsLine",
+    start_key = "line",
+  },
+})
 
 M.kind_name = "file"
 
