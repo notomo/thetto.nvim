@@ -25,11 +25,13 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     row = half_height
   end
 
-  local lines
+  local lines, path
   if open_target.bufnr ~= nil then
     lines = vim.api.nvim_buf_get_lines(open_target.bufnr, top_row - 1, top_row + height - 1, false)
+    path = vim.api.nvim_buf_get_name(open_target.bufnr)
   elseif open_target.path ~= nil then
     lines = filelib.read_lines(open_target.path, top_row, top_row + height)
+    path = open_target.path
   elseif open_target.lines ~= nil then
     lines = open_target.lines
   else
@@ -43,6 +45,9 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     bufnr = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     vim.bo[bufnr].bufhidden = "wipe"
+  end
+  if path then
+    vim.filetype.match(path, bufnr)
   end
 
   if not self:_opened() then
