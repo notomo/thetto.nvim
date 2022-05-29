@@ -44,7 +44,7 @@ function M.collect(self, source_ctx)
   return items
 end
 
-vim.cmd("highlight default link ThettoMakeTargetPath Comment")
+vim.api.nvim_set_hl(0, "ThettoMakeTargetPath", { default = true, link = "Comment" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

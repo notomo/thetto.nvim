@@ -38,7 +38,7 @@ function M.collect(self)
   return items
 end
 
-vim.cmd("highlight default link ThettoFileBookmarkDirectory String")
+vim.api.nvim_set_hl(0, "ThettoFileBookmarkDirectory", { default = true, link = "String" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

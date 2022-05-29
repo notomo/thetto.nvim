@@ -40,7 +40,7 @@ function M.apply(self, filter_ctx, items)
   return filtered
 end
 
-vim.cmd("highlight default link ThettoFilterSubstringMatch Boolean")
+vim.api.nvim_set_hl(0, "ThettoFilterSubstringMatch", { default = true, link = "Boolean" })
 
 function M.highlight(self, filter_ctx, bufnr, first_line, items)
   if self.inversed or filter_ctx.input_line == "" then

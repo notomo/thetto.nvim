@@ -278,12 +278,12 @@ end
 -- for testing
 function UI._changed_after(_) end
 
-vim.cmd("highlight default link ThettoSelected Statement")
-vim.cmd("highlight default link ThettoInfo StatusLine")
-vim.cmd("highlight default link ThettoColorLabelOthers StatusLine")
-vim.cmd("highlight default link ThettoColorLabelBackground NormalFloat")
-vim.cmd("highlight default link ThettoInput NormalFloat")
-vim.cmd("highlight default link ThettoPreview Search")
-vim.cmd("highlight default link ThettoFilterInfo Comment")
+vim.api.nvim_set_hl(0, "ThettoSelected", { default = true, link = "Statement" })
+vim.api.nvim_set_hl(0, "ThettoInfo", { default = true, link = "StatusLine" })
+vim.api.nvim_set_hl(0, "ThettoColorLabelOthers", { default = true, link = "StatusLine" })
+vim.api.nvim_set_hl(0, "ThettoColorLabelBackground", { default = true, link = "NormalFloat" })
+vim.api.nvim_set_hl(0, "ThettoInput", { default = true, link = "NormalFloat" })
+vim.api.nvim_set_hl(0, "ThettoPreview", { default = true, link = "Search" })
+vim.api.nvim_set_hl(0, "ThettoFilterInfo", { default = true, link = "Comment" })
 
 return UI

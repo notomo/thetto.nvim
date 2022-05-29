@@ -25,7 +25,7 @@ function M.collect(self)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoManualDescription Comment")
+vim.api.nvim_set_hl(0, "ThettoManualDescription", { default = true, link = "Comment" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

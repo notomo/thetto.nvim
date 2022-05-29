@@ -45,7 +45,7 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoGitActiveBranch Type")
+vim.api.nvim_set_hl(0, "ThettoGitActiveBranch", { default = true, link = "Type" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

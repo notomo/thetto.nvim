@@ -37,7 +37,7 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoJqError WarningMsg")
+vim.api.nvim_set_hl(0, "ThettoJqError", { default = true, link = "WarningMsg" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

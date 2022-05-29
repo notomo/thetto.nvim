@@ -63,7 +63,7 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoLuaLuarocksVersion Comment")
+vim.api.nvim_set_hl(0, "ThettoLuaLuarocksVersion", { default = true, link = "Comment" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

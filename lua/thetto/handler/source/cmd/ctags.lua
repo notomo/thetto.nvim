@@ -41,8 +41,8 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoCtagsType Statement")
-vim.cmd("highlight default link ThettoCtagsLine Comment")
+vim.api.nvim_set_hl(0, "ThettoCtagsType", { default = true, link = "Statement" })
+vim.api.nvim_set_hl(0, "ThettoCtagsLine", { default = true, link = "Comment" })
 
 M.highlight = require("thetto.util").highlight.columns({
   {

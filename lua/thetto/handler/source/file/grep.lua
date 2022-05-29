@@ -81,8 +81,8 @@ function M.collect(self, source_ctx)
   return {}, job
 end
 
-vim.cmd("highlight default link ThettoFileGrepPath Comment")
-vim.cmd("highlight default link ThettoFileGrepMatch Define")
+vim.api.nvim_set_hl(0, "ThettoFileGrepPath", { default = true, link = "Comment" })
+vim.api.nvim_set_hl(0, "ThettoFileGrepMatch", { default = true, link = "Define" })
 
 -- NOTICE: support only this pattern
 local highlight_target = vim.regex("\\v[[:alnum:]_]+")
