@@ -88,13 +88,12 @@ function Collector.start(self, input_pattern)
   end
 
   self._result = result
+  self.source_ctx = source_ctx
 
   local start_err = self._result:start()
   if start_err ~= nil then
     return start_err
   end
-
-  self.source_ctx = source_ctx
 
   return nil
 end
@@ -105,10 +104,6 @@ end
 
 function Collector.discard(self)
   return self._result:discard()
-end
-
-function Collector.stop(self)
-  return self._result:stop()
 end
 
 function Collector.finished(self)

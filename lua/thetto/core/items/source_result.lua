@@ -17,10 +17,6 @@ function SourceFunctionResult.start(self)
   self._subscription = subscription
 end
 
-function SourceFunctionResult.stop(self)
-  return self._subscription and self._subscription:unsubscribe()
-end
-
 function SourceFunctionResult.wait(self, ms)
   ms = ms or 1000
   return vim.wait(ms, function()
@@ -47,10 +43,6 @@ function SourcePendingResult.start(self)
     return
   end
   return self._job:start()
-end
-
-function SourcePendingResult.stop(self)
-  self._job:stop()
 end
 
 function SourcePendingResult.wait(self, ms)
@@ -102,8 +94,6 @@ end
 function SourceResult.start(_)
   return nil
 end
-
-function SourceResult.stop(_) end
 
 function SourceResult.wait(_)
   return true
