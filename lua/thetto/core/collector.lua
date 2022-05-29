@@ -86,7 +86,14 @@ function Collector.start(self, input_pattern)
   if err ~= nil then
     return err
   end
+
   self._result = result
+
+  local start_err = self._result:start()
+  if start_err ~= nil then
+    return start_err
+  end
+
   self.source_ctx = source_ctx
 
   return nil

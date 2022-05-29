@@ -359,6 +359,24 @@ describe("thetto", function()
   it("can use broad ui", function()
     thetto.start(test_source1, { opts = { view_type = "broad", insert = false } })
   end)
+
+  it("can return function result", function()
+    local source = "test_function"
+    thetto.register_source(source, {
+      collect = function()
+        return function(observer)
+          observer:next({
+            { value = "test1" },
+          })
+          observer:complete()
+        end
+      end,
+    })
+
+    thetto.start(source, { opts = { insert = false } })
+
+    assert.exists_pattern("test1")
+  end)
 end)
 
 describe("thetto.reload()", function()
