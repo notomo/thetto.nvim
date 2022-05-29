@@ -7,6 +7,9 @@ local start_column_func = function(hl_column)
       return hl_column.start_column
     end
   end
+  if type(hl_column.start_key) == "function" then
+    return hl_column.start_key
+  end
   if not hl_column.start_key then
     return function()
       return 0
@@ -22,6 +25,9 @@ local end_column_func = function(hl_column)
     return function()
       return hl_column.end_column
     end
+  end
+  if type(hl_column.end_key) == "function" then
+    return hl_column.end_key
   end
   if not hl_column.end_key then
     return function()
