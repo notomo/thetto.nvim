@@ -13,6 +13,10 @@ function SourceFunctionResult.start(self)
     next = function(items)
       self._append(items)
     end,
+    error = function(err)
+      self._append({})
+      require("thetto.vendor.misclib.message").warn(err)
+    end,
   })
   self._subscription = subscription
 end
