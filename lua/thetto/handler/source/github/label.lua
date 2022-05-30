@@ -12,34 +12,24 @@ function M.collect(self, source_ctx)
     "-F",
     "per_page=100",
   }
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self, code)
-      if code ~= 0 then
-        return
-      end
-
-      local items = {}
-      local labels = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
-      for _, label in ipairs(labels) do
-        local name = label.name
-        local label_desc = label.description
-        if not label_desc then
-          label_desc = ""
-        end
-        local desc = ("%s %s"):format(name, label_desc)
-        table.insert(items, {
-          value = label.name,
-          desc = desc,
-          label = { owner = self.opts.owner, repo = self.opts.repo },
-          column_offsets = { value = 0, description = #name + 1 },
-        })
-      end
-      self:append(items)
+  return require("thetto.util").job.run(cmd, source_ctx, function(label)
+    local name = label.name
+    local label_desc = label.description
+    if not label_desc then
+      label_desc = ""
+    end
+    local desc = ("%s %s"):format(name, label_desc)
+    return {
+      value = label.name,
+      desc = desc,
+      label = { owner = self.opts.owner, repo = self.opts.repo },
+      column_offsets = { value = 0, description = #name + 1 },
+    }
+  end, {
+    to_outputs = function(job)
+      return vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
     end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
   })
-  return {}, job
 end
 
 M.highlight = require("thetto.util").highlight.columns({

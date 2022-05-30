@@ -31,39 +31,29 @@ function M.collect(self, source_ctx)
     vim.list_extend(cmd, { "-F", "assignee=" .. self.opts.assignee })
   end
 
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self, code)
-      if code ~= 0 then
-        return
-      end
-
-      local items = {}
-      local issues = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
-      for _, issue in ipairs(issues) do
-        local mark
-        if issue.state == "open" then
-          mark = "O"
-        else
-          mark = "C"
-        end
-        local title = ("%s %s"):format(mark, issue.title)
-        local at = "" .. issue.created_at
-        local by = "by " .. issue.user.login
-        local desc = ("%s %s %s"):format(title, at, by)
-        table.insert(items, {
-          value = issue.title,
-          url = issue.html_url,
-          desc = desc,
-          issue = { is_opened = issue.state == "open" },
-          column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
-        })
-      end
-      self:append(items)
+  return require("thetto.util").job.run(cmd, source_ctx, function(issue)
+    local mark
+    if issue.state == "open" then
+      mark = "O"
+    else
+      mark = "C"
+    end
+    local title = ("%s %s"):format(mark, issue.title)
+    local at = "" .. issue.created_at
+    local by = "by " .. issue.user.login
+    local desc = ("%s %s %s"):format(title, at, by)
+    return {
+      value = issue.title,
+      url = issue.html_url,
+      desc = desc,
+      issue = { is_opened = issue.state == "open" },
+      column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
+    }
+  end, {
+    to_outputs = function(job)
+      return vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
     end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
   })
-  return {}, job
 end
 
 M.highlight = require("thetto.util").highlight.columns({

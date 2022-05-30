@@ -17,6 +17,9 @@ function SourceFunctionResult.start(self)
       self._append({})
       require("thetto.vendor.misclib.message").warn(err)
     end,
+    complete = function()
+      self._append({})
+    end,
   })
   self._subscription = subscription
 end

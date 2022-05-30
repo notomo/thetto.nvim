@@ -2,27 +2,21 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.collect(self, source_ctx)
+function M.collect(_, source_ctx)
   local file_path = vim.api.nvim_buf_get_name(0)
   if not filelib.readable(file_path) then
     return {}, nil
   end
 
   local cmd = { "gron", "--monochrome", file_path }
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self)
-      local items = {}
-      for _, output in ipairs(job_self:get_stdout()) do
-        local pattern = M._to_pattern(output)
-        table.insert(items, { value = output, path = file_path, pattern = pattern })
-      end
-      self:append(items)
-    end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
-  })
-
-  return {}, job
+  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+    local pattern = M._to_pattern(output)
+    return {
+      value = output,
+      path = file_path,
+      pattern = pattern,
+    }
+  end)
 end
 
 M.indent = 2

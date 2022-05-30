@@ -1,40 +1,20 @@
 local M = {}
 
 function M.collect(self, source_ctx)
-  local lines = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false)
-
-  local pattern = source_ctx.pattern
-  if pattern == nil or pattern == "" then
-    local items = vim.tbl_map(function(line)
-      return { value = line }
-    end, lines)
-    if source_ctx.interactive then
-      self:append(items)
-    end
-    return items, nil, self.errors.skip_empty_pattern
-  end
-
-  local job = self.jobs.new({ "jq", pattern }, {
-    on_exit = function(job_self, code)
-      local is_error = code ~= 0
-      local items = vim.tbl_map(function(output)
-        return { value = output, is_error = is_error }
-      end, job_self:get_output())
-      self:append(items)
+  local cmd = { "jq", source_ctx.pattern }
+  return require("thetto.util").job.run(cmd, source_ctx, function(output, code)
+    local is_error = code ~= 0
+    return {
+      value = output,
+      is_error = is_error,
+    }
+  end, {
+    input = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false),
+    stop_on_error = false,
+    to_outputs = function(job)
+      return job:get_output()
     end,
   })
-  local err = job:start()
-  if err ~= nil then
-    return nil, nil, err
-  end
-
-  job.stdin:write(lines, function()
-    if not job.stdin:is_closing() then
-      job.stdin:close()
-    end
-  end)
-
-  return {}, job
 end
 
 vim.api.nvim_set_hl(0, "ThettoJqError", { default = true, link = "WarningMsg" })

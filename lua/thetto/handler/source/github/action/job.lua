@@ -11,49 +11,40 @@ function M.collect(self, source_ctx)
 
   local path = ("repos/%s/%s/actions/runs/%s/jobs"):format(self.opts.owner, self.opts.repo, self.opts.run_id)
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self, code)
-      if code ~= 0 then
-        return
-      end
-
-      local items = {}
-      local data = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
-      for _, job in ipairs(data.jobs or {}) do
-        local mark = "  "
-        if job.conclusion == "success" then
-          mark = "✅"
-        elseif job.conclusion == "failure" then
-          mark = "❌"
-        elseif job.conclusion == "skipped" then
-          mark = "🔽"
-        elseif job.conclusion == "cancelled" then
-          mark = "🚫"
-        elseif job.status == "in_progress" then
-          mark = "🏃"
-        end
-        local title = ("%s %s"):format(mark, job.name)
-        local states = { job.status }
-        if job.conclusion then
-          table.insert(states, job.conclusion)
-        end
-        local state = ("(%s)"):format(table.concat(states, ","))
-        local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(job.started_at, job.completed_at)
-        local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
-        table.insert(items, {
-          value = job.name,
-          url = job.html_url,
-          desc = desc,
-          job = { id = job.id },
-          column_offsets = { value = #mark + 1, state = #title + 1 },
-        })
-      end
-      self:append(items)
+  return require("thetto.util").job.run(cmd, source_ctx, function(job)
+    local mark = "  "
+    if job.conclusion == "success" then
+      mark = "✅"
+    elseif job.conclusion == "failure" then
+      mark = "❌"
+    elseif job.conclusion == "skipped" then
+      mark = "🔽"
+    elseif job.conclusion == "cancelled" then
+      mark = "🚫"
+    elseif job.status == "in_progress" then
+      mark = "🏃"
+    end
+    local title = ("%s %s"):format(mark, job.name)
+    local states = { job.status }
+    if job.conclusion then
+      table.insert(states, job.conclusion)
+    end
+    local state = ("(%s)"):format(table.concat(states, ","))
+    local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(job.started_at, job.completed_at)
+    local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
+    return {
+      value = job.name,
+      url = job.html_url,
+      desc = desc,
+      job = { id = job.id },
+      column_offsets = { value = #mark + 1, state = #title + 1 },
+    }
+  end, {
+    to_outputs = function(job)
+      local data = vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
+      return data.jobs or {}
     end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
   })
-  return {}, job
 end
 
 M.highlight = require("thetto.util").highlight.columns({

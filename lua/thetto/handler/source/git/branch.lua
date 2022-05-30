@@ -29,20 +29,13 @@ function M.collect(self, source_ctx)
   end
   get_current_job:wait(1000)
 
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self)
-      local items = {}
-      for _, output in ipairs(job_self:get_stdout()) do
-        local is_current_branch = output == current_branch
-        table.insert(items, { value = output, is_current_branch = is_current_branch })
-      end
-      self:append(items)
-    end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
-  })
-
-  return {}, job
+  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+    local is_current_branch = output == current_branch
+    return {
+      value = output,
+      is_current_branch = is_current_branch,
+    }
+  end)
 end
 
 vim.api.nvim_set_hl(0, "ThettoGitActiveBranch", { default = true, link = "Type" })

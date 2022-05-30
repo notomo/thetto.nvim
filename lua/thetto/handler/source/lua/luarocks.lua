@@ -29,38 +29,27 @@ function M._find_dir(name, paths)
   return nil
 end
 
-function M.collect(self, source_ctx)
-  local package_paths = vim.split(package.path, ";", true)
-  vim.list_extend(package_paths, vim.split(package.cpath, ";", true))
+function M.collect(_, source_ctx)
+  local cmd = { "luarocks", "list", "--porcelain" }
+  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+    local factors = vim.split(output, "%s+")
+    local name = factors[1]
+    local version = factors[2]
+    local path = pathlib.join(factors[4], name, version)
 
-  local job = self.jobs.new({ "luarocks", "list", "--porcelain" }, {
-    on_exit = function(job_self)
-      local items = {}
-      for _, output in ipairs(job_self:get_stdout()) do
-        local factors = vim.split(output, "%s+")
-        local name = factors[1]
-        local version = factors[2]
-        local path = pathlib.join(factors[4], name, version)
+    local package_paths = vim.split(package.path, ";", true)
+    vim.list_extend(package_paths, vim.split(package.cpath, ";", true))
+    local source_path = M._find_dir(name, package_paths)
 
-        local source_path = M._find_dir(name, package_paths)
-        path = source_path or path
-
-        local desc = ("%s %s"):format(name, version)
-        table.insert(items, {
-          value = name,
-          path = path,
-          desc = desc,
-          version = version,
-          column_offsets = { value = 0, version = #name + 1 },
-        })
-      end
-      self:append(items)
-    end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
-  })
-
-  return {}, job
+    local desc = ("%s %s"):format(name, version)
+    return {
+      value = name,
+      path = source_path or path,
+      desc = desc,
+      version = version,
+      column_offsets = { value = 0, version = #name + 1 },
+    }
+  end)
 end
 
 vim.api.nvim_set_hl(0, "ThettoLuaLuarocksVersion", { default = true, link = "Comment" })

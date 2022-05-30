@@ -24,40 +24,30 @@ function M.collect(self, source_ctx)
     "-F",
     "direction=" .. self.opts.sort_direction,
   }
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self, code)
-      if code ~= 0 then
-        return
-      end
-
-      local items = {}
-      local prs = vim.json.decode(job_self:get_joined_stdout(), { luanil = { object = true } })
-      for _, pr in ipairs(prs) do
-        local mark
-        if pr.draft then
-          mark = "D"
-        else
-          mark = "R"
-        end
-        local title = ("%s %s"):format(mark, pr.title)
-        local at = pr.created_at
-        local by = "by " .. pr.user.login
-        local branch = pr.head.ref
-        local desc = ("%s %s %s (%s)"):format(title, at, by, branch)
-        table.insert(items, {
-          value = pr.title,
-          url = pr.html_url,
-          desc = desc,
-          pr = { is_draft = pr.draft },
-          column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
-        })
-      end
-      self:append(items)
+  return require("thetto.util").job.run(cmd, source_ctx, function(pr)
+    local mark
+    if pr.draft then
+      mark = "D"
+    else
+      mark = "R"
+    end
+    local title = ("%s %s"):format(mark, pr.title)
+    local at = pr.created_at
+    local by = "by " .. pr.user.login
+    local branch = pr.head.ref
+    local desc = ("%s %s %s (%s)"):format(title, at, by, branch)
+    return {
+      value = pr.title,
+      url = pr.html_url,
+      desc = desc,
+      pr = { is_draft = pr.draft },
+      column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
+    }
+  end, {
+    to_outputs = function(job)
+      return vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
     end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
   })
-  return {}, job
 end
 
 M.highlight = require("thetto.util").highlight.columns({

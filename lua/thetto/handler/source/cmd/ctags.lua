@@ -13,32 +13,21 @@ function M.collect(self, source_ctx)
   end
 
   local cmd = { "ctags", "--output-format=xref", "-f", "-", file_path }
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self)
-      local items = {}
-      for _, output in ipairs(job_self:get_stdout()) do
-        local value, typ, row, path, line = output:match("(%S+)%s+(%S+)%s+(%d+)%s+(%S+)%s+(.+)")
-        if vim.tbl_contains(self.opts.ignore, typ) then
-          goto continue
-        end
-        local _desc = ("%s [%s]"):format(value, typ)
-        local desc = ("%s %s"):format(_desc, line)
-        table.insert(items, {
-          desc = desc,
-          value = value,
-          path = path,
-          row = tonumber(row),
-          column_offsets = { value = 0, line = #_desc, type = #value + 1 },
-        })
-        ::continue::
-      end
-      self:append(items)
-    end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
-  })
-
-  return {}, job
+  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+    local value, typ, row, path, line = output:match("(%S+)%s+(%S+)%s+(%d+)%s+(%S+)%s+(.+)")
+    if vim.tbl_contains(self.opts.ignore, typ) then
+      return nil
+    end
+    local _desc = ("%s [%s]"):format(value, typ)
+    local desc = ("%s %s"):format(_desc, line)
+    return {
+      desc = desc,
+      value = value,
+      path = path,
+      row = tonumber(row),
+      column_offsets = { value = 0, line = #_desc, type = #value + 1 },
+    }
+  end)
 end
 
 vim.api.nvim_set_hl(0, "ThettoCtagsType", { default = true, link = "Statement" })

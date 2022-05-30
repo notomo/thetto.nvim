@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(self)
+function M.collect(_, source_ctx)
   local cmd = { "ps", "--no-headers", "faxo", "pid,user,command" }
   local remove_header = function(_) end
   local to_item = function(output)
@@ -25,19 +25,13 @@ function M.collect(self)
     end
   end
 
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self)
-      local items = {}
-      local outputs = job_self:get_stdout()
+  return require("thetto.util").job.run(cmd, source_ctx, to_item, {
+    to_outputs = function(job)
+      local outputs = job:get_stdout()
       remove_header(outputs)
-      for _, output in ipairs(outputs) do
-        table.insert(items, to_item(output))
-      end
-      self:append(items)
+      return outputs
     end,
-    on_stderr = self.jobs.print_stderr,
   })
-  return {}, job
 end
 
 M.kind_name = "env/process"

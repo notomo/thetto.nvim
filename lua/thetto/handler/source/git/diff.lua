@@ -46,24 +46,17 @@ function M.collect(self, source_ctx)
   end
 
   local cmd = { "git", "--no-pager", "diff", "--no-color", path }
-  local job = self.jobs.new(cmd, {
-    on_exit = function(job_self)
-      local items = {}
-      local hunks = to_hunks(job_self:get_stdout())
-      for _, hunk in ipairs(hunks) do
-        table.insert(items, {
-          value = hunk.desc,
-          row = hunk.row,
-          path = path or pathlib.join(git_root, hunk.path),
-        })
-      end
-      self:append(items)
+  return require("thetto.util").job.run(cmd, source_ctx, function(hunk)
+    return {
+      value = hunk.desc,
+      row = hunk.row,
+      path = path or pathlib.join(git_root, hunk.path),
+    }
+  end, {
+    to_outputs = function(job)
+      return to_hunks(job:get_stdout())
     end,
-    on_stderr = self.jobs.print_stderr,
-    cwd = source_ctx.cwd,
   })
-
-  return {}, job
 end
 
 M.kind_name = "file"
