@@ -59,23 +59,14 @@ function M.collect(self, source_ctx)
   end
 
   return function(observer)
-    local finished = false
-    local count = 0
-    local work = vim.loop.new_work(to_items, function(encoded)
-      local items = vim.mpack.decode(encoded)
-      observer:next(items)
-      count = count - 1
-      if finished and count == 0 then
-        observer:complete()
-      end
-    end)
-
     local output_buffer = require("thetto.util").job.output_buffer()
+    local work_observer = require("thetto.util").job.work_observer(observer, to_items, function(encoded)
+      return vim.mpack.decode(encoded)
+    end)
     local job = self.jobs.new(cmd, {
       on_stdout = function(_, _, data)
         if not data then
-          count = count + 1
-          work:queue(source_ctx.cwd, output_buffer:pop())
+          work_observer:queue(source_ctx.cwd, output_buffer:pop())
           return
         end
 
@@ -84,14 +75,10 @@ function M.collect(self, source_ctx)
           return
         end
 
-        count = count + 1
-        work:queue(source_ctx.cwd, str)
+        work_observer:queue(source_ctx.cwd, str)
       end,
       on_exit = function(_)
-        finished = true
-        if count == 0 then
-          observer:complete()
-        end
+        work_observer:complete()
       end,
       stdout_buffered = false,
       stderr_buffered = false,
