@@ -61,13 +61,13 @@ function Source.__index(self, k)
 end
 
 function Source.collect(self, source_ctx, append)
-  local all_items, job, err = self._origin.collect(self, source_ctx)
+  local all_items, err = self._origin.collect(self, source_ctx)
   if err ~= nil then
     return nil, err
   end
 
   local empty_is_err = not source_ctx.interactive
-  local result, res_err = SourceResult.new(self.name, all_items, job, empty_is_err, append)
+  local result, res_err = SourceResult.new(self.name, all_items, empty_is_err, append)
   if res_err ~= nil then
     return nil, res_err
   end

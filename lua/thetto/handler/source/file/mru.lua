@@ -10,7 +10,7 @@ M.opts = { cwd_marker = "%s/" }
 function M.collect(self, source_ctx)
   local store, err = Store.new_or_get("file/mru")
   if err ~= nil then
-    return nil, nil, err
+    return nil, err
   end
 
   local paths = store:data()

@@ -39,11 +39,10 @@ function SourceFunctionResult.finished(self)
   return self._subscription and self._subscription:closed()
 end
 
-function SourceResult.new(name, all_items, job, empty_is_err, append)
+function SourceResult.new(name, all_items, empty_is_err, append)
   vim.validate({
     name = { name, "string" },
     all_items = { all_items, { "table", "function" }, true },
-    job = { job, "table", true },
     empty_is_err = { empty_is_err, "boolean", true },
     append = { append, "function", true },
   })

@@ -6,7 +6,7 @@ local M = {}
 function M.collect()
   local ctx, ctx_err = Context.get_from_path()
   if ctx_err ~= nil then
-    return nil, nil, "must be executed in thetto buffer"
+    return nil, "must be executed in thetto buffer"
   end
 
   local item = ctx.ui:selected_items()[1] or {}

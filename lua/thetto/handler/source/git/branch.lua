@@ -7,7 +7,7 @@ M.opts = { all = false }
 function M.collect(self, source_ctx)
   local _, err = filelib.find_git_root()
   if err ~= nil then
-    return {}, nil, err
+    return nil, err
   end
 
   local cmd = { "git", "branch", "--format", "%(refname:short)" }
@@ -25,7 +25,7 @@ function M.collect(self, source_ctx)
   })
   local joberr = get_current_job:start()
   if joberr ~= nil then
-    return nil, nil, joberr
+    return nil, joberr
   end
   get_current_job:wait(1000)
 

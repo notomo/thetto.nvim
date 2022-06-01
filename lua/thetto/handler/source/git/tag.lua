@@ -7,7 +7,7 @@ M.opts = { merged = false }
 function M.collect(self, source_ctx)
   local _, err = filelib.find_git_root()
   if err ~= nil then
-    return {}, nil, err
+    return nil, err
   end
 
   local cmd = { "git", "tag", "-l" }

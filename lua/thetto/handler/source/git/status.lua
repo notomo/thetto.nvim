@@ -6,7 +6,7 @@ local M = {}
 function M.collect(_, source_ctx)
   local git_root, err = filelib.find_git_root()
   if err ~= nil then
-    return {}, nil, err
+    return nil, err
   end
 
   local cmd = { "git", "--no-pager", "status", "--short" }
