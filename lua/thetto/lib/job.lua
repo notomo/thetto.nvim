@@ -96,50 +96,6 @@ function Job.stop(self)
   close(self.handle)
 end
 
-local create_co = function(outputs)
-  return coroutine.create(function()
-    for _, o in ipairs(outputs) do
-      coroutine.yield(o)
-    end
-  end)
-end
-
-function M.loop(ms, f)
-  local current = nil
-  local next_outputs = {}
-  local timer = vim.loop.new_timer()
-  return function(job, outputs)
-    if timer:is_active() then
-      vim.list_extend(next_outputs, outputs)
-      return
-    end
-    current = create_co(outputs)
-
-    timer:start(
-      0,
-      ms,
-      vim.schedule_wrap(function()
-        if job.discarded then
-          return timer:stop()
-        end
-
-        local ok = pcall(f, current)
-        if not ok then
-          return timer:stop()
-        end
-
-        local status = coroutine.status(current)
-        if #next_outputs == 0 and not job:is_running() and status == "dead" then
-          timer:stop()
-        elseif #next_outputs ~= 0 and status == "dead" then
-          current = create_co(next_outputs)
-          next_outputs = {}
-        end
-      end)
-    )
-  end
-end
-
 function M.parse_output(data)
   if data == nil then
     return {}

@@ -39,34 +39,6 @@ function SourceFunctionResult.finished(self)
   return self._subscription and self._subscription:closed()
 end
 
-local SourcePendingResult = {}
-
-function SourcePendingResult.__index(_, k)
-  return rawget(SourcePendingResult, k) or rawget(SourceResult, k)
-end
-
-function SourcePendingResult.start(self)
-  if self._job:is_running() then
-    return
-  end
-  return self._job:start()
-end
-
-function SourcePendingResult.wait(self, ms)
-  ms = ms or 1000
-  return vim.wait(ms, function()
-    return self:finished()
-  end, 10)
-end
-
-function SourcePendingResult.discard(self)
-  self._job:discard()
-end
-
-function SourcePendingResult.finished(self)
-  return not self._job:is_running()
-end
-
 function SourceResult.new(name, all_items, job, empty_is_err, append)
   vim.validate({
     name = { name, "string" },
@@ -80,11 +52,6 @@ function SourceResult.new(name, all_items, job, empty_is_err, append)
   if type(all_items) == "function" then
     local tbl = { _subscriber = all_items, _all_items = {}, _append = append }
     return setmetatable(tbl, SourceFunctionResult)
-  end
-
-  if job ~= nil then
-    local tbl = { _job = job, _all_items = {} }
-    return setmetatable(tbl, SourcePendingResult)
   end
 
   if empty_is_err and #all_items == 0 then

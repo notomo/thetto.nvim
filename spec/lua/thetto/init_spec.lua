@@ -165,22 +165,6 @@ describe("thetto", function()
     assert.current_line("test%")
   end)
 
-  it("stops the unfinished job on closed", function()
-    local job = require("thetto.lib.job").new({ "sleep", "9" }, {})
-
-    local source = "test_job"
-    thetto.register_source(source, {
-      collect = function()
-        return {}, job
-      end,
-    })
-
-    thetto.start(source, { opts = { insert = false } })
-    thetto.execute("quit")
-
-    assert.is_false(job:is_running())
-  end)
-
   it("can open with action opts #slow", function()
     test_items1 = {
       "test1",

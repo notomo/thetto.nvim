@@ -62,10 +62,6 @@ function Source.__index(self, k)
 end
 
 function Source.collect(self, source_ctx, append)
-  self.append = function(_, items)
-    return append(items)
-  end
-
   local all_items, job, err = self._origin.collect(self, source_ctx)
   if err ~= nil and err ~= Source.errors.skip_empty_pattern then
     return nil, err
