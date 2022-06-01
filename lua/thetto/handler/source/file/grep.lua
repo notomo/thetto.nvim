@@ -70,26 +70,22 @@ function M.collect(self, source_ctx)
       end
     end)
 
-    local incompleted_data = ""
+    local output_buffer = require("thetto.util").job.output_buffer()
     local job = self.jobs.new(cmd, {
       on_stdout = function(_, _, data)
         if not data then
           count = count + 1
-          work:queue(source_ctx.cwd, incompleted_data)
+          work:queue(source_ctx.cwd, output_buffer:pop())
           return
         end
 
-        local first_sep = data:find("\n") --TODO windows
-        if not first_sep then
+        local str = output_buffer:append(data)
+        if not str then
           return
         end
-        local head = data:sub(1, first_sep - 1)
-        incompleted_data = incompleted_data .. head
 
         count = count + 1
-        work:queue(source_ctx.cwd, incompleted_data)
-
-        incompleted_data = data:sub(first_sep + 1)
+        work:queue(source_ctx.cwd, str)
       end,
       on_exit = function(_)
         finished = true
