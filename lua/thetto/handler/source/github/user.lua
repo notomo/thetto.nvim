@@ -1,12 +1,14 @@
 local M = {}
 
-function M.collect(self, source_ctx)
+function M.collect(_, source_ctx)
   local pattern = source_ctx.pattern
   if not pattern then
     pattern = vim.fn.input("Pattern: ")
   end
   if not pattern or pattern == "" then
-    return {}, nil, self.errors.skip_empty_pattern
+    return function(observer)
+      observer:complete()
+    end
   end
 
   local cmd = { "gh", "api", "-X", "GET", "search/users", "-f", "q=" .. pattern }

@@ -1,12 +1,14 @@
 local M = {}
 
-function M.collect(self, source_ctx)
+function M.collect(_, source_ctx)
   local pattern = source_ctx.pattern
   if not pattern then
     pattern = vim.fn.input("Pattern: ")
   end
   if not pattern or pattern == "" then
-    return {}, nil, self.errors.skip_empty_pattern
+    return function(observer)
+      observer:complete()
+    end
   end
 
   local cmd = {
@@ -38,7 +40,8 @@ function M.collect(self, source_ctx)
     }
   end, {
     to_outputs = function(job)
-      return vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
+      local data = vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
+      return data.items
     end,
   })
 end

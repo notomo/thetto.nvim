@@ -7,7 +7,6 @@ local base = require("thetto.handler.source.base")
 local vim = vim
 
 local Source = {
-  errors = { skip_empty_pattern = "skip_empty_pattern" },
   jobs = jobs,
 }
 
@@ -63,11 +62,11 @@ end
 
 function Source.collect(self, source_ctx, append)
   local all_items, job, err = self._origin.collect(self, source_ctx)
-  if err ~= nil and err ~= Source.errors.skip_empty_pattern then
+  if err ~= nil then
     return nil, err
   end
 
-  local empty_is_err = not (source_ctx.interactive and err == Source.errors.skip_empty_pattern)
+  local empty_is_err = not source_ctx.interactive
   local result, res_err = SourceResult.new(self.name, all_items, job, empty_is_err, append)
   if res_err ~= nil then
     return nil, res_err
