@@ -24,7 +24,7 @@ function Job.is_running(self)
 end
 
 local _adjust
-if vim.fn.has("win32") == 1 then
+if vim.loop.os_uname().version:match("Windows") then
   _adjust = function(data)
     return data:gsub("\r", "")
   end
@@ -140,12 +140,16 @@ function M.loop(ms, f)
   end
 end
 
-function Job.parse_output(data)
+function M.parse_output(data)
   if data == nil then
     return {}
   end
   data = _adjust(data)
   return vim.split(data, "\n", true)
+end
+
+function Job.parse_output(data)
+  return M.parse_output(data)
 end
 
 function Job.get_stdout(self)

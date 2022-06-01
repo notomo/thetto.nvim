@@ -1,5 +1,3 @@
-local pathlib = require("thetto.lib.path")
-
 local M = {}
 
 M.opts = {
@@ -16,10 +14,9 @@ function M.collect(self, source_ctx)
     pattern = vim.fn.input("Pattern: ")
   end
   if pattern == nil or pattern == "" then
-    if source_ctx.interactive then
-      self:append({})
+    return function(observer)
+      observer:complete()
     end
-    return {}, nil, self.errors.skip_empty_pattern
   end
 
   local paths = source_ctx.cwd
@@ -38,20 +35,15 @@ function M.collect(self, source_ctx)
     ::continue::
   end
 
-  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
-
-  local items = {}
-  local item_appender = self.jobs.loop(source_ctx.debounce_ms, function(co)
-    for _ = 0, self.chunk_max_count do
-      local ok, output = coroutine.resume(co)
-      if not ok or output == nil then
-        break
-      end
-      local path, row, matched_line = pathlib.parse_with_row(output)
-      if path == nil then
+  local to_items = function(cwd, data)
+    local items = {}
+    local outputs = require("thetto.lib.job").parse_output(data)
+    for _, output in ipairs(outputs) do
+      local path, row, matched_line = require("thetto.lib.path").parse_with_row(output)
+      if not path then
         goto continue
       end
-      local relative_path = to_relative(path)
+      local relative_path = require("thetto.lib.path").to_relative(path, cwd)
       local label = ("%s:%d"):format(relative_path, row)
       local desc = ("%s %s"):format(label, matched_line)
       table.insert(items, {
@@ -63,22 +55,58 @@ function M.collect(self, source_ctx)
       })
       ::continue::
     end
-    self:append(items)
-    items = {}
-  end)
+    return vim.mpack.encode(items)
+  end
 
-  local job = self.jobs.new(cmd, {
-    on_stdout = function(job_self, _, data)
-      local outputs = job_self.parse_output(data)
-      item_appender(job_self, outputs)
-    end,
-    on_exit = function(_) end,
-    stdout_buffered = false,
-    stderr_buffered = false,
-    cwd = source_ctx.cwd,
-  })
+  return function(observer)
+    local finished = false
+    local count = 0
+    local work = vim.loop.new_work(to_items, function(encoded)
+      local items = vim.mpack.decode(encoded)
+      observer:next(items)
+      count = count - 1
+      if finished and count == 0 then
+        observer:complete()
+      end
+    end)
 
-  return {}, job
+    local incompleted_data = ""
+    local job = self.jobs.new(cmd, {
+      on_stdout = function(_, _, data)
+        if not data then
+          count = count + 1
+          work:queue(source_ctx.cwd, incompleted_data)
+          return
+        end
+
+        local first_sep = data:find("\n") --TODO windows
+        if not first_sep then
+          return
+        end
+        local head = data:sub(1, first_sep - 1)
+        incompleted_data = incompleted_data .. head
+
+        count = count + 1
+        work:queue(source_ctx.cwd, incompleted_data)
+
+        incompleted_data = data:sub(first_sep + 1)
+      end,
+      on_exit = function(_)
+        finished = true
+        if count == 0 then
+          observer:complete()
+        end
+      end,
+      stdout_buffered = false,
+      stderr_buffered = false,
+      cwd = source_ctx.cwd,
+    })
+
+    local err = job:start()
+    if err then
+      return observer:error(err)
+    end
+  end
 end
 
 vim.api.nvim_set_hl(0, "ThettoFileGrepPath", { default = true, link = "Comment" })
