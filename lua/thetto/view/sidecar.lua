@@ -1,6 +1,5 @@
 local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local windowlib = require("thetto.vendor.misclib.window")
-local filelib = require("thetto.lib.file")
 local vim = vim
 
 local Sidecar = {}
@@ -12,43 +11,7 @@ function Sidecar.new()
 end
 
 function Sidecar.open(self, item, open_target, width, height, pos_row, left_column)
-  if open_target.bufnr ~= nil and not vim.api.nvim_buf_is_valid(open_target.bufnr) then
-    return
-  end
-
-  local half_height = math.floor(height / 2)
-
-  local top_row = 1
-  local row = open_target.row
-  if open_target.row ~= nil and open_target.row > half_height and not open_target.raw_bufnr then
-    top_row = open_target.row - half_height + 1
-    row = half_height
-  end
-
-  local lines, path
-  if open_target.bufnr ~= nil then
-    lines = vim.api.nvim_buf_get_lines(open_target.bufnr, top_row - 1, top_row + height - 1, false)
-    path = vim.api.nvim_buf_get_name(open_target.bufnr)
-  elseif open_target.path ~= nil then
-    lines = filelib.read_lines(open_target.path, top_row, top_row + height)
-    path = open_target.path
-  elseif open_target.lines ~= nil then
-    lines = open_target.lines
-  else
-    lines = {}
-  end
-
-  local bufnr
-  if open_target.raw_bufnr then
-    bufnr = open_target.raw_bufnr
-  else
-    bufnr = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    vim.bo[bufnr].bufhidden = "wipe"
-  end
-  if path then
-    vim.filetype.match(path, bufnr)
-  end
+  local bufnr, window_open_callback = require("thetto.view.open_target").new(open_target, height)
 
   if not self:_opened() then
     self._window = vim.api.nvim_open_win(bufnr, false, {
@@ -74,30 +37,14 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   else
     vim.api.nvim_win_set_buf(self._window, bufnr)
   end
-  if open_target.raw_bufnr and row then
-    vim.api.nvim_win_set_cursor(self._window, { row, 0 })
-  end
+
+  window_open_callback(self._hl_factory, self._window)
 
   local index
   if item then
     index = item.index
   end
   self._index = index
-
-  if open_target.execute ~= nil then
-    vim.api.nvim_win_call(self._window, function()
-      open_target.execute()
-    end)
-  end
-
-  if row ~= nil then
-    local highlighter = self._hl_factory:create(bufnr)
-    local range = open_target.range or { s = { column = 0 }, e = { column = -1 } }
-    highlighter:add_normal("ThettoPreview", row - 1, range.s.column, range.e.column)
-    if vim.fn.getbufline(bufnr, row)[1] == "" then
-      highlighter:set_virtual_text(row - 1, { { " ", "ThettoPreview" } }, { virt_text_pos = "overlay" })
-    end
-  end
 end
 
 function Sidecar.exists_same(self, item)

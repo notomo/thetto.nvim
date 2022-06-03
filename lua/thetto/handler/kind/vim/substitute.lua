@@ -12,7 +12,7 @@ function M.action_execute(_, items)
   end
 end
 
-function M.action_preview(self, items, ctx)
+function M.action_preview(_, items, ctx)
   local item = items[1]
   if item == nil then
     return
@@ -30,15 +30,18 @@ function M.action_preview(self, items, ctx)
   end
 
   local lines = vim.api.nvim_buf_get_lines(item.bufnr, first, last, false)
-  local preview_item = vim.deepcopy(item)
-  preview_item.cmd_prefix = ("silent! 1,%d"):format(#lines)
 
-  ctx.ui:open_preview(preview_item, {
-    lines = lines,
-    execute = function()
-      M.action_execute(self, { preview_item })
-    end,
-  })
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.bo[bufnr].bufhidden = "wipe"
+
+  vim.api.nvim_buf_call(bufnr, function()
+    local cmd = ("silent! 1,%d%s"):format(#lines, item.excmd)
+    vim.cmd(cmd)
+    M.after(item.value, cmd)
+  end)
+
+  ctx.ui:open_preview(item, { raw_bufnr = bufnr })
 end
 
 M.default_action = "execute"
