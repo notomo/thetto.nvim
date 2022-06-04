@@ -1,69 +1,56 @@
 local SourceResult = {}
 SourceResult.__index = SourceResult
 
-local SourceFunctionResult = {}
-
-function SourceFunctionResult.__index(_, k)
-  return rawget(SourceFunctionResult, k) or rawget(SourceResult, k)
+local _new = function(raw_observer, subscriber, items)
+  local tbl = {
+    _raw_observer = raw_observer,
+    _subscriber = subscriber or function(observer)
+      observer:next(items)
+      observer:complete()
+    end,
+    _all_items = {},
+  }
+  return setmetatable(tbl, SourceResult)
 end
 
-function SourceFunctionResult.start(self)
+function SourceResult.new(name, subscriber_or_items, empty_is_err, raw_observer)
+  vim.validate({
+    name = { name, "string" },
+    subscriber_or_items = { subscriber_or_items, { "table", "function" }, true },
+    empty_is_err = { empty_is_err, "boolean", true },
+    raw_observer = { raw_observer, "table", true },
+  })
+
+  if type(subscriber_or_items) == "function" then
+    return _new(raw_observer, subscriber_or_items)
+  end
+
+  local all_items = subscriber_or_items or {}
+  if empty_is_err and #all_items == 0 then
+    return nil, name .. ": empty"
+  end
+
+  return _new(raw_observer, nil, all_items)
+end
+
+function SourceResult.start(self)
   local observable = require("thetto.vendor.misclib.observable").new(self._subscriber)
   self._subscription = observable:subscribe(self._raw_observer)
 end
 
-function SourceFunctionResult.wait(self, ms)
+function SourceResult.wait(self, ms)
   ms = ms or 1000
   return vim.wait(ms, function()
     return self:finished()
   end, 10)
 end
 
-function SourceFunctionResult.discard(self)
+function SourceResult.discard(self)
   return self._subscription and self._subscription:unsubscribe()
 end
 
-function SourceFunctionResult.finished(self)
+function SourceResult.finished(self)
   return self._subscription and self._subscription:closed()
-end
-
-function SourceResult.new(name, all_items, empty_is_err, raw_observer)
-  vim.validate({
-    name = { name, "string" },
-    all_items = { all_items, { "table", "function" }, true },
-    empty_is_err = { empty_is_err, "boolean", true },
-    raw_observer = { raw_observer, "table", true },
-  })
-  all_items = all_items or {}
-
-  if type(all_items) == "function" then
-    local tbl = { _subscriber = all_items, _all_items = {}, _raw_observer = raw_observer }
-    return setmetatable(tbl, SourceFunctionResult)
-  end
-
-  if empty_is_err and #all_items == 0 then
-    return nil, name .. ": empty"
-  end
-
-  for i, item in ipairs(all_items) do
-    item.index = i
-  end
-  local tbl = { _all_items = all_items }
-  return setmetatable(tbl, SourceResult)
-end
-
-function SourceResult.start(_)
-  return nil
-end
-
-function SourceResult.wait(_)
-  return true
-end
-
-function SourceResult.discard(_) end
-
-function SourceResult.finished(_)
-  return true
 end
 
 function SourceResult.iter(self)

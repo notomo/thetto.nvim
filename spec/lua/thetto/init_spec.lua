@@ -229,6 +229,7 @@ describe("thetto", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
     thetto.start(test_source1)
+    vim.wait(100, function() end) -- HACk: wait debounce
     helper.wait_ui(function()
       vim.cmd("normal! dd")
     end)
@@ -307,7 +308,7 @@ describe("thetto", function()
     }
 
     thetto.start(test_source1, { opts = { auto = "hoge", insert = false } })
-    vim.wait(100, function() end) -- HACk: wait debounce
+    vim.wait(200, function() end) -- HACk: wait debounce
     assert.equals("test_auto_1", value)
 
     thetto.execute("move_to_input")
@@ -843,6 +844,7 @@ describe("add_filter action", function()
     thetto.execute("add_filter", { action_opts = { name = "-substring" } })
 
     vim.cmd("normal! G")
+    vim.wait(100, function() end) -- HACk: wait debounce
     helper.sync_input({ "test2" })
 
     thetto.execute("move_to_list")
