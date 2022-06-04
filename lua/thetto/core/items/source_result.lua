@@ -9,19 +9,7 @@ end
 
 function SourceFunctionResult.start(self)
   local observable = require("thetto.vendor.misclib.observable").new(self._subscriber)
-  local subscription = observable:subscribe({
-    next = function(items)
-      self._append(items)
-    end,
-    error = function(err)
-      self._append({})
-      require("thetto.vendor.misclib.message").warn(err)
-    end,
-    complete = function()
-      self._append({})
-    end,
-  })
-  self._subscription = subscription
+  self._subscription = observable:subscribe(self._raw_observer)
 end
 
 function SourceFunctionResult.wait(self, ms)
@@ -39,17 +27,17 @@ function SourceFunctionResult.finished(self)
   return self._subscription and self._subscription:closed()
 end
 
-function SourceResult.new(name, all_items, empty_is_err, append)
+function SourceResult.new(name, all_items, empty_is_err, raw_observer)
   vim.validate({
     name = { name, "string" },
     all_items = { all_items, { "table", "function" }, true },
     empty_is_err = { empty_is_err, "boolean", true },
-    append = { append, "function", true },
+    raw_observer = { raw_observer, "table", true },
   })
   all_items = all_items or {}
 
   if type(all_items) == "function" then
-    local tbl = { _subscriber = all_items, _all_items = {}, _append = append }
+    local tbl = { _subscriber = all_items, _all_items = {}, _raw_observer = raw_observer }
     return setmetatable(tbl, SourceFunctionResult)
   end
 

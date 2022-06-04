@@ -76,13 +76,20 @@ function Collector.attach_ui(self, ui)
 end
 
 function Collector.start(self, input_pattern)
-  local on_update_job = function(items)
-    self._result:append(items)
-    return self:update_with_debounce()
-  end
-
   local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
-  local result, err = self.source:collect(source_ctx, on_update_job)
+  local result, err = self.source:collect(source_ctx, {
+    next = function(items)
+      self._result:append(items)
+      return self:update_with_debounce()
+    end,
+    error = function(err)
+      require("thetto.vendor.misclib.message").warn(err)
+      return self:update_with_debounce()
+    end,
+    complete = function()
+      return self:update_with_debounce()
+    end,
+  })
   if err ~= nil then
     return err
   end
