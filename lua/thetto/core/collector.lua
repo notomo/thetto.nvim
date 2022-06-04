@@ -35,7 +35,7 @@ function Collector.new(source_name, source_opts, opts)
     sorters = sorters,
     input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
     source_ctx = SourceContext.new(opts.pattern, opts.cwd, opts.debounce_ms, opts.range, filters:has_interactive()),
-    _result = SourceResult.new(source.name),
+    _result = SourceResult.zero(),
     _ignorecase = opts.ignorecase,
     _smartcase = opts.smartcase,
     _display_limit = opts.display_limit,
@@ -77,28 +77,28 @@ end
 
 function Collector.start(self, input_pattern)
   local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
-  local result, err = self.source:collect(source_ctx, {
-    next = function(items)
-      self._result:append(items)
-      return self:update_with_debounce()
-    end,
-    error = function(err)
-      require("thetto.vendor.misclib.message").warn(err)
-      return self:update_with_debounce()
-    end,
-    complete = function()
-      return self:update_with_debounce()
-    end,
-  })
-  if err ~= nil then
+  local result, err = self.source:collect(source_ctx)
+  if err then
     return err
   end
 
   self._result = result
   self.source_ctx = source_ctx
 
-  local start_err = self._result:start()
-  if start_err ~= nil then
+  local start_err = self._result:start({
+    next = function(items)
+      self._result:append(items)
+      return self:update_with_debounce()
+    end,
+    error = function(e)
+      require("thetto.vendor.misclib.message").warn(e)
+      return self:update_with_debounce()
+    end,
+    complete = function()
+      return self:update_with_debounce()
+    end,
+  })
+  if start_err then
     return start_err
   end
 

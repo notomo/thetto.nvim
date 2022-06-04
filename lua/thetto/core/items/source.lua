@@ -60,16 +60,15 @@ function Source.__index(self, k)
   return rawget(Source, k) or self._origin[k] or base[k]
 end
 
-function Source.collect(self, source_ctx, raw_observer)
+function Source.collect(self, source_ctx)
   local all_items, err = self._origin.collect(self, source_ctx)
-  if err ~= nil then
+  if err then
     return nil, err
   end
 
-  local empty_is_err = not source_ctx.interactive
-  local result, res_err = SourceResult.new(self.name, all_items, empty_is_err, raw_observer)
-  if res_err ~= nil then
-    return nil, res_err
+  local result, res_err = SourceResult.new(all_items)
+  if res_err then
+    return nil, ("%s: %s"):format(self.name, res_err)
   end
 
   return result, nil
