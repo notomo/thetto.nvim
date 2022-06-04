@@ -54,15 +54,22 @@ function Collector.new(source_name, source_opts, opts)
   return self, nil
 end
 
-function Collector.attach(self, input_bufnr)
-  vim.validate({ input_bufnr = { input_bufnr, "number" } })
-  local on_input = function()
-    if vim.api.nvim_buf_is_valid(input_bufnr) then
-      self.input_lines = vim.api.nvim_buf_get_lines(input_bufnr, 0, -1, true)
+function Collector.subscribe_input(self, input_observable, get_lines)
+  self.update_with_debounce = wraplib.debounce(self.source_ctx.debounce_ms, function()
+    local input_lines = get_lines()
+    if input_lines then
+      self.input_lines = input_lines
     end
     return self:update()
-  end
-  self.update_with_debounce = wraplib.debounce(self.source_ctx.debounce_ms, on_input)
+  end)
+  input_observable:subscribe({
+    next = function()
+      self:update_with_debounce()
+    end,
+    complete = function()
+      self:discard()
+    end,
+  })
 end
 
 function Collector.attach_ui(self, ui)

@@ -48,7 +48,9 @@ function UI.open(self, on_move, needs_preview)
   local row = self:_row(input_lines)
   local column = self:_column()
 
-  self._inputter = Inputter.new(self._collector, width, height, row, column)
+  self._inputter = Inputter.new(source_name, input_lines, width, height, row, column)
+  self._collector:subscribe_input(self._inputter:observable())
+
   self._item_list = ItemList.new(source_name, width, height, row, column)
   self._status_line = StatusLine.new(source_name, width, height, row, column)
   self._sidecar = Sidecar.new()

@@ -8,25 +8,16 @@ Inputter.__index = Inputter
 
 local FILETYPE = "thetto-input"
 
-function Inputter.new(collector, width, height, row, column)
-  local bufnr = bufferlib.scratch(function(b)
-    local name = ("thetto://%s/%s"):format(collector.source.name, FILETYPE)
-    bufferlib.delete_by_name(name)
-    vim.api.nvim_buf_set_name(b, name)
-    vim.bo[b].filetype = FILETYPE
-    vim.api.nvim_buf_set_lines(b, 0, -1, false, collector.input_lines)
-    collector:attach(b)
-    vim.api.nvim_buf_attach(b, false, {
-      on_lines = function()
-        return collector:update_with_debounce()
-      end,
-      on_detach = function()
-        return collector:discard()
-      end,
-    })
-  end)
+function Inputter.new(source_name, input_lines, width, height, row, column)
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  local name = ("thetto://%s/%s"):format(source_name, FILETYPE)
+  bufferlib.delete_by_name(name)
+  vim.api.nvim_buf_set_name(bufnr, name)
+  vim.bo[bufnr].filetype = FILETYPE
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, input_lines)
+  vim.bo[bufnr].bufhidden = "wipe"
 
-  local input_height = #collector.input_lines
+  local input_height = #input_lines
   local window = vim.api.nvim_open_win(bufnr, false, {
     width = width - 2,
     height = input_height,
@@ -55,6 +46,26 @@ function Inputter.new(collector, width, height, row, column)
     _hl_factory = HighlighterFactory.new("thetto-input-filter-info"),
   }
   return setmetatable(tbl, Inputter)
+end
+
+function Inputter.observable(self)
+  local observable = require("thetto.vendor.misclib.observable").new(function(observer)
+    vim.api.nvim_buf_attach(self._bufnr, false, {
+      on_lines = function()
+        observer:next()
+      end,
+      on_detach = function()
+        observer:complete()
+      end,
+    })
+  end)
+  local get_lines = function()
+    if not vim.api.nvim_buf_is_valid(self._bufnr) then
+      return nil
+    end
+    return vim.api.nvim_buf_get_lines(self._bufnr, 0, -1, true)
+  end
+  return observable, get_lines
 end
 
 function Inputter.redraw(self, input_lines, filters)
