@@ -43,7 +43,7 @@ function Collector.new(source_name, source_opts, opts)
   local self = setmetatable(tbl, Collector)
   self.items = self:_items()
 
-  self.update_with_debounce = wraplib.debounce(opts.debounce_ms, function()
+  self.update_with_throttle = wraplib.throttle_with_last(opts.debounce_ms, function()
     return self:update()
   end)
 
@@ -55,7 +55,7 @@ function Collector.new(source_name, source_opts, opts)
 end
 
 function Collector.subscribe_input(self, input_observable, get_lines)
-  self.update_with_debounce = wraplib.debounce(self.source_ctx.debounce_ms, function()
+  self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.debounce_ms, function()
     local input_lines = get_lines()
     if input_lines then
       self.input_lines = input_lines
@@ -64,7 +64,7 @@ function Collector.subscribe_input(self, input_observable, get_lines)
   end)
   input_observable:subscribe({
     next = function()
-      self:update_with_debounce()
+      self:update_with_throttle()
     end,
     complete = function()
       self:discard()
@@ -95,14 +95,14 @@ function Collector.start(self, input_pattern)
   local start_err = self._result:start({
     next = function(items)
       self._result:append(items)
-      return self:update_with_debounce()
+      return self:update_with_throttle()
     end,
     error = function(e)
       require("thetto.vendor.misclib.message").warn(e)
-      return self:update_with_debounce()
+      return self:update_with_throttle()
     end,
     complete = function()
-      return self:update_with_debounce()
+      return self:update_with_throttle()
     end,
   })
   if start_err then

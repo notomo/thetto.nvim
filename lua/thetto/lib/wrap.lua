@@ -20,4 +20,33 @@ function M.debounce(ms, f)
   end
 end
 
+function M.throttle_with_last(ms, f)
+  local last_ms = vim.loop.now() - ms
+  local timer = vim.loop.new_timer()
+  return function(...)
+    timer:stop()
+
+    local now = vim.loop.now()
+    local elapsed_ms = now - last_ms
+    last_ms = now
+
+    local args = { ... }
+
+    if elapsed_ms < ms then
+      timer:start(
+        ms,
+        0,
+        vim.schedule_wrap(function()
+          f(unpack(args))
+        end)
+      )
+      return
+    end
+
+    vim.schedule(function()
+      f(unpack(args))
+    end)
+  end
+end
+
 return M
