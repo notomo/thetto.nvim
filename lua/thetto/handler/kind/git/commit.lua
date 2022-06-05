@@ -14,6 +14,9 @@ function M.action_preview(self, items, ctx)
 
   local job = self.jobs.new(cmd, {
     on_exit = function(job_self)
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
       local lines = job_self:get_output()
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     end,
