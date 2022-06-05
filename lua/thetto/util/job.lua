@@ -46,8 +46,12 @@ function M.run(cmd, source_ctx, to_item, opts)
       return observer:error(err)
     end
 
+    local cancel = function()
+      job:stop()
+    end
+
     if not opts.input then
-      return
+      return cancel
     end
     job.stdin:write(opts.input, function()
       if job.stdin:is_closing() then
@@ -55,6 +59,8 @@ function M.run(cmd, source_ctx, to_item, opts)
       end
       job.stdin:close()
     end)
+
+    return cancel
   end
 end
 
