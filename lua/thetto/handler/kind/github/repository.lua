@@ -48,4 +48,19 @@ function M.action_list_action_workflows(_, items)
   end
 end
 
+function M.action_clone(self, items)
+  local item = items[1]
+  if not item then
+    return
+  end
+
+  local cmd = { "gh", "repo", "clone", item.value }
+  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local err = job:start()
+  if err ~= nil then
+    return nil, err
+  end
+  return job, nil
+end
+
 return require("thetto.core.kind").extend(M, "url")
