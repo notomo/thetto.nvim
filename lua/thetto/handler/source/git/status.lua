@@ -10,7 +10,7 @@ function M.collect(_, source_ctx)
   end
 
   local cmd = { "git", "--no-pager", "status", "--short" }
-  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+  return require("thetto.util").job.start(cmd, source_ctx, function(output)
     local status, path = unpack(vim.split(vim.trim(output), "%s+"))
     local abs_path = pathlib.join(git_root, path)
     local kind_name

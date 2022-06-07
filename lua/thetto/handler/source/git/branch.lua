@@ -29,7 +29,7 @@ function M.collect(self, source_ctx)
   end
   get_current_job:wait(1000)
 
-  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+  return require("thetto.util").job.start(cmd, source_ctx, function(output)
     local is_current_branch = output == current_branch
     return {
       value = output,

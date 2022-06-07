@@ -13,7 +13,7 @@ function M.collect(self, source_ctx)
   end
 
   local cmd = { "ctags", "--output-format=xref", "-f", "-", file_path }
-  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+  return require("thetto.util").job.start(cmd, source_ctx, function(output)
     local value, typ, row, path, line = output:match("(%S+)%s+(%S+)%s+(%d+)%s+(%S+)%s+(.+)")
     if vim.tbl_contains(self.opts.ignore, typ) then
       return nil

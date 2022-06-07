@@ -31,7 +31,7 @@ end
 
 function M.collect(_, source_ctx)
   local cmd = { "luarocks", "list", "--porcelain" }
-  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+  return require("thetto.util").job.start(cmd, source_ctx, function(output)
     local factors = vim.split(output, "%s+")
     local name = factors[1]
     local version = factors[2]

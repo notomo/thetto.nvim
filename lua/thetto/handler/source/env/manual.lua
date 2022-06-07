@@ -6,7 +6,7 @@ function M.collect(_, source_ctx)
   end
 
   local cmd = { "apropos", "-l", "." }
-  return require("thetto.util").job.run(cmd, source_ctx, function(output)
+  return require("thetto.util").job.start(cmd, source_ctx, function(output)
     local name, desc = output:match("(%S+%s%S+)%s+-%s(.*)")
     name = name:gsub(" ", "")
     return {
