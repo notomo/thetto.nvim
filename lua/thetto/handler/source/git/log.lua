@@ -29,7 +29,7 @@ function M.collect(self, source_ctx)
   local cmd = { "git", "--no-pager", "log", "--date=short", "--pretty=format:%h %cd %s <%an>%d" }
 
   return function(observer)
-    local output_buffer = require("thetto.util").job.output_buffer()
+    local output_buffer = require("thetto.util.job.output_buffer").new()
     local job = self.jobs.new(cmd, {
       on_stdout = function(_, _, data)
         if not data then

@@ -54,8 +54,8 @@ function M.collect(self, source_ctx)
 
   return function(observer)
     local to_absolute = self.opts.to_absolute
-    local output_buffer = require("thetto.util").job.output_buffer()
-    local work_observer = require("thetto.util").job.work_observer(observer, to_items, function(encoded)
+    local output_buffer = require("thetto.util.job.output_buffer").new()
+    local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       local items = vim.mpack.decode(encoded)
       return vim.tbl_map(function(item)
         local value = self:_modify_path(item.value)

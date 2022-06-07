@@ -59,8 +59,8 @@ function M.collect(self, source_ctx)
   end
 
   return function(observer)
-    local output_buffer = require("thetto.util").job.output_buffer()
-    local work_observer = require("thetto.util").job.work_observer(observer, to_items, function(encoded)
+    local output_buffer = require("thetto.util.job.output_buffer").new()
+    local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       return vim.mpack.decode(encoded)
     end)
     local job = self.jobs.new(cmd, {
