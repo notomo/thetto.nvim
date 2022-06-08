@@ -1,6 +1,10 @@
 local M = {}
 
 function M.collect(self, source_ctx)
+  if not vim.api.nvim_buf_is_valid(self.bufnr) then
+    return nil, "invalid buffer: " .. self.bufnr
+  end
+
   local cmd = { "jq", source_ctx.pattern }
   return require("thetto.util").job.run(cmd, source_ctx, function(output, code)
     local is_error = code ~= 0
