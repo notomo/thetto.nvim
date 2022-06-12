@@ -1160,3 +1160,64 @@ describe("move_to_list action", function()
     assert.filetype("thetto")
   end)
 end)
+
+describe("go_to_next_page action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can go to next page", function()
+    test_items1 = {
+      "test1",
+      "test2",
+      "test3",
+      "test4",
+    }
+
+    thetto.start(test_source1, {
+      opts = { display_limit = 2, insert = false },
+    })
+
+    thetto.execute("go_to_next_page")
+
+    assert.current_line("test3")
+  end)
+
+  it("does nothing if current page is the last", function()
+    thetto.start(test_source1, { opts = { insert = false } })
+
+    thetto.execute("go_to_next_page")
+
+    assert.current_line("test1")
+  end)
+end)
+
+describe("go_to_previous_page action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can go to next page", function()
+    test_items1 = {
+      "test1",
+      "test2",
+      "test3",
+      "test4",
+    }
+
+    thetto.start(test_source1, {
+      opts = { display_limit = 2, insert = false },
+    })
+
+    thetto.execute("go_to_next_page")
+    thetto.execute("go_to_previous_page")
+
+    assert.current_line("test1")
+  end)
+
+  it("does nothing if current page is the first", function()
+    thetto.start(test_source1, { opts = { insert = false } })
+
+    thetto.execute("go_to_previous_page")
+
+    assert.current_line("test1")
+  end)
+end)

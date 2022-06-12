@@ -116,10 +116,12 @@ function UI.redraw(self, input_lines, row)
     local source = self._collector.source
     local result_count = self._collector:all_count()
     local items = self._collector.items:values()
+    local start_index = self._collector.items.start_index
+    local end_index = self._collector.items.end_index
     local finished = self._collector:finished()
 
     self._item_list:redraw(items)
-    self._status_line:redraw(source, items, sorters, finished, result_count)
+    self._status_line:redraw(source, sorters, finished, start_index, end_index, result_count)
     self._inputter:redraw(input_lines, filters)
   end
 

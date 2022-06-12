@@ -27,6 +27,8 @@ M.behaviors = {
   preview = { quit = false },
   toggle_preview = { quit = false },
   close_preview = { quit = false },
+  go_to_next_page = { quit = false },
+  go_to_previous_page = { quit = false },
 }
 
 function M.action_toggle_selection(_, items, ctx)
@@ -154,6 +156,14 @@ function M.action_resume_next(self, _, ctx)
     end
   end
   return nil, "no context"
+end
+
+function M.action_go_to_next_page(_, _, ctx)
+  ctx.collector:change_page_offset(1)
+end
+
+function M.action_go_to_previous_page(_, _, ctx)
+  ctx.collector:change_page_offset(-1)
 end
 
 M.default_action = "echo"

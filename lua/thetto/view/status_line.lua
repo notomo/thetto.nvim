@@ -47,7 +47,7 @@ function StatusLine.new(source_name, width, height, row, column)
   return setmetatable(tbl, StatusLine)
 end
 
-function StatusLine.redraw(self, source, items, sorters, finished, result_count)
+function StatusLine.redraw(self, source, sorters, finished, start_index, end_index, result_count)
   local sorter_info = ""
   local sorter_names = {}
   for _, sorter in ipairs(sorters) do
@@ -63,7 +63,7 @@ function StatusLine.redraw(self, source, items, sorters, finished, result_count)
     status = "running "
   end
 
-  local text = ("%s%s [ %s / %s ]"):format(source.name, sorter_info, #items, result_count)
+  local text = ("%s%s [ %s - %s / %s ]"):format(source.name, sorter_info, start_index, end_index, result_count)
   local highlighter = self._hl_factory:reset()
   highlighter:set_virtual_text(0, { { text, "ThettoInfo" }, { " " }, { status, "Comment" } }, {
     virt_text_pos = "overlay",
