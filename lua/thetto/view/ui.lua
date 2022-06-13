@@ -185,6 +185,10 @@ function UI.current_position_filter(self)
   return self._collector.filters[cursor[1]]
 end
 
+function UI.append_input(self, input_line)
+  self._inputter:append(input_line)
+end
+
 function UI.start_insert(self, behavior)
   self._inputter:start_insert(behavior)
 end

@@ -1195,7 +1195,7 @@ describe("go_to_previous_page action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can go to next page", function()
+  it("can go to previous page", function()
     test_items1 = {
       "test1",
       "test2",
@@ -1217,6 +1217,27 @@ describe("go_to_previous_page action", function()
     thetto.start(test_source1, { opts = { insert = false } })
 
     thetto.execute("go_to_previous_page")
+
+    assert.current_line("test1")
+  end)
+end)
+
+describe("append_filter_input action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can append item value as filter input", function()
+    thetto.start(test_source1)
+
+    thetto.execute("append_filter_input")
+
+    assert.current_line("test1")
+  end)
+
+  it("can concat item value as filter input", function()
+    thetto.start(test_source1, { opts = { input_lines = { "test" } } })
+
+    thetto.execute("append_filter_input")
 
     assert.current_line("test1")
   end)

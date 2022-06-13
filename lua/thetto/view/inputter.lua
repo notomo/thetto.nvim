@@ -146,4 +146,21 @@ function Inputter.has(self, id)
   return self._window == id
 end
 
+function Inputter.append(self, appended)
+  local row = self:cursor()[1]
+  local current_line = vim.api.nvim_buf_get_lines(self._bufnr, row - 1, row, false)[1] or ""
+
+  local new_line
+  if not vim.endswith(current_line, " ") then
+    local inputs = vim.split(current_line, "%s+")
+    local input_tail = inputs[#inputs]
+    new_line = current_line:sub(1, #current_line - #input_tail) .. appended
+  else
+    new_line = current_line .. appended
+  end
+  vim.api.nvim_buf_set_lines(self._bufnr, row - 1, row, false, { new_line })
+
+  vim.api.nvim_win_set_cursor(self._window, { row, #new_line })
+end
+
 return Inputter

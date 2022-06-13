@@ -29,6 +29,7 @@ M.behaviors = {
   close_preview = { quit = false },
   go_to_next_page = { quit = false },
   go_to_previous_page = { quit = false },
+  append_filter_input = { quit = false },
 }
 
 function M.action_toggle_selection(_, items, ctx)
@@ -164,6 +165,14 @@ end
 
 function M.action_go_to_previous_page(_, _, ctx)
   ctx.collector:change_page_offset(-1)
+end
+
+function M.action_append_filter_input(_, items, ctx)
+  local item = items[1]
+  if not (item and item.value) then
+    return
+  end
+  ctx.ui:append_input(item.value)
 end
 
 M.default_action = "echo"
