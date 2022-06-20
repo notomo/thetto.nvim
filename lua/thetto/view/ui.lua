@@ -10,10 +10,7 @@ local vim = vim
 local UI = {}
 UI.__index = UI
 
-local CENTER_TYPE = "center"
-local BROAD_TYPE = "broad"
-
-function UI.new(collector, insert, display_limit, typ)
+function UI.new(collector, insert, display_limit)
   vim.validate({
     collector = { collector, "table" },
     insert = { insert, "boolean" },
@@ -24,7 +21,6 @@ function UI.new(collector, insert, display_limit, typ)
     _state = State.new(insert),
     _display_limit = display_limit,
     _debounce_ms_on_move = 70,
-    _type = typ,
     _initialized_preview = false,
   }
   return setmetatable(tbl, UI)
@@ -219,14 +215,6 @@ function UI.selected_items(self, action_name, range)
   return { self._collector.items[index] }
 end
 
-local _left_column = {
-  [CENTER_TYPE] = function(width)
-    return (vim.o.columns - width) / 2
-  end,
-  [BROAD_TYPE] = function()
-    return 2
-  end,
-}
 function UI.open_preview(self, item, open_target)
   if not self._item_list:is_valid() then
     return
@@ -235,7 +223,7 @@ function UI.open_preview(self, item, open_target)
   local pos = self._item_list:position()
   local height = pos.height + self._inputter.height + 1
   local width = self:_width()
-  local left_column = _left_column[self._type](width)
+  local left_column = 2
   local row = pos.row
 
   self:_move_to(left_column)

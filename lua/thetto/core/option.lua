@@ -40,7 +40,6 @@ local default = {
   immediately = false,
   range = nil,
   can_resume = true,
-  view_type = "center",
 }
 
 function Option.new(raw_opts, raw_source_opts, source_name)
