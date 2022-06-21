@@ -272,6 +272,20 @@ describe("thetto", function()
     assert.exists_pattern("test2")
   end)
 
+  it("can use function as filters", function()
+    thetto.start(test_source1, {
+      opts = {
+        insert = false,
+        input_lines = { "", "test2" },
+        filters = function()
+          return { "-substring", "substring" }
+        end,
+      },
+    })
+
+    assert.exists_pattern("test2")
+  end)
+
   it("closes ui completely", function()
     thetto.start(test_source1)
     vim.cmd("buffer #")

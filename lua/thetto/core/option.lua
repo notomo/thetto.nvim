@@ -50,7 +50,11 @@ function Option.new(raw_opts, raw_source_opts, source_name)
 
   local filters = opts.filters
   opts.filters = function(source_filters)
-    return filters or source_config.filters or source_filters or M.user_default.filters
+    local others = source_config.filters or source_filters or M.user_default.filters
+    if type(filters) == "function" then
+      return filters(others)
+    end
+    return filters or others
   end
 
   local sorters = opts.sorters
