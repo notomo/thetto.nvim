@@ -42,7 +42,6 @@ function Inputter.new(source_name, input_lines, width, height, row, column)
   local tbl = {
     _bufnr = bufnr,
     _window = window,
-    height = input_height,
     _hl_factory = HighlighterFactory.new("thetto-input-filter-info"),
   }
   return setmetatable(tbl, Inputter)
@@ -73,7 +72,6 @@ function Inputter.redraw(self, input_lines, filters)
 
   if vim.api.nvim_win_is_valid(self._window) then
     vim.api.nvim_win_set_height(self._window, height)
-    self.height = height
   end
 
   local highlighter = self._hl_factory:reset(self._bufnr)
@@ -124,6 +122,10 @@ end
 
 function Inputter.cursor(self)
   return vim.api.nvim_win_get_cursor(self._window)
+end
+
+function Inputter.height(self)
+  return vim.api.nvim_win_get_height(self._window)
 end
 
 function Inputter.set_cursor(self, cursor)

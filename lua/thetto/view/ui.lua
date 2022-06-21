@@ -221,7 +221,7 @@ function UI.open_preview(self, item, open_target)
   end
 
   local pos = self._item_list:position()
-  local height = pos.height + self._inputter.height + 1
+  local height = pos.height + self._inputter:height() + 1
   local width = self:_width()
   local left_column = 2
   local row = pos.row
