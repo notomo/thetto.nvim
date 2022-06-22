@@ -38,13 +38,14 @@ function UI.open(self, on_move, needs_preview)
 
   local source_name = self._collector.source.name
   local input_lines = self._collector.input_lines
+  local filters = self._collector.filters
 
   local height = self:_height()
   local width = self:_width()
   local row = self:_row(input_lines)
   local column = self:_column()
 
-  self._inputter = Inputter.new(source_name, input_lines, width, height, row, column)
+  self._inputter = Inputter.new(source_name, filters, input_lines, width, height, row, column)
   self._collector:subscribe_input(self._inputter:observable())
 
   self._item_list = ItemList.new(source_name, width, height, row, column)
@@ -183,6 +184,10 @@ end
 
 function UI.append_input(self, input_line)
   self._inputter:append(input_line)
+end
+
+function UI.recall_history(self, offset)
+  self._inputter:recall_history(offset)
 end
 
 function UI.start_insert(self, behavior)

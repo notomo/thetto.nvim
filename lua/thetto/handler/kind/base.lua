@@ -30,6 +30,8 @@ M.behaviors = {
   go_to_next_page = { quit = false },
   go_to_previous_page = { quit = false },
   append_filter_input = { quit = false },
+  recall_previous_history = { quit = false },
+  recall_next_history = { quit = false },
 }
 
 function M.action_toggle_selection(_, items, ctx)
@@ -173,6 +175,14 @@ function M.action_append_filter_input(_, items, ctx)
     return
   end
   ctx.ui:append_input(item.value)
+end
+
+function M.action_recall_previous_history(_, _, ctx)
+  ctx.ui:recall_history(1)
+end
+
+function M.action_recall_next_history(_, _, ctx)
+  ctx.ui:recall_history(-1)
 end
 
 M.default_action = "echo"

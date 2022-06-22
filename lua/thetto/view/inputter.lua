@@ -1,3 +1,4 @@
+local InputFilters = require("thetto.view.input_filters")
 local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local windowlib = require("thetto.vendor.misclib.window")
 local bufferlib = require("thetto.lib.buffer")
@@ -8,7 +9,7 @@ Inputter.__index = Inputter
 
 local FILETYPE = "thetto-input"
 
-function Inputter.new(source_name, input_lines, width, height, row, column)
+function Inputter.new(source_name, filters, input_lines, width, height, row, column)
   local bufnr = vim.api.nvim_create_buf(false, true)
   local name = ("thetto://%s/%s"):format(source_name, FILETYPE)
   bufferlib.delete_by_name(name)
@@ -43,6 +44,8 @@ function Inputter.new(source_name, input_lines, width, height, row, column)
     _bufnr = bufnr,
     _window = window,
     _hl_factory = HighlighterFactory.new("thetto-input-filter-info"),
+    _source_name = source_name,
+    _input_filters = InputFilters.new(source_name, filters),
   }
   return setmetatable(tbl, Inputter)
 end
@@ -90,6 +93,14 @@ function Inputter.redraw(self, input_lines, filters)
   end
 end
 
+function Inputter.recall_history(self, offset)
+  local row = self:cursor()[1]
+  local current_line = vim.api.nvim_buf_get_lines(self._bufnr, row - 1, row, false)[1] or ""
+  local input_line = self._input_filters:recall_history(row, offset, current_line)
+  vim.api.nvim_buf_set_lines(self._bufnr, row - 1, row, false, { input_line })
+  vim.api.nvim_win_set_cursor(self._window, { row, #input_line })
+end
+
 function Inputter.move_to(self, left_column)
   local input_config = vim.api.nvim_win_get_config(self._window)
   vim.api.nvim_win_set_config(self._window, {
@@ -108,6 +119,11 @@ function Inputter.close(self)
     return
   end
   self._closed = true
+
+  if vim.api.nvim_buf_is_valid(self._bufnr) then
+    local input_lines = vim.api.nvim_buf_get_lines(self._bufnr, 0, -1, false)
+    self._input_filters:append(input_lines)
+  end
 
   windowlib.safe_close(self._window)
 end

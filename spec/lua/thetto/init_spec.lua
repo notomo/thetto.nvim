@@ -1252,3 +1252,68 @@ describe("append_filter_input action", function()
     assert.current_line("test1")
   end)
 end)
+
+describe("recall_previous_history action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("does nothing if there is no history", function()
+    thetto.start(test_source1)
+
+    thetto.execute("recall_previous_history")
+
+    assert.current_line("")
+  end)
+
+  it("recalls previous history", function()
+    thetto.start(test_source1, { opts = { input_lines = { "test" } } })
+
+    thetto.execute("quit")
+
+    thetto.start(test_source1)
+    thetto.execute("recall_previous_history")
+
+    assert.current_line("test")
+  end)
+end)
+
+describe("recall_next_history action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("does nothing if there is no history", function()
+    thetto.start(test_source1)
+
+    thetto.execute("recall_next_history")
+
+    assert.current_line("")
+  end)
+
+  it("recalls next history", function()
+    thetto.start(test_source1, { opts = { input_lines = { "test1" } } })
+    thetto.execute("quit")
+
+    thetto.start(test_source1, { opts = { input_lines = { "test2" } } })
+    thetto.execute("quit")
+
+    thetto.start(test_source1)
+
+    thetto.execute("recall_previous_history")
+    assert.current_line("test2")
+
+    thetto.execute("recall_previous_history")
+    assert.current_line("test1")
+
+    thetto.execute("recall_next_history")
+    assert.current_line("test2")
+  end)
+
+  it("saves the first input", function()
+    thetto.start(test_source1, { opts = { input_lines = { "test" } } })
+
+    thetto.execute("recall_next_history")
+    thetto.execute("recall_previous_history")
+
+    assert.current_line("test")
+  end)
+end)
