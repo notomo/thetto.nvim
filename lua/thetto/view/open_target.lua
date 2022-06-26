@@ -36,8 +36,8 @@ local highlight = function(hl_factory, bufnr, row, range)
   end
 end
 
-local set_filetype = function(path, bufnr)
-  local filetype, on_detect = vim.filetype.match(path, bufnr)
+local set_filetype = function(bufnr, hint)
+  local filetype, on_detect = vim.filetype.match(hint)
   if filetype then
     on_detect = on_detect or function() end
     vim.bo[bufnr].filetype = filetype
@@ -67,7 +67,7 @@ function M._buffer(source_bufnr, height, row, range)
   local path = vim.api.nvim_buf_get_name(source_bufnr)
   local bufnr = new_buffer(lines)
 
-  set_filetype(path, bufnr)
+  set_filetype(bufnr, { filename = path })
 
   return bufnr, function(hl_factory)
     highlight(hl_factory, bufnr, position.row, range)
@@ -97,7 +97,7 @@ function M._path(path, height, row, range)
   local lines = filelib.read_lines(path, position.top_row, position.top_row + height)
   local bufnr = new_buffer(lines)
 
-  set_filetype(path, bufnr)
+  set_filetype(bufnr, { filename = path })
 
   return bufnr, function(hl_factory)
     highlight(hl_factory, bufnr, position.row, range)
