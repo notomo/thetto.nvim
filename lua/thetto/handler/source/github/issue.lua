@@ -1,35 +1,42 @@
 local M = {}
 
 M.opts = {
-  owner = ":owner",
-  repo = ":repo",
-  milestone = nil,
-  labels = {},
-  assignee = nil,
-  state = "open",
+  owner = nil,
+  repo_with_owner = nil,
 }
 
 function M.collect(self, source_ctx)
+  local pattern = source_ctx.pattern
+  if not source_ctx.interactive and not pattern then
+    pattern = vim.fn.input("Pattern: ")
+  end
+  if not pattern or pattern == "" then
+    return function(observer)
+      observer:complete()
+    end
+  end
+
+  local repo_with_owner = self.opts.repo_with_owner
+  local owner = self.opts.owner
+  if not (repo_with_owner or owner) then
+    repo_with_owner =
+      vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
+  end
+
   local cmd = {
     "gh",
-    "api",
-    "-X",
-    "GET",
-    ("repos/%s/%s/issues"):format(self.opts.owner, self.opts.repo),
-    "-F",
-    "per_page=100",
-    "-F",
-    "state=" .. self.opts.state,
+    "search",
+    "issues",
+    "--json",
+    "author,createdAt,state,title,url",
   }
-  if self.opts.milestone then
-    vim.list_extend(cmd, { "-F", "milestone=" .. self.opts.milestone })
+  if repo_with_owner then
+    vim.list_extend(cmd, { "--repo", repo_with_owner })
   end
-  if #self.opts.labels > 0 then
-    vim.list_extend(cmd, { "-F", "labels=" .. table.concat(self.opts.labels, ",") })
+  if owner then
+    vim.list_extend(cmd, { "--owner", owner })
   end
-  if self.opts.assignee then
-    vim.list_extend(cmd, { "-F", "assignee=" .. self.opts.assignee })
-  end
+  vim.list_extend(cmd, vim.split(pattern, "%s+"))
 
   return require("thetto.util").job.run(cmd, source_ctx, function(issue)
     local mark
@@ -39,12 +46,12 @@ function M.collect(self, source_ctx)
       mark = "C"
     end
     local title = ("%s %s"):format(mark, issue.title)
-    local at = "" .. issue.created_at
-    local by = "by " .. issue.user.login
+    local at = "" .. issue.createdAt
+    local by = "by " .. issue.author.login
     local desc = ("%s %s %s"):format(title, at, by)
     return {
       value = issue.title,
-      url = issue.html_url,
+      url = issue.url,
       desc = desc,
       issue = { is_opened = issue.state == "open" },
       column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
