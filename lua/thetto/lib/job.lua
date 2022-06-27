@@ -39,6 +39,18 @@ function Job.start(self)
   self.stdout = vim.loop.new_pipe(false)
   self.stderr = vim.loop.new_pipe(false)
 
+  local log_dir = vim.fn.stdpath("log")
+  vim.fn.mkdir(log_dir, "p")
+
+  local log_path = require("thetto.lib.path").join(log_dir, "thetto.log")
+  local log_file = io.open(log_path, "a")
+  if not log_file then
+    return "could not open log file: " .. log_path
+  end
+  local msg = self.command .. " " .. table.concat(self.args, " ")
+  log_file:write(("[%s] %s\n"):format(os.date(), msg))
+  log_file:close()
+
   local opts = {
     args = self.args,
     stdio = { self.stdin, self.stdout, self.stderr },
