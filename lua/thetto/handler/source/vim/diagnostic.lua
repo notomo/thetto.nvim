@@ -7,9 +7,10 @@ function M.collect()
   local items = {}
   for _, diagnostic in ipairs(vim.diagnostic.get(0)) do
     local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
-    local desc = PREFIX .. diagnostic.message
+    local message = diagnostic.message:gsub("\n", " ")
+    local desc = PREFIX .. message
     table.insert(items, {
-      value = diagnostic.message:gsub("\n", " "),
+      value = message,
       desc = desc,
       row = diagnostic.lnum + 1,
       path = path,
