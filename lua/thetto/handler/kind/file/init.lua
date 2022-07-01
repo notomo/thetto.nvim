@@ -96,9 +96,9 @@ local directory_kind = require("thetto.handler.kind.file.directory")
 local to_dirs = function(items)
   local dirs = {}
   for _, item in ipairs(items) do
-    item.path = vim.fn.fnamemodify(item.path, ":h")
-    item.value = item.path
-    table.insert(dirs, item)
+    local cloned = vim.deepcopy(item)
+    cloned.path = vim.fn.fnamemodify(item.path, ":h")
+    table.insert(dirs, cloned)
   end
   return dirs
 end
