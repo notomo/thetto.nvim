@@ -1,21 +1,35 @@
+local pathlib = require("thetto.lib.path")
+
 local M = {}
 
 local PREFIX = "■ "
 local PREFIX_LENGTH = #PREFIX
 
-function M.collect()
+M.opts = {
+  args = { 0 },
+}
+
+function M.collect(self, source_ctx)
   local items = {}
-  for _, diagnostic in ipairs(vim.diagnostic.get(0)) do
+
+  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
+  local bufnr, opts = unpack(self.opts.args)
+  for _, diagnostic in ipairs(vim.diagnostic.get(bufnr, opts)) do
     local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
+    local relative_path = to_relative(path)
     local message = diagnostic.message:gsub("\n", " ")
-    local desc = PREFIX .. message
+    local desc = ("%s %s"):format(relative_path, PREFIX .. message)
     table.insert(items, {
       value = message,
       desc = desc,
       row = diagnostic.lnum + 1,
       path = path,
       severity = diagnostic.severity,
-      column_offsets = { value = PREFIX_LENGTH },
+      column_offsets = {
+        path = 0,
+        prefix = #relative_path + 1,
+        value = #relative_path + 1 + PREFIX_LENGTH,
+      },
     })
   end
   return items
@@ -30,10 +44,15 @@ local hl_groups = {
 
 M.highlight = require("thetto.util").highlight.columns({
   {
+    group = "Comment",
+    end_key = "prefix",
+  },
+  {
     group = function(item)
       return hl_groups[item.severity]
     end,
-    end_column = PREFIX_LENGTH,
+    start_key = "prefix",
+    end_key = "value",
   },
 })
 
