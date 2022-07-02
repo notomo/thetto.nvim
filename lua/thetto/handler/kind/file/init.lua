@@ -91,6 +91,13 @@ function M.action_preview(_, items, ctx)
   end
 end
 
+function M.action_load_buffer(_, items)
+  for _, item in ipairs(items) do
+    local bufnr = vim.fn.bufadd(item.path)
+    vim.fn.bufload(bufnr)
+  end
+end
+
 local directory_kind = require("thetto.handler.kind.file.directory")
 
 local to_dirs = function(items)
