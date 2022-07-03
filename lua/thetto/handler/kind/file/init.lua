@@ -98,6 +98,15 @@ function M.action_load_buffer(_, items)
   end
 end
 
+function M.action_delete_buffer(_, items)
+  for _, item in ipairs(items) do
+    local bufnr = get_bufnr(item)
+    if bufnr ~= -1 then
+      vim.api.nvim_buf_delete(bufnr, { force = true })
+    end
+  end
+end
+
 local directory_kind = require("thetto.handler.kind.file.directory")
 
 local to_dirs = function(items)
