@@ -15,6 +15,9 @@ function M.collect(self, source_ctx)
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local bufnr, opts = unpack(self.opts.args)
   for _, diagnostic in ipairs(vim.diagnostic.get(bufnr, opts)) do
+    if not vim.api.nvim_buf_is_valid(diagnostic.bufnr) then
+      goto continue
+    end
     local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
     local relative_path = to_relative(path)
     local message = diagnostic.message:gsub("\n", " ")
@@ -31,6 +34,7 @@ function M.collect(self, source_ctx)
         value = #relative_path + 1 + PREFIX_LENGTH,
       },
     })
+    ::continue::
   end
   return items
 end
