@@ -5,6 +5,9 @@ M.opts = {
   to_absolute = function(_, path)
     return path
   end,
+  modify_path = function(path)
+    return path .. "/"
+  end,
 }
 
 if vim.fn.has("win32") == 1 then
@@ -37,9 +40,5 @@ function M.collect(self, source_ctx)
 end
 
 M.kind_name = "file/directory"
-
-function M._modify_path(_, path)
-  return path .. "/"
-end
 
 return M

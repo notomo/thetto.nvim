@@ -5,6 +5,9 @@ M.opts = {
   to_absolute = function(_, path)
     return path
   end,
+  modify_path = function(path)
+    return path
+  end,
 }
 
 if vim.fn.has("win32") == 1 then
@@ -58,7 +61,7 @@ function M.collect(self, source_ctx)
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       local items = vim.mpack.decode(encoded)
       return vim.tbl_map(function(item)
-        local value = self:_modify_path(item.value)
+        local value = self.opts.modify_path(item.value)
         return {
           value = value,
           path = to_absolute(source_ctx.cwd, item.path),
@@ -95,9 +98,5 @@ function M.collect(self, source_ctx)
 end
 
 M.kind_name = "file"
-
-function M._modify_path(_, path)
-  return path
-end
 
 return M
