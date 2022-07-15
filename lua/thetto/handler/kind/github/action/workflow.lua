@@ -12,6 +12,24 @@ function M.action_list_action_run(_, items)
   end
 end
 
+function M.action_run(self, items)
+  local item = items[1]
+  if not item then
+    return nil, "no item"
+  end
+
+  local cmd = { "gh", "workflow", "run", item.workflow.file_name }
+  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local err = job:start()
+  if err ~= nil then
+    return nil, err
+  end
+
+  M.action_list_action_run(self, items)
+
+  return job, nil
+end
+
 M.action_list_children = M.action_list_action_run
 
 return require("thetto.core.kind").extend(M, "url")
