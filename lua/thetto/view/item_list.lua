@@ -167,14 +167,14 @@ function ItemList.enter(self)
   windowlib.safe_enter(self._window)
 end
 
-function ItemList.close(self)
+function ItemList.close(self, is_passive)
   if self._closed then
     return
   end
   self._closed = true
 
   local ctx = Context.get_from_path(self._bufnr)
-  if ctx then
+  if ctx and not is_passive then
     ctx:on_close()
   end
 

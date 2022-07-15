@@ -692,6 +692,13 @@ describe("resume_previous action", function()
   after_each(helper.after_each)
 
   it("can resume previous source", function()
+    local test_source3 = "_test_values3"
+    thetto.register_source(test_source3, {
+      collect = function()
+        return { { value = "test5" } }
+      end,
+    })
+
     thetto.start(test_source1, { opts = { insert = false } })
     helper.search("test2")
 
@@ -700,7 +707,12 @@ describe("resume_previous action", function()
       "test4",
     }
 
-    thetto.start(test_source2)
+    thetto.start(test_source2, { opts = { insert = false } })
+    helper.search("test4")
+
+    thetto.start(test_source3, { opts = { insert = false } })
+
+    thetto.execute("resume_previous")
     thetto.execute("resume_previous")
 
     assert.current_line("test2")

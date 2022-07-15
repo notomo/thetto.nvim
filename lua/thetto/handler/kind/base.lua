@@ -32,6 +32,8 @@ M.behaviors = {
   append_filter_input = { quit = false },
   recall_previous_history = { quit = false },
   recall_next_history = { quit = false },
+  resume_previous = { quit = false },
+  resume_next = { quit = false },
 }
 
 function M.action_toggle_selection(_, items, ctx)

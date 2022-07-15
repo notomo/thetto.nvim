@@ -78,7 +78,7 @@ end
 function ReturnValue.resume(source_name)
   local old_ctx = Context.get(source_name)
   if old_ctx then
-    old_ctx.ui:close()
+    old_ctx.ui:close(true)
   end
 
   local ctx, ctx_err = Context.resume(source_name)

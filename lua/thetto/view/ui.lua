@@ -32,7 +32,7 @@ function UI.open(self, on_move, needs_preview)
   for bufnr in bufferlib.in_tabpage(0) do
     local ctx = Context.get_from_path(bufnr)
     if ctx then
-      ctx.ui:close()
+      ctx.ui:close(true)
     end
   end
 
@@ -74,7 +74,7 @@ function UI.scroll(self, offset)
 end
 
 function UI.resume(self)
-  self:close()
+  self:close(true)
   self:open(self._on_move, self._initialized_preview)
   return self:redraw(self._collector.input_lines, self._state.row)
 end
@@ -144,7 +144,7 @@ function UI.update_offset(self, offset)
   self._state = self._state:update_row(offset, self._collector.items:length(), self._display_limit)
 end
 
-function UI.close(self)
+function UI.close(self, is_passive)
   if self._item_list == nil or not self._item_list:is_valid() then
     return
   end
@@ -153,7 +153,7 @@ function UI.close(self)
   local origin_window, new_state = self._state:save(self._item_list, self._inputter)
   self._state = new_state
 
-  self._item_list:close()
+  self._item_list:close(is_passive)
   self._inputter:close()
   self._status_line:close()
   self:close_preview()
