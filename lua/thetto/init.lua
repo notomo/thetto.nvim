@@ -16,6 +16,10 @@ function M.execute(action_name, args)
   return require("thetto.command").execute(action_name, args)
 end
 
+function M.get()
+  return require("thetto.command").get()
+end
+
 function M.resume_execute(args)
   return require("thetto.command").resume_execute(args)
 end

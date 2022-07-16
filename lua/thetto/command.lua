@@ -107,6 +107,15 @@ function ReturnValue.execute(action_name, raw_args)
   return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts)
 end
 
+function ReturnValue.get()
+  local ctx, ctx_err = Context.get_from_path()
+  if ctx_err ~= nil then
+    return nil, ctx_err
+  end
+  local range = require("thetto.vendor.misclib.visual_mode").row_range()
+  return ctx.ui:selected_items(nil, range)
+end
+
 function ReturnValue.resume_execute(raw_args)
   local args = require("thetto.core.argument").ResumeExecuteArgs.new(raw_args)
   local ctx, ctx_err = Context.resume(args.source_name)

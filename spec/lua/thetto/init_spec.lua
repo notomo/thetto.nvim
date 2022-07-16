@@ -687,6 +687,18 @@ describe("thetto.resume_execute()", function()
   end)
 end)
 
+describe("thetto.get()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can get current item", function()
+    thetto.start(test_source1, { opts = { insert = false } })
+    local items = thetto.get()
+
+    assert.is_same({ { index = 1, value = "test1" } }, items)
+  end)
+end)
+
 describe("resume_previous action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
