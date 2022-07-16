@@ -2,20 +2,6 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-local get_position = function(height, row)
-  local half_height = math.floor(height / 2)
-  if row ~= nil and row > half_height then
-    return {
-      top_row = row - half_height + 1,
-      row = half_height,
-    }
-  end
-  return {
-    top_row = 1,
-    row = row,
-  }
-end
-
 local new_buffer = function(lines)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
@@ -72,9 +58,7 @@ function M._buffer(source_bufnr, height, row, range)
     return
   end
 
-  local position = get_position(height, row)
-
-  local lines = vim.api.nvim_buf_get_lines(source_bufnr, position.top_row - 1, position.top_row + height - 1, false)
+  local lines = vim.api.nvim_buf_get_lines(source_bufnr, 0, (row or 0) + height - 1, false)
   local path = vim.api.nvim_buf_get_name(source_bufnr)
   local bufnr = new_buffer(lines)
 
@@ -82,8 +66,8 @@ function M._buffer(source_bufnr, height, row, range)
 
   return bufnr,
     function(hl_factory, window_id)
-      set_cursor(window_id, position.row, range)
-      highlight(hl_factory, bufnr, position.row, range)
+      set_cursor(window_id, row, range)
+      highlight(hl_factory, bufnr, row, range)
     end
 end
 
@@ -95,27 +79,25 @@ function M._raw_buffer(bufnr, row, range)
     end
 end
 
-function M._lines(lines, height, row, range)
-  local position = get_position(height, row)
+function M._lines(lines, _, row, range)
   local bufnr = new_buffer(lines)
   return bufnr,
     function(hl_factory, window_id)
-      set_cursor(window_id, position.row, range)
-      highlight(hl_factory, bufnr, position.row, range)
+      set_cursor(window_id, row, range)
+      highlight(hl_factory, bufnr, row, range)
     end
 end
 
 function M._path(path, height, row, range)
-  local position = get_position(height, row)
-  local lines = filelib.read_lines(path, position.top_row, position.top_row + height)
+  local lines = filelib.read_lines(path, 1, (row or 0) + height)
   local bufnr = new_buffer(lines)
 
   set_filetype(bufnr, { buf = bufnr, filename = path })
 
   return bufnr,
     function(hl_factory, window_id)
-      set_cursor(window_id, position.row, range)
-      highlight(hl_factory, bufnr, position.row, range)
+      set_cursor(window_id, row, range)
+      highlight(hl_factory, bufnr, row, range)
     end
 end
 
