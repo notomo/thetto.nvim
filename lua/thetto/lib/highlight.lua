@@ -16,6 +16,24 @@ function Highlighter.add_normal(self, hl_group, row, start_col, end_col)
   vim.api.nvim_buf_add_highlight(self._bufnr, self._ns, hl_group, row, start_col, end_col)
 end
 
+function Highlighter.add_normal_range(self, hl_group, start_row, end_row, start_col, end_col, row_limit)
+  end_row = end_row or start_row
+  row_limit = row_limit or end_row
+  if end_col == -1 then
+    end_col = nil
+    end_row = end_row + 1
+  end
+  if end_row >= row_limit then
+    end_col = nil
+    end_row = row_limit
+  end
+  vim.api.nvim_buf_set_extmark(self._bufnr, self._ns, start_row, start_col, {
+    hl_group = hl_group,
+    end_row = end_row,
+    end_col = end_col,
+  })
+end
+
 function Highlighter.add(self, hl_group, row, start_col, end_col)
   local end_line
   if end_col == -1 then

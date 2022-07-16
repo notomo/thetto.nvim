@@ -9,14 +9,18 @@ local new_buffer = function(lines)
   return bufnr
 end
 
-local highlight = function(hl_factory, bufnr, row, range)
+local highlight = function(hl_factory, bufnr, row, range, height)
   if not row then
     return
   end
 
   local highlighter = hl_factory:create(bufnr)
-  range = range or { s = { column = 0 }, e = { column = -1 } }
-  highlighter:add_normal("ThettoPreview", row - 1, range.s.column, range.e.column)
+  if range then
+    local row_limit = row + height - 1
+    highlighter:add_normal_range("ThettoPreview", row - 1, range.e.row, range.s.column, range.e.column, row_limit)
+  else
+    highlighter:add_normal("ThettoPreview", row - 1, 0, -1)
+  end
   if vim.fn.getbufline(bufnr, row)[1] == "" then
     highlighter:set_virtual_text(row - 1, { { " ", "ThettoPreview" } }, { virt_text_pos = "overlay" })
   end
@@ -59,7 +63,7 @@ function M.new(target, width, height)
   return bufnr,
     function(hl_factory, window_id)
       set_cursor(window_id, target.row, target.range, width)
-      highlight(hl_factory, bufnr, target.row, target.range)
+      highlight(hl_factory, bufnr, target.row, target.range, height)
     end
 end
 
