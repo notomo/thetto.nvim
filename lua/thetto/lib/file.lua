@@ -44,13 +44,16 @@ function M.write_lines(path, lines)
   f:close()
 end
 
-function M.find_upward_dir(child_pattern)
-  local found_file = vim.fn.findfile(child_pattern, ".;")
+function M.find_upward_dir(child_pattern, path)
+  path = path or "."
+  path = path .. ";"
+
+  local found_file = vim.fn.findfile(child_pattern, path)
   if found_file ~= "" then
     return vim.fn.fnamemodify(found_file, ":p:h")
   end
 
-  local found_dir = vim.fn.finddir(child_pattern, ".;")
+  local found_dir = vim.fn.finddir(child_pattern, path)
   if found_dir ~= "" then
     return vim.fn.fnamemodify(found_dir, ":p:h:h")
   end
