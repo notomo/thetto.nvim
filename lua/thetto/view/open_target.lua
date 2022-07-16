@@ -36,6 +36,17 @@ local highlight = function(hl_factory, bufnr, row, range)
   end
 end
 
+local set_cursor = function(window_id, row, range)
+  if not row then
+    return
+  end
+  range = range or { s = { column = 0 } }
+  vim.api.nvim_win_set_cursor(window_id, { row, range.s.column })
+  vim.api.nvim_win_call(window_id, function()
+    vim.cmd([[normal! zs]]) -- HACK
+  end)
+end
+
 local set_filetype = function(bufnr, hint)
   local filetype, on_detect = vim.filetype.match(hint)
   if filetype then
@@ -69,17 +80,17 @@ function M._buffer(source_bufnr, height, row, range)
 
   set_filetype(bufnr, { buf = bufnr, filename = path })
 
-  return bufnr, function(hl_factory)
-    highlight(hl_factory, bufnr, position.row, range)
-  end
+  return bufnr,
+    function(hl_factory, window_id)
+      set_cursor(window_id, position.row, range)
+      highlight(hl_factory, bufnr, position.row, range)
+    end
 end
 
 function M._raw_buffer(bufnr, row, range)
   return bufnr,
     function(hl_factory, window_id)
-      if row then
-        vim.api.nvim_win_set_cursor(window_id, { row, 0 })
-      end
+      set_cursor(window_id, row, range)
       highlight(hl_factory, bufnr, row, range)
     end
 end
@@ -87,9 +98,11 @@ end
 function M._lines(lines, height, row, range)
   local position = get_position(height, row)
   local bufnr = new_buffer(lines)
-  return bufnr, function(hl_factory)
-    highlight(hl_factory, bufnr, position.row, range)
-  end
+  return bufnr,
+    function(hl_factory, window_id)
+      set_cursor(window_id, position.row, range)
+      highlight(hl_factory, bufnr, position.row, range)
+    end
 end
 
 function M._path(path, height, row, range)
@@ -99,9 +112,11 @@ function M._path(path, height, row, range)
 
   set_filetype(bufnr, { buf = bufnr, filename = path })
 
-  return bufnr, function(hl_factory)
-    highlight(hl_factory, bufnr, position.row, range)
-  end
+  return bufnr,
+    function(hl_factory, window_id)
+      set_cursor(window_id, position.row, range)
+      highlight(hl_factory, bufnr, position.row, range)
+    end
 end
 
 return M
