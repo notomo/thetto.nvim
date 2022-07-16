@@ -43,17 +43,24 @@ local set_filetype = function(bufnr, hint)
 end
 
 function M.new(target, height)
+  local bufnr
   if target.bufnr then
-    return M._buffer(target.bufnr, height, target.row, target.range)
+    bufnr = M._buffer(target.bufnr, height, target.row)
   elseif target.raw_bufnr then
-    return M._raw_buffer(target.raw_bufnr, target.row, target.range)
+    bufnr = target.raw_bufnr
   elseif target.path then
-    return M._path(target.path, height, target.row, target.range)
+    bufnr = M._path(target.path, height, target.row)
+  else
+    bufnr = new_buffer(target.lines or {})
   end
-  return M._lines(target.lines or {}, height, target.row, target.range)
+  return bufnr,
+    function(hl_factory, window_id)
+      set_cursor(window_id, target.row, target.range)
+      highlight(hl_factory, bufnr, target.row, target.range)
+    end
 end
 
-function M._buffer(source_bufnr, height, row, range)
+function M._buffer(source_bufnr, height, row)
   if not vim.api.nvim_buf_is_valid(source_bufnr) then
     return
   end
@@ -64,41 +71,16 @@ function M._buffer(source_bufnr, height, row, range)
 
   set_filetype(bufnr, { buf = bufnr, filename = path })
 
-  return bufnr,
-    function(hl_factory, window_id)
-      set_cursor(window_id, row, range)
-      highlight(hl_factory, bufnr, row, range)
-    end
+  return bufnr
 end
 
-function M._raw_buffer(bufnr, row, range)
-  return bufnr,
-    function(hl_factory, window_id)
-      set_cursor(window_id, row, range)
-      highlight(hl_factory, bufnr, row, range)
-    end
-end
-
-function M._lines(lines, _, row, range)
-  local bufnr = new_buffer(lines)
-  return bufnr,
-    function(hl_factory, window_id)
-      set_cursor(window_id, row, range)
-      highlight(hl_factory, bufnr, row, range)
-    end
-end
-
-function M._path(path, height, row, range)
+function M._path(path, height, row)
   local lines = filelib.read_lines(path, 1, (row or 0) + height)
   local bufnr = new_buffer(lines)
 
   set_filetype(bufnr, { buf = bufnr, filename = path })
 
-  return bufnr,
-    function(hl_factory, window_id)
-      set_cursor(window_id, row, range)
-      highlight(hl_factory, bufnr, row, range)
-    end
+  return bufnr
 end
 
 return M
