@@ -22,12 +22,15 @@ local highlight = function(hl_factory, bufnr, row, range)
   end
 end
 
-local set_cursor = function(window_id, row, range)
+local set_cursor = function(window_id, row, range, width)
   if not row then
     return
   end
-  range = range or { s = { column = 0 } }
+  range = range or { s = { column = 0 }, e = { column = -1 } }
   vim.api.nvim_win_set_cursor(window_id, { row, range.s.column })
+  if range.e.column <= width then
+    return
+  end
   vim.api.nvim_win_call(window_id, function()
     vim.cmd([[normal! zs]]) -- HACK
   end)
@@ -42,7 +45,7 @@ local set_filetype = function(bufnr, hint)
   end
 end
 
-function M.new(target, height)
+function M.new(target, width, height)
   local bufnr
   if target.bufnr then
     bufnr = M._buffer(target.bufnr, height, target.row)
@@ -55,7 +58,7 @@ function M.new(target, height)
   end
   return bufnr,
     function(hl_factory, window_id)
-      set_cursor(window_id, target.row, target.range)
+      set_cursor(window_id, target.row, target.range, width)
       highlight(hl_factory, bufnr, target.row, target.range)
     end
 end

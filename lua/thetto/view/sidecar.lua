@@ -11,11 +11,12 @@ function Sidecar.new()
 end
 
 function Sidecar.open(self, item, open_target, width, height, pos_row, left_column)
-  local bufnr, window_open_callback = require("thetto.view.open_target").new(open_target, height)
+  local sidecar_width = math.ceil(vim.o.columns - left_column - width - 3 - 2)
+  local bufnr, window_open_callback = require("thetto.view.open_target").new(open_target, sidecar_width, height)
 
   if not self:_opened() then
     self._window = vim.api.nvim_open_win(bufnr, false, {
-      width = math.ceil(vim.o.columns - left_column - width - 3 - 2),
+      width = sidecar_width,
       height = height,
       relative = "editor",
       row = pos_row,
