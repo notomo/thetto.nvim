@@ -9,7 +9,8 @@ function ReturnValue.start(source_name, raw_args)
   local args = require("thetto.core.argument").StartArgs.new(raw_args)
   local opts, source_opts, opts_err = require("thetto.core.option").Option.new(args.opts, args.source_opts, source_name)
   if opts_err ~= nil then
-    return nil, opts_err
+    require("thetto.vendor.misclib.message").warn(opts_err)
+    return require("thetto.vendor.promise").resolve()
   end
   local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name)
 
@@ -20,7 +21,8 @@ function ReturnValue.start(source_name, raw_args)
 
   local collector, err = require("thetto.core.collector").new(source_name, source_opts, opts)
   if err ~= nil then
-    return nil, err
+    require("thetto.vendor.misclib.message").warn(err)
+    return require("thetto.vendor.promise").resolve()
   end
   local executor = require("thetto.core.executor").new(
     collector.source.kind_name,
@@ -31,27 +33,37 @@ function ReturnValue.start(source_name, raw_args)
   local ui = require("thetto.view.ui").new(collector, opts.insert, opts.display_limit)
   local ctx = Context.new(source_name, collector, ui, executor, opts.can_resume)
 
-  local start_err = collector:start(opts.pattern)
-  if start_err ~= nil then
-    return nil, start_err
-  end
-
-  ui:open(executor:auto(ctx, opts.auto))
-
-  local update_err = collector:update()
-  if update_err ~= nil then
-    return nil, update_err
-  end
-  ui:scroll(opts.offset)
-
-  if opts.immediately then
-    local _, exec_err = ReturnValue.execute(opts.action, { action_opts = args.action_opts })
-    if exec_err ~= nil then
-      return nil, exec_err
+  local promise = require("thetto.vendor.promise").new(function(resolve, reject)
+    local start_err = collector:start(opts.pattern, resolve, reject)
+    if start_err ~= nil then
+      return reject(start_err)
     end
+
+    ui:open(executor:auto(ctx, opts.auto))
+
+    local update_err = collector:update()
+    if update_err ~= nil then
+      return reject(update_err)
+    end
+    ui:scroll(opts.offset)
+  end)
+
+  if not opts.immediately then
+    return promise:catch(function(e)
+      require("thetto.vendor.misclib.message").warn(e)
+    end)
   end
 
-  return collector, nil
+  return promise
+    :next(function()
+      local _, exec_err = ReturnValue.execute(opts.action, { action_opts = args.action_opts })
+      if exec_err ~= nil then
+        return require("thetto.vendor.misclib.message").warn(exec_err)
+      end
+    end)
+    :catch(function(e)
+      require("thetto.vendor.misclib.message").warn(e)
+    end)
 end
 
 function ReturnValue.reload(bufnr)

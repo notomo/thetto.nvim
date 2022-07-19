@@ -85,7 +85,7 @@ foo]])
   end)
 
   it("can grep interactively", function()
-    local collector = helper.sync_open("file/grep", {
+    helper.sync_open("file/grep", {
       opts = { insert = false, filters = { "interactive" } },
     })
 
@@ -93,16 +93,16 @@ foo]])
 
     thetto.execute("move_to_input")
     helper.sync_input({ "hoge" })
-    assert.is_true(collector:wait())
     helper.wait_ui(function()
       thetto.execute("move_to_list")
     end)
+    vim.wait(100, function() end) -- HACK: wait debounce
 
     assert.current_line("target:1 hoge")
   end)
 
   it("can grep no result pattern interactively", function()
-    local collector = helper.sync_open("file/grep", { opts = { filters = { "interactive" } } })
+    helper.sync_open("file/grep", { opts = { filters = { "interactive" } } })
 
     helper.sync_input({ "hoge" })
     helper.sync_input({ "bar" })
@@ -111,7 +111,6 @@ foo]])
     end)
 
     assert.current_line("")
-    assert.is_true(collector:wait())
   end)
 
   it("can grep with camelcase pattern", function()

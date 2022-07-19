@@ -26,6 +26,32 @@ function helper.set_lines(lines)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(lines, "\n"))
 end
 
+function helper.on_finished()
+  local finished = false
+  return setmetatable({
+    wait = function()
+      local ok = vim.wait(1000, function()
+        return finished
+      end, 10, false)
+      if not ok then
+        error("wait timeout")
+      end
+    end,
+  }, {
+    __call = function()
+      finished = true
+    end,
+  })
+end
+
+function helper.wait(promise)
+  local on_finished = helper.on_finished()
+  promise:finally(function()
+    on_finished()
+  end)
+  on_finished:wait()
+end
+
 function helper.sync_input(texts)
   local text = texts[1]
   local finished = false
@@ -46,27 +72,13 @@ function helper.sync_input(texts)
 end
 
 function helper.sync_open(...)
-  local collector = require("thetto").start(...)
-  if collector == nil then
-    return
-  end
-  local ok = collector:wait(1000)
-  if not ok then
-    assert(false, "job wait timeout")
-  end
+  local promise = require("thetto").start(...)
 
-  local finished = false
-  require("thetto.view.ui")._changed_after = function()
-    finished = collector:finished()
-  end
-  ok = vim.wait(1000, function()
-    return finished
-  end, 10)
-  if not ok then
-    assert(false, "wait timeout")
-  end
-
-  return collector
+  local on_finished = helper.on_finished()
+  promise:finally(function()
+    on_finished()
+  end)
+  on_finished:wait()
 end
 
 function helper.sync_execute(...)

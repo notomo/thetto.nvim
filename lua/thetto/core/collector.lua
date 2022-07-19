@@ -43,8 +43,12 @@ function Collector.new(source_name, source_opts, opts)
   local self = setmetatable(tbl, Collector)
   self.items = self:_items(0)
 
-  self.update_with_throttle = wraplib.throttle_with_last(opts.debounce_ms, function()
-    return self:update()
+  self.update_with_throttle = wraplib.throttle_with_last(opts.debounce_ms, function(_, callback)
+    local update_err = self:update()
+    if callback then
+      callback()
+    end
+    return update_err
   end)
 
   self._send_redraw_event = function() end
@@ -55,12 +59,16 @@ function Collector.new(source_name, source_opts, opts)
 end
 
 function Collector.subscribe_input(self, input_observable, get_lines)
-  self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.debounce_ms, function()
+  self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.debounce_ms, function(_, callback)
     local input_lines = get_lines()
     if input_lines then
       self.input_lines = input_lines
     end
-    return self:update()
+    local err = self:update()
+    if callback then
+      callback()
+    end
+    return err
   end)
   input_observable:subscribe({
     next = function()
@@ -82,7 +90,10 @@ function Collector.attach_ui(self, ui)
   end
 end
 
-function Collector.start(self, input_pattern)
+function Collector.start(self, input_pattern, resolve, reject)
+  resolve = resolve or function() end
+  reject = reject or function() end
+
   local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
   local result, err = self.source:collect(source_ctx)
   if err then
@@ -99,10 +110,12 @@ function Collector.start(self, input_pattern)
     end,
     error = function(e)
       require("thetto.vendor.misclib.message").warn(e)
-      return self:update_with_throttle()
+      return self:update_with_throttle(function()
+        reject(e)
+      end)
     end,
     complete = function()
-      return self:update_with_throttle()
+      return self:update_with_throttle(resolve)
     end,
   })
   if start_err then

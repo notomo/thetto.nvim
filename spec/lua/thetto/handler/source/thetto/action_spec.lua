@@ -22,7 +22,7 @@ test3]])
   end)
 
   it("shows error if action source is not executed in thetto buffer", function()
-    thetto.start("thetto/action")
+    helper.sync_open("thetto/action")
     assert.exists_message([[must be executed in thetto buffer]])
   end)
 

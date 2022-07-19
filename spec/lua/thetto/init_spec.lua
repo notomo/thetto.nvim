@@ -216,11 +216,11 @@ describe("thetto", function()
       end,
     })
 
-    thetto.start(source)
+    helper.sync_open(source)
     assert.exists_message(source .. ": empty")
     assert.window_count(1)
 
-    thetto.start(source)
+    helper.sync_open(source)
     -- should be the same error
     assert.exists_message(source .. ": empty")
   end)
