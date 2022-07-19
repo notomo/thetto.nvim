@@ -61,9 +61,28 @@ describe("thetto", function()
       "test3",
     }
 
-    thetto.start(test_source1, { opts = { insert = false, offset = 10 } })
+    helper.sync_open(test_source1, { opts = { insert = false, offset = 10 } })
 
     assert.current_line("test3")
+  end)
+
+  it("can scroll ui by search_offset", function()
+    test_items1 = {
+      "test1",
+      "test2",
+      "test3",
+    }
+
+    helper.sync_open(test_source1, {
+      opts = {
+        insert = false,
+        search_offset = function(item)
+          return item.value == "test2"
+        end,
+      },
+    })
+
+    assert.current_line("test2")
   end)
 
   it("can close ui by :quit", function()

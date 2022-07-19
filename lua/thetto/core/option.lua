@@ -28,6 +28,7 @@ local default = {
     return nil
   end,
   offset = 0,
+  search_offset = nil,
   cwd = function()
     return "."
   end,

@@ -45,7 +45,8 @@ function ReturnValue.start(source_name, raw_args)
     if update_err ~= nil then
       return reject(update_err)
     end
-    ui:scroll(opts.offset)
+  end):next(function()
+    ui:scroll(opts.offset, opts.search_offset)
   end)
 
   if not opts.immediately then

@@ -66,7 +66,16 @@ function UI.open(self, on_move, needs_preview)
   end
 end
 
-function UI.scroll(self, offset)
+function UI.scroll(self, offset, search_offset)
+  if search_offset then
+    for i, item in ipairs(self._collector.items:values()) do
+      local found = search_offset(item)
+      if found then
+        offset = i - 1
+        break
+      end
+    end
+  end
   if offset ~= 0 then
     self:update_offset(offset)
     self._item_list:set_row(self._state.row)
