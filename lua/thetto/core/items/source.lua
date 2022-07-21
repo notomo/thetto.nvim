@@ -74,19 +74,22 @@ function Source.collect(self, source_ctx)
   return result, nil
 end
 
-function Source.all_names()
+function Source.all()
   local paths = vim.api.nvim_get_runtime_file("lua/thetto/handler/source/**/*.lua", true)
   local already = {}
-  local names = {}
+  local all = {}
   for _, path in ipairs(paths) do
     local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/source/", true)[2]
     local name = source_file:sub(1, #source_file - 4)
     if not already[name] then
-      table.insert(names, name)
+      table.insert(all, {
+        name = name,
+        path = path,
+      })
       already[name] = true
     end
   end
-  return names
+  return all
 end
 
 return Source

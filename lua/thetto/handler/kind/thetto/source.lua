@@ -16,4 +16,4 @@ end
 
 M.default_action = "execute"
 
-return M
+return require("thetto.core.kind").extend(M, "file")

@@ -2,8 +2,8 @@ local M = {}
 
 function M.collect()
   local items = {}
-  for _, name in ipairs(require("thetto.core.items.source").all_names()) do
-    table.insert(items, { value = name })
+  for _, e in ipairs(require("thetto.core.items.source").all()) do
+    table.insert(items, { value = e.name, path = e.path })
   end
   return items
 end
