@@ -2,6 +2,10 @@ local util = require("thetto.util.lsp")
 
 local M = {}
 
+M.opts = {
+  ignored_kind = { "variable", "field" },
+}
+
 function M.collect(self)
   local current_path = vim.fn.expand("%:p")
   return function(observer)
@@ -20,9 +24,13 @@ function M.collect(self)
 end
 
 function M._to_items(self, item, parent_key, current_path)
+  local kind = vim.lsp.protocol.SymbolKind[item.kind]
+  if vim.tbl_contains(self.opts.ignored_kind, kind:lower()) then
+    return {}
+  end
+
   local items = {}
 
-  local kind = vim.lsp.protocol.SymbolKind[item.kind]
   local range = item.selectionRange or item.location.range
   local name = parent_key .. item.name
   local detail = item.detail or ""
@@ -33,7 +41,8 @@ function M._to_items(self, item, parent_key, current_path)
     column = range.start.character + 1,
     desc = desc,
     value = name,
-    column_offsets = { value = 0, kind = #desc - #kind - 2 },
+    kind = kind,
+    column_offsets = { value = 0, kind = #desc - #kind - 1 },
     range = util.range(item.selectionRange),
   })
 
