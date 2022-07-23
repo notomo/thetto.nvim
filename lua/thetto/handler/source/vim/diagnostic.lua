@@ -21,7 +21,7 @@ function M.collect(self, source_ctx)
     local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
     local relative_path = to_relative(path)
     local message = diagnostic.message:gsub("\n", " ")
-    local desc = ("%s %s"):format(relative_path, PREFIX .. message)
+    local desc = ("%s %s [%s:%s]"):format(relative_path, PREFIX .. message, diagnostic.source, diagnostic.code)
     table.insert(items, {
       value = message,
       desc = desc,
