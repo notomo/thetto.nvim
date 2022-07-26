@@ -38,10 +38,9 @@ function Collector.new(source_name, source_opts, opts)
     _result = SourceResult.zero(),
     _ignorecase = opts.ignorecase,
     _smartcase = opts.smartcase,
-    _display_limit = opts.display_limit,
   }
   local self = setmetatable(tbl, Collector)
-  self.items = self:_items(0)
+  self.items = self:_items(0, nil, opts.display_limit)
 
   self.update_with_throttle = wraplib.throttle_with_last(opts.debounce_ms, function(_, callback)
     local update_err = self:update()
@@ -223,6 +222,10 @@ function Collector.change_page_offset(self, page_offset)
   return self:_update_items(page_offset)
 end
 
+function Collector.change_display_limit(self, offset)
+  return self:_update_items(nil, self.items.display_limit + offset)
+end
+
 function Collector._update_sorters(self, sorters)
   self.sorters = sorters
   return self:_update_items()
@@ -233,7 +236,7 @@ function Collector.update(self)
   return self:_update_items()
 end
 
-function Collector._items(self, page, page_offset)
+function Collector._items(self, page, page_offset, display_limit)
   return Items.new(
     self._result,
     self.input_lines,
@@ -241,14 +244,14 @@ function Collector._items(self, page, page_offset)
     self.sorters,
     self._ignorecase,
     self._smartcase,
-    self._display_limit,
+    display_limit or self.items.display_limit,
     page or self.items.page,
     page_offset
   )
 end
 
-function Collector._update_items(self, page_offset)
-  self.items = self:_items(nil, page_offset)
+function Collector._update_items(self, page_offset, display_limit)
+  self.items = self:_items(nil, page_offset, display_limit)
 
   if not self.source_ctx.interactive then
     return self:_send_redraw_event()

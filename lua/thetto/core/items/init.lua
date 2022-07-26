@@ -39,6 +39,7 @@ function Items.new(result, input_lines, filters, sorters, ignorecase, smartcase,
     page = page,
     start_index = start_index,
     end_index = end_index,
+    display_limit = display_limit,
   }
   return setmetatable(tbl, Items)
 end

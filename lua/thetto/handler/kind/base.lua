@@ -10,6 +10,7 @@ M.opts = {
   move_to_input = { behavior = "i" },
   resume_previous = { wrap = true },
   resume_next = { wrap = true },
+  change_display_limit = { offset = 1000 },
 }
 
 M.behaviors = {
@@ -34,6 +35,7 @@ M.behaviors = {
   recall_next_history = { quit = false },
   resume_previous = { quit = false },
   resume_next = { quit = false },
+  change_display_limit = { quit = false },
 }
 
 function M.action_toggle_selection(_, items, ctx)
@@ -169,6 +171,10 @@ end
 
 function M.action_go_to_previous_page(_, _, ctx)
   ctx.collector:change_page_offset(-1)
+end
+
+function M.action_change_display_limit(self, _, ctx)
+  ctx.collector:change_display_limit(self.action_opts.offset)
 end
 
 function M.action_append_filter_input(_, items, ctx)

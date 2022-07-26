@@ -1275,6 +1275,29 @@ describe("go_to_previous_page action", function()
   end)
 end)
 
+describe("change_display_limit action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can increase display limit", function()
+    test_items1 = {
+      "test1",
+      "test2",
+      "test3",
+      "test4",
+    }
+
+    thetto.start(test_source1, {
+      opts = { display_limit = 2, insert = false },
+    })
+
+    thetto.execute("change_display_limit", { action_opts = { offset = 1 } })
+
+    assert.exists_pattern("test3")
+    assert.no.exists_pattern("test4")
+  end)
+end)
+
 describe("append_filter_input action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)

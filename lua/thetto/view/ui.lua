@@ -10,16 +10,14 @@ local vim = vim
 local UI = {}
 UI.__index = UI
 
-function UI.new(collector, insert, display_limit)
+function UI.new(collector, insert)
   vim.validate({
     collector = { collector, "table" },
     insert = { insert, "boolean" },
-    display_limit = { display_limit, "number" },
   })
   local tbl = {
     _collector = collector,
     _state = State.new(insert),
-    _display_limit = display_limit,
     _debounce_ms_on_move = 70,
     _initialized_preview = false,
   }
@@ -150,7 +148,7 @@ function UI.on_move(self)
 end
 
 function UI.update_offset(self, offset)
-  self._state = self._state:update_row(offset, self._collector.items:length(), self._display_limit)
+  self._state = self._state:update_row(offset, self._collector.items:length(), self._collector.items.display_limit)
 end
 
 function UI.close(self, is_passive)
