@@ -3,6 +3,16 @@ local ShowError = require("thetto.vendor.misclib.error_handler").for_show_error(
 
 local Context = require("thetto.core.context")
 
+local _execute_action = function(ctx, action_name, raw_args)
+  local args = require("thetto.core.argument").ExecuteArgs.new(
+    action_name or ctx.collector.source.default_action,
+    raw_args
+  )
+  local range = require("thetto.vendor.misclib.visual_mode").row_range()
+  local items = ctx.ui:selected_items(args.action_name, range)
+  return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts)
+end
+
 function ReturnValue.start(source_name, raw_args)
   vim.validate({ source_name = { source_name, "string" } })
 
@@ -40,6 +50,9 @@ function ReturnValue.start(source_name, raw_args)
     end
 
     ui:open(executor:auto(ctx, opts.auto))
+    if opts.immediately then
+      ui:close()
+    end
 
     local update_err = collector:update()
     if update_err ~= nil then
@@ -57,7 +70,7 @@ function ReturnValue.start(source_name, raw_args)
 
   return promise
     :next(function()
-      local _, exec_err = ReturnValue.execute(opts.action, { action_opts = args.action_opts })
+      local _, exec_err = _execute_action(ctx, opts.action, { action_opts = args.action_opts })
       if exec_err ~= nil then
         return require("thetto.vendor.misclib.message").warn(exec_err)
       end
@@ -111,13 +124,7 @@ function ReturnValue.execute(action_name, raw_args)
   if ctx_err ~= nil then
     return nil, ctx_err
   end
-  local args = require("thetto.core.argument").ExecuteArgs.new(
-    action_name or ctx.collector.source.default_action,
-    raw_args
-  )
-  local range = require("thetto.vendor.misclib.visual_mode").row_range()
-  local items = ctx.ui:selected_items(args.action_name, range)
-  return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts)
+  return _execute_action(ctx, action_name, raw_args)
 end
 
 function ReturnValue.get()
