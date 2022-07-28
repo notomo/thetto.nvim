@@ -4,21 +4,21 @@ local M = {}
 
 function M.action_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("buffer " .. item.bufnr)
+    vim.cmd.buffer({ count = item.bufnr })
   end
 end
 
 function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("tabedit")
-    vim.cmd("buffer " .. item.bufnr)
+    vim.cmd.tabedit()
+    vim.cmd.buffer({ count = item.bufnr })
   end
 end
 
 function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("vsplit")
-    vim.cmd("buffer " .. item.bufnr)
+    vim.cmd.vsplit()
+    vim.cmd.buffer({ count = item.bufnr })
   end
 end
 
@@ -26,7 +26,7 @@ function M.action_tab_drop(_, items)
   for _, item in ipairs(items) do
     local path = vim.api.nvim_buf_get_name(item.bufnr)
     if path ~= "" then
-      vim.cmd("tab drop " .. filelib.escape(path))
+      vim.cmd.drop({ mods = { tab = 0 }, args = { filelib.escape(path) } })
     end
   end
 end

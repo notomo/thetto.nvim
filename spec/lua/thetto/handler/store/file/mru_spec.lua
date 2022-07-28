@@ -20,8 +20,8 @@ describe("file/mru store", function()
     helper.test_data:create_file("file2")
 
     thetto.setup_store("file/mru", { file_path = store_file_path })
-    vim.cmd("edit file1")
-    vim.cmd("edit file2")
+    vim.cmd.edit("file1")
+    vim.cmd.edit("file2")
 
     local data = store.get("file/mru"):data()
 

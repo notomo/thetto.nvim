@@ -14,7 +14,7 @@ describe("cmd/gron source", function()
   "bar": "baz"
 }]]
     )
-    vim.cmd("edit test.json")
+    vim.cmd.edit("test.json")
 
     helper.sync_open("cmd/gron", { opts = { insert = false } })
 

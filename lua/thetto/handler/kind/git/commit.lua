@@ -36,19 +36,21 @@ end
 
 function M.action_open(self, items)
   return open(self, items, function(bufnr)
-    vim.cmd([[buffer ]] .. bufnr)
+    vim.cmd.buffer({ count = bufnr })
   end)
 end
 
 function M.action_vsplit_open(self, items)
   return open(self, items, function(bufnr)
-    vim.cmd([[vsplit | buffer ]] .. bufnr)
+    vim.cmd.vsplit()
+    vim.cmd.buffer({ count = bufnr })
   end)
 end
 
 function M.action_tab_open(self, items)
   return open(self, items, function(bufnr)
-    vim.cmd([[tabedit | buffer ]] .. bufnr)
+    vim.cmd.tabedit()
+    vim.cmd.buffer({ count = bufnr })
   end)
 end
 

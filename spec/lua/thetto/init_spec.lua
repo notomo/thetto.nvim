@@ -87,7 +87,7 @@ describe("thetto", function()
 
   it("can close ui by :quit", function()
     thetto.start(test_source1, { opts = { insert = false } })
-    vim.cmd("quit")
+    vim.cmd.quit()
 
     assert.window_count(1)
   end)
@@ -101,7 +101,7 @@ describe("thetto", function()
 
   it("should exist same source only one", function()
     thetto.start(test_source1)
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
     thetto.start(test_source1)
 
     assert.window_count(4)
@@ -153,7 +153,7 @@ describe("thetto", function()
 
     thetto.execute("move_to_input")
 
-    vim.cmd("normal! dd")
+    vim.cmd.normal({ args = { "dd" }, bang = true })
     helper.sync_input({ "TE" })
 
     thetto.execute("move_to_list")
@@ -210,9 +210,9 @@ describe("thetto", function()
     thetto.start(test_source1, { opts = { insert = false, sorters = { "length" } } })
 
     assert.current_line("t")
-    vim.cmd("normal! j")
+    vim.cmd.normal({ args = { "j" }, bang = true })
     assert.current_line("te")
-    vim.cmd("normal! j")
+    vim.cmd.normal({ args = { "j" }, bang = true })
     assert.current_line("tes")
   end)
 
@@ -250,7 +250,7 @@ describe("thetto", function()
     thetto.start(test_source1)
     vim.wait(100, function() end) -- HACk: wait debounce
     helper.wait_ui(function()
-      vim.cmd("normal! dd")
+      vim.cmd.normal({ args = { "dd" }, bang = true })
     end)
 
     assert.line_count(2)
@@ -307,8 +307,8 @@ describe("thetto", function()
 
   it("closes ui completely", function()
     thetto.start(test_source1)
-    vim.cmd("buffer #")
-    vim.cmd("close")
+    vim.cmd.buffer("#")
+    vim.cmd.close()
 
     assert.window_count(1)
   end)
@@ -356,7 +356,7 @@ describe("thetto", function()
       source_actions = {
         [test_source1] = {
           action_hoge = function(_, _)
-            vim.cmd("normal! " .. vim.api.nvim_eval('"\\<ESC>"'))
+            vim.cmd.normal({ args = { vim.api.nvim_eval('"\\<ESC>"') }, bang = true })
           end,
           behaviors = { hoge = { quit = false } },
         },
@@ -365,8 +365,8 @@ describe("thetto", function()
 
     thetto.start(test_source1, { opts = { auto = "hoge", insert = false } })
 
-    vim.cmd("normal! Vj")
-    vim.cmd("doautocmd CursorMoved")
+    vim.cmd.normal({ args = { "Vj" }, bang = true })
+    vim.api.nvim_exec_autocmds("CursorMoved", {})
 
     thetto.execute("toggle_selection")
     thetto.execute("append")
@@ -403,12 +403,12 @@ describe("thetto.reload()", function()
     thetto.start(test_source1, { opts = { insert = false, input_lines = { "test2" } } })
 
     vim.api.nvim_set_current_win(origin_window)
-    vim.cmd("wincmd p")
+    vim.cmd.wincmd("p")
 
     helper.sync_reload()
 
     thetto.execute("move_to_input")
-    vim.cmd("delete _")
+    vim.cmd.delete({ reg = "_" })
     thetto.execute("move_to_list")
 
     assert.current_line("test2")
@@ -535,7 +535,7 @@ describe("thetto.resume()", function()
 
   it("can resume even if opened", function()
     thetto.start(test_source1)
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
 
     thetto.resume()
     assert.window_count(4)
@@ -543,7 +543,7 @@ describe("thetto.resume()", function()
 
   it("goes back to original window when quit resumed thetto", function()
     thetto.start(test_source1)
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
     local current = vim.api.nvim_get_current_win()
 
     thetto.resume()
@@ -564,7 +564,7 @@ describe("thetto.resume()", function()
     helper.sync_input({ "test2" })
 
     thetto.execute("move_to_list")
-    vim.cmd("normal! G")
+    vim.cmd.normal({ args = { "G" }, bang = true })
 
     thetto.execute("quit")
     thetto.resume()
@@ -577,7 +577,7 @@ describe("thetto.resume()", function()
     thetto.execute("move_to_list")
 
     assert.current_line("test22")
-    vim.cmd("normal! gg")
+    vim.cmd.normal({ args = { "gg" }, bang = true })
     assert.current_line("test21")
   end)
 
@@ -820,7 +820,7 @@ describe("remove_filter action", function()
 
     thetto.start(test_source1)
 
-    vim.cmd("normal! G")
+    vim.cmd.normal({ args = { "G" }, bang = true })
     helper.sync_input({ "test2" })
 
     helper.wait_ui(function()
@@ -896,7 +896,7 @@ describe("add_filter action", function()
     thetto.start(test_source1)
     thetto.execute("add_filter", { action_opts = { name = "-substring" } })
 
-    vim.cmd("normal! G")
+    vim.cmd.normal({ args = { "G" }, bang = true })
     vim.wait(100, function() end) -- HACk: wait debounce
     helper.sync_input({ "test2" })
 
@@ -1020,9 +1020,9 @@ describe("toggle_selection action", function()
     thetto.start(test_source1, { opts = { insert = false } })
 
     thetto.execute("toggle_selection")
-    vim.cmd("normal! j")
+    vim.cmd.normal({ args = { "j" }, bang = true })
     thetto.execute("toggle_selection")
-    vim.cmd("normal! j")
+    vim.cmd.normal({ args = { "j" }, bang = true })
 
     thetto.execute("toggle_selection")
     thetto.execute("toggle_selection")
@@ -1043,8 +1043,8 @@ describe("toggle_selection action", function()
 
     thetto.start(test_source1, { opts = { insert = false } })
 
-    vim.cmd("2")
-    vim.cmd("normal! v2j")
+    vim.cmd.normal({ args = { "2gg" }, bang = true })
+    vim.cmd.normal({ args = { "v2j" }, bang = true })
     thetto.execute("toggle_selection")
     thetto.execute("append")
 
@@ -1103,7 +1103,7 @@ describe("yank action #slow", function()
 
     thetto.start(test_source1, { opts = { insert = false } })
 
-    vim.cmd("normal! vj")
+    vim.cmd.normal({ args = { "vj" }, bang = true })
     thetto.execute("yank")
 
     assert.register_value("+", "test1\ntest2")
@@ -1142,7 +1142,7 @@ describe("toggle_preview action", function()
     thetto.execute("toggle_preview")
     assert.window_count(count + 1)
 
-    vim.cmd("normal! j")
+    vim.cmd.normal({ args = { "j" }, bang = true })
     thetto.execute("toggle_preview")
     assert.window_count(count + 1)
   end)

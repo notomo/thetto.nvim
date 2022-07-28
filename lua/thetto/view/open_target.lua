@@ -36,7 +36,7 @@ local set_cursor = function(window_id, row, range, width)
     return
   end
   vim.api.nvim_win_call(window_id, function()
-    vim.cmd([[normal! zs]]) -- HACK
+    vim.cmd.normal({ args = { "zs" }, bang = true }) -- HACK
   end)
 end
 

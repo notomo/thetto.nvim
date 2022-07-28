@@ -12,8 +12,8 @@ b
 c
 bottom]])
     helper.search("top")
-    vim.cmd("normal! G")
-    vim.cmd("normal! gg")
+    vim.cmd.normal({ args = { "G" }, bang = true })
+    vim.cmd.normal({ args = { "gg" }, bang = true })
 
     thetto.start("vim/jump")
     helper.sync_input({ "bottom" })

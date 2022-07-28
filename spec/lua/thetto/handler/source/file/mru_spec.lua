@@ -7,7 +7,7 @@ describe("file/mru source", function()
 
   it("can show mru files", function()
     helper.test_data:create_file("oldfile")
-    vim.cmd("edit oldfile")
+    vim.cmd.edit("oldfile")
 
     thetto.start("file/mru", { opts = { insert = false } })
 
@@ -19,7 +19,7 @@ describe("file/mru source", function()
 
   it("can execute directory_open", function()
     helper.test_data:create_file("oldfile")
-    vim.cmd("edit oldfile")
+    vim.cmd.edit("oldfile")
 
     thetto.start("file/mru", { opts = { insert = false } })
 

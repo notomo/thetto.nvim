@@ -6,23 +6,23 @@ function M.after(_, _) end
 
 function M.action_cd(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("lcd " .. filelib.escape(item.path))
+    vim.cmd.lcd(filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
 function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("tabedit")
-    vim.cmd("lcd " .. filelib.escape(item.path))
+    vim.cmd.tabedit()
+    vim.cmd.lcd(filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
 function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("vsplit")
-    vim.cmd("lcd " .. filelib.escape(item.path))
+    vim.cmd.vsplit()
+    vim.cmd.lcd(filelib.escape(item.path))
     M.after(item.path)
   end
 end

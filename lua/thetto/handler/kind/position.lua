@@ -2,7 +2,7 @@ local M = {}
 
 local goto_item_pos = function(item)
   if item.bufnr then
-    vim.cmd("buffer " .. item.bufnr)
+    vim.cmd.buffer({ count = item.bufnr })
   end
   vim.api.nvim_win_set_cursor(0, { item.row, item.column or 0 })
 end
@@ -15,14 +15,14 @@ end
 
 function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
     goto_item_pos(item)
   end
 end
 
 function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("vsplit")
+    vim.cmd.vsplit()
     goto_item_pos(item)
   end
 end

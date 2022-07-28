@@ -10,8 +10,8 @@ describe("vim/buffer source", function()
     helper.test_data:create_file("dir/foo")
     helper.test_data:create_file("dir/file")
 
-    vim.cmd("edit " .. "dir/foo")
-    vim.cmd("edit " .. "dir/file")
+    vim.cmd.edit("dir/foo")
+    vim.cmd.edit("dir/file")
 
     thetto.start("vim/buffer")
 
@@ -39,7 +39,7 @@ describe("vim/buffer source", function()
   it("can execute tab_drop", function()
     local bufnr = vim.api.nvim_create_buf(true, true)
     vim.api.nvim_buf_set_name(bufnr, "foo")
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
 
     thetto.start("vim/buffer", { opts = { insert = false } })
     helper.search("foo")

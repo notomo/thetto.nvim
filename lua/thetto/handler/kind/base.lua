@@ -53,7 +53,7 @@ end
 
 function M.action_move_to_list(_, _, ctx)
   ctx.ui:into_list()
-  vim.cmd("stopinsert")
+  vim.cmd.stopinsert()
 end
 
 function M.action_quit(_, _, ctx)

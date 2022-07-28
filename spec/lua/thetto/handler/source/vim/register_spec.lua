@@ -8,7 +8,7 @@ describe("vim/register source", function()
   it("can show registers", function()
     helper.set_lines([[
 foo]])
-    vim.cmd("normal! dw")
+    vim.cmd.normal({ args = { "dw" }, bang = true })
 
     thetto.start("vim/register", { opts = { insert = false } })
 

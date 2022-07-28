@@ -172,7 +172,7 @@ function UI.close(self, is_passive)
   end
 
   self._collector:discard()
-  vim.cmd("redraw") -- HACK: not to draw incomplete windows
+  vim.cmd.redraw() -- HACK: not to draw incomplete windows
 end
 
 function UI.into_list(self)

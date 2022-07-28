@@ -6,7 +6,7 @@ describe("vim/variable source", function()
   after_each(helper.after_each)
 
   it("can show variables", function()
-    vim.cmd("let b:hoge_foo = {}")
+    vim.b.hoge_foo = vim.empty_dict()
 
     thetto.start("vim/variable")
 

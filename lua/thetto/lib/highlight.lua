@@ -108,8 +108,8 @@ function M.default(name, attributes)
     table.insert(parts, ("%s=%s"):format(attr_name, value))
   end
 
-  local cmd = ("highlight default %s %s"):format(name, table.concat(parts, " "))
-  vim.cmd(cmd)
+  vim.cmd.highlight({ args = { "default", name, unpack(parts) } })
+
   return name
 end
 

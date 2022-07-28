@@ -7,8 +7,8 @@ local adjust_cursor = function(item)
   if item.pattern ~= nil then
     vim.fn.search(item.pattern)
     vim.fn.setreg("/", item.pattern)
-    vim.cmd("let &hlsearch = 1")
-    vim.cmd("let v:searchforward = 1")
+    vim.opt.hlsearch = true
+    vim.cmd.let({ args = { "v:searchforward", "=", "1" } })
     return
   end
 
@@ -37,9 +37,9 @@ function M.action_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.cmd("buffer " .. bufnr)
+      vim.cmd.buffer({ count = bufnr })
     else
-      vim.cmd("edit " .. filelib.escape(item.path))
+      vim.cmd.edit(filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
@@ -49,10 +49,10 @@ function M.action_tab_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.cmd("tabedit")
-      vim.cmd("buffer " .. bufnr)
+      vim.cmd.tabedit()
+      vim.cmd.buffer({ count = bufnr })
     else
-      vim.cmd("tabedit " .. filelib.escape(item.path))
+      vim.cmd.tabedit(filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
@@ -60,7 +60,7 @@ end
 
 function M.action_tab_drop(_, items)
   for _, item in ipairs(items) do
-    vim.cmd("tab drop " .. filelib.escape(item.path))
+    vim.cmd.drop({ mods = { tab = 0 }, args = { filelib.escape(item.path) } })
     adjust_cursor(item)
   end
 end
@@ -69,10 +69,10 @@ function M.action_vsplit_open(_, items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.cmd("vsplit")
-      vim.cmd("buffer " .. bufnr)
+      vim.cmd.vsplit()
+      vim.cmd.buffer({ count = bufnr })
     else
-      vim.cmd("vsplit" .. filelib.escape(item.path))
+      vim.cmd.vsplit(filelib.escape(item.path))
     end
     adjust_cursor(item)
   end

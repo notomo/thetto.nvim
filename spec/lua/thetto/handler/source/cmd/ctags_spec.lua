@@ -12,7 +12,7 @@ test:
 	echo 1
     ]]
     )
-    vim.cmd("edit Makefile")
+    vim.cmd.edit("Makefile")
 
     helper.sync_open("cmd/ctags", { opts = { insert = false } })
 

@@ -3,7 +3,7 @@ local M = {}
 function M.action_open(self, items)
   for _, item in ipairs(items) do
     self:_open(item, "", "action_open")
-    vim.cmd("only")
+    vim.cmd.only()
   end
 end
 
@@ -27,7 +27,7 @@ function M._open(self, item, help_prefix, edit_action)
     return
   end
   file_kind[edit_action](self, { item })
-  vim.cmd([[nohlsearch]])
+  vim.cmd.nohlsearch()
   vim.bo.buftype = "help"
   vim.bo.modifiable = false
 end
@@ -48,7 +48,7 @@ function M.action_preview(_, items, ctx)
 
   local cursor = vim.api.nvim_buf_call(bufnr, function()
     vim.fn.search(item.pattern)
-    vim.cmd([[nohlsearch]])
+    vim.cmd.nohlsearch()
     return vim.api.nvim_win_get_cursor(0)
   end)
 

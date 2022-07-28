@@ -10,7 +10,7 @@ describe("alter source", function()
 
     helper.test_data:create_file("file.lua")
     helper.test_data:create_file("file_test.lua")
-    vim.cmd("edit file.lua")
+    vim.cmd.edit("file.lua")
 
     helper.sync_open("file/alter", { opts = { insert = false, immediately = true } })
 
@@ -25,13 +25,13 @@ describe("alter source", function()
     helper.test_data:create_dir("from")
     helper.test_data:create_dir("from/dir")
     helper.test_data:create_file("from/file_test.lua")
-    vim.cmd("edit ./from/file_test.lua")
+    vim.cmd.edit("./from/file_test.lua")
 
     helper.sync_open("file/alter", {
       source_opts = { allow_new = true },
       opts = { insert = false, immediately = true },
     })
-    vim.cmd("silent! write")
+    vim.cmd.write({ mods = { silent = true, emsg_silent = true } })
 
     assert.file_name("file.lua")
     assert.dir_name("to")

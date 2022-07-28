@@ -35,7 +35,7 @@ describe("file/in_dir source", function()
 
     thetto.start("file/in_dir", { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }) } })
 
-    vim.cmd("normal! gg")
+    vim.cmd.normal({ args = { "gg" }, bang = true })
     assert.current_line("0_root_pattern/")
   end)
 

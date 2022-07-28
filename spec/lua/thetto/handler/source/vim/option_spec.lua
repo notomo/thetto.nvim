@@ -6,7 +6,7 @@ describe("vim/option source", function()
   after_each(helper.after_each)
 
   it("can show options", function()
-    vim.cmd("setlocal buftype=nofile")
+    vim.opt_local.buftype = "nofile"
 
     thetto.start("vim/option")
     helper.sync_input({ "buftype" })
@@ -16,7 +16,7 @@ describe("vim/option source", function()
   end)
 
   it("can toggle options", function()
-    vim.cmd("setlocal wrap")
+    vim.opt_local.wrap = true
 
     thetto.start("vim/option")
     helper.sync_input({ "wrap" })

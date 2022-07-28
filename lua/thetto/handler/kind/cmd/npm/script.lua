@@ -9,7 +9,7 @@ M.opts.execute = { driver = driver }
 
 function M.action_execute(self, items)
   for _, item in ipairs(items) do
-    vim.cmd("tabedit")
+    vim.cmd.tabedit()
     local cmd = { "npm", "run", item.value }
     local opts = { cwd = vim.fn.fnamemodify(item.path, ":h") }
     self.action_opts.driver(cmd, opts)

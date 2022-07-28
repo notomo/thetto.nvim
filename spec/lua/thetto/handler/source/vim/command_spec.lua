@@ -6,7 +6,7 @@ describe("vim/command source", function()
   after_each(helper.after_each)
 
   it("can show global ex commands", function()
-    vim.cmd("command! ThettoTest echomsg 'executed vim/command'")
+    vim.api.nvim_create_user_command("ThettoTest", "echomsg 'executed vim/command'", {})
 
     thetto.start("vim/command")
 
@@ -17,7 +17,7 @@ describe("vim/command source", function()
   end)
 
   it("can show buffer local ex commands", function()
-    vim.cmd("command! -buffer HogeFoo echomsg 'executed vim/command'")
+    vim.api.nvim_buf_create_user_command(0, "HogeFoo", "echomsg 'executed vim/command'", {})
 
     thetto.start("vim/command")
 

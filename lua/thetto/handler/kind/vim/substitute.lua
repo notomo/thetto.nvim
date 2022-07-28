@@ -1,7 +1,7 @@
 local M = {}
 
 function M.after(_, _)
-  vim.cmd("nohlsearch")
+  vim.cmd.nohlsearch()
 end
 
 function M.action_execute(_, items)

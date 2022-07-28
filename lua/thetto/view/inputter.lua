@@ -149,7 +149,7 @@ function Inputter.set_cursor(self, cursor)
 end
 
 function Inputter.start_insert(self, behavior)
-  vim.cmd("startinsert")
+  vim.cmd.startinsert()
   if behavior == "a" then
     local max_col = vim.fn.col("$")
     local cursor = self:cursor()

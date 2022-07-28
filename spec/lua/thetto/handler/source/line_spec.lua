@@ -57,8 +57,8 @@ test3]])
 test1
 test2
 test3]])
-    vim.cmd("vsplit")
-    vim.cmd("wincmd w")
+    vim.cmd.vsplit()
+    vim.cmd.wincmd("w")
     local window = vim.api.nvim_get_current_win()
 
     thetto.start("line", { opts = { insert = false } })

@@ -62,9 +62,9 @@ function State.resume(self, item_list, inputter)
   end
 
   if self._mode == "n" then
-    vim.cmd("stopinsert")
+    vim.cmd.stopinsert()
   else
-    vim.cmd("startinsert")
+    vim.cmd.startinsert()
   end
 
   if not self._input_cursor then

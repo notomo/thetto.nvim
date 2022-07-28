@@ -93,7 +93,7 @@ function helper.sync_execute(...)
 end
 
 function helper.sync_reload()
-  -- vim.cmd("edit!") not work?
+  -- edit! not work?
   local collector = require("thetto").reload()
   if collector == nil then
     return

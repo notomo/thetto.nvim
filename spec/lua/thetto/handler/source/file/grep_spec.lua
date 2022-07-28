@@ -30,7 +30,7 @@ bar]]
     helper.set_lines([[
 hoge
 foo]])
-    vim.cmd("setlocal buftype=nofile")
+    vim.opt_local.buftype = "nofile"
     helper.search("hoge")
 
     helper.sync_open("file/grep", {
