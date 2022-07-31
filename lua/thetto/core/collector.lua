@@ -57,7 +57,7 @@ function Collector.new(source_name, source_opts, opts)
   return self, nil
 end
 
-function Collector.subscribe_input(self, input_observable, get_lines)
+function Collector.subscribe_input(self, immediately, input_observable, get_lines)
   self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.debounce_ms, function(_, callback)
     local input_lines = get_lines()
     if input_lines then
@@ -74,6 +74,9 @@ function Collector.subscribe_input(self, input_observable, get_lines)
       self:update_with_throttle()
     end,
     complete = function()
+      if immediately then
+        return
+      end
       self:discard()
     end,
   })

@@ -49,9 +49,9 @@ function ReturnValue.start(source_name, raw_args)
       return reject(start_err)
     end
 
-    ui:open(executor:auto(ctx, opts.auto))
+    ui:open(opts.immediately, executor:auto(ctx, opts.auto))
     if opts.immediately then
-      ui:close()
+      ui:close(nil, opts.immediately)
     end
 
     local update_err = collector:update()

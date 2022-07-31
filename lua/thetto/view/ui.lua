@@ -24,7 +24,7 @@ function UI.new(collector, insert)
   return setmetatable(tbl, UI)
 end
 
-function UI.open(self, on_move, needs_preview)
+function UI.open(self, immediately, on_move, needs_preview)
   vim.validate({ on_move = { on_move, "function", true } })
 
   for bufnr in bufferlib.in_tabpage(0) do
@@ -44,7 +44,7 @@ function UI.open(self, on_move, needs_preview)
   local column = self:_column()
 
   self._inputter = Inputter.new(source_name, filters, input_lines, width, height, row, column)
-  self._collector:subscribe_input(self._inputter:observable())
+  self._collector:subscribe_input(immediately, self._inputter:observable())
 
   self._item_list = ItemList.new(source_name, width, height, row, column)
   self._status_line = StatusLine.new(source_name, width, height, row, column)
@@ -82,7 +82,7 @@ end
 
 function UI.resume(self)
   self:close(true)
-  self:open(self._on_move, self._initialized_preview)
+  self:open(false, self._on_move, self._initialized_preview)
   return self:redraw(self._collector.input_lines, self._state.row)
 end
 
@@ -151,9 +151,13 @@ function UI.update_offset(self, offset)
   self._state = self._state:update_row(offset, self._collector.items:length(), self._collector.items.display_limit)
 end
 
-function UI.close(self, is_passive)
+function UI.close(self, is_passive, immediately)
   if self._item_list == nil or not self._item_list:is_valid() then
     return
+  end
+
+  if not immediately then
+    self._collector:discard()
   end
 
   local current_window = vim.api.nvim_get_current_win()
@@ -171,7 +175,6 @@ function UI.close(self, is_passive)
     vim.api.nvim_set_current_win(origin_window)
   end
 
-  self._collector:discard()
   vim.cmd.redraw() -- HACK: not to draw incomplete windows
 end
 
