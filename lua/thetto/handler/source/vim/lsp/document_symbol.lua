@@ -52,7 +52,7 @@ function M._to_items(self, item, parent_key, current_path)
   return items
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Statement",
     start_key = "kind",

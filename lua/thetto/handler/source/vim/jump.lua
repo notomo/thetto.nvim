@@ -53,7 +53,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoVimJumpPath", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "ThettoVimJumpPath",
     end_key = "value",

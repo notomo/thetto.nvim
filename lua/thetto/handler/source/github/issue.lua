@@ -38,7 +38,7 @@ function M.collect(self, source_ctx)
   end
   vim.list_extend(cmd, vim.split(pattern, "%s+"))
 
-  return require("thetto.util").job.run(cmd, source_ctx, function(issue)
+  return require("thetto.util.job").run(cmd, source_ctx, function(issue)
     local mark
     if issue.state == "open" then
       mark = "O"
@@ -63,7 +63,7 @@ function M.collect(self, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Character",
     else_group = "Boolean",

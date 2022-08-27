@@ -25,7 +25,7 @@ function M.collect(_, source_ctx)
     end
   end
 
-  return require("thetto.util").job.run(cmd, source_ctx, to_item, {
+  return require("thetto.util.job").run(cmd, source_ctx, to_item, {
     to_outputs = function(job)
       local outputs = job:get_stdout()
       remove_header(outputs)

@@ -31,7 +31,7 @@ end
 
 function M.collect(_, source_ctx)
   local cmd = { "luarocks", "list", "--porcelain" }
-  return require("thetto.util").job.start(cmd, source_ctx, function(output)
+  return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local factors = vim.split(output, "%s+")
     local name = factors[1]
     local version = factors[2]
@@ -54,7 +54,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoLuaLuarocksVersion", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "ThettoLuaLuarocksVersion",
     start_key = "version",

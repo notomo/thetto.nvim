@@ -15,7 +15,7 @@ function M.collect(self, source_ctx)
     table.insert(cmd, "--merged")
   end
 
-  return require("thetto.util").job.start(cmd, source_ctx, function(output)
+  return require("thetto.util.job").start(cmd, source_ctx, function(output)
     return {
       value = output,
     }

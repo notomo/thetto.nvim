@@ -46,7 +46,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoMakeTargetPath", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "ThettoMakeTargetPath",
     end_key = "value",

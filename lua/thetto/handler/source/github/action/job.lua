@@ -11,7 +11,7 @@ function M.collect(self, source_ctx)
 
   local path = ("repos/%s/%s/actions/runs/%s/jobs"):format(self.opts.owner, self.opts.repo, self.opts.run_id)
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
-  return require("thetto.util").job.run(cmd, source_ctx, function(job)
+  return require("thetto.util.job").run(cmd, source_ctx, function(job)
     local mark = "  "
     if job.conclusion == "success" then
       mark = "✅"
@@ -47,7 +47,7 @@ function M.collect(self, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Comment",
     start_key = "state",

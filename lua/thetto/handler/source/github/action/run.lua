@@ -15,7 +15,7 @@ function M.collect(self, source_ctx)
   end
 
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
-  return require("thetto.util").job.run(cmd, source_ctx, function(run)
+  return require("thetto.util.job").run(cmd, source_ctx, function(run)
     local mark = "  "
     if run.conclusion == "success" then
       mark = "✅"
@@ -51,7 +51,7 @@ function M.collect(self, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Conditional",
     start_key = "branch",

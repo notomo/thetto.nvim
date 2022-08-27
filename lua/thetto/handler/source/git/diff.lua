@@ -46,7 +46,7 @@ function M.collect(self, source_ctx)
   end
 
   local cmd = { "git", "--no-pager", "diff", "--no-color", path }
-  return require("thetto.util").job.run(cmd, source_ctx, function(hunk)
+  return require("thetto.util.job").run(cmd, source_ctx, function(hunk)
     return {
       value = hunk.desc,
       row = hunk.row,

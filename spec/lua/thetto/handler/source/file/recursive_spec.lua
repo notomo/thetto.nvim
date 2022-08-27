@@ -1,6 +1,6 @@
 local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
-local util = helper.require("thetto.util")
+local cwd_util = helper.require("thetto.util.cwd")
 
 describe("file/recursive source", function()
   before_each(helper.before_each)
@@ -24,7 +24,7 @@ describe("file/recursive source", function()
     helper.test_data:create_dir("0_root_pattern")
     helper.test_data:create_file("0_root_pattern/in_root_pattern")
 
-    helper.sync_open("file/recursive", { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }) } })
+    helper.sync_open("file/recursive", { opts = { insert = false, cwd = cwd_util.project({ "0_root_pattern" }) } })
 
     assert.exists_pattern("root_pattern/in_root_pattern")
   end)

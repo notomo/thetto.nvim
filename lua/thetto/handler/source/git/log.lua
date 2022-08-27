@@ -9,7 +9,7 @@ function M.collect(_, source_ctx)
   end
 
   local cmd = { "git", "--no-pager", "log", "--date=short", "--pretty=format:%h %cd %s <%an>%d" }
-  return require("thetto.util").job.start(cmd, source_ctx, function(output)
+  return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local commit_hash, date = output:match("^(%S+) (%S+)")
     if not commit_hash then
       return nil
@@ -26,7 +26,7 @@ function M.collect(_, source_ctx)
   end)
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Character",
     end_key = "date",

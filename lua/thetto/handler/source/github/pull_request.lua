@@ -24,7 +24,7 @@ function M.collect(self, source_ctx)
     "-F",
     "direction=" .. self.opts.sort_direction,
   }
-  return require("thetto.util").job.run(cmd, source_ctx, function(pr)
+  return require("thetto.util.job").run(cmd, source_ctx, function(pr)
     local mark
     if pr.draft then
       mark = "D"
@@ -50,7 +50,7 @@ function M.collect(self, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Character",
     else_group = "Comment",

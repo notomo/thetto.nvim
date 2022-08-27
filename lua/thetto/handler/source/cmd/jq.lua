@@ -6,7 +6,7 @@ function M.collect(self, source_ctx)
   end
 
   local cmd = { "jq", source_ctx.pattern }
-  return require("thetto.util").job.run(cmd, source_ctx, function(output, code)
+  return require("thetto.util.job").run(cmd, source_ctx, function(output, code)
     local is_error = code ~= 0
     return {
       value = output,
@@ -23,7 +23,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoJqError", { default = true, link = "WarningMsg" })
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "ThettoJqError",
     filter = function(item)

@@ -46,7 +46,7 @@ local hl_groups = {
   [vim.diagnostic.severity.HINT] = "DiagnosticHint",
 }
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Comment",
     end_key = "prefix",

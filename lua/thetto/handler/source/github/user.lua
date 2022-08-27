@@ -12,7 +12,7 @@ function M.collect(_, source_ctx)
   end
 
   local cmd = { "gh", "api", "-X", "GET", "search/users", "-f", "q=" .. pattern }
-  return require("thetto.util").job.run(cmd, source_ctx, function(user)
+  return require("thetto.util.job").run(cmd, source_ctx, function(user)
     return {
       value = user.login,
       url = user.html_url,

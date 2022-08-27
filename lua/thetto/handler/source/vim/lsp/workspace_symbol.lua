@@ -45,7 +45,7 @@ function M.collect(self, source_ctx)
   end
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Comment",
     end_key = "value",

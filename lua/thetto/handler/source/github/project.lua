@@ -16,7 +16,7 @@ function M.collect(self, source_ctx)
     "-H",
     "Accept: application/vnd.github.inertia-preview+json",
   }
-  return require("thetto.util").job.run(cmd, source_ctx, function(project)
+  return require("thetto.util.job").run(cmd, source_ctx, function(project)
     local mark
     if project.state == "open" then
       mark = "O"
@@ -51,7 +51,7 @@ function M.collect(self, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Character",
     else_group = "Boolean",

@@ -14,7 +14,7 @@ function M.collect(self, source_ctx)
     "-F",
     "state=all",
   }
-  return require("thetto.util").job.run(cmd, source_ctx, function(milestone)
+  return require("thetto.util.job").run(cmd, source_ctx, function(milestone)
     local mark
     if milestone.state == "open" then
       mark = "O"
@@ -51,7 +51,7 @@ function M.collect(self, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Character",
     else_group = "Boolean",

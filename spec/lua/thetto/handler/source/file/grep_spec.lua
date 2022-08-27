@@ -1,6 +1,6 @@
 local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
-local util = helper.require("thetto.util")
+local cwd_util = helper.require("thetto.util.cwd")
 
 describe("file/grep source", function()
   before_each(function()
@@ -56,7 +56,7 @@ foo]])
 
     helper.sync_open(
       "file/grep",
-      { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }), pattern = "hoge" } }
+      { opts = { insert = false, cwd = cwd_util.project({ "0_root_pattern" }), pattern = "hoge" } }
     )
 
     assert.exists_pattern("0_root_pattern/in_root_pattern:1 hoge in root_pattern")

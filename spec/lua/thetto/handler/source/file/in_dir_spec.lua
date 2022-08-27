@@ -1,6 +1,6 @@
 local helper = require("thetto.lib.testlib.helper")
 local thetto = helper.require("thetto")
-local util = helper.require("thetto.util")
+local cwd_util = helper.require("thetto.util.cwd")
 
 describe("file/in_dir source", function()
   before_each(helper.before_each)
@@ -33,7 +33,7 @@ describe("file/in_dir source", function()
     helper.test_data:create_dir("dir")
     helper.test_data:cd("dir")
 
-    thetto.start("file/in_dir", { opts = { insert = false, cwd = util.cwd.project({ "0_root_pattern" }) } })
+    thetto.start("file/in_dir", { opts = { insert = false, cwd = cwd_util.project({ "0_root_pattern" }) } })
 
     vim.cmd.normal({ args = { "gg" }, bang = true })
     assert.current_line("0_root_pattern/")

@@ -22,7 +22,7 @@ function M.collect(_, source_ctx)
     "-F",
     "per_page=100",
   }
-  return require("thetto.util").job.run(cmd, source_ctx, function(repo)
+  return require("thetto.util.job").run(cmd, source_ctx, function(repo)
     local mark
     if repo.archived then
       mark = "A"
@@ -46,7 +46,7 @@ function M.collect(_, source_ctx)
   })
 end
 
-M.highlight = require("thetto.util").highlight.columns({
+M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Comment",
     end_column = 1,
