@@ -95,7 +95,7 @@ function UI._highlight_win(_, _, bufnr, topline, botline_guess)
   return false
 end
 
-local ns = vim.api.nvim_create_namespace("thetto-list-highlight")
+local ns = vim.api.nvim_create_namespace(ItemList.hl_ns_name)
 vim.api.nvim_set_decoration_provider(ns, {})
 vim.api.nvim_set_decoration_provider(ns, { on_win = UI._highlight_win })
 

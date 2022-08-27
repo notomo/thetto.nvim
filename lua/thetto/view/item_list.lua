@@ -4,10 +4,12 @@ local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")
 local visual_mode = require("thetto.vendor.misclib.visual_mode")
 local highlightlib = require("thetto.lib.highlight")
+local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local vim = vim
 
 local ItemList = {}
 ItemList.__index = ItemList
+ItemList.hl_ns_name = "thetto-list-highlight"
 
 local FILETYPE = "thetto"
 
@@ -72,6 +74,7 @@ function ItemList.new(source_name, width, height, row, column)
     _bufnr = bufnr,
     _window = window,
     _group_name = group_name,
+    _highlighter = HighlighterFactory.new(ItemList.hl_ns_name):create(bufnr),
   }
   local self = setmetatable(tbl, ItemList)
   self:enable_cursorline()
@@ -93,14 +96,13 @@ function ItemList.redraw(self, items)
 end
 
 function ItemList.highlight(self, first_line, raw_items, source, filters, filter_ctxs, source_ctx)
-  source:highlight(self._bufnr, first_line, raw_items, source_ctx)
+  source:highlight(self._bufnr, first_line, raw_items, source_ctx, self._highlighter)
 
-  local highligher = source.highlights:create(self._bufnr)
-  highligher:filter("ThettoSelected", first_line, raw_items, function(item)
+  self._highlighter:filter("ThettoSelected", first_line, raw_items, function(item)
     return item.selected
   end)
 
-  filters:highlight(filter_ctxs, self._bufnr, first_line, raw_items)
+  filters:highlight(filter_ctxs, self._bufnr, first_line, raw_items, self._highlighter)
 end
 
 function ItemList.redraw_selections(self, s, e)

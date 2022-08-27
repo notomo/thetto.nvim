@@ -4,7 +4,7 @@ function M.collect()
   return {}
 end
 
-function M.highlight(_, _, _, _) end
+function M.highlight() end
 
 M.filters = { "substring" }
 M.sorters = {}

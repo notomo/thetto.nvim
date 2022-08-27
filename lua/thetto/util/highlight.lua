@@ -65,8 +65,7 @@ function M.columns(hl_columns)
   local columns = vim.tbl_map(function(hl_column)
     return to_column(hl_column)
   end, hl_columns)
-  return function(source, bufnr, first_line, items)
-    local highlighter = source.highlights:create(bufnr)
+  return function(_, _, first_line, items, _, highlighter)
     for i, item in ipairs(items) do
       for _, column in ipairs(columns) do
         local hl_group = column.to_hl_group(item)

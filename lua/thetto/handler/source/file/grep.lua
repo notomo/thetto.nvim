@@ -98,8 +98,7 @@ vim.api.nvim_set_hl(0, "ThettoFileGrepMatch", { default = true, link = "Define" 
 -- NOTICE: support only this pattern
 local highlight_target = vim.regex("\\v[[:alnum:]_]+")
 
-function M.highlight(self, bufnr, first_line, items, source_ctx)
-  local highlighter = self.highlights:create(bufnr)
+function M.highlight(_, _, first_line, items, source_ctx, highlighter)
   local pattern = (source_ctx.pattern or ""):lower()
   local ok = ({ highlight_target:match_str(pattern) })[1] ~= nil
   for i, item in ipairs(items) do

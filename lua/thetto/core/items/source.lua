@@ -1,4 +1,3 @@
-local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local pathlib = require("thetto.lib.path")
 local modulelib = require("thetto.vendor.misclib.module")
 local SourceResult = require("thetto.core.items.source_result")
@@ -42,7 +41,6 @@ function Source.new(name, source_opts, opts)
     name = name,
     bufnr = vim.api.nvim_get_current_buf(),
     opts = vim.tbl_extend("force", origin.opts or {}, source_opts),
-    highlights = HighlighterFactory.new("thetto-list-highlight"),
     filters = opts.filters(origin.filters),
     sorters = opts.sorters(origin.sorters),
     _origin = origin,

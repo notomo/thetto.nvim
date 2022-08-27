@@ -1,4 +1,3 @@
-local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
 local modulelib = require("thetto.vendor.misclib.module")
 local vim = vim
 
@@ -32,7 +31,6 @@ function Filter.new(name, inversed, key, modifier)
     _key = _key,
     is_interactive = name == "interactive",
     _modifier = modifier,
-    highlights = HighlighterFactory.new("thetto-list-highlight"),
   }
 
   return setmetatable(tbl, Filter)
