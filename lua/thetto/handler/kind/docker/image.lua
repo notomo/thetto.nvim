@@ -1,12 +1,12 @@
 local M = {}
 
-function M.action_remove(self, items)
+function M.action_remove(_, items)
   local ids = vim.tbl_map(function(item)
     return item.image_id
   end, items)
   local cmd = { "docker", "rmi" }
   vim.list_extend(cmd, ids)
-  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err
@@ -14,13 +14,13 @@ function M.action_remove(self, items)
   return job, nil
 end
 
-function M.action_untag(self, items)
+function M.action_untag(_, items)
   local ids = vim.tbl_map(function(item)
     return item.value
   end, items)
   local cmd = { "docker", "rmi" }
   vim.list_extend(cmd, ids)
-  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err

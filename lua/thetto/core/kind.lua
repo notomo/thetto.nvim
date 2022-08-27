@@ -1,4 +1,3 @@
-local jobs = require("thetto.lib.job")
 local modulelib = require("thetto.vendor.misclib.module")
 local base = require("thetto.handler.kind.base")
 local vim = vim
@@ -19,9 +18,7 @@ function Action.__index(self, k)
   return rawget(Action, k) or self._kind[k]
 end
 
-local Kind = {
-  jobs = jobs,
-}
+local Kind = {}
 
 function Kind.new(executor, name)
   vim.validate({ executor = { executor, "table" }, name = { name, "string" } })

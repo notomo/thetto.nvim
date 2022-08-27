@@ -1,14 +1,11 @@
 local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
-local jobs = require("thetto.lib.job")
 local pathlib = require("thetto.lib.path")
 local modulelib = require("thetto.vendor.misclib.module")
 local SourceResult = require("thetto.core.items.source_result")
 local base = require("thetto.handler.source.base")
 local vim = vim
 
-local Source = {
-  jobs = jobs,
-}
+local Source = {}
 
 local _registered = {}
 function Source.register(name, handler)

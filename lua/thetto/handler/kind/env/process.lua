@@ -2,7 +2,7 @@ local M = {}
 
 M.cmd = { "kill" }
 
-function M.action_kill(self, items)
+function M.action_kill(_, items)
   local pids = {}
   for _, item in ipairs(items) do
     table.insert(pids, item.pid)
@@ -11,7 +11,7 @@ function M.action_kill(self, items)
   local cmd = vim.deepcopy(M.cmd)
   vim.list_extend(cmd, pids)
 
-  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err

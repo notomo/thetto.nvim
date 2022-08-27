@@ -14,7 +14,7 @@ function M.action_checkout(self, items)
   end
   table.insert(cmd, item.value)
 
-  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err
@@ -22,7 +22,7 @@ function M.action_checkout(self, items)
   return job, nil
 end
 
-function M.action_delete(self, items)
+function M.action_delete(_, items)
   local branches = {}
   for _, item in ipairs(items) do
     table.insert(branches, item.value)
@@ -32,9 +32,9 @@ function M.action_delete(self, items)
   table.insert(cmd, "--delete")
   vim.list_extend(cmd, branches)
 
-  local job = self.jobs.new(cmd, {
-    on_exit = self.jobs.print_stdout,
-    on_stderr = self.jobs.print_stderr,
+  local job = require("thetto.lib.job").new(cmd, {
+    on_exit = require("thetto.lib.job").print_stdout,
+    on_stderr = require("thetto.lib.job").print_stderr,
   })
   local err = job:start()
   if err ~= nil then
@@ -43,7 +43,7 @@ function M.action_delete(self, items)
   return job, nil
 end
 
-function M.action_force_delete(self, items)
+function M.action_force_delete(_, items)
   local branches = {}
   for _, item in ipairs(items) do
     table.insert(branches, item.value)
@@ -53,9 +53,9 @@ function M.action_force_delete(self, items)
   table.insert(cmd, "-D")
   vim.list_extend(cmd, branches)
 
-  local job = self.jobs.new(cmd, {
-    on_exit = self.jobs.print_stdout,
-    on_stderr = self.jobs.print_stderr,
+  local job = require("thetto.lib.job").new(cmd, {
+    on_exit = require("thetto.lib.job").print_stdout,
+    on_stderr = require("thetto.lib.job").print_stderr,
   })
   local err = job:start()
   if err ~= nil then

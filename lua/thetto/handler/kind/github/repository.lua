@@ -48,14 +48,14 @@ function M.action_list_action_workflows(_, items)
   end
 end
 
-function M.action_clone(self, items)
+function M.action_clone(_, items)
   local item = items[1]
   if not item then
     return
   end
 
   local cmd = { "gh", "repo", "clone", item.value }
-  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err

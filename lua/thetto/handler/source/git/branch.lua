@@ -16,11 +16,11 @@ function M.collect(self, source_ctx)
   end
 
   local current_branch = nil
-  local get_current_job = self.jobs.new({ "git", "rev-parse", "--abbrev-ref", "HEAD" }, {
+  local get_current_job = require("thetto.lib.job").new({ "git", "rev-parse", "--abbrev-ref", "HEAD" }, {
     on_exit = function(job_self)
       current_branch = job_self:get_stdout()[1]
     end,
-    on_stderr = self.jobs.print_stderr,
+    on_stderr = require("thetto.lib.job").print_stderr,
     cwd = source_ctx.cwd,
   })
   local joberr = get_current_job:start()

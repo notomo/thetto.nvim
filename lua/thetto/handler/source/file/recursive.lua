@@ -68,7 +68,7 @@ function M.collect(self, source_ctx)
         }
       end, items)
     end)
-    local job = self.jobs.new(cmd, {
+    local job = require("thetto.lib.job").new(cmd, {
       on_stdout = function(_, _, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())

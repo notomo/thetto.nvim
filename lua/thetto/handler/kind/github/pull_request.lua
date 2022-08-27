@@ -1,13 +1,13 @@
 local M = {}
 
-function M.action_checkout(self, items)
+function M.action_checkout(_, items)
   local item = items[1]
   if not item then
     return nil, "no item"
   end
 
   local cmd = { "gh", "pr", "checkout", item.url }
-  local job = self.jobs.new(cmd, { on_exit = self.jobs.print_output })
+  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
   local err = job:start()
   if err ~= nil then
     return nil, err
