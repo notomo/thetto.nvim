@@ -121,6 +121,5 @@ function M.highlight(self, bufnr, first_line, items, source_ctx)
 end
 
 M.kind_name = "file"
-M.color_label_key = "path"
 
 return M

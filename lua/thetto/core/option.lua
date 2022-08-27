@@ -47,7 +47,6 @@ function Option.new(raw_opts, raw_source_opts, source_name)
   local source_config = M.user_default.source[source_name] or {}
 
   local opts = vim.tbl_extend("force", default, M.user_default.global_opts, source_config.global_opts or {}, raw_opts)
-  opts.colors = source_config.colors or {}
 
   local filters = opts.filters
   opts.filters = function(source_filters)

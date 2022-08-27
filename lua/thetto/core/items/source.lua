@@ -45,9 +45,6 @@ function Source.new(name, source_opts, opts)
     highlights = HighlighterFactory.new("thetto-list-highlight"),
     filters = opts.filters(origin.filters),
     sorters = opts.sorters(origin.sorters),
-    compiled_colors = vim.tbl_map(function(color)
-      return { regex = vim.regex(color.pattern), chunks = color.chunks }
-    end, origin.colors or opts.colors),
     _origin = origin,
   }
   return setmetatable(tbl, Source)
