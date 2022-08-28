@@ -3,14 +3,14 @@ local util = require("thetto.util.lsp")
 
 local M = {}
 
-function M.collect(self, opts)
+function M.collect(_, source_ctx)
   return function(observer)
     return require("thetto.handler.source.lsp_adapter.outgoing_calls").request(
-      self.bufnr,
+      source_ctx.bufnr,
       "callHierarchy/incomingCalls"
     )
       :next(function(result)
-        local to_relative = pathlib.relative_modifier(opts.cwd)
+        local to_relative = pathlib.relative_modifier(source_ctx.cwd)
 
         local items = {}
         for _, call in pairs(result or {}) do

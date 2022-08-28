@@ -6,12 +6,12 @@ M.opts = {
   ignored_kind = { "variable", "field" },
 }
 
-function M.collect(self)
+function M.collect(self, source_ctx)
   local current_path = vim.fn.expand("%:p")
   return function(observer)
     local method = "textDocument/documentSymbol"
     local params = { textDocument = vim.lsp.util.make_text_document_params() }
-    local _, cancel = vim.lsp.buf_request(self.bufnr, method, params, function(_, result)
+    local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
       local items = {}
       for _, v in ipairs(result or {}) do
         vim.list_extend(items, self:_to_items(v, "", current_path))

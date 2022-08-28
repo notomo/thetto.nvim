@@ -29,12 +29,12 @@ function M.request(bufnr, method)
   end)
 end
 
-function M.collect(self, opts)
+function M.collect(_, source_ctx)
   return function(observer)
-    return M.request(self.bufnr, "callHierarchy/outgoingCalls")
+    return M.request(source_ctx.bufnr, "callHierarchy/outgoingCalls")
       :next(function(result)
-        local to_relative = pathlib.relative_modifier(opts.cwd)
-        local path = vim.api.nvim_buf_get_name(self.bufnr)
+        local to_relative = pathlib.relative_modifier(source_ctx.cwd)
+        local path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
         local relative_path = to_relative(path)
 
         local items = {}

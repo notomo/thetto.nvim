@@ -39,7 +39,6 @@ function Source.new(name, source_opts, opts)
 
   local tbl = {
     name = name,
-    bufnr = vim.api.nvim_get_current_buf(),
     opts = vim.tbl_extend("force", origin.opts or {}, source_opts),
     filters = opts.filters(origin.filters),
     sorters = opts.sorters(origin.sorters),

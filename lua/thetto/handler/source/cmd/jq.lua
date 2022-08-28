@@ -1,8 +1,8 @@
 local M = {}
 
-function M.collect(self, source_ctx)
-  if not vim.api.nvim_buf_is_valid(self.bufnr) then
-    return nil, "invalid buffer: " .. self.bufnr
+function M.collect(_, source_ctx)
+  if not vim.api.nvim_buf_is_valid(source_ctx.bufnr) then
+    return nil, "invalid buffer: " .. source_ctx.bufnr
   end
 
   local cmd = { "jq", source_ctx.pattern }
@@ -13,7 +13,7 @@ function M.collect(self, source_ctx)
       is_error = is_error,
     }
   end, {
-    input = vim.api.nvim_buf_get_lines(self.bufnr, 0, -1, false),
+    input = vim.api.nvim_buf_get_lines(source_ctx.bufnr, 0, -1, false),
     stop_on_error = false,
     to_outputs = function(job)
       return job:get_output()
