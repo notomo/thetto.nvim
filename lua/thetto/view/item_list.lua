@@ -96,7 +96,7 @@ function ItemList.redraw(self, items)
 end
 
 function ItemList.highlight(self, first_line, raw_items, source, filters, filter_ctxs, source_ctx)
-  source:highlight(self._bufnr, first_line, raw_items, source_ctx, self._highlighter)
+  source.highlight(self._highlighter, raw_items, first_line, source_ctx)
 
   self._highlighter:filter("ThettoSelected", first_line, raw_items, function(item)
     return item.selected
