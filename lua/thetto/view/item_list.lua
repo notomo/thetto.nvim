@@ -128,6 +128,9 @@ function ItemList.is_active(self)
 end
 
 function ItemList.enable_cursorline(self)
+  if not self:is_valid() then
+    return
+  end
   vim.wo[self._window].cursorline = true
 end
 
