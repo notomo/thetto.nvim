@@ -38,6 +38,7 @@ function Collector.new(source_name, source_opts, opts)
       opts.pattern,
       opts.cwd,
       opts.debounce_ms,
+      opts.throttle_ms,
       opts.range,
       filters:has_interactive(),
       vim.api.nvim_get_current_buf()
@@ -49,7 +50,7 @@ function Collector.new(source_name, source_opts, opts)
   local self = setmetatable(tbl, Collector)
   self.items = self:_items(0, nil, opts.display_limit)
 
-  self.update_with_throttle = wraplib.throttle_with_last(opts.debounce_ms, function(_, callback)
+  self.update_with_throttle = wraplib.throttle_with_last(opts.throttle_ms, function(_, callback)
     local update_err = self:update()
     if callback then
       callback()
@@ -65,7 +66,7 @@ function Collector.new(source_name, source_opts, opts)
 end
 
 function Collector.subscribe_input(self, immediately, input_observable, get_lines)
-  self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.debounce_ms, function(_, callback)
+  self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.throttle_ms, function(_, callback)
     local input_lines = get_lines()
     if input_lines then
       self.input_lines = input_lines
@@ -76,9 +77,12 @@ function Collector.subscribe_input(self, immediately, input_observable, get_line
     end
     return err
   end)
+  local update_with_debounce = wraplib.debounce(self.source_ctx.debounce_ms, function()
+    return self:update_with_throttle()
+  end)
   input_observable:subscribe({
     next = function()
-      self:update_with_throttle()
+      update_with_debounce()
     end,
     complete = function()
       if immediately then
