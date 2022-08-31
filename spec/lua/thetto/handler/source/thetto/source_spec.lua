@@ -6,10 +6,17 @@ describe("thetto/source source", function()
   after_each(helper.after_each)
 
   it("can show all sources", function()
+    thetto.setup({
+      source = {
+        example_alias = { alias_to = "thetto/source" },
+      },
+    })
+
     thetto.start("thetto/source", { opts = { insert = false } })
 
     assert.exists_pattern("source")
     assert.exists_pattern("file/mru")
+    assert.exists_pattern("example_alias")
     helper.search("runtimepath")
 
     thetto.execute()

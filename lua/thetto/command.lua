@@ -16,8 +16,15 @@ end
 function ReturnValue.start(source_name, raw_args)
   vim.validate({ source_name = { source_name, "string" } })
 
+  local source_config
+  source_name, source_config = require("thetto.core.option").resolve_alias(source_name)
+
   local args = require("thetto.core.argument").StartArgs.new(raw_args)
-  local opts, source_opts, opts_err = require("thetto.core.option").Option.new(args.opts, args.source_opts, source_name)
+  local opts, source_opts, opts_err = require("thetto.core.option").Option.new(
+    args.opts,
+    args.source_opts,
+    source_config
+  )
   if opts_err ~= nil then
     require("thetto.vendor.misclib.message").warn(opts_err)
     return require("thetto.vendor.promise").resolve()

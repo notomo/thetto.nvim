@@ -15,6 +15,37 @@ function M.set_default(setting)
   M.user_default = vim.tbl_deep_extend("force", M.user_default, setting)
 end
 
+function M.resolve_alias(source_name, original_source_config)
+  original_source_config = original_source_config or {}
+  local source_config = M.user_default.source[source_name] or {}
+  local alias_to = source_config.alias_to
+  local extended_config = vim.tbl_deep_extend("force", source_config, original_source_config)
+  if not alias_to then
+    return source_name, extended_config
+  end
+  return M.resolve_alias(alias_to, extended_config)
+end
+
+function M._resolve_one_alias(source_name)
+  local source_config = M.user_default.source[source_name] or {}
+  local alias_to = source_config.alias_to
+  if not alias_to then
+    return source_name
+  end
+  return M._resolve_one_alias(alias_to)
+end
+
+function M.resolve_all_aliases()
+  local resolved_source_map = {}
+  for source_name in pairs(M.user_default.source) do
+    local resolved_source_name = M._resolve_one_alias(source_name)
+    if resolved_source_name ~= source_name then
+      resolved_source_map[source_name] = resolved_source_name
+    end
+  end
+  return resolved_source_map
+end
+
 local Option = {}
 Option.__index = Option
 M.Option = Option
@@ -44,9 +75,7 @@ local default = {
   can_resume = true,
 }
 
-function Option.new(raw_opts, raw_source_opts, source_name)
-  local source_config = M.user_default.source[source_name] or {}
-
+function Option.new(raw_opts, raw_source_opts, source_config)
   local opts = vim.tbl_extend("force", default, M.user_default.global_opts, source_config.global_opts or {}, raw_opts)
 
   local filters = opts.filters

@@ -73,13 +73,27 @@ function Source.all()
     local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/source/", true)[2]
     local name = source_file:sub(1, #source_file - 4)
     if not already[name] then
-      table.insert(all, {
+      local source_info = {
         name = name,
         path = path,
-      })
-      already[name] = true
+      }
+      table.insert(all, source_info)
+      already[name] = source_info
     end
   end
+
+  local aliases = require("thetto.core.option").resolve_all_aliases()
+  for source_name, resolved_source_name in pairs(aliases) do
+    local source_info = already[resolved_source_name]
+    if not source_info then
+      return nil, ("invalid alias: %s : not found source: %s"):format(source_name, resolved_source_name)
+    end
+    table.insert(all, {
+      name = source_name,
+      path = source_info.path,
+    })
+  end
+
   return all
 end
 

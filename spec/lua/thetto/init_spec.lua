@@ -503,6 +503,20 @@ describe("thetto.setup()", function()
     assert.is_true(called)
   end)
 
+  it("can set source alias", function()
+    thetto.setup({
+      source = {
+        [test_source1] = { global_opts = { insert = true } },
+        example_alias1 = { alias_to = test_source1 },
+        example_alias2 = { alias_to = "example_alias1", global_opts = { insert = false } },
+      },
+    })
+
+    thetto.start("example_alias2")
+
+    assert.current_line("test1")
+  end)
+
   it("can custom kind action", function()
     local called = false
 
