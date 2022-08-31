@@ -131,7 +131,12 @@ function Executor.auto(self, ctx, action_name)
     return function() end, false
   end
 
-  local needs_preview = action_name == "preview"
+  local kind, kind_err = Kind.new(self, self._default_kind_name)
+  if kind_err then
+    error(kind_err)
+  end
+
+  local needs_preview = action_name == "preview" and kind:find_action(action_name, {})
   return function(items)
     local _, err = self:action(items, ctx, action_name, self._default_action_opts)
     return err

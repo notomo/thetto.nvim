@@ -121,10 +121,6 @@ function M.action_toggle_sorter(self, _, ctx)
   return nil, ctx.collector:toggle_sorter(sorter_name)
 end
 
-function M.action_preview(_, _, ctx)
-  return ctx.ui:open_preview(nil, {})
-end
-
 function M.action_toggle_preview(self, items, ctx)
   if ctx.ui:exists_same_preview(items) then
     ctx.ui:close_preview()

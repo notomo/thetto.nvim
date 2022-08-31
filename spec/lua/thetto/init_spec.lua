@@ -1139,7 +1139,7 @@ describe("toggle_preview action", function()
       },
     })
 
-    thetto.start(test_source1, { opts = { insert = false } })
+    thetto.start(test_source1, { opts = { insert = false, auto = "" } })
     local count = helper.window_count()
 
     thetto.execute("toggle_preview")
@@ -1150,7 +1150,17 @@ describe("toggle_preview action", function()
   end)
 
   it("can execute continuously", function()
-    thetto.start(test_source1, { opts = { insert = false } })
+    thetto.setup({
+      kind_actions = {
+        base = {
+          action_preview = function(_, items, ctx)
+            ctx.ui:open_preview(items[1], { lines = { items[1].value } })
+          end,
+        },
+      },
+    })
+
+    thetto.start(test_source1, { opts = { insert = false, auto = "" } })
     local count = helper.window_count()
 
     thetto.execute("toggle_preview")
@@ -1167,7 +1177,17 @@ describe("preview action", function()
   after_each(helper.after_each)
 
   it("can open preview", function()
-    thetto.start(test_source1, { opts = { insert = false } })
+    thetto.setup({
+      kind_actions = {
+        base = {
+          action_preview = function(_, items, ctx)
+            ctx.ui:open_preview(items[1], { lines = { items[1].value } })
+          end,
+        },
+      },
+    })
+
+    thetto.start(test_source1, { opts = { insert = false, auto = "" } })
     local count = helper.window_count()
 
     thetto.execute("preview")
