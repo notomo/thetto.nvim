@@ -11,4 +11,6 @@ end
 
 M.kind_name = "word"
 
+M.sorters = { "length" }
+
 return M

@@ -49,4 +49,6 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "git/branch"
 
+M.sorters = { "length" }
+
 return M

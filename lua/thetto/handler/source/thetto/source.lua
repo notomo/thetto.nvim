@@ -14,4 +14,6 @@ end
 
 M.kind_name = "thetto/source"
 
+M.sorters = { "length" }
+
 return M

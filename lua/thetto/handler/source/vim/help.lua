@@ -31,4 +31,6 @@ end
 
 M.kind_name = "vim/help"
 
+M.sorters = { "length" }
+
 return M

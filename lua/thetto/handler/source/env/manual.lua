@@ -28,4 +28,6 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "env/manual"
 
+M.sorters = { "length" }
+
 return M
