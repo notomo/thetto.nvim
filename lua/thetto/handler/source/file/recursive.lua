@@ -40,7 +40,7 @@ function M.collect(self, source_ctx)
 
   local to_items = function(cwd, data)
     local items = {}
-    local paths = require("thetto.lib.job").parse_output(data)
+    local paths = require("thetto.util.job.parse").output(data)
     for _, path in ipairs(paths) do
       if path == "" or path == cwd then
         goto continue
@@ -68,7 +68,7 @@ function M.collect(self, source_ctx)
         }
       end, items)
     end)
-    local job = require("thetto.lib.job").new(cmd, {
+    local _, err = require("thetto.util.job").execute(cmd, {
       on_stdout = function(_, _, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())
@@ -89,8 +89,6 @@ function M.collect(self, source_ctx)
       stderr_buffered = false,
       cwd = source_ctx.cwd,
     })
-
-    local err = job:start()
     if err then
       return observer:error(err)
     end

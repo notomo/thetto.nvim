@@ -37,7 +37,7 @@ function M.collect(self, source_ctx)
 
   local to_items = function(cwd, data)
     local items = {}
-    local outputs = require("thetto.lib.job").parse_output(data)
+    local outputs = require("thetto.util.job.parse").output(data)
     for _, output in ipairs(outputs) do
       local path, row, matched_line = require("thetto.lib.path").parse_with_row(output)
       if not path then
@@ -63,7 +63,7 @@ function M.collect(self, source_ctx)
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       return vim.mpack.decode(encoded)
     end)
-    local job = require("thetto.lib.job").new(cmd, {
+    local _, err = require("thetto.util.job").execute(cmd, {
       on_stdout = function(_, _, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())
@@ -84,8 +84,6 @@ function M.collect(self, source_ctx)
       stderr_buffered = false,
       cwd = source_ctx.cwd,
     })
-
-    local err = job:start()
     if err then
       return observer:error(err)
     end
