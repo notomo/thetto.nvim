@@ -485,6 +485,25 @@ describe("thetto.execute()", function()
 
     assert.is_true(called)
   end)
+
+  it("can custom default action by kind_actions", function()
+    local called = false
+    thetto.setup({
+      kind_actions = {
+        base = {
+          action_hoge = function(_)
+            called = true
+          end,
+          default_action = "hoge",
+        },
+      },
+    })
+
+    thetto.start(test_source1, { opts = { insert = false } })
+    thetto.execute()
+
+    assert.is_true(called)
+  end)
 end)
 
 describe("thetto.setup()", function()
