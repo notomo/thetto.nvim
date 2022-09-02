@@ -29,7 +29,6 @@ function ReturnValue.start(source_name, raw_args)
     require("thetto.vendor.misclib.message").warn(opts_err)
     return require("thetto.vendor.promise").resolve()
   end
-  local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name)
 
   local old_ctx = Context.get(source_name)
   if old_ctx then
@@ -41,6 +40,8 @@ function ReturnValue.start(source_name, raw_args)
     require("thetto.vendor.misclib.message").warn(err)
     return require("thetto.vendor.promise").resolve()
   end
+
+  local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name, collector.source.actions)
   local executor = require("thetto.core.executor").new(
     collector.source.kind_name,
     args.action_opts,

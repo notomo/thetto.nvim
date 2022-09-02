@@ -121,14 +121,20 @@ local ExecuteOption = {}
 ExecuteOption.__index = ExecuteOption
 M.ExecuteOption = ExecuteOption
 
-function ExecuteOption.new(source_name)
-  local source_actions = M.user_default.source_actions[source_name] or {}
-  source_actions.opts = source_actions.opts or {}
-  source_actions.behaviors = source_actions.behaviors or {}
+function ExecuteOption.new(source_name, source_actions)
+  source_actions = source_actions or {}
+
+  local user_source_actions = vim.tbl_deep_extend(
+    "force",
+    source_actions,
+    M.user_default.source_actions[source_name] or {}
+  )
+  user_source_actions.opts = user_source_actions.opts or {}
+  user_source_actions.behaviors = user_source_actions.behaviors or {}
 
   local tbl = {
     kind_actions = M.user_default.kind_actions,
-    source_actions = source_actions,
+    source_actions = user_source_actions,
   }
   return setmetatable(tbl, ExecuteOption)
 end

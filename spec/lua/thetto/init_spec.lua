@@ -463,6 +463,28 @@ describe("thetto.execute()", function()
 
     assert.is_true(called)
   end)
+
+  it("can have actions in source", function()
+    local called = false
+    local source_name = "has_actions"
+    thetto.register_source(source_name, {
+      collect = function()
+        return {
+          { value = "1" },
+        }
+      end,
+      actions = {
+        action_test = function()
+          called = true
+        end,
+      },
+    })
+
+    thetto.start(source_name, { opts = { insert = false } })
+    thetto.execute("test")
+
+    assert.is_true(called)
+  end)
 end)
 
 describe("thetto.setup()", function()
