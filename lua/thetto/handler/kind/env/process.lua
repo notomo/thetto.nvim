@@ -11,13 +11,7 @@ function M.action_kill(_, items)
   local cmd = vim.deepcopy(M.cmd)
   vim.list_extend(cmd, pids)
 
-  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-
-  return job, nil
+  return require("thetto.util.job").execute(cmd)
 end
 
 return M

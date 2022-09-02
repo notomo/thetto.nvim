@@ -6,12 +6,7 @@ function M.action_remove(_, items)
   end, items)
   local cmd = { "docker", "rm" }
   vim.list_extend(cmd, ids)
-  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-  return job, nil
+  return require("thetto.util.job").execute(cmd)
 end
 
 return M

@@ -129,4 +129,19 @@ function M.start(cmd, source_ctx, to_item, opts)
   end
 end
 
+function M.execute(cmd, opts)
+  local default_opts = {
+    on_exit = jobs.print_stdout,
+    on_stderr = jobs.print_stderr,
+  }
+  opts = vim.tbl_extend("force", default_opts, opts or {})
+
+  local job = jobs.new(cmd, opts)
+  local err = job:start()
+  if err ~= nil then
+    return nil, err
+  end
+  return job, nil
+end
+
 return M

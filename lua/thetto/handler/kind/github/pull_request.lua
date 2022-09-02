@@ -7,12 +7,7 @@ function M.action_checkout(_, items)
   end
 
   local cmd = { "gh", "pr", "checkout", item.url }
-  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-  return job, nil
+  return require("thetto.util.job").execute(cmd)
 end
 
 return require("thetto.core.kind").extend(M, "url")

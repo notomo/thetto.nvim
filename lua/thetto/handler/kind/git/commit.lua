@@ -5,8 +5,7 @@ local start = function(bufnr, item)
   vim.bo[bufnr].filetype = "diff"
 
   local cmd = { "git", "show", "--date=iso", item.commit_hash }
-
-  local job = require("thetto.lib.job").new(cmd, {
+  return require("thetto.util.job").execute(cmd, {
     on_exit = function(job_self)
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return
@@ -14,13 +13,7 @@ local start = function(bufnr, item)
       local lines = job_self:get_output()
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     end,
-    on_stderr = require("thetto.lib.job").print_stderr,
   })
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-  return job, nil
 end
 
 local open = function(items, f)

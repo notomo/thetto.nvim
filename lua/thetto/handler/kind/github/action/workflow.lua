@@ -19,8 +19,7 @@ function M.action_run(self, items)
   end
 
   local cmd = { "gh", "workflow", "run", item.workflow.file_name }
-  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
-  local err = job:start()
+  local job, err = require("thetto.util.job").execute(cmd)
   if err ~= nil then
     return nil, err
   end

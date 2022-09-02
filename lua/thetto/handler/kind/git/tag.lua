@@ -7,12 +7,7 @@ function M.action_checkout(_, items)
   end
 
   local cmd = { "git", "checkout", "-b", item.value, "refs/tags/" .. item.value }
-  local job = require("thetto.lib.job").new(cmd, { on_exit = require("thetto.lib.job").print_output })
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-  return job, nil
+  return require("thetto.util.job").execute(cmd)
 end
 
 function M.action_delete(_, items)
@@ -24,15 +19,7 @@ function M.action_delete(_, items)
   local cmd = { "git", "tag", "--delete" }
   vim.list_extend(cmd, branches)
 
-  local job = require("thetto.lib.job").new(cmd, {
-    on_exit = require("thetto.lib.job").print_stdout,
-    on_stderr = require("thetto.lib.job").print_stderr,
-  })
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-  return job, nil
+  return require("thetto.util.job").execute(cmd)
 end
 
 M.default_action = "checkout"
