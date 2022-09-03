@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   if not vim.api.nvim_buf_is_valid(source_ctx.bufnr) then
     return nil, "invalid buffer: " .. source_ctx.bufnr
   end

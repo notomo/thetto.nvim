@@ -2,13 +2,13 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo" }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local cmd = {
     "gh",
     "api",
     "-X",
     "GET",
-    ("repos/%s/%s/labels"):format(self.opts.owner, self.opts.repo),
+    ("repos/%s/%s/labels"):format(source_ctx.opts.owner, source_ctx.opts.repo),
     "-F",
     "per_page=100",
   }
@@ -22,7 +22,7 @@ function M.collect(self, source_ctx)
     return {
       value = label.name,
       desc = desc,
-      label = { owner = self.opts.owner, repo = self.opts.repo },
+      label = { owner = source_ctx.opts.owner, repo = source_ctx.opts.repo },
       column_offsets = { value = 0, description = #name + 1 },
     }
   end, {

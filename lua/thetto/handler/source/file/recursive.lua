@@ -35,8 +35,8 @@ else
   end
 end
 
-function M.collect(self, source_ctx)
-  local cmd = self.opts.get_command(source_ctx.cwd, self.opts.max_depth)
+function M.collect(source_ctx)
+  local cmd = source_ctx.opts.get_command(source_ctx.cwd, source_ctx.opts.max_depth)
 
   local to_items = function(cwd, data)
     local items = {}
@@ -56,12 +56,12 @@ function M.collect(self, source_ctx)
   end
 
   return function(observer)
-    local to_absolute = self.opts.to_absolute
+    local to_absolute = source_ctx.opts.to_absolute
     local output_buffer = require("thetto.util.job.output_buffer").new()
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       local items = vim.mpack.decode(encoded)
       return vim.tbl_map(function(item)
-        local value = self.opts.modify_path(item.value)
+        local value = source_ctx.opts.modify_path(item.value)
         return {
           value = value,
           path = to_absolute(source_ctx.cwd, item.path),

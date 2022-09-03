@@ -29,7 +29,7 @@ function M.request(bufnr, method)
   end)
 end
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   return function(observer)
     return M.request(source_ctx.bufnr, "callHierarchy/outgoingCalls")
       :next(function(result)

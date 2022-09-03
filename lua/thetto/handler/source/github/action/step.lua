@@ -4,12 +4,16 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", job_id = nil }
 
-function M.collect(self, source_ctx)
-  if not self.opts.job_id then
+function M.collect(source_ctx)
+  if not source_ctx.opts.job_id then
     return {}
   end
 
-  local path = ("repos/%s/%s/actions/jobs/%s"):format(self.opts.owner, self.opts.repo, self.opts.job_id)
+  local path = ("repos/%s/%s/actions/jobs/%s"):format(
+    source_ctx.opts.owner,
+    source_ctx.opts.repo,
+    source_ctx.opts.job_id
+  )
   local cmd = { "gh", "api", "-X", "GET", path }
   return require("thetto.util.job").run(cmd, source_ctx, function(step)
     local mark = "  "

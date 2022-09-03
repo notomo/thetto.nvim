@@ -4,7 +4,7 @@ local M = {}
 
 M.opts = { per_file = false }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local items = {}
 
   local jumps = vim.fn.reverse(vim.fn.getjumplist(0)[1])
@@ -24,7 +24,7 @@ function M.collect(self, source_ctx)
     end
 
     local path = vim.uri_to_fname(vim.uri_from_bufnr(bufnr))
-    if self.opts.per_file and (path == current_path or path == "") then
+    if source_ctx.opts.per_file and (path == current_path or path == "") then
       goto continue
     end
     current_path = path

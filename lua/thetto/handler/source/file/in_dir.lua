@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local paths = {}
   for _, path in ipairs(vim.fn.readdir(source_ctx.cwd)) do
     local abs_path = vim.fn.fnamemodify(source_ctx.cwd .. "/" .. path, ":p:gs?\\?\\/?")

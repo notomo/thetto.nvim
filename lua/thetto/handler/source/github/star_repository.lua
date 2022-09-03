@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local cmd = { "gh", "api", "-X", "GET", "user/starred", "-F", "per_page=100" }
   return require("thetto.util.job").run(cmd, source_ctx, function(repo)
     return {

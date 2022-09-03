@@ -8,21 +8,21 @@ M.opts = {
   sort_direction = "desc",
 }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local cmd = {
     "gh",
     "api",
     "-X",
     "GET",
-    ("repos/%s/%s/pulls"):format(self.opts.owner, self.opts.repo),
+    ("repos/%s/%s/pulls"):format(source_ctx.opts.owner, source_ctx.opts.repo),
     "-F",
     "per_page=100",
     "-F",
-    "state=" .. self.opts.state,
+    "state=" .. source_ctx.opts.state,
     "-F",
-    "sort=" .. self.opts.sort,
+    "sort=" .. source_ctx.opts.sort,
     "-F",
-    "direction=" .. self.opts.sort_direction,
+    "direction=" .. source_ctx.opts.sort_direction,
   }
   return require("thetto.util.job").run(cmd, source_ctx, function(pr)
     local mark

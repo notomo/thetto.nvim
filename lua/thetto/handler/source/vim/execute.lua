@@ -2,9 +2,9 @@ local M = {}
 
 M.opts = { cmd = "messages" }
 
-function M.collect(self)
+function M.collect(source_ctx)
   local items = {}
-  local outputs = vim.api.nvim_exec(self.opts.cmd, true)
+  local outputs = vim.api.nvim_exec(source_ctx.opts.cmd, true)
   for line in vim.gsplit(outputs, "\n", true) do
     table.insert(items, { value = line })
   end

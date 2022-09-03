@@ -41,7 +41,8 @@ function Collector.new(source_name, source_opts, opts)
       opts.throttle_ms,
       opts.range,
       filters:has_interactive(),
-      vim.api.nvim_get_current_buf()
+      vim.api.nvim_get_current_buf(),
+      source.opts
     ),
     _result = SourceResult.zero(),
     _ignorecase = opts.ignorecase,

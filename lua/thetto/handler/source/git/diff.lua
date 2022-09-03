@@ -34,15 +34,15 @@ end
 
 M.opts = { expr = nil }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
 
   local path
-  if self.opts.expr ~= nil then
-    path = vim.fn.expand(self.opts.expr)
+  if source_ctx.opts.expr ~= nil then
+    path = vim.fn.expand(source_ctx.opts.expr)
   end
 
   local cmd = { "git", "--no-pager", "diff", "--no-color", path }

@@ -6,7 +6,7 @@ M.opts = {
   ignored_kind = { "variable", "field" },
 }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local current_path = vim.fn.expand("%:p")
   return function(observer)
     local method = "textDocument/documentSymbol"
@@ -14,7 +14,7 @@ function M.collect(self, source_ctx)
     local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
       local items = {}
       for _, v in ipairs(result or {}) do
-        vim.list_extend(items, self:_to_items(v, "", current_path))
+        vim.list_extend(items, M._to_items(source_ctx, v, "", current_path))
       end
       observer:next(items)
       observer:complete()
@@ -23,9 +23,9 @@ function M.collect(self, source_ctx)
   end
 end
 
-function M._to_items(self, item, parent_key, current_path)
+function M._to_items(source_ctx, item, parent_key, current_path)
   local kind = vim.lsp.protocol.SymbolKind[item.kind]
-  if vim.tbl_contains(self.opts.ignored_kind, kind:lower()) then
+  if vim.tbl_contains(source_ctx.opts.ignored_kind, kind:lower()) then
     return {}
   end
 
@@ -47,7 +47,7 @@ function M._to_items(self, item, parent_key, current_path)
   })
 
   for _, v in ipairs(item.children or {}) do
-    vim.list_extend(items, self:_to_items(v, name .. ".", current_path))
+    vim.list_extend(items, M._to_items(v, name .. ".", current_path))
   end
   return items
 end

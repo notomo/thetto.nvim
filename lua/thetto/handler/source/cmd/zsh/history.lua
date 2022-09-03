@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local path = vim.fn.systemlist({ "zsh", "-i", "-c", "echo ${HISTFILE}" })[1]
   if not path then
     return {}

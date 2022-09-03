@@ -2,13 +2,13 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo" }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local cmd = {
     "gh",
     "api",
     "-X",
     "GET",
-    ("repos/%s/%s/milestones"):format(self.opts.owner, self.opts.repo),
+    ("repos/%s/%s/milestones"):format(source_ctx.opts.owner, source_ctx.opts.repo),
     "-F",
     "per_page=100",
     "-F",
@@ -39,8 +39,8 @@ function M.collect(self, source_ctx)
       milestone = {
         is_opened = milestone.state == "open",
         number = milestone.number,
-        owner = self.opts.owner,
-        repo = self.opts.repo,
+        owner = source_ctx.opts.owner,
+        repo = source_ctx.opts.repo,
       },
       column_offsets = { value = #mark + 1, description = #mark + #milestone_title + 1 },
     }

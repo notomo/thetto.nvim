@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local pattern = source_ctx.pattern
   if not source_ctx.interactive and not pattern then
     pattern = vim.fn.input("Pattern: ")

@@ -3,10 +3,10 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.collect(self)
+function M.collect(source_ctx)
   local path = vim.fn.expand("%:p")
-  for _, patterns in ipairs(self.opts.pattern_groups) do
-    local items = self:_to_items(patterns, path)
+  for _, patterns in ipairs(source_ctx.opts.pattern_groups) do
+    local items = M._to_items(source_ctx, patterns, path)
     if items ~= nil then
       return items
     end
@@ -14,10 +14,10 @@ function M.collect(self)
   return {}
 end
 
-function M._to_items(self, patterns, path)
+function M._to_items(source_ctx, patterns, path)
   local index, matches
   for i, pattern in ipairs(patterns) do
-    local m = self._match(pattern, path)
+    local m = M._match(pattern, path)
     if m ~= nil then
       index = i
       matches = m
@@ -43,7 +43,7 @@ function M._to_items(self, patterns, path)
     local value = abs_path:gsub(home, "~")
     if filelib.readable(abs_path) then
       table.insert(items, { value = value, path = abs_path })
-    elseif self.opts.allow_new then
+    elseif source_ctx.opts.allow_new then
       table.insert(items, { value = value, path = abs_path, kind_name = "file/new" })
     end
 

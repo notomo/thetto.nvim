@@ -4,14 +4,14 @@ local M = {}
 
 M.opts = { all = false }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local _, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
 
   local cmd = { "git", "branch", "--format", "%(refname:short)" }
-  if self.opts.all then
+  if source_ctx.opts.all then
     table.insert(cmd, "--all")
   end
 

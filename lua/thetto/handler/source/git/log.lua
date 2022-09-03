@@ -2,7 +2,7 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local _, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err

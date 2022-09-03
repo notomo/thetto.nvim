@@ -2,9 +2,9 @@ local M = {}
 
 M.opts = { owner = ":owner", is_org = false }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local typ = "users"
-  if self.opts.is_org then
+  if source_ctx.opts.is_org then
     typ = "orgs"
   end
 
@@ -13,7 +13,7 @@ function M.collect(self, source_ctx)
     "api",
     "-X",
     "GET",
-    ("%s/%s/repos"):format(typ, self.opts.owner),
+    ("%s/%s/repos"):format(typ, source_ctx.opts.owner),
     "-F",
     "per_page=100",
     "-F",

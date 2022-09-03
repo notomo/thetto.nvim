@@ -2,7 +2,7 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M._load(_, path)
+function M._load(path)
   if not filelib.readable(path) then
     return {}
   end
@@ -20,9 +20,9 @@ function M._load(_, path)
   return items
 end
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local path = source_ctx.cwd .. "/package.json"
-  return M._load(self, path)
+  return M._load(path)
 end
 
 M.kind_name = "cmd/npm/script"

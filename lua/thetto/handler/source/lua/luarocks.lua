@@ -29,7 +29,7 @@ function M._find_dir(name, paths)
   return nil
 end
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local cmd = { "luarocks", "list", "--porcelain" }
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local factors = vim.split(output, "%s+")

@@ -5,7 +5,7 @@ M.opts = {
   repo_with_owner = nil,
 }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local pattern = source_ctx.pattern
   if not source_ctx.interactive and not pattern then
     pattern = vim.fn.input("Pattern: ")
@@ -16,8 +16,8 @@ function M.collect(self, source_ctx)
     end
   end
 
-  local repo_with_owner = self.opts.repo_with_owner
-  local owner = self.opts.owner
+  local repo_with_owner = source_ctx.opts.repo_with_owner
+  local owner = source_ctx.opts.owner
   if not (repo_with_owner or owner) then
     repo_with_owner =
       vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]

@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   local cmd = { "docker", "ps", "-a", "--format={{json .}}" }
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local attrs = vim.json.decode(output)

@@ -9,11 +9,11 @@ M.opts = {
   args = { 0 },
 }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local items = {}
 
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
-  local bufnr, opts = unpack(self.opts.args)
+  local bufnr, opts = unpack(source_ctx.opts.args)
   for _, diagnostic in ipairs(vim.diagnostic.get(bufnr, opts)) do
     if not vim.api.nvim_buf_is_valid(diagnostic.bufnr) then
       goto continue

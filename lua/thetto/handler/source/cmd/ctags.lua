@@ -6,7 +6,7 @@ local M = {}
 
 M.opts = { ignore = {} }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local file_path = vim.api.nvim_buf_get_name(0)
   if not filelib.readable(file_path) then
     return {}, nil
@@ -15,7 +15,7 @@ function M.collect(self, source_ctx)
   local cmd = { "ctags", "--output-format=xref", "-f", "-", file_path }
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local value, typ, row, path, line = output:match("(%S+)%s+(%S+)%s+(%d+)%s+(%S+)%s+(.+)")
-    if vim.tbl_contains(self.opts.ignore, typ) then
+    if vim.tbl_contains(source_ctx.opts.ignore, typ) then
       return nil
     end
     local _desc = ("%s [%s]"):format(value, typ)

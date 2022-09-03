@@ -7,7 +7,7 @@ local M = {}
 
 M.opts = { cwd_marker = "%s/" }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local store, err = Store.new_or_get("file/mru")
   if err ~= nil then
     return nil, err
@@ -32,7 +32,7 @@ function M.collect(self, source_ctx)
 
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local dir = vim.fn.fnamemodify(source_ctx.cwd, ":t")
-  local cwd_marker = self.opts.cwd_marker:format(dir)
+  local cwd_marker = source_ctx.opts.cwd_marker:format(dir)
   local home = pathlib.home()
 
   local items = {}

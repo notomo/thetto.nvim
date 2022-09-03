@@ -2,13 +2,13 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo" }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local cmd = {
     "gh",
     "api",
     "-X",
     "GET",
-    ("repos/%s/%s/releases"):format(self.opts.owner, self.opts.repo),
+    ("repos/%s/%s/releases"):format(source_ctx.opts.owner, source_ctx.opts.repo),
     "-F",
     "per_page=100",
   }

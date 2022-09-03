@@ -6,15 +6,15 @@ local M = {}
 
 M.opts = { file_path = nil, default_paths = {} }
 
-function M.collect(self)
-  local file_path = self.opts.file_path or pathlib.user_data_path("file_bookmark.txt")
+function M.collect(source_ctx)
+  local file_path = source_ctx.opts.file_path or pathlib.user_data_path("file_bookmark.txt")
   if filelib.create_if_need(file_path) then
     io.open(file_path, "w"):close()
   end
 
   local f = io.open(file_path, "r")
   local lines = { file_path }
-  vim.list_extend(lines, self.opts.default_paths)
+  vim.list_extend(lines, source_ctx.opts.default_paths)
   for line in f:lines() do
     table.insert(lines, line)
   end

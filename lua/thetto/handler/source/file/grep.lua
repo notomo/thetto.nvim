@@ -8,7 +8,7 @@ M.opts = {
   separator = "--",
 }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local pattern = source_ctx.pattern
   if not source_ctx.interactive and pattern == nil then
     pattern = vim.fn.input("Pattern: ")
@@ -20,12 +20,12 @@ function M.collect(self, source_ctx)
   end
 
   local paths = source_ctx.cwd
-  local cmd = vim.list_extend({ self.opts.command }, self.opts.command_opts)
+  local cmd = vim.list_extend({ source_ctx.opts.command }, source_ctx.opts.command_opts)
   for _, x in ipairs({
-    self.opts.recursive_opt,
-    self.opts.pattern_opt,
+    source_ctx.opts.recursive_opt,
+    source_ctx.opts.pattern_opt,
     pattern,
-    self.opts.separator,
+    source_ctx.opts.separator,
     paths,
   }) do
     if x == "" then

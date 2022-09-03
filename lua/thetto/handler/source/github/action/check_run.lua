@@ -4,8 +4,12 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", ref = ":branch" }
 
-function M.collect(self, source_ctx)
-  local path = ("repos/%s/%s/commits/%s/check-runs"):format(self.opts.owner, self.opts.repo, self.opts.ref)
+function M.collect(source_ctx)
+  local path = ("repos/%s/%s/commits/%s/check-runs"):format(
+    source_ctx.opts.owner,
+    source_ctx.opts.repo,
+    source_ctx.opts.ref
+  )
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
   return require("thetto.util.job").run(cmd, source_ctx, function(run)
     local mark = "  "

@@ -2,16 +2,16 @@ local M = {}
 
 M.opts = { owner = ":owner", repo = ":repo", workflow_file_name = nil }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local path
-  if self.opts.workflow_file_name then
+  if source_ctx.opts.workflow_file_name then
     path = ("repos/%s/%s/actions/workflows/%s/runs"):format(
-      self.opts.owner,
-      self.opts.repo,
-      self.opts.workflow_file_name
+      source_ctx.opts.owner,
+      source_ctx.opts.repo,
+      source_ctx.opts.workflow_file_name
     )
   else
-    path = ("repos/%s/%s/actions/runs"):format(self.opts.owner, self.opts.repo)
+    path = ("repos/%s/%s/actions/runs"):format(source_ctx.opts.owner, source_ctx.opts.repo)
   end
 
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }

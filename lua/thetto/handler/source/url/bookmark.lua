@@ -16,11 +16,11 @@ end
 
 M.opts = { file_path = nil, default_lines = {} }
 
-function M.collect(self)
-  local file_path = self.opts.file_path or pathlib.user_data_path("url_bookmark.txt")
+function M.collect(source_ctx)
+  local file_path = source_ctx.opts.file_path or pathlib.user_data_path("url_bookmark.txt")
   if filelib.create_if_need(file_path) then
     local f = io.open(file_path, "w")
-    for _, line in ipairs(self.opts.default_lines) do
+    for _, line in ipairs(source_ctx.opts.default_lines) do
       f:write(line .. "\n")
     end
     f:close()

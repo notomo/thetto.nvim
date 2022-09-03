@@ -3,7 +3,7 @@ local util = require("thetto.util.lsp")
 
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   return function(observer)
     return require("thetto.handler.source.lsp_adapter.outgoing_calls").request(
       source_ctx.bufnr,

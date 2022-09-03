@@ -2,7 +2,7 @@ local M = {}
 
 M.opts = { buftype = nil }
 
-function M.collect(self)
+function M.collect(source_ctx)
   local items = {}
   local bufnrs = vim.api.nvim_list_bufs()
   for _, bufnr in ipairs(bufnrs) do
@@ -12,7 +12,7 @@ function M.collect(self)
     if not vim.bo[bufnr].buflisted then
       goto continue
     end
-    if self.opts.buftype ~= nil and vim.bo[bufnr].buftype ~= self.opts.buftype then
+    if source_ctx.opts.buftype ~= nil and vim.bo[bufnr].buftype ~= source_ctx.opts.buftype then
       goto continue
     end
 

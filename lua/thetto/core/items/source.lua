@@ -52,7 +52,7 @@ function Source.__index(self, k)
 end
 
 function Source.collect(self, source_ctx)
-  local all_items, err = self._origin.collect(self, source_ctx)
+  local all_items, err = self._origin.collect(source_ctx)
   if err then
     return nil, err
   end

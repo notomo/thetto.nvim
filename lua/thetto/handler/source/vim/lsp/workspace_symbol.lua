@@ -29,8 +29,8 @@ function M._to_item(_, cwd)
   end
 end
 
-function M.collect(self, source_ctx)
-  local to_item = self:_to_item(source_ctx.cwd)
+function M.collect(source_ctx)
+  local to_item = M._to_item(source_ctx.cwd)
   return function(observer)
     local method = "workspace/symbol"
     local params = { query = source_ctx.pattern or "" }

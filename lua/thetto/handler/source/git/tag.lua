@@ -4,14 +4,14 @@ local M = {}
 
 M.opts = { merged = false }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local _, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
 
   local cmd = { "git", "tag", "-l" }
-  if self.opts.merged then
+  if source_ctx.opts.merged then
     table.insert(cmd, "--merged")
   end
 

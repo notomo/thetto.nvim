@@ -1,6 +1,6 @@
 local M = {}
 
-function M.collect(_, source_ctx)
+function M.collect(source_ctx)
   if vim.fn.has("win32") == 1 then
     return nil, "not supported in windows"
   end

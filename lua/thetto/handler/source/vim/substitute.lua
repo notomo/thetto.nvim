@@ -14,12 +14,12 @@ M.opts = {
   },
 }
 
-function M.collect(self, source_ctx)
+function M.collect(source_ctx)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local items = {}
-  for name, c in pairs(self.opts.commands) do
-    local cmd_prefix = self.opts.range
+  for name, c in pairs(source_ctx.opts.commands) do
+    local cmd_prefix = source_ctx.opts.range
     local range = nil
     if source_ctx.range ~= nil then
       cmd_prefix = ("%d,%d"):format(source_ctx.range.first, source_ctx.range.last)
@@ -28,12 +28,12 @@ function M.collect(self, source_ctx)
 
     local flags = c.flags
     if flags == nil then
-      flags = self.opts.flags
+      flags = source_ctx.opts.flags
     end
 
     local magic = c.magic
     if magic == nil then
-      magic = self.opts.magic
+      magic = source_ctx.opts.magic
     end
 
     local excmd = ("s/%s%s/%s/%s"):format(magic, c.pattern, c.after, flags)

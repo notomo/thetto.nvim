@@ -18,8 +18,8 @@ function M._to_item(_, cwd)
   end
 end
 
-function M.collect(self, source_ctx)
-  local to_item = self:_to_item(source_ctx.cwd)
+function M.collect(source_ctx)
+  local to_item = M._to_item(source_ctx.cwd)
   return function(observer)
     local method = "textDocument/references"
     local params = vim.lsp.util.make_position_params()
