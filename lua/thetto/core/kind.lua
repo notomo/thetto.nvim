@@ -1,3 +1,4 @@
+local pathlib = require("thetto.lib.path")
 local modulelib = require("thetto.vendor.misclib.module")
 local base = require("thetto.handler.kind.base")
 local vim = vim
@@ -167,6 +168,25 @@ function Kind.extend(raw_kind, ...)
       end
     end,
   })
+end
+
+function Kind.all()
+  local paths = vim.api.nvim_get_runtime_file("lua/thetto/handler/kind/**/*.lua", true)
+  local already = {}
+  local all = {}
+  for _, path in ipairs(paths) do
+    local kind_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/kind/", true)[2]
+    local name = kind_file:sub(1, #kind_file - 4)
+    if not already[name] then
+      local kind_info = {
+        name = name,
+        path = path,
+      }
+      table.insert(all, kind_info)
+      already[name] = kind_info
+    end
+  end
+  return all
 end
 
 return Kind
