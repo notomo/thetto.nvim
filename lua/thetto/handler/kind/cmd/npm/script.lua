@@ -5,8 +5,8 @@ local driver = function(cmd, opts)
 end
 
 M.opts = {}
-M.opts.execute = { driver = driver }
 
+M.opts.execute = { driver = driver }
 function M.action_execute(items, action_ctx)
   for _, item in ipairs(items) do
     vim.cmd.tabedit()

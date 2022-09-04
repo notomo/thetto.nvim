@@ -1,7 +1,8 @@
 local M = {}
 
-M.opts = { checkout = { track = false }, delete = { force = false } }
+M.opts = {}
 
+M.opts.checkout = { track = false }
 function M.action_checkout(items, action_ctx)
   local item = items[1]
   if item == nil then
@@ -17,30 +18,24 @@ function M.action_checkout(items, action_ctx)
   return require("thetto.util.job").execute(cmd)
 end
 
-function M.action_delete(items)
+M.opts.delete = { force = false, args = { "--delete" } }
+function M.action_delete(items, action_ctx)
   local branches = {}
   for _, item in ipairs(items) do
     table.insert(branches, item.value)
   end
 
   local cmd = { "git", "branch" }
-  table.insert(cmd, "--delete")
+  vim.list_extend(cmd, action_ctx.opts.args)
   vim.list_extend(cmd, branches)
 
   return require("thetto.util.job").execute(cmd)
 end
 
-function M.action_force_delete(items)
-  local branches = {}
-  for _, item in ipairs(items) do
-    table.insert(branches, item.value)
-  end
-
-  local cmd = { "git", "branch" }
-  table.insert(cmd, "-D")
-  vim.list_extend(cmd, branches)
-
-  return require("thetto.util.job").execute(cmd)
+function M.action_force_delete(items, action_ctx, ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, ctx, {
+    args = { "-D" },
+  })
 end
 
 M.default_action = "checkout"

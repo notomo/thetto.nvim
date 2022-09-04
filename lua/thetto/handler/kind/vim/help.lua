@@ -1,32 +1,45 @@
 local M = {}
 
-function M.action_open(items)
+function M.action_open(items, _, ctx)
   for _, item in ipairs(items) do
-    M._open(item, "", "action_open")
+    local err = M._open(item, "", "open", ctx)
+    if err then
+      return nil, err
+    end
     vim.cmd.only()
   end
 end
 
-function M.action_tab_open(items)
+function M.action_tab_open(items, _, ctx)
   for _, item in ipairs(items) do
-    M._open(item, "tab", "action_tab_open")
+    local err = M._open(item, "tab", "tab_open", ctx)
+    if err then
+      return nil, err
+    end
   end
 end
 
-function M.action_vsplit_open(items)
+function M.action_vsplit_open(items, _, ctx)
   for _, item in ipairs(items) do
-    M._open(item, "vertical", "action_vsplit_open")
+    local err = M._open(item, "vertical", "vsplit_open", ctx)
+    if err then
+      return nil, err
+    end
   end
 end
 
-local file_kind = require("thetto.handler.kind.file")
-
-function M._open(item, help_prefix, edit_action)
+function M._open(item, help_prefix, edit_action, ctx)
   local ok = pcall(vim.cmd, ("%s help %s"):format(help_prefix, item.value))
   if ok then
     return
   end
-  file_kind[edit_action]({ item })
+
+  local items = { item }
+  local _, err = require("thetto.util.action").call("file", edit_action, items, ctx)
+  if err then
+    return err
+  end
+
   vim.cmd.nohlsearch()
   vim.bo.buftype = "help"
   vim.bo.modifiable = false

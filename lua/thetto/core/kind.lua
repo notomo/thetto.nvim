@@ -68,24 +68,24 @@ function Kind.find_action(self, action_name, action_opts)
 
   local source_actions = self._execute_opts.source_actions
   if source_actions[key] then
-    return Action.new(source_actions[key], opts, behavior), nil
+    return Action.new(self.name, source_actions[key], opts, behavior), nil
   end
 
   local kind_action = self._execute_opts.kind_actions[self.name]
   if kind_action ~= nil and kind_action[key] then
-    return Action.new(kind_action[key], opts, behavior), nil
+    return Action.new(self.name, kind_action[key], opts, behavior), nil
   end
 
   for _, extend in ipairs(self._origin.extends or {}) do
     local action = self._execute_opts.kind_actions[extend.name]
     if action ~= nil and action[key] then
-      return Action.new(action[key], opts, behavior), nil
+      return Action.new(self.name, action[key], opts, behavior), nil
     end
   end
 
   local action = self[key]
   if action ~= nil then
-    return Action.new(action, opts, behavior), nil
+    return Action.new(self.name, action, opts, behavior), nil
   end
 
   return nil, "not found action: " .. name

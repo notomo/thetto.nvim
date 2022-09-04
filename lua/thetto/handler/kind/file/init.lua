@@ -107,8 +107,6 @@ function M.action_delete_buffer(items)
   end
 end
 
-local directory_kind = require("thetto.handler.kind.file.directory")
-
 local to_dirs = function(items)
   local dirs = {}
   for _, item in ipairs(items) do
@@ -119,12 +117,12 @@ local to_dirs = function(items)
   return dirs
 end
 
-function M.action_directory_open(items, action_ctx)
-  directory_kind.action_open(to_dirs(items), action_ctx)
+function M.action_directory_open(items, _, ctx)
+  return require("thetto.util.action").call("file/directory", "open", to_dirs(items), ctx)
 end
 
-function M.action_directory_tab_open(items, action_ctx)
-  directory_kind.action_tab_open(to_dirs(items), action_ctx)
+function M.action_directory_tab_open(items, _, ctx)
+  return require("thetto.util.action").call("file/directory", "tab_open", to_dirs(items), ctx)
 end
 
 function M.action_directory_enter(items)
