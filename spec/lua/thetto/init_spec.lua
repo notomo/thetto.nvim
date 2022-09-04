@@ -327,7 +327,7 @@ describe("thetto", function()
     thetto.setup({
       source_actions = {
         [test_source1] = {
-          action_hoge = function(_, items)
+          action_hoge = function(items)
             value = items[1].value
           end,
           behaviors = { hoge = { quit = false } },
@@ -729,7 +729,7 @@ describe("thetto.resume_execute()", function()
     thetto.setup({
       kind_actions = {
         base = {
-          action_hoge = function(_, items)
+          action_hoge = function(items)
             item = items[1].value
           end,
         },
@@ -1173,7 +1173,7 @@ describe("toggle_preview action", function()
     thetto.setup({
       kind_actions = {
         base = {
-          action_preview = function(_, items, ctx)
+          action_preview = function(items, _, ctx)
             ctx.ui:open_preview(items[1], { lines = { items[1].value } })
           end,
         },
@@ -1194,7 +1194,7 @@ describe("toggle_preview action", function()
     thetto.setup({
       kind_actions = {
         base = {
-          action_preview = function(_, items, ctx)
+          action_preview = function(items, _, ctx)
             ctx.ui:open_preview(items[1], { lines = { items[1].value } })
           end,
         },
@@ -1221,7 +1221,7 @@ describe("preview action", function()
     thetto.setup({
       kind_actions = {
         base = {
-          action_preview = function(_, items, ctx)
+          action_preview = function(items, _, ctx)
             ctx.ui:open_preview(items[1], { lines = { items[1].value } })
           end,
         },

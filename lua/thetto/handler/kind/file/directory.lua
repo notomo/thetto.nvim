@@ -4,14 +4,14 @@ local M = {}
 
 function M.after(_, _) end
 
-function M.action_cd(_, items)
+function M.action_cd(items)
   for _, item in ipairs(items) do
     vim.cmd.lcd(filelib.escape(item.path))
     M.after(item.path)
   end
 end
 
-function M.action_tab_open(_, items)
+function M.action_tab_open(items)
   for _, item in ipairs(items) do
     vim.cmd.tabedit()
     vim.cmd.lcd(filelib.escape(item.path))
@@ -19,7 +19,7 @@ function M.action_tab_open(_, items)
   end
 end
 
-function M.action_vsplit_open(_, items)
+function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     vim.cmd.vsplit()
     vim.cmd.lcd(filelib.escape(item.path))
@@ -27,7 +27,7 @@ function M.action_vsplit_open(_, items)
   end
 end
 
-function M.action_enter(_, items)
+function M.action_enter(items)
   local item = items[1]
   if item == nil then
     return
@@ -35,7 +35,7 @@ function M.action_enter(_, items)
   require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
 end
 
-function M.action_preview(_, items, ctx)
+function M.action_preview(items, _, ctx)
   local item = items[1]
   if item == nil then
     return
@@ -47,7 +47,7 @@ function M.action_preview(_, items, ctx)
   end
 end
 
-function M.action_list_parents(_, items)
+function M.action_list_parents(items)
   local item = items[1]
   if item == nil then
     return

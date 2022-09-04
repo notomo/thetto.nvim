@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_execute(_, items)
+function M.action_execute(items)
   for _, item in ipairs(items) do
     vim.cmd.tabedit()
     vim.fn.termopen({ item.shell }, { cwd = item.cwd })
@@ -11,7 +11,7 @@ function M.action_execute(_, items)
   end
 end
 
-function M.action_tab_open(_, items)
+function M.action_tab_open(items)
   for _, item in ipairs(items) do
     vim.cmd.tabedit()
     vim.fn.termopen({ item.shell }, { cwd = item.cwd })

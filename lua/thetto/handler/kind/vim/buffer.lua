@@ -2,27 +2,27 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.action_open(_, items)
+function M.action_open(items)
   for _, item in ipairs(items) do
     vim.cmd.buffer({ count = item.bufnr })
   end
 end
 
-function M.action_tab_open(_, items)
+function M.action_tab_open(items)
   for _, item in ipairs(items) do
     vim.cmd.tabedit()
     vim.cmd.buffer({ count = item.bufnr })
   end
 end
 
-function M.action_vsplit_open(_, items)
+function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     vim.cmd.vsplit()
     vim.cmd.buffer({ count = item.bufnr })
   end
 end
 
-function M.action_tab_drop(_, items)
+function M.action_tab_drop(items)
   for _, item in ipairs(items) do
     local path = vim.api.nvim_buf_get_name(item.bufnr)
     if path ~= "" then
@@ -31,7 +31,7 @@ function M.action_tab_drop(_, items)
   end
 end
 
-function M.action_preview(_, items, ctx)
+function M.action_preview(items, _, ctx)
   local item = items[1]
   if item == nil or not vim.api.nvim_buf_is_loaded(item.bufnr) then
     return

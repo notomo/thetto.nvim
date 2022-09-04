@@ -4,7 +4,7 @@ function M.after(_, _)
   vim.cmd.nohlsearch()
 end
 
-function M.action_execute(_, items)
+function M.action_execute(items)
   for _, item in ipairs(items) do
     local cmd = item.cmd_prefix .. item.excmd
     vim.cmd(cmd)
@@ -12,7 +12,7 @@ function M.action_execute(_, items)
   end
 end
 
-function M.action_preview(_, items, ctx)
+function M.action_preview(items, _, ctx)
   local item = items[1]
   if item == nil then
     return

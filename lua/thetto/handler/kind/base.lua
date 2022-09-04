@@ -38,7 +38,7 @@ M.behaviors = {
   change_display_limit = { quit = false },
 }
 
-function M.action_toggle_selection(_, items, ctx)
+function M.action_toggle_selection(items, _, ctx)
   ctx.collector:toggle_selections(items)
 end
 
@@ -46,9 +46,9 @@ function M.action_toggle_all_selection(_, _, ctx)
   ctx.collector:toggle_all_selections()
 end
 
-function M.action_move_to_input(self, _, ctx)
+function M.action_move_to_input(_, action_ctx, ctx)
   ctx.ui:into_inputter()
-  ctx.ui:start_insert(self.action_opts.behavior)
+  ctx.ui:start_insert(action_ctx.opts.behavior)
 end
 
 function M.action_move_to_list(_, _, ctx)
@@ -60,72 +60,72 @@ function M.action_quit(_, _, ctx)
   ctx.ui:close()
 end
 
-function M.action_debug_print(_, items)
+function M.action_debug_print(items)
   for _, item in ipairs(items) do
     print(vim.inspect(item))
   end
 end
 
-function M.action_echo(_, items)
+function M.action_echo(items)
   for _, item in ipairs(items) do
     print(item.value)
   end
 end
 
-function M.action_yank(self, items)
+function M.action_yank(items, action_ctx)
   local values = vim.tbl_map(function(item)
-    return item[self.action_opts.key]
+    return item[action_ctx.opts.key]
   end, items)
   local value = table.concat(values, "\n")
   if value ~= "" then
-    vim.fn.setreg(self.action_opts.register, value)
+    vim.fn.setreg(action_ctx.opts.register, value)
     print("yank: " .. value)
   end
 end
 
-function M.action_append(self, items)
+function M.action_append(items, action_ctx)
   for _, item in ipairs(items) do
-    vim.api.nvim_put({ item[self.action_opts.key] }, self.action_opts.type, true, true)
+    vim.api.nvim_put({ item[action_ctx.opts.key] }, action_ctx.opts.type, true, true)
   end
 end
 
-function M.action_add_filter(self, _, ctx)
-  local filter_name = self.action_opts.name
+function M.action_add_filter(_, action_ctx, ctx)
+  local filter_name = action_ctx.opts.name
   ctx.collector:add_filter(filter_name)
 end
 
-function M.action_remove_filter(self, _, ctx)
-  local filter_name = self.action_opts.name or ctx.ui:current_position_filter().name
+function M.action_remove_filter(_, action_ctx, ctx)
+  local filter_name = action_ctx.opts.name or ctx.ui:current_position_filter().name
   return nil, ctx.collector:remove_filter(filter_name)
 end
 
-function M.action_inverse_filter(self, _, ctx)
-  local filter_name = self.action_opts.name or ctx.ui:current_position_filter().name
+function M.action_inverse_filter(_, action_ctx, ctx)
+  local filter_name = action_ctx.opts.name or ctx.ui:current_position_filter().name
   ctx.collector:inverse_filter(filter_name)
 end
 
-function M.action_change_filter(self, _, ctx)
+function M.action_change_filter(_, action_ctx, ctx)
   local old_filter_name = ctx.ui:current_position_filter().name
-  return nil, ctx.collector:change_filter(old_filter_name, self.action_opts.name)
+  return nil, ctx.collector:change_filter(old_filter_name, action_ctx.opts.name)
 end
 
-function M.action_reverse_sorter(self, _, ctx)
+function M.action_reverse_sorter(_, action_ctx, ctx)
   if ctx.collector.sorters:length() == 0 then
     return nil, "no sorter"
   end
-  return nil, ctx.collector:reverse_sorter(self.action_opts.name or ctx.collector.sorters[1].name)
+  return nil, ctx.collector:reverse_sorter(action_ctx.opts.name or ctx.collector.sorters[1].name)
 end
 
-function M.action_toggle_sorter(self, _, ctx)
-  local sorter_name = self.action_opts.name
+function M.action_toggle_sorter(_, action_ctx, ctx)
+  local sorter_name = action_ctx.opts.name
   return nil, ctx.collector:toggle_sorter(sorter_name)
 end
 
-function M.action_toggle_preview(self, items, ctx)
+function M.action_toggle_preview(items, _, ctx)
   if ctx.ui:exists_same_preview(items) then
     ctx.ui:close_preview()
   else
-    return self.executor:action(items, ctx, "preview")
+    return ctx.executor:action(items, ctx, "preview")
   end
 end
 
@@ -133,12 +133,12 @@ function M.action_close_preview(_, _, ctx)
   ctx.ui:close_preview()
 end
 
-function M.action_resume_previous(self, _, ctx)
+function M.action_resume_previous(_, action_ctx, ctx)
   local previous_ctx = ctx:resume_previous()
   if previous_ctx then
     return nil, previous_ctx.ui:resume()
   end
-  if self.action_opts.wrap then
+  if action_ctx.opts.wrap then
     local first_ctx = require("thetto.core.context").resume()
     if first_ctx then
       return nil, first_ctx.ui:resume()
@@ -147,12 +147,12 @@ function M.action_resume_previous(self, _, ctx)
   return nil, "no context"
 end
 
-function M.action_resume_next(self, _, ctx)
+function M.action_resume_next(_, action_ctx, ctx)
   local next_ctx = ctx:resume_next()
   if next_ctx then
     return nil, next_ctx.ui:resume()
   end
-  if self.action_opts.wrap then
+  if action_ctx.opts.wrap then
     local last_ctx = ctx:resume_last()
     if last_ctx then
       return nil, last_ctx.ui:resume()
@@ -169,11 +169,11 @@ function M.action_go_to_previous_page(_, _, ctx)
   ctx.collector:change_page_offset(-1)
 end
 
-function M.action_change_display_limit(self, _, ctx)
-  ctx.collector:change_display_limit(self.action_opts.offset)
+function M.action_change_display_limit(_, action_ctx, ctx)
+  ctx.collector:change_display_limit(action_ctx.opts.offset)
 end
 
-function M.action_append_filter_input(_, items, ctx)
+function M.action_append_filter_input(items, _, ctx)
   local item = items[1]
   if not (item and item.value) then
     return

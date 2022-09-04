@@ -41,12 +41,8 @@ function Executor._action(self, action_name, kind_name, items, action_opts)
   end
 
   return function(ctx)
-    if action.behavior.quit then
-      ctx.ui:close()
-    end
     return action:execute(items, ctx)
-  end,
-    nil
+  end, nil
 end
 
 function Executor.action(self, items, ctx, action_name, action_opts)

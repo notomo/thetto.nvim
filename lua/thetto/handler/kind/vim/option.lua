@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_toggle(_, items)
+function M.action_toggle(items)
   for _, item in ipairs(items) do
     local name = item.option.name
     local info = vim.api.nvim_get_option_info(name)

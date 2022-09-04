@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_checkout(_, items)
+function M.action_checkout(items)
   local item = items[1]
   if not item then
     return nil, "no item"

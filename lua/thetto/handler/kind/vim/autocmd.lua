@@ -1,12 +1,12 @@
 local M = {}
 
-function M.action_delete_group(_, items)
+function M.action_delete_group(items)
   for _, item in ipairs(items) do
     vim.api.nvim_clear_autocmds({ group = item.autocmd.group })
   end
 end
 
-function M.action_delete_autocmd_by_pattern(_, items)
+function M.action_delete_autocmd_by_pattern(items)
   for _, item in ipairs(items) do
     vim.api.nvim_clear_autocmds({
       group = item.autocmd.group,
@@ -16,7 +16,7 @@ function M.action_delete_autocmd_by_pattern(_, items)
   end
 end
 
-function M.action_delete_autocmd_by_event(_, items)
+function M.action_delete_autocmd_by_event(items)
   for _, item in ipairs(items) do
     vim.api.nvim_clear_autocmds({
       group = item.autocmd.group,

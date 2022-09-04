@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_remove(_, items)
+function M.action_remove(items)
   local ids = vim.tbl_map(function(item)
     return item.container_id
   end, items)

@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_remove(_, items)
+function M.action_remove(items)
   local ids = vim.tbl_map(function(item)
     return item.image_id
   end, items)
@@ -9,7 +9,7 @@ function M.action_remove(_, items)
   return require("thetto.util.job").execute(cmd)
 end
 
-function M.action_untag(_, items)
+function M.action_untag(items)
   local ids = vim.tbl_map(function(item)
     return item.value
   end, items)

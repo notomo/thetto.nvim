@@ -2,7 +2,7 @@ local M = {}
 
 M.cmd = { "kill" }
 
-function M.action_kill(_, items)
+function M.action_kill(items)
   local pids = {}
   for _, item in ipairs(items) do
     table.insert(pids, item.pid)

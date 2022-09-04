@@ -1,12 +1,12 @@
 local M = {}
 
-function M.action_execute(_, items)
+function M.action_execute(items)
   for _, item in ipairs(items) do
     require("thetto").start(item.value)
   end
 end
 
-function M.action_resume(_, items)
+function M.action_resume(items)
   local item = items[1]
   if not item then
     return

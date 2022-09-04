@@ -33,7 +33,7 @@ function M.escape(path)
   return ([[`='%s'`]]):format(path:gsub("'", "''"))
 end
 
-function M.action_open(_, items)
+function M.action_open(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -45,7 +45,7 @@ function M.action_open(_, items)
   end
 end
 
-function M.action_tab_open(_, items)
+function M.action_tab_open(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -58,14 +58,14 @@ function M.action_tab_open(_, items)
   end
 end
 
-function M.action_tab_drop(_, items)
+function M.action_tab_drop(items)
   for _, item in ipairs(items) do
     vim.cmd.drop({ mods = { tab = 0 }, args = { filelib.escape(item.path) } })
     adjust_cursor(item)
   end
 end
 
-function M.action_vsplit_open(_, items)
+function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -78,7 +78,7 @@ function M.action_vsplit_open(_, items)
   end
 end
 
-function M.action_preview(_, items, ctx)
+function M.action_preview(items, _, ctx)
   local item = items[1]
   if item == nil then
     return
@@ -91,14 +91,14 @@ function M.action_preview(_, items, ctx)
   end
 end
 
-function M.action_load_buffer(_, items)
+function M.action_load_buffer(items)
   for _, item in ipairs(items) do
     local bufnr = vim.fn.bufadd(item.path)
     vim.fn.bufload(bufnr)
   end
 end
 
-function M.action_delete_buffer(_, items)
+function M.action_delete_buffer(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
@@ -119,15 +119,15 @@ local to_dirs = function(items)
   return dirs
 end
 
-function M.action_directory_open(self, items)
-  directory_kind.action_open(self, to_dirs(items))
+function M.action_directory_open(items, action_ctx)
+  directory_kind.action_open(to_dirs(items), action_ctx)
 end
 
-function M.action_directory_tab_open(self, items)
-  directory_kind.action_tab_open(self, to_dirs(items))
+function M.action_directory_tab_open(items, action_ctx)
+  directory_kind.action_tab_open(to_dirs(items), action_ctx)
 end
 
-function M.action_directory_enter(_, items)
+function M.action_directory_enter(items)
   local item = items[1]
   if item == nil then
     return
@@ -136,7 +136,7 @@ function M.action_directory_enter(_, items)
   require("thetto").start("file/in_dir", { opts = { cwd = path } })
 end
 
-function M.action_list_parents(_, items)
+function M.action_list_parents(items)
   local item = items[1]
   if item == nil then
     return

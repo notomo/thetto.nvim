@@ -1,6 +1,6 @@
 local M = {}
 
-function M.action_checkout(_, items)
+function M.action_checkout(items)
   local item = items[1]
   if item == nil then
     return
@@ -10,7 +10,7 @@ function M.action_checkout(_, items)
   return require("thetto.util.job").execute(cmd)
 end
 
-function M.action_delete(_, items)
+function M.action_delete(items)
   local branches = {}
   for _, item in ipairs(items) do
     table.insert(branches, item.value)
