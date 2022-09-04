@@ -3,7 +3,7 @@ local util = require("thetto.util.lsp")
 
 local M = {}
 
-function M._to_item(_, cwd)
+function M._to_item(cwd)
   local to_relative = pathlib.relative_modifier(cwd)
   return function(v)
     local path = vim.uri_to_fname(v.uri)
