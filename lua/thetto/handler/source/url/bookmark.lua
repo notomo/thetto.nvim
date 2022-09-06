@@ -45,6 +45,7 @@ function M.collect(source_ctx)
 end
 
 M.kind_name = "file"
+M.default_action = "open_browser"
 
 M.actions = {
   opts = { yank = { key = "url" } },
