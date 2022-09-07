@@ -53,8 +53,8 @@ end
 function Inputter.observable(self)
   local observable = require("thetto.vendor.misclib.observable").new(function(observer)
     vim.api.nvim_buf_attach(self._bufnr, false, {
-      on_lines = function()
-        observer:next()
+      on_lines = function(_, _, _, row)
+        observer:next(row)
       end,
       on_detach = function()
         observer:complete()

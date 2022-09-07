@@ -65,7 +65,6 @@ local default = {
   end,
   action = nil,
   display_limit = 100,
-  debounce_ms = 50,
   throttle_ms = 50,
   filters = nil,
   sorters = nil,

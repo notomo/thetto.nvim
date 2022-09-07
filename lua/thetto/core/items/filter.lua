@@ -31,6 +31,7 @@ function Filter.new(name, inversed, key, modifier)
     _key = _key,
     is_interactive = name == "interactive",
     _modifier = modifier,
+    debounce_ms = origin.debounce_ms or 50,
   }
 
   return setmetatable(tbl, Filter)

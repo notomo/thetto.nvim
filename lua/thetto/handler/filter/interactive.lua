@@ -5,4 +5,6 @@ function M.apply(_, _, items)
   return items
 end
 
+M.debounce_ms = 300
+
 return M

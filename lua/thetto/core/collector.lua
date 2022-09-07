@@ -37,7 +37,6 @@ function Collector.new(source_name, source_opts, opts)
     source_ctx = SourceContext.new(
       opts.pattern,
       opts.cwd,
-      opts.debounce_ms,
       opts.throttle_ms,
       opts.range,
       filters:has_interactive(),
@@ -78,11 +77,16 @@ function Collector.subscribe_input(self, immediately, input_observable, get_line
     end
     return err
   end)
-  local update_with_debounce = wraplib.debounce(self.source_ctx.debounce_ms, function()
-    return self:update_with_throttle()
-  end)
+
+  local update_with_debounces = vim.tbl_map(function(filter)
+    return wraplib.debounce(filter.debounce_ms, function()
+      return self:update_with_throttle()
+    end)
+  end, self.filters:values())
   input_observable:subscribe({
-    next = function()
+    next = function(row)
+      local filter_index = row + 1
+      local update_with_debounce = update_with_debounces[filter_index] or update_with_debounces[1]
       update_with_debounce()
     end,
     complete = function()
