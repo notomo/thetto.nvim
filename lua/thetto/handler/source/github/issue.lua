@@ -3,6 +3,7 @@ local M = {}
 M.opts = {
   owner = nil,
   repo_with_owner = nil,
+  extra_args = {},
 }
 
 function M.collect(source_ctx)
@@ -18,7 +19,7 @@ function M.collect(source_ctx)
 
   local repo_with_owner = source_ctx.opts.repo_with_owner
   local owner = source_ctx.opts.owner
-  if not (repo_with_owner or owner) then
+  if not (repo_with_owner or owner) and repo_with_owner ~= "" then
     repo_with_owner =
       vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
   end
@@ -30,12 +31,13 @@ function M.collect(source_ctx)
     "--json",
     "author,createdAt,state,title,url",
   }
-  if repo_with_owner then
+  if repo_with_owner and repo_with_owner ~= "" then
     vim.list_extend(cmd, { "--repo", repo_with_owner })
   end
   if owner then
     vim.list_extend(cmd, { "--owner", owner })
   end
+  vim.list_extend(cmd, source_ctx.opts.extra_args)
   vim.list_extend(cmd, vim.split(pattern, "%s+"))
 
   return require("thetto.util.job").run(cmd, source_ctx, function(issue)
