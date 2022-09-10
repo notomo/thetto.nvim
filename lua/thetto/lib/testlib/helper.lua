@@ -93,16 +93,12 @@ function helper.sync_execute(...)
 end
 
 function helper.sync_reload()
-  -- edit! not work?
-  local collector = require("thetto").reload()
-  if collector == nil then
-    return
-  end
-  local ok = collector:wait(1000)
-  if not ok then
-    assert(false, "job wait timeout")
-  end
-  return collector
+  local promise = require("thetto").reload()
+  local on_finished = helper.on_finished()
+  promise:finally(function()
+    on_finished()
+  end)
+  on_finished:wait()
 end
 
 function helper.wait_ui(f)

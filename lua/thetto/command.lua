@@ -89,24 +89,26 @@ function ReturnValue.start(source_name, raw_args)
 end
 
 function ReturnValue.reload(bufnr)
-  local ctx, ctx_err = Context.get_from_path(bufnr)
-  if ctx_err then
-    return nil, ctx_err
-  end
+  return require("thetto.vendor.promise").new(function(resolve, reject)
+    local ctx, ctx_err = Context.get_from_path(bufnr)
+    if ctx_err then
+      return reject(ctx_err)
+    end
 
-  local collector = ctx.collector
+    local collector = ctx.collector
 
-  local start_err = collector:start()
-  if start_err ~= nil then
-    return nil, start_err
-  end
+    local start_err = collector:start(nil, resolve, reject)
+    if start_err ~= nil then
+      return reject(start_err)
+    end
 
-  local update_err = collector:update()
-  if update_err ~= nil then
-    return nil, update_err
-  end
-
-  return collector, nil
+    local update_err = collector:update()
+    if update_err ~= nil then
+      return reject(update_err)
+    end
+  end):catch(function(e)
+    require("thetto.vendor.misclib.message").warn(e)
+  end)
 end
 
 function ReturnValue.resume(source_name)
