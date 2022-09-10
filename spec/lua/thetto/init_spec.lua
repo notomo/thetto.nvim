@@ -422,7 +422,7 @@ describe("thetto.execute()", function()
   it("should show an error message if not found action", function()
     thetto.start(test_source1)
 
-    thetto.execute("invalid")
+    helper.sync_execute("invalid")
 
     assert.exists_message("not found action: invalid")
   end)
@@ -431,7 +431,7 @@ describe("thetto.execute()", function()
     thetto.start(test_source1)
     helper.sync_input({ "hoge" })
 
-    thetto.execute("open")
+    helper.sync_execute("open")
 
     assert.exists_message("not found action: open")
   end)
@@ -440,7 +440,7 @@ describe("thetto.execute()", function()
     thetto.start(test_source1)
     helper.sync_input({ "hoge" })
 
-    thetto.execute("open")
+    helper.sync_execute("open")
 
     assert.exists_message("not found action: open")
   end)
@@ -889,7 +889,7 @@ describe("remove_filter action", function()
   it("cannot remove the last filter", function()
     thetto.start(test_source1)
 
-    thetto.execute("remove_filter")
+    helper.sync_execute("remove_filter")
     assert.exists_message("the last filter cannot be removed")
   end)
 end)

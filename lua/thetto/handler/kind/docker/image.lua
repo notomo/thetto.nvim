@@ -6,7 +6,7 @@ function M.action_remove(items)
   end, items)
   local cmd = { "docker", "rmi" }
   vim.list_extend(cmd, ids)
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 function M.action_untag(items)
@@ -15,7 +15,7 @@ function M.action_untag(items)
   end, items)
   local cmd = { "docker", "rmi" }
   vim.list_extend(cmd, ids)
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 return M

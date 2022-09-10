@@ -32,7 +32,7 @@ function M.action_enter(items)
   if item == nil then
     return
   end
-  require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
+  return require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
 end
 
 function M.action_preview(items, _, ctx)
@@ -53,7 +53,7 @@ function M.action_list_parents(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h:h:h")
-  require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
 end
 
 M.action_open = M.action_cd

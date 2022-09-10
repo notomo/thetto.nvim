@@ -11,7 +11,7 @@ function M.action_kill(items)
   local cmd = vim.deepcopy(M.cmd)
   vim.list_extend(cmd, pids)
 
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 return M

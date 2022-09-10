@@ -83,41 +83,50 @@ function Executor._actions(self, items, ctx, action_name, action_opts)
     table.insert(actions, action)
   end
 
-  local result
+  return actions, nil
+end
+
+local Promise = require("thetto.vendor.promise")
+function Executor._execute(ctx, actions)
+  local promise = Promise.resolve()
   for _, action in ipairs(actions) do
-    local r, err = action(ctx)
+    local result, err = action(ctx)
     if err ~= nil then
-      return nil, err
+      return promise:next(function()
+        return Promise.reject(err)
+      end)
     end
-    result = r
+    promise = promise:next(function()
+      return Promise.resolve(result)
+    end)
   end
-  return result, nil
+  return promise
 end
 
 function Executor.actions(self, items, ctx, main_action_name, fallback_action_names, action_opts)
   vim.validate({
     fallback_action_names = { fallback_action_names, "table" },
   })
-  local action_result, action_err = self:_actions(items, ctx, main_action_name, action_opts)
+  local main_actions, action_err = self:_actions(items, ctx, main_action_name, action_opts)
   if not action_err then
-    return action_result, nil
+    return self._execute(ctx, main_actions)
   end
   if not vim.startswith(action_err, "not found action:") then
-    return nil, action_err
+    return Promise.reject(action_err)
   end
 
   local errs = { action_err }
   for _, action_name in ipairs(fallback_action_names) do
-    local result, err = self:_actions(items, ctx, action_name, action_opts)
+    local actions, err = self:_actions(items, ctx, action_name, action_opts)
     if not err then
-      return result, nil
+      return self._execute(ctx, actions)
     end
     table.insert(errs, err)
     if not vim.startswith(err, "not found action:") then
       break
     end
   end
-  return nil, table.concat(errs, ", ")
+  return Promise.reject(table.concat(errs, ", "))
 end
 
 function Executor.auto(self, ctx, action_name)
@@ -134,7 +143,7 @@ function Executor.auto(self, ctx, action_name)
 
   local needs_preview = action_name == "preview" and kind:find_action(action_name, {})
   local execute_action = function(items)
-    return self:actions(items, ctx, action_name, {}, self._default_action_opts)
+    return self:actions(items, ctx, action_name, {}, self._default_action_opts):catch(function() end)
   end
   return execute_action, needs_preview
 end

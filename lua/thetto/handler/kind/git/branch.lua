@@ -15,7 +15,7 @@ function M.action_checkout(items, action_ctx)
   end
   table.insert(cmd, item.value)
 
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 M.opts.delete = { force = false, args = { "--delete" } }
@@ -29,7 +29,7 @@ function M.action_delete(items, action_ctx)
   vim.list_extend(cmd, action_ctx.opts.args)
   vim.list_extend(cmd, branches)
 
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 function M.action_force_delete(items, action_ctx, ctx)

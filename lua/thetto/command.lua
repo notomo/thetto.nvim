@@ -10,7 +10,9 @@ local _execute_action = function(ctx, action_name, raw_args)
   )
   local range = require("thetto.vendor.misclib.visual_mode").row_range()
   local items = ctx.ui:selected_items(args.action_name, range)
-  return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts)
+  return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts):catch(function(e)
+    require("thetto.vendor.misclib.message").warn(e)
+  end)
 end
 
 function ReturnValue.start(source_name, raw_args)
@@ -78,10 +80,7 @@ function ReturnValue.start(source_name, raw_args)
 
   return promise
     :next(function()
-      local _, exec_err = _execute_action(ctx, opts.action, { action_opts = args.action_opts })
-      if exec_err ~= nil then
-        return require("thetto.vendor.misclib.message").warn(exec_err)
-      end
+      return _execute_action(ctx, opts.action, { action_opts = args.action_opts })
     end)
     :catch(function(e)
       require("thetto.vendor.misclib.message").warn(e)

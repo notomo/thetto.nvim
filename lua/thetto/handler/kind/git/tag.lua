@@ -7,7 +7,7 @@ function M.action_checkout(items)
   end
 
   local cmd = { "git", "checkout", "-b", item.value, "refs/tags/" .. item.value }
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 function M.action_delete(items)
@@ -19,7 +19,7 @@ function M.action_delete(items)
   local cmd = { "git", "tag", "--delete" }
   vim.list_extend(cmd, branches)
 
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto.util.job").promise(cmd)
 end
 
 M.default_action = "checkout"

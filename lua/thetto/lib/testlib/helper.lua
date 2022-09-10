@@ -73,7 +73,6 @@ end
 
 function helper.sync_open(...)
   local promise = require("thetto").start(...)
-
   local on_finished = helper.on_finished()
   promise:finally(function()
     on_finished()
@@ -82,14 +81,12 @@ function helper.sync_open(...)
 end
 
 function helper.sync_execute(...)
-  local job = require("thetto").execute(...)
-  if job == nil then
-    return
-  end
-  local ok = job:wait(1000)
-  if not ok then
-    assert(false, "job wait timeout")
-  end
+  local promise = require("thetto").execute(...)
+  local on_finished = helper.on_finished()
+  promise:finally(function()
+    on_finished()
+  end)
+  on_finished:wait()
 end
 
 function helper.sync_reload()

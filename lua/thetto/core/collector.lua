@@ -143,10 +143,6 @@ function Collector.start(self, input_pattern, resolve, reject)
   return nil
 end
 
-function Collector.wait(self, ms)
-  return self._result:wait(ms)
-end
-
 function Collector.discard(self)
   return self._result:discard()
 end
