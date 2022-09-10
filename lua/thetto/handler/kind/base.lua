@@ -123,10 +123,9 @@ end
 
 function M.action_toggle_preview(items, _, ctx)
   if ctx.ui:exists_same_preview(items) then
-    ctx.ui:close_preview()
-  else
-    return ctx.executor:action(items, ctx, "preview")
+    return ctx.ui:close_preview()
   end
+  return ctx.executor:actions(items, ctx, "preview", {})
 end
 
 function M.action_close_preview(_, _, ctx)

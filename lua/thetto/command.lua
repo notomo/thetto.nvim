@@ -156,7 +156,7 @@ function ReturnValue.resume_execute(raw_args)
 
   local range = require("thetto.vendor.misclib.visual_mode").row_range()
   local items = ctx.ui:selected_items(args.action_name, range)
-  return ctx.executor:action(items, ctx, args.action_name, args.action_opts)
+  return ctx.executor:actions(items, ctx, args.action_name, {}, args.action_opts)
 end
 
 function ShowError.setup(setting)

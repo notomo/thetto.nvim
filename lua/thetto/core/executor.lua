@@ -20,7 +20,7 @@ function Executor.new(default_kind_name, default_action_opts, default_action_nam
   return setmetatable(tbl, Executor)
 end
 
-function Executor._action(self, action_name, kind_name, items, action_opts)
+function Executor._action_function(self, action_name, kind_name, items, action_opts)
   local kind, err = Kind.new(self, kind_name)
   if err ~= nil then
     return nil, err
@@ -45,7 +45,7 @@ function Executor._action(self, action_name, kind_name, items, action_opts)
   end, nil
 end
 
-function Executor.action(self, items, ctx, action_name, action_opts)
+function Executor._actions(self, items, ctx, action_name, action_opts)
   vim.validate({
     items = { items, "table" },
     ctx = { ctx, "table" },
@@ -76,7 +76,7 @@ function Executor.action(self, items, ctx, action_name, action_opts)
     local grouped_items = vim.tbl_map(function(pair)
       return pair[1]
     end, item_pairs)
-    local action, err = self:_action(action_name, kind_name, grouped_items, action_opts)
+    local action, err = self:_action_function(action_name, kind_name, grouped_items, action_opts)
     if err ~= nil then
       return nil, err
     end
@@ -98,7 +98,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
   vim.validate({
     fallback_action_names = { fallback_action_names, "table" },
   })
-  local action_result, action_err = self:action(items, ctx, main_action_name, action_opts)
+  local action_result, action_err = self:_actions(items, ctx, main_action_name, action_opts)
   if not action_err then
     return action_result, nil
   end
@@ -108,7 +108,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
 
   local errs = { action_err }
   for _, action_name in ipairs(fallback_action_names) do
-    local result, err = self:action(items, ctx, action_name, action_opts)
+    local result, err = self:_actions(items, ctx, action_name, action_opts)
     if not err then
       return result, nil
     end
@@ -133,11 +133,10 @@ function Executor.auto(self, ctx, action_name)
   end
 
   local needs_preview = action_name == "preview" and kind:find_action(action_name, {})
-  return function(items)
-    local _, err = self:action(items, ctx, action_name, self._default_action_opts)
-    return err
-  end,
-    needs_preview
+  local execute_action = function(items)
+    return self:actions(items, ctx, action_name, {}, self._default_action_opts)
+  end
+  return execute_action, needs_preview
 end
 
 return Executor
