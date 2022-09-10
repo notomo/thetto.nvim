@@ -9,14 +9,9 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local pattern = source_ctx.pattern
-  if not source_ctx.interactive and pattern == nil then
-    pattern = vim.fn.input("Pattern: ")
-  end
-  if pattern == nil or pattern == "" then
-    return function(observer)
-      observer:complete()
-    end
+  local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
+  if not pattern then
+    return subscriber
   end
 
   local paths = source_ctx.cwd
