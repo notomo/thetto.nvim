@@ -2,6 +2,7 @@ local ReturnValue = require("thetto.vendor.misclib.error_handler").for_return_va
 local ShowError = require("thetto.vendor.misclib.error_handler").for_show_error()
 
 local Context = require("thetto.core.context")
+local Promise = require("thetto.vendor.promise")
 
 local _execute_action = function(ctx, action_name, raw_args)
   local args = require("thetto.core.argument").ExecuteArgs.new(
@@ -29,7 +30,7 @@ function ReturnValue.start(source_name, raw_args)
   )
   if opts_err ~= nil then
     require("thetto.vendor.misclib.message").warn(opts_err)
-    return require("thetto.vendor.promise").resolve()
+    return Promise.resolve()
   end
 
   local old_ctx = Context.get(source_name)
@@ -40,7 +41,7 @@ function ReturnValue.start(source_name, raw_args)
   local collector, err = require("thetto.core.collector").new(source_name, source_opts, opts)
   if err ~= nil then
     require("thetto.vendor.misclib.message").warn(err)
-    return require("thetto.vendor.promise").resolve()
+    return Promise.resolve()
   end
 
   local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name, collector.source.actions)
@@ -53,7 +54,7 @@ function ReturnValue.start(source_name, raw_args)
   local ui = require("thetto.view.ui").new(collector, opts.insert)
   local ctx = Context.new(source_name, collector, ui, executor, opts.can_resume)
 
-  local promise = require("thetto.vendor.promise").new(function(resolve, reject)
+  local promise = Promise.new(function(resolve, reject)
     local start_err = collector:start(opts.pattern, resolve, reject)
     if start_err ~= nil then
       return reject(start_err)
@@ -88,7 +89,7 @@ function ReturnValue.start(source_name, raw_args)
 end
 
 function ReturnValue.reload(bufnr)
-  return require("thetto.vendor.promise").new(function(resolve, reject)
+  return Promise.new(function(resolve, reject)
     local ctx, ctx_err = Context.get_from_path(bufnr)
     if ctx_err then
       return reject(ctx_err)
@@ -131,7 +132,7 @@ end
 function ReturnValue.execute(action_name, raw_args)
   local ctx, ctx_err = Context.get_from_path()
   if ctx_err ~= nil then
-    return nil, ctx_err
+    return Promise.reject(ctx_err)
   end
   return _execute_action(ctx, action_name, raw_args)
 end
@@ -149,7 +150,7 @@ function ReturnValue.resume_execute(raw_args)
   local args = require("thetto.core.argument").ResumeExecuteArgs.new(raw_args)
   local ctx, ctx_err = Context.resume(args.source_name)
   if ctx_err ~= nil then
-    return nil, ctx_err
+    return Promise.reject(ctx_err)
   end
   ctx.ui:update_offset(args.opts.offset)
 
