@@ -5,7 +5,7 @@ local start = function(bufnr, item)
   vim.bo[bufnr].filetype = "diff"
 
   local cmd = { "git", "show", "--date=iso", item.commit_hash }
-  return require("thetto.util.job").execute(cmd, {
+  return require("thetto.util.job").promise(cmd, {
     on_exit = function(job_self)
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return
@@ -17,14 +17,14 @@ local start = function(bufnr, item)
 end
 
 local open = function(items, f)
+  local promises = {}
   for _, item in ipairs(items) do
     local bufnr = vim.api.nvim_create_buf(false, true)
-    local _, err = start(bufnr, item)
-    if err then
-      return nil, err
-    end
+    local promise = start(bufnr, item)
+    table.insert(promises, promise)
     f(bufnr)
   end
+  return require("thetto.vendor.promise").all(promises)
 end
 
 function M.action_open(items)
@@ -54,14 +54,9 @@ function M.action_preview(items, _, ctx)
   end
 
   local bufnr = vim.api.nvim_create_buf(false, true)
-  local job, err = start(bufnr, item)
-  if err ~= nil then
-    return nil, err
-  end
-
+  local promise = start(bufnr, item)
   ctx.ui:open_preview(item, { raw_bufnr = bufnr })
-
-  return job, nil
+  return promise
 end
 
 M.default_action = "open"

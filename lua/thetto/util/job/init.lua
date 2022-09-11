@@ -145,17 +145,22 @@ function M.execute(cmd, opts)
 end
 
 function M.promise(cmd, opts)
+  opts = opts or {}
+
   return require("thetto.vendor.promise").new(function(resolve, reject)
     local default_opts = {
       stderr_buffered = true,
       stdout_buffered = true,
     }
-    opts = vim.tbl_extend("force", default_opts, opts or {})
+    local on_exit = opts.on_exit or function(job)
+      jobs.print_stdout(job)
+    end
+    opts = vim.tbl_extend("force", default_opts, opts)
     opts.on_exit = function(job, code)
       if code ~= 0 then
         return reject(job.stderr_output)
       end
-      jobs.print_stdout(job)
+      on_exit(job, code)
       return resolve()
     end
 
