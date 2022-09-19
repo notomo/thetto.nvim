@@ -289,12 +289,24 @@ end
 -- for testing
 function UI._changed_after(_) end
 
-vim.api.nvim_set_hl(0, "ThettoSelected", { default = true, link = "Statement" })
-vim.api.nvim_set_hl(0, "ThettoInfo", { default = true, link = "StatusLine" })
-vim.api.nvim_set_hl(0, "ThettoColorLabelOthers", { default = true, link = "StatusLine" })
-vim.api.nvim_set_hl(0, "ThettoColorLabelBackground", { default = true, link = "NormalFloat" })
-vim.api.nvim_set_hl(0, "ThettoInput", { default = true, link = "NormalFloat" })
-vim.api.nvim_set_hl(0, "ThettoPreview", { default = true, link = "Search" })
-vim.api.nvim_set_hl(0, "ThettoFilterInfo", { default = true, link = "Comment" })
+local setup_highlight_groups = function()
+  ItemList.setup_highlight_groups()
+  vim.api.nvim_set_hl(0, "ThettoSelected", { default = true, link = "Statement" })
+  vim.api.nvim_set_hl(0, "ThettoInfo", { default = true, link = "StatusLine" })
+  vim.api.nvim_set_hl(0, "ThettoColorLabelOthers", { default = true, link = "StatusLine" })
+  vim.api.nvim_set_hl(0, "ThettoColorLabelBackground", { default = true, link = "NormalFloat" })
+  vim.api.nvim_set_hl(0, "ThettoInput", { default = true, link = "NormalFloat" })
+  vim.api.nvim_set_hl(0, "ThettoPreview", { default = true, link = "Search" })
+  vim.api.nvim_set_hl(0, "ThettoFilterInfo", { default = true, link = "Comment" })
+end
+
+local group = vim.api.nvim_create_augroup("thetto", {})
+vim.api.nvim_create_autocmd({ "ColorScheme" }, {
+  group = group,
+  pattern = { "*" },
+  callback = setup_highlight_groups,
+})
+
+setup_highlight_groups()
 
 return UI

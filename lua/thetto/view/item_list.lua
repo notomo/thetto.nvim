@@ -35,7 +35,7 @@ function ItemList.new(source_name, width, height, row, column)
     style = "minimal",
     border = {
       { " ", "NormalFloat" },
-      { border_char, ItemList._ThettoAboveBorder() },
+      { border_char, "ThettoAboveBorder" },
       { " ", "NormalFloat" },
       { " ", "NormalFloat" },
       { "", "NormalFloat" },
@@ -199,13 +199,13 @@ function ItemList.has(self, id)
   return self._window == id
 end
 
-ItemList._ThettoAboveBorder = highlightlib.Ensured.new("ThettoAboveBorder", function(hl_group)
-  return highlightlib.default(hl_group, {
+ItemList.setup_highlight_groups = function()
+  highlightlib.default("ThettoAboveBorder", {
     ctermbg = { "NormalFloat", 235 },
     guibg = { "NormalFloat", "#213243" },
     ctermfg = { "Comment", 103 },
     guifg = { "Comment", "#8d9eb2" },
   })
-end)
+end
 
 return ItemList
