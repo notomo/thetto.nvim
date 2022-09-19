@@ -1,5 +1,5 @@
 local InputFilters = require("thetto.view.input_filters")
-local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
+local Decorator = require("thetto.lib.decorator")
 local windowlib = require("thetto.vendor.misclib.window")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
@@ -43,7 +43,7 @@ function Inputter.new(source_name, filters, input_lines, width, height, row, col
   local tbl = {
     _bufnr = bufnr,
     _window = window,
-    _hl_factory = HighlighterFactory.new("thetto-input-filter-info"),
+    _decorator_factory = Decorator.factory("thetto-input-filter-info"),
     _source_name = source_name,
     _input_filters = InputFilters.new(source_name, filters),
   }
@@ -84,10 +84,10 @@ function Inputter.redraw(self, input_lines, filters)
     vim.api.nvim_buf_set_lines(self._bufnr, height, -1, false, {})
   end
 
-  local highlighter = self._hl_factory:reset(self._bufnr)
+  local decorator = self._decorator_factory:reset(self._bufnr)
   for i, filter in ipairs(filters) do
     local filter_info = ("[%s]"):format(filter.name)
-    highlighter:set_virtual_text(i - 1, { { filter_info, "ThettoFilterInfo" } }, {
+    decorator:add_virtual_text(i - 1, 0, { { filter_info, "ThettoFilterInfo" } }, {
       virt_text_pos = "right_align",
     })
   end

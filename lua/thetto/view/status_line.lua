@@ -1,5 +1,5 @@
 local Context = require("thetto.core.context")
-local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
+local Decorator = require("thetto.lib.decorator")
 local windowlib = require("thetto.vendor.misclib.window")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
@@ -43,7 +43,10 @@ function StatusLine.new(source_name, width, height, row, column)
     end,
   })
 
-  local tbl = { _window = window, _hl_factory = HighlighterFactory.new("thetto-info-text", bufnr) }
+  local tbl = {
+    _window = window,
+    _decorator_factory = Decorator.factory("thetto-info-text", bufnr),
+  }
   return setmetatable(tbl, StatusLine)
 end
 
@@ -64,8 +67,8 @@ function StatusLine.redraw(self, source, sorters, finished, start_index, end_ind
   end
 
   local text = ("%s%s [ %s - %s / %s ]"):format(source.name, sorter_info, start_index, end_index, result_count)
-  local highlighter = self._hl_factory:reset()
-  highlighter:set_virtual_text(0, { { text, "ThettoInfo" }, { " " }, { status, "Comment" } }, {
+  local decorator = self._decorator_factory:reset()
+  decorator:add_virtual_text(0, 0, { { text, "ThettoInfo" }, { " " }, { status, "Comment" } }, {
     virt_text_pos = "overlay",
   })
 end

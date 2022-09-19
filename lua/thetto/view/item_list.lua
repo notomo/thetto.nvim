@@ -4,7 +4,7 @@ local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")
 local visual_mode = require("thetto.vendor.misclib.visual_mode")
 local highlightlib = require("thetto.lib.highlight")
-local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
+local Decorator = require("thetto.lib.decorator")
 local vim = vim
 
 local ItemList = {}
@@ -74,7 +74,7 @@ function ItemList.new(source_name, width, height, row, column)
     _bufnr = bufnr,
     _window = window,
     _group_name = group_name,
-    _highlighter = HighlighterFactory.new(ItemList.hl_ns_name):create(bufnr),
+    _decorator = Decorator.factory(ItemList.hl_ns_name):create(bufnr, true),
   }
   local self = setmetatable(tbl, ItemList)
   self:enable_cursorline()
@@ -96,13 +96,13 @@ function ItemList.redraw(self, items)
 end
 
 function ItemList.highlight(self, first_line, raw_items, source, filters, filter_ctxs, source_ctx)
-  source.highlight(self._highlighter, raw_items, first_line, source_ctx)
+  source.highlight(self._decorator, raw_items, first_line, source_ctx)
 
-  self._highlighter:filter("ThettoSelected", first_line, raw_items, function(item)
+  self._decorator:filter("ThettoSelected", first_line, raw_items, function(item)
     return item.selected
   end)
 
-  filters:highlight(filter_ctxs, self._bufnr, first_line, raw_items, self._highlighter)
+  filters:highlight(filter_ctxs, self._bufnr, first_line, raw_items, self._decorator)
 end
 
 function ItemList.redraw_selections(self, s, e)

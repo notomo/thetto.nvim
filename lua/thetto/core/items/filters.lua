@@ -128,10 +128,10 @@ function Filters.extract_interactive(self, input_lines)
   end
 end
 
-function Filters.highlight(self, filter_ctxs, bufnr, first_line, raw_items, highlighter)
+function Filters.highlight(self, filter_ctxs, bufnr, first_line, raw_items, decorator)
   for i, filter in ipairs(self._filters) do
     if filter.highlight ~= nil then
-      filter:highlight(filter_ctxs:index(i), bufnr, first_line, raw_items, highlighter)
+      filter:highlight(filter_ctxs:index(i), bufnr, first_line, raw_items, decorator)
     end
   end
 end

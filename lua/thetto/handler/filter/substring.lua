@@ -42,7 +42,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoFilterSubstringMatch", { default = true, link = "Boolean" })
 
-function M.highlight(self, filter_ctx, _, first_line, items, highlighter)
+function M.highlight(self, filter_ctx, _, first_line, items, decorator)
   if self.inversed or filter_ctx.input_line == "" then
     return
   end
@@ -73,7 +73,7 @@ function M.highlight(self, filter_ctx, _, first_line, items, highlighter)
 
     local offset = offsets[self.key] or 0
     for _, pos in ipairs(positions) do
-      highlighter:add("ThettoFilterSubstringMatch", first_line + i - 1, offset + pos[1] - 1, offset + pos[2])
+      decorator:highlight("ThettoFilterSubstringMatch", first_line + i - 1, offset + pos[1] - 1, offset + pos[2])
     end
   end
 end

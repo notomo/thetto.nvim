@@ -1,4 +1,4 @@
-local HighlighterFactory = require("thetto.lib.highlight").HighlighterFactory
+local Decorator = require("thetto.lib.decorator")
 local windowlib = require("thetto.vendor.misclib.window")
 local vim = vim
 
@@ -6,7 +6,7 @@ local Sidecar = {}
 Sidecar.__index = Sidecar
 
 function Sidecar.new()
-  local tbl = { _window = nil, _hl_factory = HighlighterFactory.new("thetto-preview") }
+  local tbl = { _window = nil, _decorator_factory = Decorator.factory("thetto-preview") }
   return setmetatable(tbl, Sidecar)
 end
 
@@ -39,7 +39,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     vim.api.nvim_win_set_buf(self._window, bufnr)
   end
 
-  window_open_callback(self._hl_factory, self._window)
+  window_open_callback(self._decorator_factory, self._window)
 
   local index
   if item then
