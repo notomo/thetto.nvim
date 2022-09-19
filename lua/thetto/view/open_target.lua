@@ -17,7 +17,7 @@ local highlight = function(decorator_factory, bufnr, row, range, height)
   local decorator = decorator_factory:create(bufnr)
   if range then
     local row_limit = row + height - 1
-    local end_row = range.e.row > row_limit and row_limit or range.e.row
+    local end_row = range.e.row and (range.e.row > row_limit) and row_limit or range.e.row
     decorator:highlight_range("ThettoPreview", row - 1, end_row, range.s.column, range.e.column)
   else
     decorator:highlight("ThettoPreview", row - 1, 0, -1)
