@@ -47,7 +47,7 @@ function M._to_items(source_ctx, item, parent_key, current_path)
   })
 
   for _, v in ipairs(item.children or {}) do
-    vim.list_extend(items, M._to_items(v, name .. ".", current_path))
+    vim.list_extend(items, M._to_items(source_ctx, v, name .. ".", current_path))
   end
   return items
 end
