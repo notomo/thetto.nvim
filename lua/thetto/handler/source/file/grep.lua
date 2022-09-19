@@ -75,6 +75,9 @@ function M.collect(source_ctx)
       on_exit = function(_)
         work_observer:complete()
       end,
+      on_stderr = function()
+        -- workaround to ignore regex parse error
+      end,
       stdout_buffered = false,
       stderr_buffered = false,
       cwd = source_ctx.cwd,
