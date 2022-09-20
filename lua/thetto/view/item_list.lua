@@ -3,7 +3,6 @@ local windowlib = require("thetto.vendor.misclib.window")
 local bufferlib = require("thetto.lib.buffer")
 local cursorlib = require("thetto.lib.cursor")
 local visual_mode = require("thetto.vendor.misclib.visual_mode")
-local highlightlib = require("thetto.lib.highlight")
 local Decorator = require("thetto.lib.decorator")
 local vim = vim
 
@@ -200,11 +199,10 @@ function ItemList.has(self, id)
 end
 
 ItemList.setup_highlight_groups = function()
-  highlightlib.default("ThettoAboveBorder", {
-    ctermbg = { "NormalFloat", 235 },
-    guibg = { "NormalFloat", "#213243" },
-    ctermfg = { "Comment", 103 },
-    guifg = { "Comment", "#8d9eb2" },
+  local highlightlib = require("thetto.vendor.misclib.highlight")
+  highlightlib.define("ThettoAboveBorder", {
+    fg = vim.api.nvim_get_hl_by_name("Comment", true).foreground,
+    bg = vim.api.nvim_get_hl_by_name("NormalFloat", true).background,
   })
 end
 
