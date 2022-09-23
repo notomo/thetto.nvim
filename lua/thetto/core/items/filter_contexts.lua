@@ -14,13 +14,9 @@ function M.index(self, i)
 end
 
 function M._new_one(ignorecase, smartcase, input_line)
-  if not ignorecase and smartcase and input_line:find("[A-Z]") then
-    ignorecase = false
-  else
-    ignorecase = true
-  end
+  local case_sensitive = not ignorecase and smartcase and input_line:find("[A-Z]")
   return {
-    ignorecase = ignorecase,
+    ignorecase = not case_sensitive,
     input_line = input_line,
   }
 end
