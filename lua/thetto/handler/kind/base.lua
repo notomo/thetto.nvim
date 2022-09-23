@@ -62,13 +62,13 @@ end
 
 function M.action_debug_print(items)
   for _, item in ipairs(items) do
-    print(vim.inspect(item))
+    require("thetto.vendor.misclib.message").info(vim.inspect(item))
   end
 end
 
 function M.action_echo(items)
   for _, item in ipairs(items) do
-    print(item.value)
+    require("thetto.vendor.misclib.message").info(item.value)
   end
 end
 
@@ -79,7 +79,7 @@ function M.action_yank(items, action_ctx)
   local value = table.concat(values, "\n")
   if value ~= "" then
     vim.fn.setreg(action_ctx.opts.register, value)
-    print("yank: " .. value)
+    require("thetto.vendor.misclib.message").info("yank: " .. value)
   end
 end
 
