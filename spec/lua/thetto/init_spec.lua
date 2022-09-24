@@ -265,7 +265,7 @@ describe("thetto", function()
     thetto.execute("move_to_list")
     thetto.execute("move_to_input")
 
-    assert.current_column(#"hoge")
+    assert.cursor_column(#"hoge")
   end)
 
   it("can move to input with behavior as `a` #slow", function()
@@ -277,7 +277,7 @@ describe("thetto", function()
     thetto.execute("move_to_list")
     thetto.execute("move_to_input", { action_opts = { behavior = "a" } })
 
-    assert.current_column(#"hoge" + 1)
+    assert.cursor_column(#"hoge" + 1)
   end)
 
   it("can filter by regex #slow", function()
@@ -605,7 +605,7 @@ describe("thetto.resume()", function()
     thetto.start(test_source1)
     thetto.execute("quit")
 
-    assert.window(current)
+    assert.window_id(current)
   end)
 
   it("can resume latest #slow", function()

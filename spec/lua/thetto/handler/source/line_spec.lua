@@ -65,6 +65,6 @@ test3]])
 
     thetto.execute("open")
 
-    assert.current_window(window)
+    assert.window_id(window)
   end)
 end)
