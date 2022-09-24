@@ -8,7 +8,7 @@ function M.collect(source_ctx)
 
   local cmd = { "capture.zsh", pattern }
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
-    local desc = vim.fn.trim(output, 2)
+    local desc = vim.fn.trim(output, "\n\r", 2)
     local value = vim.split(desc, "%s+")[1]
     return {
       value = value,
