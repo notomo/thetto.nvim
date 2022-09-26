@@ -5,28 +5,30 @@ local M = {}
 
 function M.request(bufnr, method)
   local params = vim.lsp.util.make_position_params()
-  return require("promise").new(function(resolve, reject)
-    vim.lsp.buf_request(bufnr, "textDocument/prepareCallHierarchy", params, function(err, result, ctx)
-      if err then
-        return reject(err)
-      end
-
-      local client = vim.lsp.get_client_by_id(ctx.client_id)
-      if not client then
-        return reject(err)
-      end
-      return resolve(client, result[1])
-    end)
-  end):next(function(client, call_hierarchy_item)
-    return require("promise").new(function(resolve, reject)
-      client.request(method, { item = call_hierarchy_item }, function(err, result)
+  return require("promise")
+    .new(function(resolve, reject)
+      vim.lsp.buf_request(bufnr, "textDocument/prepareCallHierarchy", params, function(err, result, ctx)
         if err then
           return reject(err)
         end
-        return resolve(result)
-      end, bufnr)
+
+        local client = vim.lsp.get_client_by_id(ctx.client_id)
+        if not client then
+          return reject(err)
+        end
+        return resolve(client, result[1])
+      end)
     end)
-  end)
+    :next(function(client, call_hierarchy_item)
+      return require("promise").new(function(resolve, reject)
+        client.request(method, { item = call_hierarchy_item }, function(err, result)
+          if err then
+            return reject(err)
+          end
+          return resolve(result)
+        end, bufnr)
+      end)
+    end)
 end
 
 function M.collect(source_ctx)

@@ -123,11 +123,8 @@ M.ExecuteOption = ExecuteOption
 function ExecuteOption.new(source_name, source_actions)
   source_actions = source_actions or {}
 
-  local user_source_actions = vim.tbl_deep_extend(
-    "force",
-    source_actions,
-    M.user_default.source_actions[source_name] or {}
-  )
+  local user_source_actions =
+    vim.tbl_deep_extend("force", source_actions, M.user_default.source_actions[source_name] or {})
   user_source_actions.opts = user_source_actions.opts or {}
   user_source_actions.behaviors = user_source_actions.behaviors or {}
 
