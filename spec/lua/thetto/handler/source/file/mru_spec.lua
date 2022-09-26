@@ -14,7 +14,7 @@ describe("file/mru source", function()
     helper.search("oldfile")
     thetto.execute()
 
-    assert.file_name("oldfile")
+    assert.buffer_name_tail("oldfile")
   end)
 
   it("can execute directory_open", function()

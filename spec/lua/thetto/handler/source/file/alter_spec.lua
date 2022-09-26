@@ -14,7 +14,7 @@ describe("alter source", function()
 
     helper.sync_open("file/alter", { opts = { insert = false, immediately = true } })
 
-    assert.file_name("file_test.lua")
+    assert.buffer_name_tail("file_test.lua")
   end)
 
   it("can show alternative files including new files", function()
@@ -33,7 +33,7 @@ describe("alter source", function()
     })
     vim.cmd.write({ mods = { silent = true, emsg_silent = true } })
 
-    assert.file_name("file.lua")
+    assert.buffer_name_tail("file.lua")
     assert.dir_name("to")
   end)
 end)

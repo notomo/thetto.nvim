@@ -21,7 +21,7 @@ describe("vim/buffer source", function()
     helper.search("foo")
 
     thetto.execute()
-    assert.file_name("foo")
+    assert.buffer_name_tail("foo")
   end)
 
   it("can show terminal buffers", function()

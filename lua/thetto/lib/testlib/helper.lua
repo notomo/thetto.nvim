@@ -157,10 +157,6 @@ asserts.create("line_count"):register_eq(function()
   return vim.api.nvim_buf_line_count(0)
 end)
 
-asserts.create("file_name"):register_eq(function()
-  return vim.fn.fnamemodify(vim.fn.bufname("%"), ":t")
-end)
-
 asserts.create("dir_name"):register_eq(function()
   return vim.fn.fnamemodify(vim.fn.bufname("%"), ":h:t")
 end)

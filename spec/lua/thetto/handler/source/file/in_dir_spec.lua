@@ -25,7 +25,7 @@ describe("file/in_dir source", function()
 
     thetto.execute()
 
-    assert.file_name("file")
+    assert.buffer_name_tail("file")
   end)
 
   it("can show files in project dir", function()
