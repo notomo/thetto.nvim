@@ -10,7 +10,7 @@ end
 M.kind_name = "word"
 
 M.actions = {
-  action_update = function(_, items)
+  action_update = function(items)
     local item = items[1]
     if not item then
       return
