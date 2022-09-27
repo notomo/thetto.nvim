@@ -71,6 +71,10 @@ function StatusLine.redraw(self, source, sorters, finished, start_index, end_ind
   decorator:add_virtual_text(0, 0, { { text, "ThettoInfo" }, { " " }, { status, "Comment" } }, {
     virt_text_pos = "overlay",
   })
+  -- workaround?
+  vim.api.nvim_win_call(self._window, function()
+    vim.cmd.redraw()
+  end)
 end
 
 function StatusLine.move_to(self, left_column)
