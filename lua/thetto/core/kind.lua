@@ -91,31 +91,41 @@ function Kind.find_action(self, action_name, action_opts)
   return nil, "not found action: " .. name
 end
 
-function Kind.action_names(self)
-  local names = {}
-
-  local extends = vim.tbl_map(function(e)
-    return getmetatable(e)
-  end, self._origin.extends or {})
-  if vim.tbl_isempty(extends) then
-    extends = { {} }
-  end
-
-  local actions = vim.tbl_extend("force", self._origin, unpack(extends))
-  actions = vim.tbl_extend(
-    "force",
-    actions,
-    base,
-    self._execute_opts.source_actions,
-    self._execute_opts.kind_actions[self.name] or {}
-  )
-  for key in pairs(actions) do
-    if vim.startswith(key, Action.PREFIX) then
-      local action_name = key:gsub("^" .. Action.PREFIX, "")
-      table.insert(names, action_name)
+function Kind.action_infos(self)
+  local already = {}
+  local to_action_infos = function(from, actions)
+    local infos = {}
+    for key in pairs(actions) do
+      if already[key] then
+        goto continue
+      end
+      if vim.startswith(key, Action.PREFIX) then
+        local action_name = key:gsub("^" .. Action.PREFIX, "")
+        table.insert(infos, {
+          from = from,
+          name = action_name,
+        })
+        already[key] = true
+      end
+      ::continue::
     end
+    return infos
   end
-  return names
+
+  local action_infos = {}
+
+  vim.list_extend(action_infos, to_action_infos("source_actions option", self._execute_opts.source_actions))
+  vim.list_extend(
+    action_infos,
+    to_action_infos("kind_actions option", self._execute_opts.kind_actions[self.name] or {})
+  )
+  vim.list_extend(action_infos, to_action_infos(self.name, self._origin))
+  for _, extend in ipairs(self._origin.extends or {}) do
+    vim.list_extend(action_infos, to_action_infos(extend.name, getmetatable(extend)))
+  end
+  vim.list_extend(action_infos, to_action_infos("base", base))
+
+  return action_infos
 end
 
 function Kind._find(name)

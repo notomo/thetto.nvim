@@ -34,7 +34,7 @@ test1
     thetto.start("line", { opts = { insert = false } })
 
     thetto.start("thetto/action", { opts = { insert = false } })
-    helper.search("move_to_input")
+    helper.search("move_to_input (base)")
     thetto.execute()
 
     assert.filetype("thetto-input")
@@ -52,6 +52,6 @@ build:
     thetto.start("cmd/make/target", { opts = { insert = false } })
     thetto.start("thetto/action", { opts = { insert = false } })
 
-    assert.exists_pattern("open")
+    assert.exists_pattern("open (file)")
   end)
 end)

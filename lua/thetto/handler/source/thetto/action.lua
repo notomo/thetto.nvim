@@ -15,13 +15,31 @@ function M.collect()
 
   local items = {}
   local source_name = ctx.collector.source.name
-  for _, action_name in ipairs(kind:action_names()) do
+  for _, action_info in ipairs(kind:action_infos()) do
+    local action_name = action_info.name
     local quit = (kind.behaviors[action_name] or {}).quit or false
-    table.insert(items, { value = action_name, source_name = source_name, quit = quit })
+    local desc = ("%s (%s)"):format(action_name, action_info.from)
+    table.insert(items, {
+      value = action_name,
+      desc = desc,
+      source_name = source_name,
+      quit = quit,
+      column_offsets = {
+        value = 0,
+        from = #action_name + 1,
+      },
+    })
   end
   return items
 end
 
 M.kind_name = "thetto/action"
+
+M.highlight = require("thetto.util.highlight").columns({
+  {
+    group = "Comment",
+    start_key = "from",
+  },
+})
 
 return M
