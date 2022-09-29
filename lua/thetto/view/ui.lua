@@ -7,6 +7,8 @@ local State = require("thetto.view.state")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
+local _ns = vim.api.nvim_create_namespace(ItemList.hl_ns_name)
+
 local UI = {}
 UI.__index = UI
 
@@ -58,6 +60,9 @@ function UI.open(self, immediately, on_move, needs_preview)
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)
 
+  vim.api.nvim_set_decoration_provider(_ns, {})
+  vim.api.nvim_set_decoration_provider(_ns, { on_win = UI._highlight_win })
+
   if needs_preview then
     self:open_preview(nil, {})
     self._initialized_preview = needs_preview
@@ -94,10 +99,6 @@ function UI._highlight_win(_, _, bufnr, topline, botline_guess)
   ctx.ui:highlight(topline, botline_guess)
   return false
 end
-
-local ns = vim.api.nvim_create_namespace(ItemList.hl_ns_name)
-vim.api.nvim_set_decoration_provider(ns, {})
-vim.api.nvim_set_decoration_provider(ns, { on_win = UI._highlight_win })
 
 function UI.highlight(self, first_line, last_line)
   local collector_items = self._collector.items:values()
@@ -168,6 +169,8 @@ function UI.close(self, is_passive, immediately)
   self._inputter:close()
   self._status_line:close()
   self:close_preview()
+
+  vim.api.nvim_set_decoration_provider(_ns, {})
 
   if vim.api.nvim_win_is_valid(current_window) then
     vim.api.nvim_set_current_win(current_window)
