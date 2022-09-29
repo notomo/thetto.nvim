@@ -7,7 +7,8 @@ local State = require("thetto.view.state")
 local bufferlib = require("thetto.lib.buffer")
 local vim = vim
 
-local _ns = vim.api.nvim_create_namespace(ItemList.hl_ns_name)
+local _item_list_ns = vim.api.nvim_create_namespace(ItemList.hl_ns_name)
+local _inputter_ns = vim.api.nvim_create_namespace(Inputter.hl_ns_name)
 
 local UI = {}
 UI.__index = UI
@@ -60,8 +61,10 @@ function UI.open(self, immediately, on_move, needs_preview)
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)
 
-  vim.api.nvim_set_decoration_provider(_ns, {})
-  vim.api.nvim_set_decoration_provider(_ns, { on_win = UI._highlight_win })
+  vim.api.nvim_set_decoration_provider(_item_list_ns, {})
+  vim.api.nvim_set_decoration_provider(_item_list_ns, { on_win = UI._highlight_item_list_win })
+  vim.api.nvim_set_decoration_provider(_inputter_ns, {})
+  vim.api.nvim_set_decoration_provider(_inputter_ns, { on_win = UI._highlight_inputter_win })
 
   if needs_preview then
     self:open_preview(nil, {})
@@ -91,16 +94,16 @@ function UI.resume(self)
   return self:redraw(self._collector.input_lines, self._state.row)
 end
 
-function UI._highlight_win(_, _, bufnr, topline, botline_guess)
+function UI._highlight_item_list_win(_, _, bufnr, topline, botline_guess)
   local ctx, err = Context.get_from_path(bufnr, "$")
   if err ~= nil then
     return false
   end
-  ctx.ui:highlight(topline, botline_guess)
+  ctx.ui:highlight_item_list(topline, botline_guess)
   return false
 end
 
-function UI.highlight(self, first_line, last_line)
+function UI.highlight_item_list(self, first_line, last_line)
   local collector_items = self._collector.items:values()
   local raw_items = {}
   for i = first_line + 1, last_line, 1 do
@@ -112,6 +115,20 @@ function UI.highlight(self, first_line, last_line)
   local filter_ctxs = self._collector.items.filter_ctxs
   local source_ctx = self._collector.source_ctx
   self._item_list:highlight(first_line, raw_items, source, filters, filter_ctxs, source_ctx)
+end
+
+function UI._highlight_inputter_win(_, _, bufnr, topline, botline_guess)
+  local ctx, err = Context.get_from_path(bufnr, "%-input$")
+  if err ~= nil then
+    return false
+  end
+  ctx.ui:highlight_inputter(topline, botline_guess)
+  return false
+end
+
+function UI.highlight_inputter(self)
+  local filters = self._collector.filters:values()
+  self._inputter:highlight(filters)
 end
 
 function UI.redraw(self, input_lines, row)
@@ -170,7 +187,8 @@ function UI.close(self, is_passive, immediately)
   self._status_line:close()
   self:close_preview()
 
-  vim.api.nvim_set_decoration_provider(_ns, {})
+  vim.api.nvim_set_decoration_provider(_item_list_ns, {})
+  vim.api.nvim_set_decoration_provider(_inputter_ns, {})
 
   if vim.api.nvim_win_is_valid(current_window) then
     vim.api.nvim_set_current_win(current_window)

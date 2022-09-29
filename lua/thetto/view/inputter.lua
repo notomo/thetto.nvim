@@ -6,6 +6,7 @@ local vim = vim
 
 local Inputter = {}
 Inputter.__index = Inputter
+Inputter.hl_ns_name = "thetto-input-filter-info"
 
 local FILETYPE = "thetto-input"
 
@@ -43,7 +44,7 @@ function Inputter.new(source_name, filters, input_lines, width, height, row, col
   local tbl = {
     _bufnr = bufnr,
     _window = window,
-    _decorator_factory = Decorator.factory("thetto-input-filter-info"),
+    _decorator = Decorator.factory(Inputter.hl_ns_name):create(bufnr, true),
     _source_name = source_name,
     _input_filters = InputFilters.new(source_name, filters),
   }
@@ -83,11 +84,16 @@ function Inputter.redraw(self, input_lines, filters)
   elseif line_count_diff < 0 then
     vim.api.nvim_buf_set_lines(self._bufnr, height, -1, false, {})
   end
+end
 
-  local decorator = self._decorator_factory:reset(self._bufnr)
+function Inputter.highlight(self, filters)
+  local line_count = vim.api.nvim_buf_line_count(self._bufnr)
   for i, filter in ipairs(filters) do
+    if i > line_count then
+      break
+    end
     local filter_info = ("[%s]"):format(filter.name)
-    decorator:add_virtual_text(i - 1, 0, { { filter_info, "ThettoFilterInfo" } }, {
+    self._decorator:add_virtual_text(i - 1, 0, { { filter_info, "ThettoFilterInfo" } }, {
       virt_text_pos = "right_align",
     })
   end
