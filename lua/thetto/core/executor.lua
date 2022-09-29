@@ -66,7 +66,7 @@ function Executor._actions(self, items, ctx, action_name, action_opts)
     table.insert(item_kind_pairs, { {}, "base" })
   end
 
-  local groups = listlib.group_by(item_kind_pairs, function(pair)
+  local groups = listlib.group_by_adjacent(item_kind_pairs, function(pair)
     return pair[2]
   end)
 
