@@ -3,6 +3,8 @@ local _contexts = {}
 local Context = {}
 Context.__index = Context
 
+local vim = vim
+
 local now = function()
   return vim.fn.reltimestr(vim.fn.reltime())
 end
@@ -34,16 +36,18 @@ function Context.get(source_name)
   return ctx, nil
 end
 
+local api = vim.api
+
 function Context.get_from_path(bufnr, pattern)
   vim.validate({ bufnr = { bufnr, "number", true }, pattern = { pattern, "string", true } })
-  bufnr = bufnr or vim.api.nvim_get_current_buf()
+  bufnr = bufnr or api.nvim_get_current_buf()
   pattern = pattern or ""
 
-  if not vim.api.nvim_buf_is_valid(bufnr) then
+  if not api.nvim_buf_is_valid(bufnr) then
     return nil, "invalid buffer: " .. bufnr
   end
 
-  local path = vim.api.nvim_buf_get_name(bufnr)
+  local path = api.nvim_buf_get_name(bufnr)
   local source_name = path:match("^thetto://(.+)/thetto" .. pattern)
   if not source_name then
     return nil, "not found state in: " .. path
