@@ -4,21 +4,21 @@ local M = {}
 
 function M.action_open(items)
   for _, item in ipairs(items) do
-    vim.cmd.buffer({ count = item.bufnr })
+    vim.cmd.buffer(item.bufnr)
   end
 end
 
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
     vim.cmd.tabedit()
-    vim.cmd.buffer({ count = item.bufnr })
+    vim.cmd.buffer(item.bufnr)
   end
 end
 
 function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     vim.cmd.vsplit()
-    vim.cmd.buffer({ count = item.bufnr })
+    vim.cmd.buffer(item.bufnr)
   end
 end
 

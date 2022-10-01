@@ -29,21 +29,21 @@ end
 
 function M.action_open(items)
   return open(items, function(bufnr)
-    vim.cmd.buffer({ count = bufnr })
+    vim.cmd.buffer(bufnr)
   end)
 end
 
 function M.action_vsplit_open(items)
   return open(items, function(bufnr)
     vim.cmd.vsplit()
-    vim.cmd.buffer({ count = bufnr })
+    vim.cmd.buffer(bufnr)
   end)
 end
 
 function M.action_tab_open(items)
   return open(items, function(bufnr)
     vim.cmd.tabedit()
-    vim.cmd.buffer({ count = bufnr })
+    vim.cmd.buffer(bufnr)
   end)
 end
 

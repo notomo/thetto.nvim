@@ -37,7 +37,7 @@ function M.action_open(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.cmd.buffer({ count = bufnr })
+      vim.cmd.buffer(bufnr)
     else
       vim.cmd.edit(filelib.escape(item.path))
     end
@@ -50,7 +50,7 @@ function M.action_tab_open(items)
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd.tabedit()
-      vim.cmd.buffer({ count = bufnr })
+      vim.cmd.buffer(bufnr)
     else
       vim.cmd.tabedit(filelib.escape(item.path))
     end
@@ -70,7 +70,7 @@ function M.action_vsplit_open(items)
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
       vim.cmd.vsplit()
-      vim.cmd.buffer({ count = bufnr })
+      vim.cmd.buffer(bufnr)
     else
       vim.cmd.vsplit(filelib.escape(item.path))
     end
