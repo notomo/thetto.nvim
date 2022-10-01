@@ -894,6 +894,42 @@ describe("remove_filter action", function()
   end)
 end)
 
+describe("reverse action", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can reverse items", function()
+    test_items1 = {
+      "1",
+      "2",
+      "3",
+    }
+
+    thetto.start(test_source1, { opts = { insert = false } })
+    assert.current_line("1")
+
+    helper.sync_execute("reverse")
+
+    assert.current_line("3")
+  end)
+
+  it("can reset reversed", function()
+    test_items1 = {
+      "1",
+      "2",
+      "3",
+    }
+
+    thetto.start(test_source1, { opts = { insert = false } })
+    assert.current_line("1")
+
+    helper.sync_execute("reverse")
+    helper.sync_execute("reverse")
+
+    assert.current_line("1")
+  end)
+end)
+
 describe("reverse_sorter action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)

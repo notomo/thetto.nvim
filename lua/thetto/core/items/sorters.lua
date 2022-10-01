@@ -3,7 +3,7 @@ local vim = vim
 
 local Sorters = {}
 
-function Sorters.new(names)
+function Sorters.new(names, reversed)
   local sorters = {}
   for _, name in ipairs(names) do
     local sorter, err = Sorter.parse(name)
@@ -13,7 +13,10 @@ function Sorters.new(names)
     table.insert(sorters, sorter)
   end
 
-  local tbl = { _sorters = sorters }
+  local tbl = {
+    _sorters = sorters,
+    _reversed = reversed or false,
+  }
   return setmetatable(tbl, Sorters)
 end
 
@@ -41,7 +44,7 @@ function Sorters._names(self)
   end, self._sorters)
 end
 
-function Sorters.reverse(self, name)
+function Sorters.reverse_one(self, name)
   local sorter, index, err = self:_find(name)
   if err ~= nil then
     return nil, err
@@ -50,6 +53,11 @@ function Sorters.reverse(self, name)
   local names = self:_names()
   names[index] = sorter:reverse().name
   return Sorters.new(names), nil
+end
+
+function Sorters.reverse(self)
+  local names = self:_names()
+  return Sorters.new(names, not self._reversed), nil
 end
 
 function Sorters.toggle(self, name)
@@ -86,9 +94,17 @@ function Sorters.values(self)
   return self._sorters
 end
 
+local reverse = require("thetto.lib.list").reverse
+local apply_reverse = function(items, reversed)
+  if not reversed then
+    return items
+  end
+  return reverse(items)
+end
+
 function Sorters.apply(self, items)
   if #self._sorters == 0 then
-    return items
+    return apply_reverse(items, self._reversed)
   end
 
   local compare = function(item_a, item_b)
@@ -104,7 +120,7 @@ function Sorters.apply(self, items)
 
   table.sort(items, compare)
 
-  return items
+  return apply_reverse(items, self._reversed)
 end
 
 return Sorters

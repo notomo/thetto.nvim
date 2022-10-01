@@ -218,7 +218,15 @@ function Collector._update_filters(self, filters)
 end
 
 function Collector.reverse_sorter(self, name)
-  local sorters, err = self.sorters:reverse(name)
+  local sorters, err = self.sorters:reverse_one(name)
+  if err ~= nil then
+    return err
+  end
+  return self:_update_sorters(sorters)
+end
+
+function Collector.reverse(self)
+  local sorters, err = self.sorters:reverse()
   if err ~= nil then
     return err
   end

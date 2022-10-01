@@ -23,6 +23,7 @@ M.behaviors = {
   remove_filter = { quit = false },
   inverse_filter = { quit = false },
   change_filter = { quit = false },
+  reverse = { quit = false },
   reverse_sorter = { quit = false },
   toggle_sorter = { quit = false },
   preview = { quit = false },
@@ -107,6 +108,10 @@ end
 function M.action_change_filter(_, action_ctx, ctx)
   local old_filter_name = ctx.ui:current_position_filter().name
   return nil, ctx.collector:change_filter(old_filter_name, action_ctx.opts.name)
+end
+
+function M.action_reverse(_, _, ctx)
+  return nil, ctx.collector:reverse()
 end
 
 function M.action_reverse_sorter(_, action_ctx, ctx)
