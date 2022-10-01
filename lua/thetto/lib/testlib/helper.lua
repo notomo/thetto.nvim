@@ -4,6 +4,7 @@ local helper = require("vusted.helper")
 helper.root = helper.find_plugin_root(plugin_name)
 
 function helper.before_each()
+  vim.o.showmode = false
   helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root)
   helper.test_data:cd("")
 end
