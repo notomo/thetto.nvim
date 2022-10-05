@@ -72,9 +72,7 @@ function StatusLine.redraw(self, source, sorters, finished, start_index, end_ind
     virt_text_pos = "overlay",
   })
   -- workaround?
-  vim.api.nvim_win_call(self._window, function()
-    vim.cmd.redraw()
-  end)
+  vim.cmd.redraw()
 end
 
 function StatusLine.move_to(self, left_column)
