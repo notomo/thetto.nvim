@@ -1,4 +1,4 @@
-local helper = require("thetto.lib.testlib.helper")
+local helper = require("thetto.test.helper")
 
 describe("git/branch source", function()
   before_each(helper.before_each)

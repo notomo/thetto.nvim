@@ -1,4 +1,4 @@
-local helper = require("thetto.lib.testlib.helper")
+local helper = require("thetto.test.helper")
 local thetto = helper.require("thetto")
 
 local test_source1 = "_test_values1"
