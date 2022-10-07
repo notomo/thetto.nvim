@@ -36,11 +36,13 @@ function M.collect(source_ctx)
     local state = ("(%s)"):format(table.concat(states, ","))
     local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(job.started_at, job.completed_at)
     local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
+    local run_id = job.html_url:match("/(%d+)/jobs/%d+$")
     return {
       value = job.name,
       url = job.html_url,
       desc = desc,
       job = { id = job.id },
+      run = { id = run_id },
       column_offsets = { value = #mark + 1, state = #title + 1 },
     }
   end, {

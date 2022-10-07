@@ -161,7 +161,7 @@ function M.promise(cmd, opts)
         return reject(job.stderr_output)
       end
       on_exit(job, code)
-      return resolve()
+      return resolve(job.stdout_output)
     end
 
     local job = jobs.new(cmd, opts)

@@ -11,32 +11,34 @@ function M.collect(source_ctx)
     source_ctx.opts.ref
   )
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
-  return require("thetto.util.job").run(cmd, source_ctx, function(run)
+  return require("thetto.util.job").run(cmd, source_ctx, function(job)
     local mark = "  "
-    if run.conclusion == "success" then
+    if job.conclusion == "success" then
       mark = "✅"
-    elseif run.conclusion == "failure" then
+    elseif job.conclusion == "failure" then
       mark = "❌"
-    elseif run.conclusion == "skipped" then
+    elseif job.conclusion == "skipped" then
       mark = "🔽"
-    elseif run.conclusion == "cancelled" then
+    elseif job.conclusion == "cancelled" then
       mark = "🚫"
-    elseif run.status == "in_progress" then
+    elseif job.status == "in_progress" then
       mark = "🏃"
     end
-    local title = ("%s %s"):format(mark, run.name)
-    local states = { run.status }
-    if run.conclusion then
-      table.insert(states, run.conclusion)
+    local title = ("%s %s"):format(mark, job.name)
+    local states = { job.status }
+    if job.conclusion then
+      table.insert(states, job.conclusion)
     end
     local state = ("(%s)"):format(table.concat(states, ","))
-    local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(run.started_at, run.completed_at)
+    local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(job.started_at, job.completed_at)
     local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
+    local run_id = job.html_url:match("/(%d+)/jobs/%d+$")
     return {
-      value = run.name,
-      url = run.html_url,
+      value = job.name,
+      url = job.html_url,
       desc = desc,
-      job = { id = run.id },
+      job = { id = job.id },
+      run = { id = run_id },
       column_offsets = { value = #mark + 1, state = #title + 1 },
     }
   end, {
