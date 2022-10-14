@@ -1,10 +1,11 @@
 local SourceResult = {}
 SourceResult.__index = SourceResult
 
-local _new = function(subscriber)
+local _new = function(subscriber, promise)
   local tbl = {
     _subscriber = subscriber,
     _all_items = {},
+    _promise = promise,
   }
   return setmetatable(tbl, SourceResult)
 end
@@ -16,6 +17,9 @@ function SourceResult.new(subscriber_or_items)
 
   if type(subscriber_or_items) == "function" then
     return _new(subscriber_or_items)
+  end
+  if type(subscriber_or_items.next) == "function" then
+    return _new(nil, subscriber_or_items)
   end
 
   local all_items = subscriber_or_items or {}
@@ -34,8 +38,24 @@ function SourceResult.zero()
 end
 
 function SourceResult.start(self, raw_observer)
-  local observable = require("thetto.vendor.misclib.observable").new(self._subscriber)
-  self._subscription = observable:subscribe(raw_observer)
+  if self._subscriber then
+    local observable = require("thetto.vendor.misclib.observable").new(self._subscriber)
+    self._subscription = observable:subscribe(raw_observer)
+    return
+  end
+
+  self._promise
+    :next(function(subscriber_or_items)
+      local result, err = SourceResult.new(subscriber_or_items)
+      if err then
+        return raw_observer:error(err)
+      end
+      result:start(raw_observer)
+      self._subscription = result._subscription
+    end)
+    :catch(function(err)
+      raw_observer:error(err)
+    end)
 end
 
 function SourceResult.wait(self, ms)

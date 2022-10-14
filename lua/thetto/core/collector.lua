@@ -121,7 +121,7 @@ function Collector.start(self, input_pattern, resolve, reject)
   self._result = result
   self.source_ctx = source_ctx
 
-  local start_err = self._result:start({
+  self._result:start({
     next = function(items)
       self._result:append(items)
       return self:update_with_throttle()
@@ -136,9 +136,6 @@ function Collector.start(self, input_pattern, resolve, reject)
       return self:update_with_throttle(resolve)
     end,
   })
-  if start_err then
-    return start_err
-  end
 
   return nil
 end

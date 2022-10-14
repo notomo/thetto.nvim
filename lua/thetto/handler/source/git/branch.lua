@@ -15,25 +15,21 @@ function M.collect(source_ctx)
     table.insert(cmd, "--all")
   end
 
-  local current_branch = nil
-  local get_current_job, joberr = require("thetto.util.job").execute({ "git", "rev-parse", "--abbrev-ref", "HEAD" }, {
-    on_exit = function(job_self)
-      current_branch = job_self:get_stdout()[1]
-    end,
-    cwd = source_ctx.cwd,
-  })
-  if joberr ~= nil then
-    return nil, joberr
-  end
-  get_current_job:wait(1000)
-
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
-    local is_current_branch = output == current_branch
-    return {
-      value = output,
-      is_current_branch = is_current_branch,
-    }
-  end)
+  return require("thetto.util.job")
+    .promise({ "git", "rev-parse", "--abbrev-ref", "HEAD" }, {
+      on_exit = function() end,
+      cwd = source_ctx.cwd,
+    })
+    :next(function(current_branch)
+      current_branch = vim.trim(current_branch)
+      return require("thetto.util.job").start(cmd, source_ctx, function(output)
+        local is_current_branch = output == current_branch
+        return {
+          value = output,
+          is_current_branch = is_current_branch,
+        }
+      end)
+    end)
 end
 
 vim.api.nvim_set_hl(0, "ThettoGitActiveBranch", { default = true, link = "Type" })
