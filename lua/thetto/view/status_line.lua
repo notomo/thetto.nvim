@@ -50,7 +50,7 @@ function StatusLine.new(source_name, width, height, row, column)
   return setmetatable(tbl, StatusLine)
 end
 
-function StatusLine.redraw(self, source, sorters, finished, start_index, end_index, result_count)
+function StatusLine.redraw(self, source, sorters, finished, start_index, end_index, result_count, item_list_row)
   local sorter_info = ""
   local sorter_names = {}
   for _, sorter in ipairs(sorters) do
@@ -65,13 +65,18 @@ function StatusLine.redraw(self, source, sorters, finished, start_index, end_ind
     status = "running"
   end
 
-  local text = ("%s%s [ %s - %s / %s ]"):format(source.name, sorter_info, start_index, end_index, result_count)
+  local text = ("%s%s [ %s - %s / %s , %s ]"):format(
+    source.name,
+    sorter_info,
+    start_index,
+    end_index,
+    result_count,
+    start_index + item_list_row - 1
+  )
   local decorator = self._decorator_factory:reset()
   decorator:add_virtual_text(0, 0, { { text, "ThettoInfo" }, { " " }, { status, "Comment" } }, {
     virt_text_pos = "overlay",
   })
-  -- workaround?
-  vim.cmd.redraw()
 end
 
 function StatusLine.move_to(self, left_column)

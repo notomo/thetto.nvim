@@ -56,7 +56,10 @@ function UI.open(self, immediately, on_move, needs_preview)
   self._state = self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
   self._on_move = on_move or function() end
-  self._debounced_on_move = require("thetto.lib.wrap").debounce(self._debounce_ms_on_move, self._on_move)
+  self._debounced_on_move = require("thetto.lib.wrap").debounce(self._debounce_ms_on_move, function(...)
+    self:_redraw_status()
+    self._on_move(...)
+  end)
 
   -- NOTICE: set autocmd in the end not to fire it
   self._item_list:enable_on_moved(source_name)
@@ -133,17 +136,12 @@ end
 
 function UI.redraw(self, input_lines, row)
   if self._item_list:is_valid() then
-    local filters = self._collector.filters:values()
-    local sorters = self._collector.sorters:values()
-    local source = self._collector.source
-    local result_count = self._collector:all_count()
     local items = self._collector.items:values()
-    local start_index = self._collector.items.start_index
-    local end_index = self._collector.items.end_index
-    local finished = self._collector:finished()
-
     self._item_list:redraw(items)
-    self._status_line:redraw(source, sorters, finished, start_index, end_index, result_count)
+
+    self:_redraw_status()
+
+    local filters = self._collector.filters:values()
     self._inputter:redraw(input_lines, filters)
   end
 
@@ -158,6 +156,20 @@ function UI.redraw(self, input_lines, row)
   end
 
   UI._changed_after(input_lines)
+end
+
+function UI._redraw_status(self)
+  if not self._item_list:is_valid() then
+    return nil
+  end
+  local sorters = self._collector.sorters:values()
+  local source = self._collector.source
+  local result_count = self._collector:all_count()
+  local start_index = self._collector.items.start_index
+  local end_index = self._collector.items.end_index
+  local finished = self._collector:finished()
+  local item_list_row = self._item_list:cursor()[1]
+  self._status_line:redraw(source, sorters, finished, start_index, end_index, result_count, item_list_row)
 end
 
 function UI.on_move(self)
