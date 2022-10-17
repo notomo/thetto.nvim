@@ -38,6 +38,33 @@ function M.action_force_delete(items, action_ctx, ctx)
   })
 end
 
+function M.action_rename(items)
+  local item = items[1]
+  if not item then
+    return
+  end
+
+  local old_branch_name = item.value
+  local new_branch_name
+  return require("thetto.util.input")
+    .promise({
+      prompt = "Rename branch: ",
+      default = old_branch_name,
+    })
+    :next(function(input)
+      if not input or input == "" or input == old_branch_name then
+        return require("thetto.vendor.misclib.message").info("invalid input for renaming branch: " .. tostring(input))
+      end
+      new_branch_name = input
+      return require("thetto.util.job").promise({ "git", "branch", "-m", old_branch_name, input })
+    end)
+    :next(function()
+      return require("thetto.vendor.misclib.message").info(
+        ("Renamed branch: %s -> %s"):format(old_branch_name, new_branch_name)
+      )
+    end)
+end
+
 M.default_action = "checkout"
 
 return M
