@@ -44,24 +44,46 @@ function M.action_rename(items)
     return
   end
 
-  local old_branch_name = item.value
-  local new_branch_name
+  local old_branch = item.value
+  local new_branch
   return require("thetto.util.input")
     .promise({
       prompt = "Rename branch: ",
-      default = old_branch_name,
+      default = old_branch,
     })
     :next(function(input)
-      if not input or input == "" or input == old_branch_name then
-        return require("thetto.vendor.misclib.message").info("invalid input for renaming branch: " .. tostring(input))
+      if not input or input == "" or input == old_branch then
+        return require("thetto.vendor.misclib.message").info("invalid input to rename branch: " .. tostring(input))
       end
-      new_branch_name = input
-      return require("thetto.util.job").promise({ "git", "branch", "-m", old_branch_name, input })
+      new_branch = input
+      return require("thetto.util.job").promise({ "git", "branch", "-m", old_branch, new_branch })
     end)
     :next(function()
-      return require("thetto.vendor.misclib.message").info(
-        ("Renamed branch: %s -> %s"):format(old_branch_name, new_branch_name)
-      )
+      return require("thetto.vendor.misclib.message").info(("Renamed branch: %s -> %s"):format(old_branch, new_branch))
+    end)
+end
+
+function M.action_create(items)
+  local item = items[1]
+  if not item then
+    return
+  end
+
+  local from = item.value
+  local new_branch
+  return require("thetto.util.input")
+    .promise({
+      prompt = ("Create branch from %s: "):format(from),
+    })
+    :next(function(input)
+      if not input or input == "" then
+        return require("thetto.vendor.misclib.message").info("invalid input to create branch: " .. tostring(new_branch))
+      end
+      new_branch = input
+      return require("thetto.util.job").promise({ "git", "switch", "-c", new_branch, from })
+    end)
+    :next(function()
+      return require("thetto.vendor.misclib.message").info(("Created branch from %s: %s"):format(from, new_branch))
     end)
 end
 
