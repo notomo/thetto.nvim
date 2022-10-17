@@ -62,8 +62,7 @@ function StatusLine.redraw(self, source, sorters, finished, start_index, end_ind
 
   local status = ""
   if not finished then
-    -- HACK: the last space for clean up all characters
-    status = "running "
+    status = "running"
   end
 
   local text = ("%s%s [ %s - %s / %s ]"):format(source.name, sorter_info, start_index, end_index, result_count)
