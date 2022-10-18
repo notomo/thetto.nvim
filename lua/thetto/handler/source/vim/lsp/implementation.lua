@@ -14,6 +14,9 @@ function M._to_item(cwd)
       path = path,
       row = row,
       range = util.range(v.range),
+      column_offsets = {
+        ["path:relative"] = 0,
+      },
     }
   end
 end
