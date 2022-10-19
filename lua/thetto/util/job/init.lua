@@ -38,6 +38,10 @@ function M.run(cmd, source_ctx, to_item, opts)
   }
   opts = vim.tbl_extend("force", default_opts, opts or {})
 
+  if opts.env and vim.tbl_isempty(opts.env) then
+    opts.env = nil
+  end
+
   return function(observer)
     local job = jobs.new(cmd, {
       on_exit = function(self, code)
@@ -62,6 +66,7 @@ function M.run(cmd, source_ctx, to_item, opts)
       cwd = opts.cwd,
       stdout_buffered = opts.stdout_buffered,
       stderr_buffered = opts.stderr_buffered,
+      env = opts.env,
     })
 
     return start(observer, job, opts.input)
@@ -123,6 +128,7 @@ function M.start(cmd, source_ctx, to_item, opts)
       cwd = opts.cwd,
       stdout_buffered = false,
       stderr_buffered = true,
+      env = opts.env,
     })
 
     return start(observer, job, opts.input)
@@ -162,6 +168,9 @@ function M.promise(cmd, opts)
       end
       on_exit(job, code)
       return resolve(job.stdout_output)
+    end
+    if opts.env and vim.tbl_isempty(opts.env) then
+      opts.env = nil
     end
 
     local job = jobs.new(cmd, opts)
