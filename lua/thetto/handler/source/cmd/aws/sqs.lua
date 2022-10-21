@@ -4,18 +4,22 @@ M.opts = { profile = nil }
 
 function M.collect(source_ctx)
   local cmd = { "aws", "sqs", "list-queues" }
-  return require("thetto.util.job").run(cmd, source_ctx, function(url)
-    return {
-      value = url,
-    }
-  end, {
-    to_outputs = function(job)
-      return vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } }).QueueUrls
-    end,
-    env = {
-      AWS_PROFILE = source_ctx.opts.profile,
-    },
-  })
+  return require("thetto.util.job")
+    .promise(cmd, {
+      cwd = source_ctx.cwd,
+      env = {
+        AWS_PROFILE = source_ctx.opts.profile,
+      },
+      on_exit = function() end,
+    })
+    :next(function(output)
+      local urls = vim.json.decode(output, { luanil = { object = true } }).QueueUrls
+      return vim.tbl_map(function(url)
+        return {
+          value = url,
+        }
+      end, urls)
+    end)
 end
 
 M.kind_name = "word"
