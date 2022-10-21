@@ -48,13 +48,13 @@ function SourceResult.start(self, raw_observer)
     :next(function(subscriber_or_items)
       local result, err = SourceResult.new(subscriber_or_items)
       if err then
-        return raw_observer:error(err)
+        return raw_observer.error(err)
       end
       result:start(raw_observer)
       self._subscription = result._subscription
     end)
     :catch(function(err)
-      raw_observer:error(err)
+      raw_observer.error(err)
     end)
 end
 
