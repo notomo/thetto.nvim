@@ -1,14 +1,6 @@
 PLUGIN_NAME:=$(basename $(notdir $(abspath .)))
 SPEC_DIR:=./spec/lua/${PLUGIN_NAME}
 
-# required
-# - ctags
-# - grep
-# - ps
-# - git
-# - find or where
-# - apropos
-
 test:
 	vusted --shuffle ./spec/lua/thetto/init_spec.lua ./spec/lua/thetto/handler/init_spec.lua --exclude-tags=slow
 .PHONY: test
