@@ -2,10 +2,15 @@ local M = {}
 
 M.opts = {
   profile = nil,
+  cluster = "default",
+  service = nil,
 }
 
 function M.collect(source_ctx)
-  local cmd = { "aws", "ecs", "list-clusters" }
+  local cmd = { "aws", "ecs", "list-tasks", "--cluster", source_ctx.opts.cluster }
+  if source_ctx.opts.service then
+    vim.list_extend(cmd, { "--service", source_ctx.opts.service })
+  end
   return require("thetto.util.job")
     .promise(cmd, {
       cwd = source_ctx.cwd,
@@ -15,7 +20,7 @@ function M.collect(source_ctx)
       on_exit = function() end,
     })
     :next(function(output)
-      local arns = vim.json.decode(output, { luanil = { object = true } }).clusterArns
+      local arns = vim.json.decode(output, { luanil = { object = true } }).taskArns
       return vim.tbl_map(function(arn)
         return {
           value = arn,
@@ -23,18 +28,6 @@ function M.collect(source_ctx)
       end, arns)
     end)
 end
-
-M.actions = {
-  action_list_children = function(items)
-    local item = items[1]
-    if not item then
-      return
-    end
-    return require("thetto").start("cmd/aws/ecs/service", {
-      source_opts = { cluster = item.value },
-    })
-  end,
-}
 
 M.kind_name = "word"
 

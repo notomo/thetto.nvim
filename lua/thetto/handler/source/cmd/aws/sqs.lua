@@ -1,6 +1,8 @@
 local M = {}
 
-M.opts = { profile = nil }
+M.opts = {
+  profile = nil,
+}
 
 function M.collect(source_ctx)
   local cmd = { "aws", "sqs", "list-queues" }
