@@ -7,18 +7,21 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "gh", "api", "-X", "GET", "search/users", "-f", "q=" .. pattern }
-  return require("thetto.util.job").run(cmd, source_ctx, function(user)
-    return {
-      value = user.login,
-      url = user.html_url,
-      user = { name = user.login, is_org = user.type == "Organization" },
-    }
-  end, {
-    to_outputs = function(job)
-      local data = vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
-      return data.items
-    end,
-  })
+  return require("thetto.util.job")
+    .promise(cmd, {
+      cwd = source_ctx.cwd,
+      on_exit = function() end,
+    })
+    :next(function(output)
+      local users = vim.json.decode(output, { luanil = { object = true } }).items
+      return vim.tbl_map(function(user)
+        return {
+          value = user.login,
+          url = user.html_url,
+          user = { name = user.login, is_org = user.type == "Organization" },
+        }
+      end, users)
+    end)
 end
 
 M.kind_name = "github/user"
