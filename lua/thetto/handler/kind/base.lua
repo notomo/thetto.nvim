@@ -67,6 +67,20 @@ function M.action_debug_print(items)
   end
 end
 
+function M.action_debug_dump(items)
+  for _, item in ipairs(items) do
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    vim.bo[bufnr].filetype = "json"
+
+    local lines = { vim.json.encode(item) }
+    vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+
+    vim.cmd.tabedit()
+    vim.cmd.buffer(bufnr)
+    vim.cmd("%!jq '.'")
+  end
+end
+
 function M.action_echo(items)
   for _, item in ipairs(items) do
     require("thetto.vendor.misclib.message").info(item.value)
