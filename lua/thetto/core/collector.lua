@@ -180,7 +180,7 @@ end
 function Collector.add_filter(self, name)
   local filters, err = self.filters:add(name)
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_filters(filters)
 end
@@ -188,7 +188,7 @@ end
 function Collector.remove_filter(self, name)
   local filters, err = self.filters:remove(name)
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_filters(filters)
 end
@@ -196,7 +196,7 @@ end
 function Collector.inverse_filter(self, name)
   local filters, err = self.filters:inverse(name)
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_filters(filters)
 end
@@ -204,7 +204,7 @@ end
 function Collector.change_filter(self, old, new)
   local filters, err = self.filters:change(old, new)
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_filters(filters)
 end
@@ -217,7 +217,7 @@ end
 function Collector.reverse_sorter(self, name)
   local sorters, err = self.sorters:reverse_one(name)
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_sorters(sorters)
 end
@@ -225,7 +225,7 @@ end
 function Collector.reverse(self)
   local sorters, err = self.sorters:reverse()
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_sorters(sorters)
 end
@@ -233,7 +233,7 @@ end
 function Collector.toggle_sorter(self, name)
   local sorters, err = self.sorters:toggle(name)
   if err ~= nil then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_update_sorters(sorters)
 end
@@ -286,7 +286,7 @@ function Collector._update_items(self, page_offset, display_limit)
 
   local err = self:start(input_pattern)
   if err then
-    return err
+    return require("thetto.vendor.promise").reject(err)
   end
   return self:_send_redraw_event()
 end

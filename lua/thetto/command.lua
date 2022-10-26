@@ -56,10 +56,7 @@ function ReturnValue.start(source_name, raw_args)
       ui:close(nil, opts.immediately)
     end
 
-    local update_err = collector:update()
-    if update_err ~= nil then
-      return reject(update_err)
-    end
+    return collector:update()
   end):next(function()
     ui:scroll(opts.offset, opts.search_offset)
   end)
@@ -93,10 +90,7 @@ function ReturnValue.reload(bufnr)
       return reject(start_err)
     end
 
-    local update_err = collector:update()
-    if update_err ~= nil then
-      return reject(update_err)
-    end
+    return collector:update()
   end):catch(function(e)
     require("thetto.vendor.misclib.message").warn(e)
   end)
@@ -110,14 +104,10 @@ function ReturnValue.resume(source_name)
 
   local ctx, ctx_err = Context.resume(source_name)
   if ctx_err ~= nil then
-    return nil, ctx_err
+    return Promise.reject(ctx_err)
   end
 
-  local err = ctx.ui:resume()
-  if err ~= nil then
-    return nil, err
-  end
-  return ctx.collector, nil
+  return ctx.ui:resume()
 end
 
 function ReturnValue.execute(action_name, raw_args)

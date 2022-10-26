@@ -7,7 +7,7 @@ describe("git/branch source", function()
   it("can show tags", function()
     vim.fn.system({ "git", "tag", "tag-source-test" })
 
-    helper.sync_open("git/tag", { opts = { insert = false } })
+    helper.sync_start("git/tag", { opts = { insert = false } })
 
     assert.exists_pattern("tag-source-test")
   end)
@@ -16,7 +16,7 @@ describe("git/branch source", function()
     vim.fn.system({ "git", "tag", "tag-source-test1" })
     vim.fn.system({ "git", "tag", "tag-source-test2" })
 
-    helper.sync_open("git/tag", { opts = { insert = false } })
+    helper.sync_start("git/tag", { opts = { insert = false } })
 
     helper.search("tag-source-test1")
     helper.sync_execute("toggle_selection")
@@ -24,7 +24,7 @@ describe("git/branch source", function()
     helper.sync_execute("toggle_selection")
     helper.sync_execute("delete")
 
-    helper.sync_open("git/tag", { opts = { insert = false } })
+    helper.sync_start("git/tag", { opts = { insert = false } })
     assert.no.exists_pattern("tag-source-test1")
     assert.no.exists_pattern("tag-source-test2")
   end)

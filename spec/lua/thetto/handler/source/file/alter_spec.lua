@@ -12,7 +12,7 @@ describe("alter source", function()
     helper.test_data:create_file("file_test.lua")
     vim.cmd.edit("file.lua")
 
-    helper.sync_open("file/alter", { opts = { insert = false, immediately = true } })
+    helper.sync_start("file/alter", { opts = { insert = false, immediately = true } })
 
     assert.buffer_name_tail("file_test.lua")
   end)
@@ -27,7 +27,7 @@ describe("alter source", function()
     helper.test_data:create_file("from/file_test.lua")
     vim.cmd.edit("./from/file_test.lua")
 
-    helper.sync_open("file/alter", {
+    helper.sync_start("file/alter", {
       source_opts = { allow_new = true },
       opts = { insert = false, immediately = true },
     })

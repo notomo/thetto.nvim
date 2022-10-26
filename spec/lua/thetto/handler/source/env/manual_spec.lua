@@ -6,7 +6,7 @@ describe("env/manual source", function()
   after_each(helper.after_each)
 
   it("can show manuals", function()
-    helper.sync_open("env/manual")
+    helper.sync_start("env/manual")
     helper.sync_input({ "nvim" })
 
     thetto.execute("move_to_list")

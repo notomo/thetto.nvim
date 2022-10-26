@@ -106,38 +106,38 @@ end
 
 function M.action_add_filter(_, action_ctx, ctx)
   local filter_name = action_ctx.opts.name
-  ctx.collector:add_filter(filter_name)
+  return ctx.collector:add_filter(filter_name)
 end
 
 function M.action_remove_filter(_, action_ctx, ctx)
   local filter_name = action_ctx.opts.name or ctx.ui:current_position_filter().name
-  return nil, ctx.collector:remove_filter(filter_name)
+  return ctx.collector:remove_filter(filter_name)
 end
 
 function M.action_inverse_filter(_, action_ctx, ctx)
   local filter_name = action_ctx.opts.name or ctx.ui:current_position_filter().name
-  ctx.collector:inverse_filter(filter_name)
+  return ctx.collector:inverse_filter(filter_name)
 end
 
 function M.action_change_filter(_, action_ctx, ctx)
   local old_filter_name = ctx.ui:current_position_filter().name
-  return nil, ctx.collector:change_filter(old_filter_name, action_ctx.opts.name)
+  return ctx.collector:change_filter(old_filter_name, action_ctx.opts.name)
 end
 
 function M.action_reverse(_, _, ctx)
-  return nil, ctx.collector:reverse()
+  return ctx.collector:reverse()
 end
 
 function M.action_reverse_sorter(_, action_ctx, ctx)
   if ctx.collector.sorters:length() == 0 then
     return nil, "no sorter"
   end
-  return nil, ctx.collector:reverse_sorter(action_ctx.opts.name or ctx.collector.sorters[1].name)
+  return ctx.collector:reverse_sorter(action_ctx.opts.name or ctx.collector.sorters[1].name)
 end
 
 function M.action_toggle_sorter(_, action_ctx, ctx)
   local sorter_name = action_ctx.opts.name
-  return nil, ctx.collector:toggle_sorter(sorter_name)
+  return ctx.collector:toggle_sorter(sorter_name)
 end
 
 function M.action_toggle_preview(items, _, ctx)
@@ -154,12 +154,12 @@ end
 function M.action_resume_previous(_, action_ctx, ctx)
   local previous_ctx = ctx:resume_previous()
   if previous_ctx then
-    return nil, previous_ctx.ui:resume()
+    return previous_ctx.ui:resume()
   end
   if action_ctx.opts.wrap then
     local first_ctx = require("thetto.core.context").resume()
     if first_ctx then
-      return nil, first_ctx.ui:resume()
+      return first_ctx.ui:resume()
     end
   end
   return nil, "no context"
@@ -168,27 +168,27 @@ end
 function M.action_resume_next(_, action_ctx, ctx)
   local next_ctx = ctx:resume_next()
   if next_ctx then
-    return nil, next_ctx.ui:resume()
+    return next_ctx.ui:resume()
   end
   if action_ctx.opts.wrap then
     local last_ctx = ctx:resume_last()
     if last_ctx then
-      return nil, last_ctx.ui:resume()
+      return last_ctx.ui:resume()
     end
   end
   return nil, "no context"
 end
 
 function M.action_go_to_next_page(_, _, ctx)
-  ctx.collector:change_page_offset(1)
+  return ctx.collector:change_page_offset(1)
 end
 
 function M.action_go_to_previous_page(_, _, ctx)
-  ctx.collector:change_page_offset(-1)
+  return ctx.collector:change_page_offset(-1)
 end
 
 function M.action_change_display_limit(_, action_ctx, ctx)
-  ctx.collector:change_display_limit(action_ctx.opts.offset)
+  return ctx.collector:change_display_limit(action_ctx.opts.offset)
 end
 
 function M.action_append_filter_input(items, _, ctx)

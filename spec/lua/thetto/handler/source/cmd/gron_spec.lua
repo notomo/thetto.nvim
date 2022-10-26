@@ -16,7 +16,7 @@ describe("cmd/gron source", function()
     )
     vim.cmd.edit("test.json")
 
-    helper.sync_open("cmd/gron", { opts = { insert = false } })
+    helper.sync_start("cmd/gron", { opts = { insert = false } })
 
     helper.search("baz")
     thetto.execute("open")

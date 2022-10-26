@@ -14,7 +14,7 @@ test:
     )
     vim.cmd.edit("Makefile")
 
-    helper.sync_open("cmd/ctags", { opts = { insert = false } })
+    helper.sync_start("cmd/ctags", { opts = { insert = false } })
 
     assert.exists_pattern("test")
   end)

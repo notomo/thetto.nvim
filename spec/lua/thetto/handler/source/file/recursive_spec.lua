@@ -10,7 +10,7 @@ describe("file/recursive source", function()
     helper.test_data:create_dir("dir")
     helper.test_data:create_file("dir/file")
 
-    helper.sync_open("file/recursive", { opts = { insert = false } })
+    helper.sync_start("file/recursive", { opts = { insert = false } })
 
     assert.exists_pattern("dir/file")
     helper.search("dir\\/file")
@@ -24,7 +24,7 @@ describe("file/recursive source", function()
     helper.test_data:create_dir("0_root_pattern")
     helper.test_data:create_file("0_root_pattern/in_root_pattern")
 
-    helper.sync_open("file/recursive", { opts = { insert = false, cwd = cwd_util.project({ "0_root_pattern" }) } })
+    helper.sync_start("file/recursive", { opts = { insert = false, cwd = cwd_util.project({ "0_root_pattern" }) } })
 
     assert.exists_pattern("root_pattern/in_root_pattern")
   end)

@@ -5,7 +5,7 @@ describe("git/config source", function()
   after_each(helper.after_each)
 
   it("can show config list", function()
-    helper.sync_open("git/config", { opts = { insert = false } })
+    helper.sync_start("git/config", { opts = { insert = false } })
 
     assert.exists_pattern("remote.origin.url=https://github.com/notomo/thetto.nvim.git")
   end)

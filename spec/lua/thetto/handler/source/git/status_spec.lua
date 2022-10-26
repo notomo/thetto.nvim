@@ -7,7 +7,7 @@ describe("git/status source", function()
   it("can show status files", function()
     helper.test_data:create_file("test_file")
 
-    helper.sync_open("git/status", { opts = { insert = false } })
+    helper.sync_start("git/status", { opts = { insert = false } })
 
     assert.exists_pattern("?? test_data/")
   end)

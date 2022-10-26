@@ -16,7 +16,7 @@ bar]]
   after_each(helper.after_each)
 
   it("can show grep results", function()
-    helper.sync_open("file/grep", { opts = { insert = false, pattern = "hoge" } })
+    helper.sync_start("file/grep", { opts = { insert = false, pattern = "hoge" } })
 
     assert.exists_pattern("hoge")
 
@@ -33,7 +33,7 @@ foo]])
     vim.opt_local.buftype = "nofile"
     helper.search("hoge")
 
-    helper.sync_open("file/grep", {
+    helper.sync_start("file/grep", {
       opts = {
         insert = false,
         pattern = function()
@@ -54,7 +54,7 @@ foo]])
     helper.test_data:create_dir("0_root_pattern")
     helper.test_data:create_file("0_root_pattern/in_root_pattern", [[hoge in root_pattern]])
 
-    helper.sync_open(
+    helper.sync_start(
       "file/grep",
       { opts = { insert = false, cwd = cwd_util.project({ "0_root_pattern" }), pattern = "hoge" } }
     )
@@ -63,7 +63,7 @@ foo]])
   end)
 
   it("can execute tab_open", function()
-    helper.sync_open("file/grep", { opts = { insert = false, pattern = "foo" } })
+    helper.sync_start("file/grep", { opts = { insert = false, pattern = "foo" } })
 
     assert.exists_pattern("foo")
 
@@ -74,7 +74,7 @@ foo]])
   end)
 
   it("can execute vsplit_open", function()
-    helper.sync_open("file/grep", { opts = { insert = false, pattern = "foo" } })
+    helper.sync_start("file/grep", { opts = { insert = false, pattern = "foo" } })
 
     assert.exists_pattern("foo")
 
@@ -85,36 +85,31 @@ foo]])
   end)
 
   it("can grep interactively", function()
-    helper.sync_open("file/grep", {
+    helper.sync_start("file/grep", {
       opts = { insert = false, filters = { "interactive" } },
     })
 
     assert.current_line("")
 
-    thetto.execute("move_to_input")
+    helper.sync_execute("move_to_input")
     helper.sync_input({ "hoge" })
-    helper.wait_ui(function()
-      thetto.execute("move_to_list")
-    end)
-    vim.wait(100, function() end) -- HACK: wait debounce
+    helper.sync_execute("move_to_list")
 
     assert.current_line("target:1 hoge")
   end)
 
   it("can grep no result pattern interactively", function()
-    helper.sync_open("file/grep", { opts = { filters = { "interactive" } } })
+    helper.sync_start("file/grep", { opts = { filters = { "interactive" } } })
 
     helper.sync_input({ "hoge" })
     helper.sync_input({ "bar" })
-    helper.wait_ui(function()
-      thetto.execute("move_to_list")
-    end)
+    helper.sync_execute("move_to_list")
 
     assert.current_line("")
   end)
 
   it("can grep with camelcase pattern", function()
-    helper.sync_open("file/grep", { opts = { insert = false, ignorecase = true, pattern = "Foo" } })
+    helper.sync_start("file/grep", { opts = { insert = false, ignorecase = true, pattern = "Foo" } })
 
     assert.exists_pattern("foo")
   end)
@@ -122,7 +117,7 @@ foo]])
   it("can show grep results with including :digits: text", function()
     helper.test_data:create_file("file", [[  test :111:  ]])
 
-    helper.sync_open("file/grep", { opts = { insert = false, pattern = "test" } })
+    helper.sync_start("file/grep", { opts = { insert = false, pattern = "test" } })
 
     assert.exists_pattern("file:1   test :111:  ")
   end)

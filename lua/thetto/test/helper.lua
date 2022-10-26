@@ -5,6 +5,7 @@ helper.root = helper.find_plugin_root(plugin_name)
 
 function helper.before_each()
   vim.o.showmode = false
+  vim.o.swapfile = false
   helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root)
   helper.test_data:cd("")
 end
@@ -65,7 +66,7 @@ function helper.sync_input(texts)
   end
 end
 
-function helper.sync_open(...)
+function helper.sync_start(...)
   local promise = require("thetto").start(...)
   local on_finished = helper.on_finished()
   promise:finally(function()
@@ -85,6 +86,15 @@ end
 
 function helper.sync_reload()
   local promise = require("thetto").reload()
+  local on_finished = helper.on_finished()
+  promise:finally(function()
+    on_finished()
+  end)
+  on_finished:wait()
+end
+
+function helper.sync_resume()
+  local promise = require("thetto").resume()
   local on_finished = helper.on_finished()
   promise:finally(function()
     on_finished()

@@ -61,7 +61,7 @@ describe("thetto", function()
       "test3",
     }
 
-    helper.sync_open(test_source1, { opts = { insert = false, offset = 10 } })
+    helper.sync_start(test_source1, { opts = { insert = false, offset = 10 } })
 
     assert.current_line("test3")
   end)
@@ -73,7 +73,7 @@ describe("thetto", function()
       "test3",
     }
 
-    helper.sync_open(test_source1, {
+    helper.sync_start(test_source1, {
       opts = {
         insert = false,
         search_offset = function(item)
@@ -235,11 +235,11 @@ describe("thetto", function()
       end,
     })
 
-    helper.sync_open(source)
+    helper.sync_start(source)
     assert.exists_message(source .. ": empty")
     assert.window_count(1)
 
-    helper.sync_open(source)
+    helper.sync_start(source)
     -- should be the same error
     assert.exists_message(source .. ": empty")
   end)
@@ -247,7 +247,7 @@ describe("thetto", function()
   it("cannot delete input lines #slow", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
-    thetto.start(test_source1)
+    helper.sync_start(test_source1)
     vim.wait(100, function() end) -- HACk: wait debounce
     helper.wait_ui(function()
       vim.cmd.normal({ args = { "dd" }, bang = true })
@@ -589,21 +589,21 @@ describe("thetto.resume()", function()
   after_each(helper.after_each)
 
   it("can resume even if opened", function()
-    thetto.start(test_source1)
+    helper.sync_start(test_source1)
     vim.cmd.tabedit()
 
-    thetto.resume()
+    helper.sync_resume()
     assert.window_count(4)
   end)
 
   it("goes back to original window when quit resumed thetto", function()
-    thetto.start(test_source1)
+    helper.sync_start(test_source1)
     vim.cmd.tabedit()
     local current = vim.api.nvim_get_current_win()
 
-    thetto.resume()
-    thetto.start(test_source1)
-    thetto.execute("quit")
+    helper.sync_resume()
+    helper.sync_start(test_source1)
+    helper.sync_execute("quit")
 
     assert.window_id(current)
   end)
@@ -660,10 +660,10 @@ describe("thetto.resume()", function()
   end)
 
   it("can resume current window", function()
-    thetto.start(test_source1)
-    thetto.execute("move_to_list")
-    thetto.execute("quit")
-    thetto.resume()
+    helper.sync_start(test_source1)
+    helper.sync_execute("move_to_list")
+    helper.sync_execute("quit")
+    helper.sync_resume()
 
     assert.exists_pattern("test1")
   end)
@@ -676,9 +676,9 @@ describe("thetto.resume()", function()
       end,
     })
 
-    thetto.start(source, { opts = { insert = false } })
+    helper.sync_start(source, { opts = { insert = false } })
 
-    thetto.resume()
+    helper.sync_resume()
 
     assert.current_line("")
   end)
@@ -688,17 +688,17 @@ describe("thetto.resume()", function()
       "resumed",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
-    thetto.execute("quit")
+    helper.sync_start(test_source1, { opts = { insert = false } })
+    helper.sync_execute("quit")
 
-    thetto.start(test_source2, { opts = { insert = false } })
-    thetto.execute("quit")
+    helper.sync_start(test_source2, { opts = { insert = false } })
+    helper.sync_execute("quit")
 
-    thetto.resume()
-    thetto.execute("resume_previous")
-    thetto.execute("quit")
+    helper.sync_resume()
+    helper.sync_execute("resume_previous")
+    helper.sync_execute("quit")
 
-    thetto.resume()
+    helper.sync_resume()
 
     assert.exists_pattern("resumed")
   end)
@@ -708,13 +708,13 @@ describe("thetto.resume()", function()
       "resumed",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
-    thetto.execute("quit")
+    helper.sync_start(test_source1, { opts = { insert = false } })
+    helper.sync_execute("quit")
 
-    thetto.start(test_source2, { opts = { insert = false, can_resume = false } })
-    thetto.execute("quit")
+    helper.sync_start(test_source2, { opts = { insert = false, can_resume = false } })
+    helper.sync_execute("quit")
 
-    thetto.resume()
+    helper.sync_resume()
 
     assert.exists_pattern("resumed")
   end)
@@ -887,7 +887,7 @@ describe("remove_filter action", function()
   end)
 
   it("cannot remove the last filter", function()
-    thetto.start(test_source1)
+    helper.sync_start(test_source1)
 
     helper.sync_execute("remove_filter")
     assert.exists_message("the last filter cannot be removed")
@@ -905,7 +905,7 @@ describe("reverse action", function()
       "3",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
+    helper.sync_start(test_source1, { opts = { insert = false } })
     assert.current_line("1")
 
     helper.sync_execute("reverse")
@@ -920,7 +920,7 @@ describe("reverse action", function()
       "3",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
+    helper.sync_start(test_source1, { opts = { insert = false } })
     assert.current_line("1")
 
     helper.sync_execute("reverse")
@@ -943,12 +943,10 @@ describe("reverse_sorter action", function()
       "tes",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
+    helper.sync_start(test_source1, { opts = { insert = false } })
     assert.current_line("t")
 
-    helper.wait_ui(function()
-      thetto.execute("reverse_sorter")
-    end)
+    helper.sync_execute("reverse_sorter")
 
     assert.current_line("tes")
   end)
@@ -962,12 +960,10 @@ describe("reverse_sorter action", function()
       "tes",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
+    helper.sync_start(test_source1, { opts = { insert = false } })
     assert.current_line("t")
 
-    helper.wait_ui(function()
-      thetto.execute("reverse_sorter", { action_opts = { name = "length" } })
-    end)
+    helper.sync_execute("reverse_sorter", { action_opts = { name = "length" } })
 
     assert.current_line("tes")
   end)
@@ -1056,11 +1052,8 @@ describe("toggle_sorter action", function()
       "tes",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
-
-    helper.wait_ui(function()
-      thetto.execute("toggle_sorter", { action_opts = { name = "length" } })
-    end)
+    helper.sync_start(test_source1, { opts = { insert = false } })
+    helper.sync_execute("toggle_sorter", { action_opts = { name = "length" } })
 
     assert.current_line("t")
   end)
@@ -1074,11 +1067,8 @@ describe("toggle_sorter action", function()
       "tes",
     }
 
-    thetto.start(test_source1, { opts = { insert = false } })
-
-    helper.wait_ui(function()
-      thetto.execute("toggle_sorter", { action_opts = { name = "length" } })
-    end)
+    helper.sync_start(test_source1, { opts = { insert = false } })
+    helper.sync_execute("toggle_sorter", { action_opts = { name = "length" } })
 
     assert.current_line("te")
   end)

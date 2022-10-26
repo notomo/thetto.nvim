@@ -12,7 +12,7 @@ describe("file/directory/recursive source", function()
   after_each(helper.after_each)
 
   it("can show directories recursively", function()
-    helper.sync_open("file/directory/recursive", { opts = { insert = false } })
+    helper.sync_start("file/directory/recursive", { opts = { insert = false } })
 
     assert.exists_pattern("dir/")
     assert.no.exists_pattern("dir/file")
@@ -24,7 +24,7 @@ describe("file/directory/recursive source", function()
   end)
 
   it("can show directories with depth range", function()
-    helper.sync_open("file/directory/recursive", {
+    helper.sync_start("file/directory/recursive", {
       source_opts = { max_depth = 1 },
       opts = { insert = false },
     })
@@ -36,7 +36,7 @@ describe("file/directory/recursive source", function()
   end)
 
   it("can execute enter", function()
-    helper.sync_open("file/directory/recursive", { opts = { insert = false } })
+    helper.sync_start("file/directory/recursive", { opts = { insert = false } })
     helper.search("dir/$")
 
     thetto.execute("enter")

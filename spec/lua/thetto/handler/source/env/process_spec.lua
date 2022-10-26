@@ -10,7 +10,7 @@ describe("env/process source", function()
     local sleep2 = require("thetto.lib.job").new({ "sleep", "9" }, {})
     sleep2:start()
 
-    helper.sync_open("env/process", { opts = { insert = false } })
+    helper.sync_start("env/process", { opts = { insert = false } })
     helper.search("sleep 8")
     helper.sync_execute("toggle_selection")
     helper.search("sleep 9")

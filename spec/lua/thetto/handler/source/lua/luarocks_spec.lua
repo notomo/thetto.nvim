@@ -6,7 +6,7 @@ describe("lua/luarocks source", function()
   after_each(helper.after_each)
 
   it("can show luarocks packages", function()
-    helper.sync_open("lua/luarocks")
+    helper.sync_start("lua/luarocks")
     helper.sync_input({ "vusted" })
 
     thetto.execute("move_to_list")

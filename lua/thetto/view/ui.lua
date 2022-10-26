@@ -56,7 +56,7 @@ function UI.open(self, immediately, on_move, needs_preview)
   self._state = self._state:resume(self._item_list, self._inputter)
   self._collector:attach_ui(self)
   self._on_move = on_move or function() end
-  self._debounced_on_move = require("thetto.lib.wrap").debounce(self._debounce_ms_on_move, function(...)
+  self._debounced_on_move = require("thetto.lib.wrap").debounce_promise(self._debounce_ms_on_move, function(...)
     self:_redraw_status()
     self._on_move(...)
   end)
@@ -150,12 +150,9 @@ function UI.redraw(self, input_lines, row)
     self._item_list:set_row(row)
   end
 
-  local err = self:on_move()
-  if err ~= nil then
-    return err
-  end
-
-  UI._changed_after(input_lines)
+  return self:on_move():next(function()
+    UI._changed_after(input_lines)
+  end)
 end
 
 function UI._redraw_status(self)
