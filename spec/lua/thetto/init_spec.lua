@@ -248,10 +248,9 @@ describe("thetto", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
     helper.sync_start(test_source1)
-    vim.wait(100, function() end) -- HACk: wait debounce
-    helper.wait_ui(function()
-      vim.cmd.normal({ args = { "dd" }, bang = true })
-    end)
+
+    vim.cmd.normal({ args = { "dd" }, bang = true })
+    helper.wait_redraw()
 
     assert.line_count(2)
   end)
@@ -259,11 +258,11 @@ describe("thetto", function()
   it("can move to input with behavior as `i` #slow", function()
     thetto.setup({ filters = { "substring", "-substring" } })
 
-    thetto.start(test_source1)
+    helper.sync_start(test_source1)
     helper.sync_input({ "hoge" })
 
-    thetto.execute("move_to_list")
-    thetto.execute("move_to_input")
+    helper.sync_execute("move_to_list")
+    helper.sync_execute("move_to_input")
 
     assert.cursor_column(#"hoge")
   end)
@@ -341,12 +340,11 @@ describe("thetto", function()
     }
 
     thetto.start(test_source1, { opts = { auto = "hoge", insert = false } })
-    vim.wait(200, function() end) -- HACk: wait debounce
+    helper.wait_redraw()
     assert.equals("test_auto_1", value)
 
     thetto.execute("move_to_input")
     helper.sync_input({ "test_auto_2" })
-    vim.wait(100, function() end) -- HACk: wait debounce
 
     assert.equals("test_auto_2", value)
   end)
@@ -878,9 +876,7 @@ describe("remove_filter action", function()
     vim.cmd.normal({ args = { "G" }, bang = true })
     helper.sync_input({ "test2" })
 
-    helper.wait_ui(function()
-      thetto.execute("remove_filter", { action_opts = { name = "-substring" } })
-    end)
+    thetto.execute("remove_filter", { action_opts = { name = "-substring" } })
     thetto.execute("move_to_list")
 
     assert.exists_pattern("test2")
@@ -984,10 +980,9 @@ describe("add_filter action", function()
     thetto.execute("add_filter", { action_opts = { name = "-substring" } })
 
     vim.cmd.normal({ args = { "G" }, bang = true })
-    vim.wait(100, function() end) -- HACk: wait debounce
     helper.sync_input({ "test2" })
 
-    thetto.execute("move_to_list")
+    helper.sync_execute("move_to_list")
 
     assert.exists_pattern("test1")
     assert.exists_pattern("test3")
@@ -1020,7 +1015,7 @@ describe("change_filter action", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
 
-  it("can change filter #slow", function()
+  it("can change filter", function()
     thetto.setup({ filters = { "substring" } })
 
     test_items1 = {
@@ -1032,9 +1027,8 @@ describe("change_filter action", function()
     thetto.start(test_source1)
     helper.sync_input({ "test2" })
 
-    helper.wait_ui(function()
-      thetto.execute("change_filter", { action_opts = { name = "-substring" } })
-    end)
+    thetto.execute("change_filter", { action_opts = { name = "-substring" } })
+    helper.wait_redraw()
     thetto.execute("move_to_list")
 
     assert.no.exists_pattern("test2")

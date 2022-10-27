@@ -94,6 +94,7 @@ foo]])
     helper.sync_execute("move_to_input")
     helper.sync_input({ "hoge" })
     helper.sync_execute("move_to_list")
+    helper.wait_redraw()
 
     assert.current_line("target:1 hoge")
   end)

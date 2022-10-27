@@ -47,75 +47,47 @@ function helper.wait(promise)
   on_finished:wait()
 end
 
+function helper.wait_redraw(f)
+  f = f or function() end
+  local on_finished = helper.on_finished()
+  vim.api.nvim_create_autocmd({ "User" }, {
+    group = vim.api.nvim_create_augroup("thetto_test", {}),
+    pattern = { "ThettoTestRedrawn" },
+    callback = function()
+      on_finished()
+      return true
+    end,
+  })
+  require("thetto.view.ui")._test = true
+  f()
+  on_finished:wait()
+end
+
 function helper.sync_input(texts)
-  local text = texts[1]
-  local finished = false
-  require("thetto.view.ui")._changed_after = function(input_lines)
-    for _, line in ipairs(input_lines) do
-      if vim.endswith(line, text) then
-        finished = true
-      end
-    end
-  end
-  vim.api.nvim_put({ text }, "c", true, true)
-  local ok = vim.wait(1000, function()
-    return finished
-  end, 10)
-  if not ok then
-    assert(false, "wait timeout")
-  end
+  helper.wait_redraw(function()
+    local text = texts[1]
+    vim.api.nvim_put({ text }, "c", true, true)
+  end)
 end
 
 function helper.sync_start(...)
   local promise = require("thetto").start(...)
-  local on_finished = helper.on_finished()
-  promise:finally(function()
-    on_finished()
-  end)
-  on_finished:wait()
+  helper.wait(promise)
 end
 
 function helper.sync_execute(...)
   local promise = require("thetto").execute(...)
-  local on_finished = helper.on_finished()
-  promise:finally(function()
-    on_finished()
-  end)
-  on_finished:wait()
+  helper.wait(promise)
 end
 
 function helper.sync_reload()
   local promise = require("thetto").reload()
-  local on_finished = helper.on_finished()
-  promise:finally(function()
-    on_finished()
-  end)
-  on_finished:wait()
+  helper.wait(promise)
 end
 
 function helper.sync_resume()
   local promise = require("thetto").resume()
-  local on_finished = helper.on_finished()
-  promise:finally(function()
-    on_finished()
-  end)
-  on_finished:wait()
-end
-
-function helper.wait_ui(f)
-  local finished = false
-  require("thetto.view.ui")._changed_after = function(_)
-    finished = true
-  end
-
-  f()
-
-  local ok = vim.wait(1000, function()
-    return finished
-  end, 10)
-  if not ok then
-    assert(false, "wait ui timeout")
-  end
+  helper.wait(promise)
 end
 
 function helper.search(pattern)

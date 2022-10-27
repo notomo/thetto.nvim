@@ -150,10 +150,19 @@ function UI.redraw(self, input_lines, row)
     self._item_list:set_row(row)
   end
 
-  return self:on_move():next(function()
-    UI._changed_after(input_lines)
+  local promise = self:on_move()
+  promise:next(function()
+    if not UI._test then
+      return
+    end
+    vim.api.nvim_exec_autocmds("User", {
+      pattern = "ThettoTestRedrawn",
+    })
   end)
+  return promise
 end
+
+UI._test = false
 
 function UI._redraw_status(self)
   if not self._item_list:is_valid() then
