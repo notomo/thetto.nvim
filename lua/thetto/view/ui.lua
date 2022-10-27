@@ -325,9 +325,6 @@ function UI._column(self)
   return (vim.o.columns - self:_width()) / 2
 end
 
--- for testing
-function UI._changed_after(_) end
-
 local setup_highlight_groups = function()
   ItemList.setup_highlight_groups()
   vim.api.nvim_set_hl(0, "ThettoSelected", { default = true, link = "Statement" })
