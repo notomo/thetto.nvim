@@ -58,13 +58,6 @@ function SourceResult.start(self, raw_observer)
     end)
 end
 
-function SourceResult.wait(self, ms)
-  ms = ms or 1000
-  return vim.wait(ms, function()
-    return self:finished()
-  end, 10)
-end
-
 function SourceResult.discard(self)
   return self._subscription and self._subscription:unsubscribe()
 end

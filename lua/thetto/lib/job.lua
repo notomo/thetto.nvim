@@ -116,12 +116,8 @@ function M.parse_output(data)
   return vim.split(data, "\n", true)
 end
 
-function Job.parse_output(data)
-  return M.parse_output(data)
-end
-
 function Job.get_stdout(self)
-  local output = self.parse_output(self.stdout_output)
+  local output = M.parse_output(self.stdout_output)
   if output[#output] == "" then
     table.remove(output, #output)
   end
@@ -132,26 +128,12 @@ function Job.get_joined_stdout(self)
   return table.concat(self:get_stdout(), "")
 end
 
-function Job.get_stderr(self)
-  local output = self.parse_output(self.stderr_output)
-  if output[#output] == "" then
-    table.remove(output, #output)
-  end
-  return output
-end
-
 function Job.get_output(self)
-  local output = self.parse_output(self.all_output)
+  local output = M.parse_output(self.all_output)
   if output[#output] == "" then
     table.remove(output, #output)
   end
   return output
-end
-
-function Job.wait(self, ms)
-  return vim.wait(ms, function()
-    return not self:is_running()
-  end, 10)
 end
 
 function M.new(cmd_and_args, opts)
@@ -199,16 +181,6 @@ function M.print_stdout(self)
     return
   end
   local output = table.concat(self:get_stdout(), "\n")
-  vim.api.nvim_out_write(output .. "\n")
-end
-
-function M.print_output(self)
-  if self.all_output == "" then
-    return
-  end
-  -- HACK: nvim_out_write does not display message
-  vim.api.nvim_err_write("\n")
-  local output = table.concat(self:get_output(), "\n")
   vim.api.nvim_out_write(output .. "\n")
 end
 
