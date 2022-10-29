@@ -641,18 +641,18 @@ describe("thetto.resume()", function()
       "test22",
     }
 
-    thetto.start(test_source1)
+    helper.sync_start(test_source1)
     helper.sync_input({ "test2" })
 
-    thetto.execute("quit")
-    thetto.start(test_source2)
-    thetto.execute("quit")
-    thetto.resume(test_source1)
+    helper.sync_execute("quit")
+    helper.sync_start(test_source2)
+    helper.sync_execute("quit")
+    helper.sync_resume(test_source1)
 
     assert.filetype("thetto-input")
     assert.current_line("test2")
 
-    thetto.execute("move_to_list")
+    helper.sync_execute("move_to_list")
 
     assert.current_line("test21")
   end)

@@ -14,7 +14,7 @@ end
 
 function Job._shutdown(self, code, signal)
   self:stop()
-  if self.on_exit and not self.discarded then
+  if self.on_exit then
     self:on_exit(code, signal)
   end
 end
@@ -76,7 +76,7 @@ function Job.start(self)
       self.stdout_output = self.stdout_output .. adjusted
       self.all_output = self.all_output .. adjusted
     end
-    if self.on_stdout and not self.discarded then
+    if self.on_stdout then
       self:on_stdout(err, data)
     end
   end))
@@ -87,15 +87,10 @@ function Job.start(self)
       self.stderr_output = self.stderr_output .. adjusted
       self.all_output = self.all_output .. adjusted
     end
-    if self.on_stderr and not self.discarded then
+    if self.on_stderr then
       self:on_stderr(err, data)
     end
   end))
-end
-
-function Job.discard(self)
-  self.discarded = true
-  self:stop()
 end
 
 function Job.stop(self)
@@ -164,16 +159,8 @@ function M.new(cmd_and_args, opts)
   end
 
   job.all_output = ""
-  job.discarded = false
 
   return setmetatable(job, Job)
-end
-
-function M.print_stderr(_, _, data)
-  if data == nil or data == "" then
-    return
-  end
-  vim.api.nvim_err_write(data .. "\n")
 end
 
 function M.print_stdout(self)

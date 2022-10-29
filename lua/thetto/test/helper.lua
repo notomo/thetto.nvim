@@ -80,13 +80,13 @@ function helper.sync_execute(...)
   helper.wait(promise)
 end
 
-function helper.sync_reload()
-  local promise = require("thetto").reload()
+function helper.sync_reload(...)
+  local promise = require("thetto").reload(...)
   helper.wait(promise)
 end
 
-function helper.sync_resume()
-  local promise = require("thetto").resume()
+function helper.sync_resume(...)
+  local promise = require("thetto").resume(...)
   helper.wait(promise)
 end
 

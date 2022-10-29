@@ -138,7 +138,12 @@ end
 function M.execute(cmd, opts)
   local default_opts = {
     on_exit = jobs.print_stdout,
-    on_stderr = jobs.print_stderr,
+    on_stderr = function(_, _, data)
+      if not data or data == "" then
+        return
+      end
+      vim.api.nvim_err_write(data .. "\n")
+    end,
   }
   opts = vim.tbl_extend("force", default_opts, opts or {})
 
