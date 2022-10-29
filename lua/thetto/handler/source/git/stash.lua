@@ -37,11 +37,11 @@ local start = function(bufnr, item)
 
   local cmd = { "git", "show", "--date=iso", item.stash_name }
   return require("thetto.util.job").promise(cmd, {
-    on_exit = function(job_self)
+    on_exit = function(output)
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return
       end
-      local lines = job_self:get_output()
+      local lines = vim.split(output, "\n", true)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     end,
   })
@@ -79,11 +79,11 @@ M.actions = {
 
     local cmd = { "git", "--no-pager", "show", "--date=iso", item.stash_name }
     local promise = require("thetto.util.job").promise(cmd, {
-      on_exit = function(job_self)
+      on_exit = function(output)
         if not vim.api.nvim_buf_is_valid(bufnr) then
           return
         end
-        local lines = job_self:get_output()
+        local lines = vim.split(output, "\n", true)
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
       end,
     })

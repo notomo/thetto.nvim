@@ -26,8 +26,8 @@ function M.collect(source_ctx)
   end
 
   return require("thetto.util.job").run(cmd, source_ctx, to_item, {
-    to_outputs = function(job)
-      local outputs = job:get_stdout()
+    to_outputs = function(output)
+      local outputs = vim.split(output, "\n", true)
       remove_header(outputs)
       return outputs
     end,

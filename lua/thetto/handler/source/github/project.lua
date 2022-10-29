@@ -45,8 +45,8 @@ function M.collect(source_ctx)
       column_offsets = { value = #mark + 1, description = #mark + #project_name + 1 },
     }
   end, {
-    to_outputs = function(job)
-      return vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
+    to_outputs = function(output)
+      return vim.json.decode(output, { luanil = { object = true } })
     end,
   })
 end

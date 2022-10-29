@@ -1,7 +1,7 @@
-local jobs = require("thetto.lib.job")
-
 local M = {}
 
-M.output = jobs.parse_output
+M.output = function(output)
+  return vim.split(output, "\n", true)
+end
 
 return M

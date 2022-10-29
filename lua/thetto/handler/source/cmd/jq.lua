@@ -15,9 +15,6 @@ function M.collect(source_ctx)
   end, {
     input = vim.api.nvim_buf_get_lines(source_ctx.bufnr, 0, -1, false),
     stop_on_error = false,
-    to_outputs = function(job)
-      return job:get_output()
-    end,
   })
 end
 

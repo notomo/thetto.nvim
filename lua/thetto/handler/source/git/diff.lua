@@ -53,8 +53,8 @@ function M.collect(source_ctx)
       path = path or pathlib.join(git_root, hunk.path),
     }
   end, {
-    to_outputs = function(job)
-      return to_hunks(job:get_stdout())
+    to_outputs = function(output)
+      return to_hunks(output)
     end,
   })
 end

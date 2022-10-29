@@ -1,9 +1,9 @@
-local jobs = require("thetto.lib.job")
+local jobs = require("thetto..vendor.misclib.job")
 
 local M = {}
 
-local start = function(observer, job, input)
-  local err = job:start()
+local start = function(observer, cmd, opts, input)
+  local job, err = jobs.start(cmd, opts)
   if err then
     return observer:error(err)
   end
@@ -11,24 +11,20 @@ local start = function(observer, job, input)
   local cancel = function()
     job:stop()
   end
-
   if not input then
     return cancel
   end
-  job.stdin:write(input, function()
-    if job.stdin:is_closing() then
-      return
-    end
-    job.stdin:close()
-  end)
+
+  job:input(input)
+  job:close_stdin()
 
   return cancel
 end
 
 function M.run(cmd, source_ctx, to_item, opts)
   local default_opts = {
-    to_outputs = function(job)
-      return job:get_stdout()
+    to_outputs = function(output)
+      return require("thetto.util.job.parse").output(output)
     end,
     stop_on_error = true,
     input = nil,
@@ -42,15 +38,18 @@ function M.run(cmd, source_ctx, to_item, opts)
     opts.env = nil
   end
 
+  local stdout = require("thetto.vendor.misclib.job.output").new()
+  local stderr = require("thetto.vendor.misclib.job.output").new()
   return function(observer)
-    local job = jobs.new(cmd, {
-      on_exit = function(self, code)
+    return start(observer, cmd, {
+      on_exit = function(_, code)
         if opts.stop_on_error and code ~= 0 then
-          return observer:error(self.stderr_output)
+          return observer:error(stderr:str())
         end
 
         local items = {}
-        for _, output in ipairs(opts.to_outputs(self)) do
+        local out_or_err = code ~= 0 and stderr:str() or stdout:str()
+        for _, output in ipairs(opts.to_outputs(out_or_err)) do
           local item = to_item(output, code)
           if not item then
             goto continue
@@ -66,17 +65,17 @@ function M.run(cmd, source_ctx, to_item, opts)
       cwd = opts.cwd,
       stdout_buffered = opts.stdout_buffered,
       stderr_buffered = opts.stderr_buffered,
+      on_stdout = stdout:collector(),
+      on_stderr = stderr:collector(),
       env = opts.env,
-    })
-
-    return start(observer, job, opts.input)
+    }, opts.input)
   end
 end
 
 function M.start(cmd, source_ctx, to_item, opts)
   local default_opts = {
     to_outputs = function(data)
-      return jobs.parse_output(data)
+      return require("thetto.util.job.parse").output(data)
     end,
     input = nil,
     cwd = source_ctx.cwd,
@@ -96,11 +95,12 @@ function M.start(cmd, source_ctx, to_item, opts)
     return items
   end
 
-  local output_buffer = require("thetto.util.job.output_buffer").new()
+  local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
+  local stderr = require("thetto.vendor.misclib.job.output").new()
   return function(observer)
-    local job = jobs.new(cmd, {
-      on_stdout = function(_, _, data)
-        if not data then
+    return start(observer, cmd, {
+      on_stdout = function(_, data)
+        if #data == 1 and data[1] == "" then
           local str = output_buffer:pop()
           local outputs = opts.to_outputs(str)
           if outputs[#outputs] == "" then
@@ -120,66 +120,67 @@ function M.start(cmd, source_ctx, to_item, opts)
         local outputs = opts.to_outputs(str)
         observer:next(to_items(outputs))
       end,
-      on_exit = function(self, code)
+      on_exit = function(_, code)
         if code ~= 0 then
-          return observer:error(self.stderr_output)
+          return observer:error(stderr:str())
         end
       end,
       cwd = opts.cwd,
       stdout_buffered = false,
       stderr_buffered = true,
+      on_stderr = stderr:collector(),
       env = opts.env,
-    })
-
-    return start(observer, job, opts.input)
+    }, opts.input)
   end
 end
 
 function M.execute(cmd, opts)
+  local stdout = require("thetto.vendor.misclib.job.output").new()
   local default_opts = {
-    on_exit = jobs.print_stdout,
-    on_stderr = function(_, _, data)
-      if not data or data == "" then
+    on_exit = function()
+      vim.api.nvim_echo({ { stdout:str() } }, true, {})
+    end,
+    on_stderr = function(_, data)
+      if #data == 1 and data[1] == "" then
         return
       end
-      vim.api.nvim_err_write(data .. "\n")
+      vim.api.nvim_err_write(table.concat(data, "\n") .. "\n")
     end,
+    on_stdout = stdout:collector(),
   }
   opts = vim.tbl_extend("force", default_opts, opts or {})
-
-  local job = jobs.new(cmd, opts)
-  local err = job:start()
-  if err ~= nil then
-    return nil, err
-  end
-  return job, nil
+  return jobs.start(cmd, opts)
 end
 
 function M.promise(cmd, opts)
   opts = opts or {}
 
+  local stdout = require("thetto.vendor.misclib.job.output").new()
+  local stderr = require("thetto.vendor.misclib.job.output").new()
   return require("thetto.vendor.promise").new(function(resolve, reject)
     local default_opts = {
       stderr_buffered = true,
       stdout_buffered = true,
+      on_stdout = stdout:collector(),
+      on_stderr = stderr:collector(),
     }
-    local on_exit = opts.on_exit or function(job)
-      jobs.print_stdout(job)
+    local on_exit = opts.on_exit or function(output)
+      vim.api.nvim_echo({ { output } }, true, {})
     end
     opts = vim.tbl_extend("force", default_opts, opts)
-    opts.on_exit = function(job, code)
+    opts.on_exit = function(_, code)
       if code ~= 0 then
-        return reject(job.stderr_output)
+        return reject(stderr:str())
       end
-      on_exit(job, code)
-      return resolve(job.stdout_output)
+      local output = stdout:str()
+      on_exit(output, code)
+      return resolve(output)
     end
     if opts.env and vim.tbl_isempty(opts.env) then
       opts.env = nil
     end
 
-    local job = jobs.new(cmd, opts)
-    local err = job:start()
+    local _, err = jobs.start(cmd, opts)
     if err ~= nil then
       return reject(err)
     end

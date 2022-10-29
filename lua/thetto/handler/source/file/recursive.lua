@@ -57,7 +57,7 @@ function M.collect(source_ctx)
 
   return function(observer)
     local to_absolute = source_ctx.opts.to_absolute
-    local output_buffer = require("thetto.util.job.output_buffer").new()
+    local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       local items = vim.mpack.decode(encoded)
       return vim.tbl_map(function(item)
@@ -69,7 +69,7 @@ function M.collect(source_ctx)
       end, items)
     end)
     local _, err = require("thetto.util.job").execute(cmd, {
-      on_stdout = function(_, _, data)
+      on_stdout = function(_, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())
           return

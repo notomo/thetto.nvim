@@ -42,8 +42,8 @@ function M.collect(source_ctx)
       column_offsets = { value = #mark + 1, state = #title + 1 },
     }
   end, {
-    to_outputs = function(job)
-      local data = vim.json.decode(job:get_joined_stdout(), { luanil = { object = true } })
+    to_outputs = function(output)
+      local data = vim.json.decode(output, { luanil = { object = true } })
       return data.check_runs or {}
     end,
   })
