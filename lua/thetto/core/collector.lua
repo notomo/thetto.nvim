@@ -252,7 +252,6 @@ function Collector._update_sorters(self, sorters)
 end
 
 function Collector.update(self)
-  self._result:apply_selected(self.items)
   return self:_update_items()
 end
 
