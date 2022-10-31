@@ -1,4 +1,4 @@
-local jobs = require("thetto..vendor.misclib.job")
+local jobs = require("thetto.vendor.misclib.job")
 
 local M = {}
 
