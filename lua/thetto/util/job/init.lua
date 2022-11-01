@@ -108,7 +108,6 @@ function M.start(cmd, source_ctx, to_item, opts)
           end
           local items = to_items(outputs)
           observer:next(items)
-          observer:complete()
           return
         end
 
@@ -124,6 +123,7 @@ function M.start(cmd, source_ctx, to_item, opts)
         if code ~= 0 then
           return observer:error(stderr:str())
         end
+        observer:complete()
       end,
       cwd = opts.cwd,
       stdout_buffered = false,

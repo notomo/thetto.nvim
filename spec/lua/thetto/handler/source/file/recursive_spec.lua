@@ -42,7 +42,7 @@ describe("file/recursive source", function()
       },
     })
 
-    thetto.start("file/recursive")
+    helper.sync_start("file/recursive")
     assert.exists_message("not_exists_cmd")
   end)
 end)

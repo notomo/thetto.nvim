@@ -110,7 +110,9 @@ end
 
 function Collector.start(self, input_pattern, resolve, reject)
   resolve = resolve or function() end
-  reject = reject or function() end
+  reject = reject or function(e)
+    require("thetto.vendor.misclib.message").warn(e)
+  end
 
   local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
   local result, err = self.source:collect(source_ctx)
@@ -127,7 +129,6 @@ function Collector.start(self, input_pattern, resolve, reject)
       return self:update_with_throttle()
     end,
     error = function(e)
-      require("thetto.vendor.misclib.message").warn(e)
       return self:update_with_throttle(function()
         reject(e)
       end)
