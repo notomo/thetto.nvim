@@ -88,6 +88,34 @@ function M.action_create(items)
     end)
 end
 
+local start = function(bufnr, item)
+  vim.bo[bufnr].bufhidden = "wipe"
+  vim.bo[bufnr].filetype = "diff"
+
+  local cmd = { "git", "show", "--date=iso", item.commit_hash }
+  return require("thetto.util.job").promise(cmd, {
+    on_exit = function(output)
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
+      local lines = vim.split(output, "\n", true)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+    end,
+  })
+end
+
+function M.action_preview(items, _, ctx)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  local promise = start(bufnr, item)
+  ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  return promise
+end
+
 M.default_action = "checkout"
 
 return M

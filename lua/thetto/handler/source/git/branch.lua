@@ -10,7 +10,12 @@ function M.collect(source_ctx)
     return nil, err
   end
 
-  local cmd = { "git", "branch", "--format", "%(refname:short) %(contents:subject)" }
+  local cmd = {
+    "git",
+    "branch",
+    "--format",
+    "%(objectname:short) %(refname:short) %(contents:subject)",
+  }
   if source_ctx.opts.all then
     table.insert(cmd, "--all")
   end
@@ -23,15 +28,16 @@ function M.collect(source_ctx)
     :next(function(current_branch)
       current_branch = vim.trim(current_branch)
       return require("thetto.util.job").start(cmd, source_ctx, function(output)
-        local branch_name = output:match("(%S+) (.*)")
+        local commit_hash, branch_name = output:match("^(%S+) (%S+)")
         local is_current_branch = branch_name == current_branch
         return {
           value = branch_name,
+          commit_hash = commit_hash,
           desc = output,
           is_current_branch = is_current_branch,
           column_offsets = {
-            value = 0,
-            message = #branch_name,
+            value = #commit_hash + 1,
+            message = #commit_hash + 1 + #branch_name,
           },
         }
       end)
@@ -42,10 +48,15 @@ vim.api.nvim_set_hl(0, "ThettoGitActiveBranch", { default = true, link = "Type" 
 
 M.highlight = require("thetto.util.highlight").columns({
   {
+    group = "Comment",
+    end_key = "value",
+  },
+  {
     group = "ThettoGitActiveBranch",
     filter = function(item)
       return item.is_current_branch
     end,
+    start_key = "value",
     end_key = "message",
   },
   {
