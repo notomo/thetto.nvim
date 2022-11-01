@@ -1,8 +1,8 @@
 local helper = require("thetto.test.helper")
 local thetto = helper.require("thetto")
 
-local test_source1 = "_test_values1"
-local test_source2 = "_test_values2"
+local test_source1 = "test_values1"
+local test_source2 = "test_values2"
 local test_items1
 local test_items2
 

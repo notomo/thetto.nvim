@@ -72,7 +72,8 @@ function Source.all()
   for _, path in ipairs(paths) do
     local source_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/source/", true)[2]
     local name = source_file:sub(1, #source_file - 4)
-    if not already[name] then
+    local ignored = vim.startswith(vim.fs.basename(source_file), "_")
+    if not ignored and not already[name] then
       local source_info = {
         name = name,
         path = path,

@@ -16,24 +16,9 @@ function M.collect(source_ctx)
   )
   local cmd = { "gh", "api", "-X", "GET", path }
   return require("thetto.util.job").run(cmd, source_ctx, function(step)
-    local mark = "  "
-    if step.conclusion == "success" then
-      mark = "✅"
-    elseif step.conclusion == "failure" then
-      mark = "❌"
-    elseif step.conclusion == "skipped" then
-      mark = "🔽"
-    elseif step.conclusion == "cancelled" then
-      mark = "🚫"
-    elseif step.status == "in_progress" then
-      mark = "🏃"
-    end
+    local mark = require("thetto.handler.source.github.action._util").conclusion_mark(step)
     local title = ("%s %s"):format(mark, step.name)
-    local states = { step.status }
-    if step.conclusion then
-      table.insert(states, step.conclusion)
-    end
-    local state = ("(%s)"):format(table.concat(states, ","))
+    local state = require("thetto.handler.source.github.action._util").state(step)
     local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(step.started_at, step.completed_at)
     local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
     return {

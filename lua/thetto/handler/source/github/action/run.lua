@@ -16,24 +16,9 @@ function M.collect(source_ctx)
 
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
   return require("thetto.util.job").run(cmd, source_ctx, function(run)
-    local mark = "  "
-    if run.conclusion == "success" then
-      mark = "✅"
-    elseif run.conclusion == "failure" then
-      mark = "❌"
-    elseif run.conclusion == "skipped" then
-      mark = "🔽"
-    elseif run.conclusion == "cancelled" then
-      mark = "🚫"
-    elseif run.status == "in_progress" then
-      mark = "🏃"
-    end
+    local mark = require("thetto.handler.source.github.action._util").conclusion_mark(run)
     local title = ("%s %s"):format(mark, run.name)
-    local states = { run.status }
-    if run.conclusion then
-      table.insert(states, run.conclusion)
-    end
-    local state = ("(%s)"):format(table.concat(states, ","))
+    local state = require("thetto.handler.source.github.action._util").state(run)
     local branch = ("[%s]"):format(run.head_branch)
     local desc = ("%s %s %s"):format(title, branch, state)
     return {
