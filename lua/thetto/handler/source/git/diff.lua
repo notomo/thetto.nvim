@@ -54,7 +54,8 @@ function M.collect(source_ctx)
     }
   end, {
     to_outputs = function(output)
-      return to_hunks(output)
+      local lines = require("thetto.util.job.parse").output(output)
+      return to_hunks(lines)
     end,
   })
 end
