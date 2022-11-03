@@ -1,9 +1,25 @@
-local jobs = require("thetto.vendor.misclib.job")
+local joblib = require("thetto.vendor.misclib.job")
 
 local M = {}
 
+local job_start = function(cmd, opts)
+  local log_dir = vim.fn.stdpath("log")
+  vim.fn.mkdir(log_dir, "p")
+
+  local log_path = require("thetto.lib.path").join(log_dir, "thetto.log")
+  local log_file = io.open(log_path, "a")
+  if not log_file then
+    return nil, "could not open log file: " .. log_path
+  end
+  local msg = table.concat(cmd, " ")
+  log_file:write(("[%s] %s\n"):format(os.date(), msg))
+  log_file:close()
+
+  return joblib.start(cmd, opts)
+end
+
 local start = function(observer, cmd, opts, input)
-  local job, err = jobs.start(cmd, opts)
+  local job, err = job_start(cmd, opts)
   if err then
     return observer:error(err)
   end
@@ -149,7 +165,7 @@ function M.execute(cmd, opts)
     on_stdout = stdout:collector(),
   }
   opts = vim.tbl_extend("force", default_opts, opts or {})
-  return jobs.start(cmd, opts)
+  return job_start(cmd, opts)
 end
 
 function M.promise(cmd, opts)
@@ -180,7 +196,7 @@ function M.promise(cmd, opts)
       opts.env = nil
     end
 
-    local _, err = jobs.start(cmd, opts)
+    local _, err = job_start(cmd, opts)
     if err ~= nil then
       return reject(err)
     end
