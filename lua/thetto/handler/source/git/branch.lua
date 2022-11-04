@@ -35,6 +35,7 @@ function M.collect(source_ctx)
           commit_hash = commit_hash,
           desc = output,
           is_current_branch = is_current_branch,
+          _is_current_branch = is_current_branch and 1 or 0,
           column_offsets = {
             value = #commit_hash + 1,
             message = #commit_hash + 1 + #branch_name,
@@ -67,6 +68,6 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "git/branch"
 
-M.sorters = { "length" }
+M.sorters = { "-numeric:_is_current_branch", "length" }
 
 return M
