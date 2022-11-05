@@ -9,7 +9,7 @@ function M.collect(source_ctx)
     if not vim.api.nvim_buf_is_valid(bufnr) then
       goto continue
     end
-    if not vim.bo[bufnr].buflisted then
+    if not vim.bo[bufnr].buflisted and vim.bo[bufnr].buftype ~= "terminal" then
       goto continue
     end
     if source_ctx.opts.buftype ~= nil and vim.bo[bufnr].buftype ~= source_ctx.opts.buftype then
