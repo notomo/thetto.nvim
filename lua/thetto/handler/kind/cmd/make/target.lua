@@ -12,7 +12,7 @@ M.opts.execute = {
 
 function M.action_execute(items, action_ctx)
   for _, item in ipairs(items) do
-    vim.cmd.tabedit()
+    require("thetto.lib.buffer").open_scratch_tab()
     local cmd = { "make" }
     vim.list_extend(cmd, action_ctx.opts.args)
     vim.list_extend(cmd, { item.path, item.value })

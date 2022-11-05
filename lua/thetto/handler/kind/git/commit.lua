@@ -18,7 +18,7 @@ end
 
 function M.action_tab_open(items)
   return open_diff(items, function(bufnr)
-    vim.cmd.tabedit()
+    require("thetto.lib.buffer").open_scratch_tab()
     vim.cmd.buffer(bufnr)
   end)
 end

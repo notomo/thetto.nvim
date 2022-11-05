@@ -15,7 +15,7 @@ end
 
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
-    vim.cmd.tabedit()
+    require("thetto.lib.buffer").open_scratch_tab()
     goto_item_pos(item)
   end
 end

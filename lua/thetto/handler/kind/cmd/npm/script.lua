@@ -9,7 +9,7 @@ M.opts = {}
 M.opts.execute = { driver = driver }
 function M.action_execute(items, action_ctx)
   for _, item in ipairs(items) do
-    vim.cmd.tabedit()
+    require("thetto.lib.buffer").open_scratch_tab()
     local cmd = { "npm", "run", item.value }
     local opts = { cwd = vim.fn.fnamemodify(item.path, ":h") }
     action_ctx.opts.driver(cmd, opts)

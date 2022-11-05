@@ -8,6 +8,12 @@ function M.scratch(modify)
   return bufnr
 end
 
+function M.open_scratch_tab()
+  vim.cmd.tabedit()
+  vim.bo.buftype = "nofile"
+  vim.bo.bufhidden = "wipe"
+end
+
 function M.delete_by_name(name)
   local bufnr = vim.fn.bufnr(("^%s$"):format(name))
   if bufnr == -1 then

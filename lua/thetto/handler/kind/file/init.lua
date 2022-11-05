@@ -49,7 +49,7 @@ function M.action_tab_open(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      vim.cmd.tabedit()
+      require("thetto.lib.buffer").open_scratch_tab()
       vim.cmd.buffer(bufnr)
     else
       vim.cmd.tabedit(filelib.escape(item.path))

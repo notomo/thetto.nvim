@@ -75,7 +75,7 @@ function M.action_debug_dump(items)
     local lines = { vim.json.encode(item) }
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
-    vim.cmd.tabedit()
+    require("thetto.lib.buffer").open_scratch_tab()
     vim.cmd.buffer(bufnr)
     vim.cmd("%!jq '.'")
   end

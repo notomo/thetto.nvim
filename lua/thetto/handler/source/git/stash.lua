@@ -35,7 +35,7 @@ M.actions = {
 
   action_tab_open = function(items)
     return require("thetto.handler.kind.git._util").open_diff(items, function(bufnr)
-      vim.cmd.tabedit()
+      require("thetto.lib.buffer").open_scratch_tab()
       vim.cmd.buffer(bufnr)
     end)
   end,
