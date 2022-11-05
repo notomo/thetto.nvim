@@ -51,6 +51,68 @@ M.actions = {
     ctx.ui:open_preview(item, { raw_bufnr = bufnr })
     return promise
   end,
+
+  action_create = function(items)
+    local item = items[1]
+    if not item then
+      return
+    end
+
+    return require("thetto.util.input")
+      .promise({
+        prompt = "Create stash: ",
+      })
+      :next(function(input)
+        if not input or input == "" then
+          return require("thetto.vendor.misclib.message").info("invalid input to create stash")
+        end
+        return require("thetto.util.job").promise({ "git", "stash", "save", input }):next(function()
+          return require("thetto.vendor.misclib.message").info(("Created stash: %s"):format(input))
+        end)
+      end)
+  end,
+
+  action_pop = function(items)
+    local item = items[1]
+    if not item then
+      return
+    end
+    return require("thetto.util.job")
+      .promise({ "git", "stash", "pop", item.stash_name }, {
+        on_exit = function() end,
+      })
+      :next(function()
+        return require("thetto.vendor.misclib.message").info(("Pop stash: %s"):format(item.stash_name))
+      end)
+  end,
+
+  action_apply = function(items)
+    local item = items[1]
+    if not item then
+      return
+    end
+    return require("thetto.util.job")
+      .promise({ "git", "stash", "apply", item.stash_name }, {
+        on_exit = function() end,
+      })
+      :next(function()
+        return require("thetto.vendor.misclib.message").info(("Applied stash: %s"):format(item.stash_name))
+      end)
+  end,
+
+  action_delete = function(items)
+    local item = items[1]
+    if not item then
+      return
+    end
+    return require("thetto.util.job")
+      .promise({ "git", "stash", "drop", item.stash_name }, {
+        on_exit = function() end,
+      })
+      :next(function()
+        return require("thetto.vendor.misclib.message").info(("Drop stash: %s"):format(item.stash_name))
+      end)
+  end,
 }
 
 return M
