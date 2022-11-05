@@ -389,6 +389,20 @@ describe("thetto", function()
 
     assert.exists_pattern("test1")
   end)
+
+  it("can set source specific setting", function()
+    local called_source_name
+    vim.api.nvim_create_autocmd({ "User" }, {
+      pattern = { "ThettoOpened" },
+      callback = function(args)
+        called_source_name = args.data.source_name
+      end,
+    })
+
+    thetto.start(test_source1, { opts = { insert = false } })
+
+    assert.equal(test_source1, called_source_name)
+  end)
 end)
 
 describe("thetto.reload()", function()

@@ -77,6 +77,15 @@ function ItemList.new(source_name, width, height, row, column)
   }
   local self = setmetatable(tbl, ItemList)
   self:enable_cursorline()
+
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "ThettoOpened",
+    data = {
+      source_name = source_name,
+      list_bufnr = bufnr,
+    },
+  })
+
   return self
 end
 
