@@ -68,7 +68,7 @@ function M.collect(source_ctx)
         }
       end, items)
     end)
-    local _, err = require("thetto.util.job").execute(cmd, {
+    local job, err = require("thetto.util.job").execute(cmd, {
       on_stdout = function(_, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())
@@ -85,6 +85,9 @@ function M.collect(source_ctx)
       on_exit = function()
         work_observer:complete()
       end,
+      on_stderr = function()
+        -- workaround to ignore permission error
+      end,
       stdout_buffered = false,
       stderr_buffered = false,
       cwd = source_ctx.cwd,
@@ -92,6 +95,9 @@ function M.collect(source_ctx)
     if err then
       return observer:error(err)
     end
+    return vim.schedule_wrap(function()
+      job:stop()
+    end)
   end
 end
 
