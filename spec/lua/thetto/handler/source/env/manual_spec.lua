@@ -7,10 +7,10 @@ describe("env/manual source", function()
 
   it("can show manuals", function()
     helper.sync_start("env/manual")
-    helper.sync_input({ "nvim" })
+    helper.sync_input({ "ls" })
 
     thetto.execute("move_to_list")
 
-    assert.exists_pattern("nvim(1)")
+    assert.exists_pattern("ls(1)")
   end)
 end)
