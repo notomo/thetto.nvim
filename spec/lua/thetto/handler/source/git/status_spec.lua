@@ -9,6 +9,6 @@ describe("git/status source", function()
 
     helper.sync_start("git/status", { opts = { insert = false } })
 
-    assert.exists_pattern("?? test_data/")
+    assert.exists_pattern("UNTRACKED test_data/")
   end)
 end)
