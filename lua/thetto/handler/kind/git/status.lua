@@ -2,6 +2,7 @@ local M = {}
 
 M.behaviors = {
   toggle_stage = { quit = false },
+  discard = { quit = false },
 }
 
 local to_paths = function(items)
@@ -42,6 +43,32 @@ function M.action_toggle_stage(items)
   return require("thetto.vendor.promise").all(promises):next(function()
     return require("thetto.command").reload(bufnr)
   end)
+end
+
+function M.action_discard(items)
+  if #items == 0 then
+    return nil
+  end
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local paths = to_paths(items)
+  return require("thetto.util.input")
+    .promise({
+      prompt = "Reset (y/n):\n" .. table.concat(paths, "\n"),
+    })
+    :next(function(input)
+      if input ~= "y" then
+        return require("thetto.vendor.misclib.message").info("Canceled reset")
+      end
+      return require("thetto.util.job").promise({
+        "git",
+        "restore",
+        unpack(paths),
+      })
+    end)
+    :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
 end
 
 return require("thetto.core.kind").extend(M, "file")
