@@ -65,7 +65,12 @@ M.kind_name = "git/status"
 
 M.highlight = require("thetto.util.highlight").columns({
   {
-    group = "Comment",
+    group = function(item)
+      if item.index_status == "staged" then
+        return "String"
+      end
+      return "Boolean"
+    end,
     end_key = "value",
   },
 })
