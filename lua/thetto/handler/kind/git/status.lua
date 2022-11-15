@@ -1,5 +1,7 @@
 local M = {}
 
+M.opts = {}
+
 M.behaviors = {
   toggle_stage = { quit = false },
   discard = { quit = false },
@@ -90,6 +92,24 @@ function M.action_stash(items)
       require("thetto.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
       return require("thetto.command").reload(bufnr)
     end)
+end
+
+M.opts.commit = {
+  args = {},
+}
+function M.action_commit(_, action_ctx)
+  return require("thetto.util.job").promise({ "git", "commit", unpack(action_ctx.opts.args) }):catch(function(err)
+    if err and err:match("Please supply the message") then
+      return
+    end
+    return require("thetto.vendor.promise").reject(err)
+  end)
+end
+
+function M.action_commit_amend(items, action_ctx, ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, ctx, {
+    args = { "--amend" },
+  })
 end
 
 return require("thetto.core.kind").extend(M, "file")
