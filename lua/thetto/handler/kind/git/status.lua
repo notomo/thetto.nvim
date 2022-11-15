@@ -3,6 +3,7 @@ local M = {}
 M.behaviors = {
   toggle_stage = { quit = false },
   discard = { quit = false },
+  stash = { quit = false },
 }
 
 local to_paths = function(items)
@@ -58,7 +59,7 @@ function M.action_discard(items)
     })
     :next(function(input)
       if input ~= "y" then
-        return require("thetto.vendor.misclib.message").info("Canceled reset")
+        return require("thetto.vendor.misclib.message").info("Canceled discard")
       end
       return require("thetto.util.job").promise({
         "git",
@@ -67,6 +68,26 @@ function M.action_discard(items)
       })
     end)
     :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
+end
+
+function M.action_stash(items)
+  if #items == 0 then
+    return nil
+  end
+
+  local bufnr = vim.api.nvim_get_current_buf()
+  local paths = to_paths(items)
+  return require("thetto.util.job")
+    .promise({
+      "git",
+      "stash",
+      "--",
+      unpack(paths),
+    })
+    :next(function()
+      require("thetto.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
       return require("thetto.command").reload(bufnr)
     end)
 end
