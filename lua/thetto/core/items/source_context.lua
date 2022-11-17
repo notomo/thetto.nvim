@@ -18,4 +18,16 @@ function M.from(self, pattern)
   return M.new(pattern, self.cwd, self.throttle_ms, self.range, self.interactive, self.bufnr, self.opts)
 end
 
+function M.change_opts(self, opts)
+  return M.new(
+    self.pattern,
+    self.cwd,
+    self.throttle_ms,
+    self.range,
+    self.interactive,
+    self.bufnr,
+    vim.tbl_deep_extend("force", self.opts, opts)
+  )
+end
+
 return M

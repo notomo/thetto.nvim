@@ -2,13 +2,25 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
+M.opts = {
+  paths = {},
+}
+
 function M.collect(source_ctx)
   local _, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
 
-  local cmd = { "git", "--no-pager", "log", "--date=short", "--pretty=format:%h %cd %s <%an>%d" }
+  local cmd = {
+    "git",
+    "--no-pager",
+    "log",
+    "--date=short",
+    "--pretty=format:%h %cd %s <%an>%d",
+    "--",
+    unpack(source_ctx.opts.paths),
+  }
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local commit_hash, date = output:match("^(%S+) (%S+)")
     if not commit_hash then
