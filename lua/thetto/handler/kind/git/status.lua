@@ -112,4 +112,12 @@ function M.action_commit_amend(items, action_ctx, ctx)
   })
 end
 
+function M.action_compare(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  return require("thetto.handler.kind.git._util").compare(item.path, "HEAD", item.path)
+end
+
 return require("thetto.core.kind").extend(M, "file")
