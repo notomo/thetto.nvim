@@ -1,8 +1,6 @@
 local M = {}
 
 function M.render_diff(bufnr, item)
-  vim.bo[bufnr].bufhidden = "wipe"
-  vim.bo[bufnr].filetype = "diff"
   local cmd = { "git", "--no-pager", "show", "--date=iso", item.commit_hash or item.stash_name }
   return require("thetto.util.job").promise(cmd, {
     on_exit = function(output)
@@ -15,10 +13,17 @@ function M.render_diff(bufnr, item)
   })
 end
 
+function M.diff_buffer()
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.bo[bufnr].bufhidden = "wipe"
+  vim.bo[bufnr].filetype = "diff"
+  return bufnr
+end
+
 function M.open_diff(items, f)
   local promises = {}
   for _, item in ipairs(items) do
-    local bufnr = vim.api.nvim_create_buf(false, true)
+    local bufnr = M.diff_buffer()
     local promise = M.render_diff(bufnr, item)
     table.insert(promises, promise)
     f(bufnr)
@@ -77,7 +82,7 @@ function M.compare(path_before, revision_before, path_after, revision_after)
   local after = M.content(git_root, path_after, revision_after)
   return require("thetto.vendor.promise").all({ before, after }):next(function(result)
     local before_buffer_path, after_buffer_path = unpack(result)
-    vim.cmd.tabedit()
+    require("thetto.lib.buffer").open_scratch_tab()
 
     vim.cmd.edit(before_buffer_path)
     vim.cmd.diffthis()

@@ -120,4 +120,19 @@ function M.action_compare(items)
   return require("thetto.handler.kind.git._util").compare(item.path, "HEAD", item.path)
 end
 
+function M.action_diff(items)
+  local paths = to_paths(items)
+  return require("thetto.util.job")
+    .promise({ "git", "diff", unpack(paths) }, {
+      on_exit = function() end,
+    })
+    :next(function(output)
+      local bufnr = require("thetto.handler.kind.git._util").diff_buffer()
+      local lines = vim.split(output, "\n", true)
+      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+      require("thetto.lib.buffer").open_scratch_tab()
+      vim.cmd.buffer(bufnr)
+    end)
+end
+
 return require("thetto.core.kind").extend(M, "file")
