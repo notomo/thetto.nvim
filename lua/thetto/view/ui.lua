@@ -154,15 +154,19 @@ function UI.redraw(self, input_lines, row)
   end
 
   local promise = self:on_move()
-  promise:next(function()
-    if not UI._test then
-      return
-    end
-    vim.api.nvim_exec_autocmds("User", {
-      pattern = "ThettoTestRedrawn",
-    })
+  promise
+    :next(function()
+      if not UI._test then
+        return
+      end
+      vim.api.nvim_exec_autocmds("User", {
+        pattern = "ThettoTestRedrawn",
+      })
+    end)
+    :catch(function() end)
+  return promise:catch(function(err)
+    require("thetto.vendor.misclib.message").warn(err)
   end)
-  return promise
 end
 
 UI._test = false

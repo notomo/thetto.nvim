@@ -161,10 +161,7 @@ function ItemList.enable_on_moved(self, source_name)
       end
       prev_row = row
 
-      ctx.ui:on_move():next(function(_, err)
-        if not err then
-          return
-        end
+      ctx.ui:on_move():catch(function(err)
         require("thetto.vendor.misclib.message").warn(err)
       end)
     end,

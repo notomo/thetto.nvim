@@ -111,7 +111,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
   if not action_err then
     return self._execute(ctx, main_actions)
   end
-  if not vim.startswith(action_err, "not found action:") then
+  if not vim.startswith(action_err, Kind.ErrNotFoundAction) then
     return Promise.reject(action_err)
   end
 
@@ -122,7 +122,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
       return self._execute(ctx, actions)
     end
     table.insert(errs, err)
-    if not vim.startswith(err, "not found action:") then
+    if not vim.startswith(err, Kind.ErrNotFoundAction) then
       break
     end
   end
@@ -143,7 +143,12 @@ function Executor.auto(self, ctx, action_name)
 
   local needs_preview = action_name == "preview" and kind:find_action(action_name, {})
   local execute_action = function(items)
-    return self:actions(items, ctx, action_name, {}, self._default_action_opts):catch(function() end)
+    return self:actions(items, ctx, action_name, {}, self._default_action_opts):catch(function(err)
+      if vim.startswith(err, Kind.ErrNotFoundAction) then
+        return
+      end
+      return Promise.reject(err)
+    end)
   end
   return execute_action, needs_preview
 end

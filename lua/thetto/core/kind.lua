@@ -61,6 +61,8 @@ function Kind._action_key(self, action_name)
   return Action.PREFIX .. name, name
 end
 
+Kind.ErrNotFoundAction = "not found action: "
+
 function Kind.find_action(self, action_name, action_opts)
   local key, name = self:_action_key(action_name)
   local opts = vim.tbl_extend("force", self.opts[name] or {}, action_opts)
@@ -88,7 +90,7 @@ function Kind.find_action(self, action_name, action_opts)
     return Action.new(self.name, action, opts, behavior), nil
   end
 
-  return nil, "not found action: " .. name
+  return nil, Kind.ErrNotFoundAction .. name
 end
 
 function Kind.action_infos(self)
