@@ -32,7 +32,7 @@ function M.action_preview(items, _, ctx)
   if item == nil then
     return
   end
-  ctx.ui:open_preview(item, { bufnr = item.bufnr, row = item.row })
+  return nil, ctx.ui:open_preview(item, { bufnr = item.bufnr, row = item.row })
 end
 
 M.default_action = "open"

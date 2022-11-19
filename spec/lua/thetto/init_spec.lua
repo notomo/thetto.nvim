@@ -1208,7 +1208,7 @@ describe("toggle_preview action", function()
       kind_actions = {
         base = {
           action_preview = function(items, _, ctx)
-            ctx.ui:open_preview(items[1], { lines = { items[1].value } })
+            return nil, ctx.ui:open_preview(items[1], { lines = { items[1].value } })
           end,
         },
       },
@@ -1229,7 +1229,7 @@ describe("toggle_preview action", function()
       kind_actions = {
         base = {
           action_preview = function(items, _, ctx)
-            ctx.ui:open_preview(items[1], { lines = { items[1].value } })
+            return nil, ctx.ui:open_preview(items[1], { lines = { items[1].value } })
           end,
         },
       },
@@ -1256,7 +1256,7 @@ describe("preview action", function()
       kind_actions = {
         base = {
           action_preview = function(items, _, ctx)
-            ctx.ui:open_preview(items[1], { lines = { items[1].value } })
+            return nil, ctx.ui:open_preview(items[1], { lines = { items[1].value } })
           end,
         },
       },

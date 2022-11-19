@@ -64,7 +64,15 @@ function M.new(target, width, height)
   return bufnr,
     function(decorator_factory, window_id)
       set_cursor(window_id, target.row, target.range, width)
-      highlight(decorator_factory, bufnr, target.row, target.range, height)
+      local ok, err = pcall(highlight, decorator_factory, bufnr, target.row, target.range, height)
+      if ok then
+        return nil
+      end
+      if err:match("outside range") then
+        -- workaround for outdated positions in language server
+        return err
+      end
+      error(err)
     end
 end
 

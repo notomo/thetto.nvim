@@ -51,7 +51,10 @@ function ReturnValue.start(source_name, raw_args)
       return reject(start_err)
     end
 
-    ui:open(opts.immediately, executor:auto(ctx, opts.auto))
+    local open_err = ui:open(opts.immediately, executor:auto(ctx, opts.auto))
+    if err then
+      return reject(open_err)
+    end
     if opts.immediately then
       ui:close(nil, opts.immediately)
     end

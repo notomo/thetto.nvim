@@ -58,7 +58,7 @@ function UI.open(self, immediately, on_move, needs_preview)
   self._on_move = on_move or function() end
   self._debounced_on_move = require("thetto.lib.wrap").debounce_promise(self._debounce_ms_on_move, function(...)
     self:_redraw_status()
-    self._on_move(...)
+    return self._on_move(...)
   end)
 
   -- NOTICE: set autocmd in the end not to fire it
@@ -70,7 +70,10 @@ function UI.open(self, immediately, on_move, needs_preview)
   vim.api.nvim_set_decoration_provider(_inputter_ns, { on_win = UI._highlight_inputter_win })
 
   if needs_preview then
-    self:open_preview(nil, {})
+    local err = self:open_preview(nil, {})
+    if err then
+      return err
+    end
     self._initialized_preview = needs_preview
   end
 end
@@ -281,7 +284,7 @@ function UI.open_preview(self, item, open_target)
   local row = pos.row
 
   self:_move_to(left_column)
-  self._sidecar:open(item, open_target, width, height, row, left_column)
+  return self._sidecar:open(item, open_target, width, height, row, left_column)
 end
 
 function UI.exists_same_preview(self, items)

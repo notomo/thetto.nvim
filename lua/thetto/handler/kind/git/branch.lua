@@ -96,7 +96,10 @@ function M.action_preview(items, _, ctx)
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
-  ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  if err then
+    return nil, err
+  end
   return promise
 end
 

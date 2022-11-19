@@ -39,7 +39,10 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     vim.api.nvim_win_set_buf(self._window, bufnr)
   end
 
-  window_open_callback(self._decorator_factory, self._window)
+  local err = window_open_callback(self._decorator_factory, self._window)
+  if err then
+    return err
+  end
 
   local index
   if item then

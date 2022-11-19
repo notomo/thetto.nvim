@@ -65,10 +65,11 @@ function M.action_preview(items, _, ctx)
     return vim.api.nvim_win_get_cursor(0)
   end)
 
-  ctx.ui:open_preview(
-    item,
-    { raw_bufnr = bufnr, row = cursor[1], range = { s = { column = cursor[2] }, e = { column = -1 } } }
-  )
+  return nil,
+    ctx.ui:open_preview(
+      item,
+      { raw_bufnr = bufnr, row = cursor[1], range = { s = { column = cursor[2] }, e = { column = -1 } } }
+    )
 end
 
 M.default_action = "open"

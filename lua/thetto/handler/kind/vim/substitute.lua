@@ -41,7 +41,7 @@ function M.action_preview(items, _, ctx)
     M.after(item.value, cmd)
   end)
 
-  ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  return nil, ctx.ui:open_preview(item, { raw_bufnr = bufnr })
 end
 
 M.default_action = "execute"
