@@ -41,4 +41,13 @@ function M.start(cmd, opts)
   return Job.new(id_or_err)
 end
 
+function M.open_terminal(cmd, opts)
+  opts = opts or vim.empty_dict()
+  local ok, id_or_err = pcall(vim.fn.termopen, cmd, opts)
+  if not ok then
+    return nil, id_or_err
+  end
+  return Job.new(id_or_err)
+end
+
 return M
