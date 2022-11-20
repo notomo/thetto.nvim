@@ -103,6 +103,14 @@ function M.action_preview(items, _, ctx)
   return promise
 end
 
+function M.action_merge(items)
+  local item = items[1]
+  if not item then
+    return
+  end
+  return require("thetto.util.job").promise({ "git", "merge", item.value })
+end
+
 M.default_action = "checkout"
 
 return M
