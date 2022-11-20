@@ -170,6 +170,9 @@ end
 
 function M.promise(cmd, opts)
   opts = opts or {}
+  opts.is_err = opts.is_err or function(code)
+    return code ~= 0
+  end
 
   local stdout = require("thetto.vendor.misclib.job.output").new()
   local stderr = require("thetto.vendor.misclib.job.output").new()
@@ -185,7 +188,7 @@ function M.promise(cmd, opts)
     end
     opts = vim.tbl_extend("force", default_opts, opts)
     opts.on_exit = function(_, code)
-      if code ~= 0 then
+      if opts.is_err(code) then
         return reject(stderr:str())
       end
       local output = stdout:str()

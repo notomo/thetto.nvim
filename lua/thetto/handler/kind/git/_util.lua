@@ -31,6 +31,46 @@ function M.open_diff(items, f)
   return require("thetto.vendor.promise").all(promises)
 end
 
+function M._apply(git_root, diff, path_a, path_b, path_from_git_root)
+  if diff == "" then
+    return
+  end
+
+  local diff_lines = vim.split(diff, "\n", true)
+  local replaced_path = "/" .. path_from_git_root
+  diff_lines[1] = diff_lines[1]:gsub(path_a, replaced_path)
+  diff_lines[1] = diff_lines[1]:gsub(path_b, replaced_path)
+  diff_lines[3] = diff_lines[3]:gsub(path_a, replaced_path)
+  diff_lines[4] = diff_lines[4]:gsub(path_b, replaced_path)
+
+  local patch_path = vim.fn.tempname()
+  local f = io.open(patch_path, "w")
+  f:write(table.concat(diff_lines, "\n") .. "\n")
+  f:close()
+
+  return require("thetto.util.job").promise({ "git", "apply", "--verbose", "--cached", patch_path }, {
+    cwd = git_root,
+    on_exit = function() end,
+  })
+end
+
+function M._index_content_path(git_root, path_from_git_root)
+  return require("thetto.util.job")
+    .promise({ "git", "--no-pager", "show", ":" .. path_from_git_root }, {
+      cwd = git_root,
+      on_exit = function() end,
+    })
+    :next(function(head)
+      local path = vim.fn.tempname()
+      do
+        local f = io.open(path, "w")
+        f:write(head)
+        f:close()
+      end
+      return path
+    end)
+end
+
 function M.content(git_root, path, revision)
   if not revision then
     return require("thetto.vendor.promise").resolve(path)
@@ -53,6 +93,9 @@ function M.content(git_root, path, revision)
       local bufnr = vim.api.nvim_create_buf(false, true)
       local lines = vim.split(output, "\n", true)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+      vim.bo[bufnr].bufhidden = "wipe"
+      vim.bo[bufnr].buftype = "acwrite"
+      vim.bo[bufnr].modified = false
 
       local buffer_path = "thetto-git://" .. git_root .. "/" .. treeish
       local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
@@ -67,6 +110,46 @@ function M.content(git_root, path, revision)
         vim.bo[bufnr].filetype = filetype
         on_detect(bufnr)
       end
+
+      local index_path, working_path
+      vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
+        buffer = bufnr,
+        callback = function()
+          M._index_content_path(git_root, path_from_git_root)
+            :next(function(index_content_path)
+              index_path = index_content_path
+
+              working_path = vim.fn.tempname()
+              do
+                local f = io.open(working_path, "w")
+                local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+                f:write(table.concat(new_lines, "\n"))
+                f:close()
+              end
+
+              return
+                require("thetto.util.job").promise(
+                { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
+                {
+                  cwd = git_root,
+                  on_exit = function() end,
+                  is_err = function(code)
+                    return code ~= 0 and code ~= 1
+                  end,
+                }
+              )
+            end)
+            :next(function(diff)
+              return M._apply(git_root, diff, index_path, working_path, path_from_git_root)
+            end)
+            :next(function()
+              vim.bo[bufnr].modified = false
+            end)
+            :catch(function(err)
+              require("thetto.vendor.misclib.message").warn(err)
+            end)
+        end,
+      })
 
       return buffer_path
     end)
