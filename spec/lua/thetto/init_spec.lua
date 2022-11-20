@@ -516,6 +516,34 @@ describe("thetto.execute()", function()
 
     assert.is_true(called)
   end)
+
+  it("can execute kind specific action with no items", function()
+    local source = "has_kind"
+    thetto.register_source(source, {
+      collect = function()
+        return function(observer)
+          observer:complete()
+        end
+      end,
+      kind_name = "word",
+    })
+
+    local called = false
+    thetto.setup({
+      kind_actions = {
+        word = {
+          action_hoge = function()
+            called = true
+          end,
+        },
+      },
+    })
+
+    helper.sync_start(source, { opts = { insert = false } })
+    thetto.execute("hoge", { allow_no_items = true })
+
+    assert.is_true(called)
+  end)
 end)
 
 describe("thetto.setup()", function()

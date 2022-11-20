@@ -45,7 +45,7 @@ function Executor._action_function(self, action_name, kind_name, items, action_o
   end, nil
 end
 
-function Executor._actions(self, items, ctx, action_name, action_opts)
+function Executor._actions(self, items, ctx, action_name, action_opts, allow_no_items)
   vim.validate({
     items = { items, "table" },
     ctx = { ctx, "table" },
@@ -63,7 +63,7 @@ function Executor._actions(self, items, ctx, action_name, action_opts)
     table.insert(item_kind_pairs, { item, kind:action_kind_name(action_name) })
   end
   if #item_kind_pairs == 0 then
-    table.insert(item_kind_pairs, { {}, "base" })
+    table.insert(item_kind_pairs, { {}, allow_no_items and self._default_kind_name or "base" })
   end
 
   local groups = listlib.group_by_adjacent(item_kind_pairs, function(pair)
@@ -103,11 +103,11 @@ function Executor._execute(ctx, actions)
   return promise
 end
 
-function Executor.actions(self, items, ctx, main_action_name, fallback_action_names, action_opts)
+function Executor.actions(self, items, ctx, main_action_name, fallback_action_names, action_opts, allow_no_items)
   vim.validate({
     fallback_action_names = { fallback_action_names, "table" },
   })
-  local main_actions, action_err = self:_actions(items, ctx, main_action_name, action_opts)
+  local main_actions, action_err = self:_actions(items, ctx, main_action_name, action_opts, allow_no_items)
   if not action_err then
     return self._execute(ctx, main_actions)
   end
@@ -117,7 +117,7 @@ function Executor.actions(self, items, ctx, main_action_name, fallback_action_na
 
   local errs = { action_err }
   for _, action_name in ipairs(fallback_action_names) do
-    local actions, err = self:_actions(items, ctx, action_name, action_opts)
+    local actions, err = self:_actions(items, ctx, action_name, action_opts, allow_no_items)
     if not err then
       return self._execute(ctx, actions)
     end

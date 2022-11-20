@@ -9,9 +9,11 @@ local _execute_action = function(ctx, action_name, raw_args)
     require("thetto.core.argument").ExecuteArgs.new(action_name or ctx.collector.source.default_action, raw_args)
   local range = require("thetto.vendor.misclib.visual_mode").row_range()
   local items = ctx.ui:selected_items(args.action_name, range)
-  return ctx.executor:actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts):catch(function(e)
-    require("thetto.vendor.misclib.message").warn(e)
-  end)
+  return ctx.executor
+    :actions(items, ctx, args.action_name, args.fallback_actions, args.action_opts, args.allow_no_items)
+    :catch(function(e)
+      require("thetto.vendor.misclib.message").warn(e)
+    end)
 end
 
 function ReturnValue.start(source_name, raw_args)

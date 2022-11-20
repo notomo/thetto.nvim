@@ -35,6 +35,7 @@ M.ExecuteArgs = ExecuteArgs
 ExecuteArgs.default = {
   fallback_actions = {},
   action_opts = {},
+  allow_no_items = false,
 }
 function ExecuteArgs.new(action_name, raw_args)
   vim.validate({
