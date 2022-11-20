@@ -14,16 +14,27 @@ function M.collect(source_ctx)
     ["Changes to be committed:"] = "staged",
     ["Changes not staged for commit:"] = "unstaged",
     ["Untracked files:"] = "untracked",
+    ["Unmerged paths:"] = "conflict",
   }
-  local stage_parser = function(target)
+  local parse_stage = function(target)
     local status, path = target:match("([:^]+)%s+(.*)")
-    return path, status == "new file"
+    return status, path
   end
   local parsers = {
-    staged = stage_parser,
-    unstaged = stage_parser,
+    staged = function(target)
+      local status, path = parse_stage(target)
+      return path, status == "new file"
+    end,
+    unstaged = function(target)
+      local status, path = parse_stage(target)
+      return path, status == "new file"
+    end,
     untracked = function(target)
       return target, false
+    end,
+    conflict = function(target)
+      local _, path = target:match("([:^]+)%s+(.*)")
+      return path, false
     end,
   }
   local index_status = "staged"
@@ -63,13 +74,14 @@ end
 
 M.kind_name = "git/status"
 
+local hl_groups = {
+  staged = "String",
+  conflict = "Special",
+}
 M.highlight = require("thetto.util.highlight").columns({
   {
     group = function(item)
-      if item.index_status == "staged" then
-        return "String"
-      end
-      return "Boolean"
+      return hl_groups[item.index_status] or "Boolean"
     end,
     end_key = "value",
   },
