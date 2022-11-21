@@ -52,10 +52,6 @@ function M.collect(source_ctx)
 
     local path = parsers[index_status](target)
     local abs_path = pathlib.join(git_root, path)
-    local kind_name
-    if not filelib.readable(abs_path) then
-      kind_name = "word"
-    end
 
     local status = ("%-9s"):format(index_status:upper())
     local desc = ("%s %s"):format(status, path)
@@ -64,7 +60,6 @@ function M.collect(source_ctx)
       desc = desc,
       path = abs_path,
       index_status = index_status,
-      kind_name = kind_name,
       column_offsets = {
         value = #status + 1,
       },

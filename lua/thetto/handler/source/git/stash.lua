@@ -46,7 +46,7 @@ M.actions = {
       return nil
     end
 
-    local bufnr = vim.api.nvim_create_buf(false, true)
+    local bufnr = require("thetto.handler.kind.git._util").diff_buffer()
     local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
     local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
     if err then
