@@ -17,25 +17,16 @@ function M.collect(source_ctx)
     ["Unmerged paths:"] = "conflict",
   }
   local parse_stage = function(target)
-    local status, path = target:match("([:^]+)%s+(.*)")
-    return status, path
+    local path_status, path = target:match("([^:]+):%s+(.*)")
+    return path_status, path
   end
   local parsers = {
-    staged = function(target)
-      local status, path = parse_stage(target)
-      return path, status == "new file"
-    end,
-    unstaged = function(target)
-      local status, path = parse_stage(target)
-      return path, status == "new file"
-    end,
+    staged = parse_stage,
+    unstaged = parse_stage,
     untracked = function(target)
-      return target, false
+      return "untracked", target
     end,
-    conflict = function(target)
-      local _, path = target:match("([:^]+)%s+(.*)")
-      return path, false
-    end,
+    conflict = parse_stage,
   }
   local index_status = "staged"
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
@@ -50,10 +41,10 @@ function M.collect(source_ctx)
       return nil
     end
 
-    local path = parsers[index_status](target)
+    local path_status, path = parsers[index_status](target)
     local abs_path = pathlib.join(git_root, path)
 
-    local status = ("%-9s"):format(index_status:upper())
+    local status = ("%-13s"):format(path_status)
     local desc = ("%s %s"):format(status, path)
     return {
       value = path,
