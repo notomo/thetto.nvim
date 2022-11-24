@@ -14,26 +14,26 @@ function M.collect(source_ctx)
     "git",
     "branch",
     "--format",
-    "%(objectname:short) %(refname:short) %(contents:subject)",
+    "%(refname:short)\t%(objectname:short) %(contents:subject)",
   }
   if source_ctx.opts.all then
     table.insert(cmd, "--all")
   end
 
   return require("thetto.util.job")
-    .promise({ "git", "rev-parse", "--abbrev-ref", "HEAD" }, {
+    .promise({ "git", "show", "--format=%h", "--no-patch" }, {
       on_exit = function() end,
       cwd = source_ctx.cwd,
     })
-    :next(function(current_branch)
-      current_branch = vim.trim(current_branch)
+    :next(function(current_commit_hash)
+      current_commit_hash = vim.trim(current_commit_hash)
       return require("thetto.util.job").start(cmd, source_ctx, function(output)
-        local commit_hash, branch_name = output:match("^(%S+) (%S+)")
-        local is_current_branch = branch_name == current_branch
+        local branch_name, commit_hash, message = output:match("^([^\t]+)\t(%S+) (.*)")
+        local is_current_branch = commit_hash == current_commit_hash
         return {
           value = branch_name,
           commit_hash = commit_hash,
-          desc = output,
+          desc = ("%s %s %s"):format(commit_hash, branch_name, message),
           is_current_branch = is_current_branch,
           _is_current_branch = is_current_branch and 1 or 0,
           column_offsets = {
