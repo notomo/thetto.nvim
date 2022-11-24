@@ -57,6 +57,13 @@ function M.action_discard(items)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local paths = to_paths(items)
+
+  local restore_targets = vim.tbl_filter(function(item)
+    return item.index_status ~= "untracked"
+  end, items)
+  local delete_targets = vim.tbl_filter(function(item)
+    return item.index_status == "untracked"
+  end, items)
   return require("thetto.util.input")
     .promise({
       prompt = "Reset (y/n):\n" .. table.concat(paths, "\n"),
@@ -65,11 +72,19 @@ function M.action_discard(items)
       if input ~= "y" then
         return require("thetto.vendor.misclib.message").info("Canceled discard")
       end
-      return require("thetto.util.job").promise({
-        "git",
-        "restore",
-        unpack(paths),
-      })
+      local promises = {}
+      if #restore_targets > 0 then
+        local restore = require("thetto.util.job").promise({
+          "git",
+          "restore",
+          unpack(to_paths(restore_targets)),
+        })
+        table.insert(promises, restore)
+      end
+      for _, path in ipairs(to_paths(delete_targets)) do
+        vim.fn.delete(path, "rf")
+      end
+      return require("thetto.vendor.promise").all(promises)
     end)
     :next(function()
       return require("thetto.command").reload(bufnr)

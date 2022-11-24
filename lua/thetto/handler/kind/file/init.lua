@@ -83,6 +83,9 @@ function M.action_preview(items, _, ctx)
   if item == nil then
     return
   end
+  if vim.fn.isdirectory(item.path) == 1 then
+    return require("thetto.util.action").call("file/directory", "preview", items, ctx)
+  end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
     return nil, ctx.ui:open_preview(item, { bufnr = bufnr, row = item.row, range = item.range })
