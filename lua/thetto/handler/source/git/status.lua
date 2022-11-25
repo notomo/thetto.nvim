@@ -33,26 +33,35 @@ function M.collect(source_ctx)
     local changed_state = states[output]
     if changed_state then
       index_status = changed_state
-      return nil
+      return {
+        value = "",
+        desc = output,
+        kind_name = "git/status_message",
+      }
     end
 
     local target = output:match("\t(.*)")
     if not target then
-      return nil
+      return {
+        value = "",
+        desc = output,
+        kind_name = "git/status_message",
+      }
     end
 
     local path_status, path = parsers[index_status](target)
     local abs_path = pathlib.join(git_root, path)
 
     local status = ("%-13s"):format(path_status)
-    local desc = ("%s %s"):format(status, path)
+    local indent = "    "
+    local desc = ("%s%s %s"):format(indent, status, path)
     return {
       value = path,
       desc = desc,
       path = abs_path,
       index_status = index_status,
       column_offsets = {
-        value = #status + 1,
+        value = #indent + #status + 1,
       },
     }
   end, { cwd = git_root })
@@ -67,6 +76,9 @@ local hl_groups = {
 M.highlight = require("thetto.util.highlight").columns({
   {
     group = function(item)
+      if not item.index_status then
+        return nil
+      end
       return hl_groups[item.index_status] or "Boolean"
     end,
     end_key = "value",

@@ -89,13 +89,12 @@ function ReturnValue.reload(bufnr)
     end
 
     local collector = ctx.collector
+    collector:discard()
 
     local start_err = collector:start(nil, resolve, reject)
     if start_err ~= nil then
       return reject(start_err)
     end
-
-    return collector:update()
   end):catch(function(e)
     require("thetto.vendor.misclib.message").warn(e)
   end)
