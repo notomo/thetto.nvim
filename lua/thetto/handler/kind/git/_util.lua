@@ -1,7 +1,14 @@
 local M = {}
 
 function M.render_diff(bufnr, item)
-  local cmd = { "git", "--no-pager", "show", "--date=iso", item.commit_hash or item.stash_name }
+  local cmd = { "git", "--no-pager", "show", "--date=iso" }
+  local target = item.commit_hash or item.stash_name
+  if target then
+    table.insert(cmd, target)
+  end
+  if item.path then
+    vim.list_extend(cmd, { "--", item.path })
+  end
   return require("thetto.util.job").promise(cmd, {
     on_exit = function(output)
       if not vim.api.nvim_buf_is_valid(bufnr) then

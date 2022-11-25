@@ -84,6 +84,28 @@ function M.action_checkout(items)
   end)
 end
 
+M.action_diff = M.action_tab_open
+
+function M.action_list_children(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  return require("thetto").start("git/change", { source_opts = { commit_hash = item.commit_hash } })
+end
+
+function M.action_compare(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  if not item.path then
+    return nil
+  end
+  local commit_hash = item.commit_hash or "HEAD"
+  return require("thetto.handler.kind.git._util").compare(item.path, commit_hash .. "^", item.path, commit_hash)
+end
+--
 M.default_action = "open"
 
 return M
