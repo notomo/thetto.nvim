@@ -152,4 +152,23 @@ function M.action_diff(items)
     end)
 end
 
+function M.action_preview(items, _, ctx)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+
+  if item.index_status == "untracked" then
+    return require("thetto.util.action").call("file", "preview", items, ctx)
+  end
+
+  local bufnr = require("thetto.util.git").diff_buffer()
+  local promise = require("thetto.util.git").diff(bufnr, { "git", "--no-pager", "diff", "--date=iso", "--", item.path })
+  local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  if err then
+    return nil, err
+  end
+  return promise
+end
+
 return require("thetto.core.kind").extend(M, "file")
