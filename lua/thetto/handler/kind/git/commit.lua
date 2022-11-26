@@ -103,7 +103,7 @@ function M.action_compare(items)
     return nil
   end
   local commit_hash = item.commit_hash or "HEAD"
-  return require("thetto.handler.kind.git._util").compare(item.path, commit_hash .. "^", item.path, commit_hash)
+  return require("thetto.util.git").compare(item.path, commit_hash .. "^", item.path, commit_hash)
 end
 --
 M.default_action = "open"

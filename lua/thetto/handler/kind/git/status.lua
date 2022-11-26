@@ -134,7 +134,7 @@ function M.action_compare(items)
   if not item then
     return nil
   end
-  return require("thetto.handler.kind.git._util").compare(item.path, "HEAD", item.path)
+  return require("thetto.util.git").compare(item.path, "HEAD", item.path)
 end
 
 function M.action_diff(items)
