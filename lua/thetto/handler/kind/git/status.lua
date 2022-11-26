@@ -144,7 +144,7 @@ function M.action_diff(items)
       on_exit = function() end,
     })
     :next(function(output)
-      local bufnr = require("thetto.handler.kind.git._util").diff_buffer()
+      local bufnr = require("thetto.util.git").diff_buffer()
       local lines = vim.split(output, "\n", true)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
       require("thetto.lib.buffer").open_scratch_tab()

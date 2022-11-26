@@ -9,28 +9,13 @@ function M.render_diff(bufnr, item)
   if item.path then
     vim.list_extend(cmd, { "--", item.path })
   end
-  return require("thetto.util.job").promise(cmd, {
-    on_exit = function(output)
-      if not vim.api.nvim_buf_is_valid(bufnr) then
-        return
-      end
-      local lines = vim.split(output, "\n", true)
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    end,
-  })
-end
-
-function M.diff_buffer()
-  local bufnr = vim.api.nvim_create_buf(false, true)
-  vim.bo[bufnr].bufhidden = "wipe"
-  vim.bo[bufnr].filetype = "diff"
-  return bufnr
+  return require("thetto.util.git").diff(bufnr, cmd)
 end
 
 function M.open_diff(items, f)
   local promises = {}
   for _, item in ipairs(items) do
-    local bufnr = M.diff_buffer()
+    local bufnr = require("thetto.util.git").diff_buffer()
     local promise = M.render_diff(bufnr, item)
     table.insert(promises, promise)
     f(bufnr)
