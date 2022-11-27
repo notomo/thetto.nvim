@@ -12,6 +12,9 @@ function M.diff(bufnr, cmd)
       on_exit = function() end,
     })
     :next(function(output)
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
       local lines = vim.split(output, "\n", true)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     end)
@@ -64,7 +67,67 @@ function M._index_content_path(git_root, path_from_git_root)
     end)
 end
 
-function M.content(git_root, path, revision)
+function M._enable_patch(git_root, path_from_git_root, bufnr)
+  local index_path, working_path
+  vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
+    buffer = bufnr,
+    callback = function()
+      M._index_content_path(git_root, path_from_git_root)
+        :next(function(index_content_path)
+          index_path = index_content_path
+
+          working_path = vim.fn.tempname()
+          do
+            local f = io.open(working_path, "w")
+            local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+            f:write(table.concat(new_lines, "\n"))
+            f:close()
+          end
+
+          return
+            require("thetto.util.job").promise(
+            { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
+            {
+              cwd = git_root,
+              on_exit = function() end,
+              is_err = function(code)
+                return code ~= 0 and code ~= 1
+              end,
+            }
+          )
+        end)
+        :next(function(diff)
+          return M._apply(git_root, diff, index_path, working_path, path_from_git_root)
+        end)
+        :next(function()
+          vim.bo[bufnr].modified = false
+        end)
+        :catch(function(err)
+          require("thetto.vendor.misclib.message").warn(err)
+        end)
+    end,
+  })
+end
+
+function M._to_path(path_or_bufnr)
+  if type(path_or_bufnr) == "string" then
+    return path_or_bufnr
+  end
+  local bufnr = path_or_bufnr
+  local state = M.state()
+  if not state then
+    return vim.api.nvim_buf_get_name(bufnr)
+  end
+  return state.path
+end
+
+function M.state()
+  local bufnr = vim.api.nvim_get_current_buf()
+  return vim.b[bufnr].thetto_git_state
+end
+
+function M.content(git_root, path_or_bufnr, revision)
+  local path = M._to_path(path_or_bufnr)
   if not revision then
     return require("thetto.vendor.promise").resolve(path)
   end
@@ -89,6 +152,10 @@ function M.content(git_root, path, revision)
       vim.bo[bufnr].bufhidden = "wipe"
       vim.bo[bufnr].buftype = "acwrite"
       vim.bo[bufnr].modified = false
+      vim.b[bufnr].thetto_git_state = {
+        path = path,
+        revision = revision,
+      }
 
       local buffer_path = "thetto-git://" .. git_root .. "/" .. treeish
       local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
@@ -104,45 +171,7 @@ function M.content(git_root, path, revision)
         on_detect(bufnr)
       end
 
-      local index_path, working_path
-      vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
-        buffer = bufnr,
-        callback = function()
-          M._index_content_path(git_root, path_from_git_root)
-            :next(function(index_content_path)
-              index_path = index_content_path
-
-              working_path = vim.fn.tempname()
-              do
-                local f = io.open(working_path, "w")
-                local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-                f:write(table.concat(new_lines, "\n"))
-                f:close()
-              end
-
-              return
-                require("thetto.util.job").promise(
-                { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
-                {
-                  cwd = git_root,
-                  on_exit = function() end,
-                  is_err = function(code)
-                    return code ~= 0 and code ~= 1
-                  end,
-                }
-              )
-            end)
-            :next(function(diff)
-              return M._apply(git_root, diff, index_path, working_path, path_from_git_root)
-            end)
-            :next(function()
-              vim.bo[bufnr].modified = false
-            end)
-            :catch(function(err)
-              require("thetto.vendor.misclib.message").warn(err)
-            end)
-        end,
-      })
+      M._enable_patch(git_root, path_from_git_root, bufnr)
 
       return buffer_path
     end)

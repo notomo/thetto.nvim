@@ -111,6 +111,22 @@ function M.action_merge(items)
   return require("thetto.util.job").promise({ "git", "merge", item.value })
 end
 
+function M.action_tab_open(items)
+  local item = items[1]
+  if not item then
+    return
+  end
+  local git_root, err = require("thetto.lib.file").find_git_root()
+  if err then
+    return require("thetto.vendor.promise").reject(err)
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  return require("thetto.util.git").content(git_root, bufnr, item.commit_hash):next(function(buffer_path)
+    require("thetto.lib.buffer").open_scratch_tab()
+    vim.cmd.edit(buffer_path)
+  end)
+end
+
 M.default_action = "checkout"
 
 return M
