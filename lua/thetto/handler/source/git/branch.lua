@@ -21,15 +21,18 @@ function M.collect(source_ctx)
   end
 
   return require("thetto.util.job")
-    .promise({ "git", "show", "--format=%h", "--no-patch" }, {
+    .promise({ "git", "branch", "--points-at", "HEAD" }, {
       on_exit = function() end,
       cwd = source_ctx.cwd,
     })
-    :next(function(current_commit_hash)
-      current_commit_hash = vim.trim(current_commit_hash)
+    :next(function(heads)
+      local head_output = vim.tbl_filter(function(line)
+        return vim.startswith(line, "*")
+      end, vim.split(heads, "\n", true))[1]
+      local current_branch = string.match(head_output, "* (.*)")
       return require("thetto.util.job").start(cmd, source_ctx, function(output)
         local branch_name, commit_hash, message = output:match("^([^\t]+)\t(%S+) (.*)")
-        local is_current_branch = commit_hash == current_commit_hash
+        local is_current_branch = branch_name == current_branch
         return {
           value = branch_name,
           commit_hash = commit_hash,
