@@ -171,4 +171,4 @@ function M.action_preview(items, _, ctx)
   return promise
 end
 
-return require("thetto.core.kind").extend(M, "file")
+return M

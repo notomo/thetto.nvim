@@ -36,7 +36,7 @@ function M.collect(source_ctx)
       return {
         value = "",
         desc = output,
-        kind_name = "git/status_message",
+        kind_name = "git/status/message",
       }
     end
 
@@ -45,12 +45,17 @@ function M.collect(source_ctx)
       return {
         value = "",
         desc = output,
-        kind_name = "git/status_message",
+        kind_name = "git/status/message",
       }
     end
 
     local path_status, path = parsers[index_status](target)
     local abs_path = pathlib.join(git_root, path)
+
+    local kind
+    if vim.fn.isdirectory(abs_path) == 1 then
+      kind = "git/status/directory"
+    end
 
     local status = ("%-13s"):format(path_status)
     local indent = "    "
@@ -58,6 +63,7 @@ function M.collect(source_ctx)
     return {
       value = path,
       desc = desc,
+      kind_name = kind,
       path = abs_path,
       index_status = index_status,
       column_offsets = {
@@ -67,7 +73,7 @@ function M.collect(source_ctx)
   end, { cwd = git_root })
 end
 
-M.kind_name = "git/status"
+M.kind_name = "git/status/file"
 
 local hl_groups = {
   staged = "String",
