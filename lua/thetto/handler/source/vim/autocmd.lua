@@ -15,7 +15,7 @@ function M.collect()
       table.insert(parts, "++once")
     end
 
-    if autocmd.command then
+    if autocmd.command ~= "" then
       table.insert(parts, autocmd.command)
     elseif autocmd.desc then
       table.insert(parts, autocmd.desc)
