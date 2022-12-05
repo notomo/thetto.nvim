@@ -2,6 +2,8 @@ local M = {}
 
 M.opts = {}
 
+local to_git_root = require("thetto.handler.kind.git._util").to_git_root
+
 M.opts.checkout = { track = false }
 function M.action_checkout(items, action_ctx)
   local item = items[1]
@@ -15,7 +17,7 @@ function M.action_checkout(items, action_ctx)
   end
   table.insert(cmd, item.value)
 
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").promise(cmd, { cwd = item.git_root })
 end
 
 M.opts.delete = { force = false, args = { "--delete" } }
@@ -29,7 +31,7 @@ function M.action_delete(items, action_ctx)
   vim.list_extend(cmd, action_ctx.opts.args)
   vim.list_extend(cmd, branches)
 
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").promise(cmd, { cwd = to_git_root(items) })
 end
 
 function M.action_force_delete(items, action_ctx, ctx)
@@ -56,11 +58,13 @@ function M.action_rename(items)
         return require("thetto.vendor.misclib.message").info("invalid input to rename branch: " .. tostring(input))
       end
       new_branch = input
-      return require("thetto.util.job").promise({ "git", "branch", "-m", old_branch, new_branch }):next(function()
-        return require("thetto.vendor.misclib.message").info(
-          ("Renamed branch: %s -> %s"):format(old_branch, new_branch)
-        )
-      end)
+      return require("thetto.util.job")
+        .promise({ "git", "branch", "-m", old_branch, new_branch }, { cwd = item.git_root })
+        :next(function()
+          return require("thetto.vendor.misclib.message").info(
+            ("Renamed branch: %s -> %s"):format(old_branch, new_branch)
+          )
+        end)
     end)
 end
 
@@ -82,9 +86,11 @@ function M.action_create(items)
         return require("thetto.vendor.misclib.message").info("invalid input to create branch: " .. tostring(new_branch))
       end
       new_branch = input
-      return require("thetto.util.job").promise({ "git", "switch", "-c", new_branch, from }):next(function()
-        return require("thetto.vendor.misclib.message").info(("Created branch from %s: %s"):format(from, new_branch))
-      end)
+      return require("thetto.util.job")
+        .promise({ "git", "switch", "-c", new_branch, from }, { cwd = item.git_root })
+        :next(function()
+          return require("thetto.vendor.misclib.message").info(("Created branch from %s: %s"):format(from, new_branch))
+        end)
     end)
 end
 
@@ -108,7 +114,7 @@ function M.action_merge(items)
   if not item then
     return
   end
-  return require("thetto.util.job").promise({ "git", "merge", item.value })
+  return require("thetto.util.job").promise({ "git", "merge", item.value }, { cwd = item.git_root })
 end
 
 function M.action_tab_open(items)
@@ -116,13 +122,9 @@ function M.action_tab_open(items)
   if not item then
     return
   end
-  local git_root, err = require("thetto.lib.file").find_git_root()
-  if err then
-    return require("thetto.vendor.promise").reject(err)
-  end
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
-  return require("thetto.util.git").content(git_root, bufnr, item.commit_hash):next(function(buffer_path)
+  return require("thetto.util.git").content(item.git_root, bufnr, item.commit_hash):next(function(buffer_path)
     require("thetto.lib.buffer").open_scratch_tab()
     vim.cmd.edit(buffer_path)
     require("thetto.vendor.misclib.cursor").set(cursor)

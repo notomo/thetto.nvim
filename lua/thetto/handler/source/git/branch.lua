@@ -5,7 +5,7 @@ local M = {}
 M.opts = { all = false }
 
 function M.collect(source_ctx)
-  local _, err = filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
@@ -36,6 +36,7 @@ function M.collect(source_ctx)
         return {
           value = branch_name,
           commit_hash = commit_hash,
+          git_root = git_root,
           desc = ("%s %s %s"):format(commit_hash, branch_name, message),
           is_current_branch = is_current_branch,
           _is_current_branch = is_current_branch and 1 or 0,
@@ -44,7 +45,7 @@ function M.collect(source_ctx)
             message = #commit_hash + 1 + #branch_name,
           },
         }
-      end)
+      end, { cwd = git_root })
     end)
 end
 

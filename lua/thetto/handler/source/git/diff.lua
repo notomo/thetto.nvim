@@ -53,6 +53,7 @@ function M.collect(source_ctx)
       path = path or pathlib.join(git_root, hunk.path),
     }
   end, {
+    cwd = git_root,
     to_outputs = function(output)
       local lines = require("thetto.util.job.parse").output(output)
       return to_hunks(lines)

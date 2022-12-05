@@ -5,7 +5,7 @@ local M = {}
 M.opts = { merged = false }
 
 function M.collect(source_ctx)
-  local _, err = filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
@@ -18,8 +18,9 @@ function M.collect(source_ctx)
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     return {
       value = output,
+      git_root = git_root,
     }
-  end)
+  end, { cwd = git_root })
 end
 
 M.kind_name = "git/tag"

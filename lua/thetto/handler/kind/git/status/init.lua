@@ -16,6 +16,8 @@ local to_paths = function(items)
   end, items)
 end
 
+local to_git_root = require("thetto.handler.kind.git._util").to_git_root
+
 function M.action_toggle_stage(items)
   local promises = {}
 
@@ -27,7 +29,7 @@ function M.action_toggle_stage(items)
       "git",
       "add",
       unpack(to_paths(will_be_stage)),
-    })
+    }, { cwd = to_git_root(items) })
     table.insert(promises, stage)
   end
 
@@ -40,7 +42,7 @@ function M.action_toggle_stage(items)
       "restore",
       "--staged",
       unpack(to_paths(will_be_unstage)),
-    })
+    }, { cwd = to_git_root(items) })
     table.insert(promises, unstage)
   end
 
@@ -57,6 +59,7 @@ function M.action_discard(items)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local paths = to_paths(items)
+  local git_root = to_git_root(items)
 
   local restore_targets = vim.tbl_filter(function(item)
     return item.index_status ~= "untracked"
@@ -78,7 +81,7 @@ function M.action_discard(items)
           "git",
           "restore",
           unpack(to_paths(restore_targets)),
-        })
+        }, { cwd = git_root })
         table.insert(promises, restore)
       end
       for _, path in ipairs(to_paths(delete_targets)) do
@@ -98,13 +101,14 @@ function M.action_stash(items)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local paths = to_paths(items)
+  local git_root = to_git_root(items)
   return require("thetto.util.job")
     .promise({
       "git",
       "stash",
       "--",
       unpack(paths),
-    })
+    }, { cwd = git_root })
     :next(function()
       require("thetto.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
       return require("thetto.command").reload(bufnr)
@@ -114,13 +118,19 @@ end
 M.opts.commit = {
   args = {},
 }
-function M.action_commit(_, action_ctx)
-  return require("thetto.util.job").promise({ "git", "commit", unpack(action_ctx.opts.args) }):catch(function(err)
-    if err and err:match("Please supply the message") then
-      return
-    end
-    return require("thetto.vendor.promise").reject(err)
-  end)
+function M.action_commit(items, action_ctx)
+  if #items == 0 then
+    return nil
+  end
+  local git_root = to_git_root(items)
+  return require("thetto.util.job")
+    .promise({ "git", "commit", unpack(action_ctx.opts.args) }, { cwd = git_root })
+    :catch(function(err)
+      if err and err:match("Please supply the message") then
+        return
+      end
+      return require("thetto.vendor.promise").reject(err)
+    end)
 end
 
 function M.action_commit_amend(items, action_ctx, ctx)
@@ -134,14 +144,16 @@ function M.action_compare(items)
   if not item then
     return nil
   end
-  return require("thetto.util.git").compare(item.path, "HEAD", item.path)
+  return require("thetto.util.git").compare(item.git_root, item.path, "HEAD", item.path)
 end
 
 function M.action_diff(items)
   local paths = to_paths(items)
+  local git_root = to_git_root(items)
   return require("thetto.util.job")
     .promise({ "git", "diff", unpack(paths) }, {
       on_exit = function() end,
+      cwd = git_root,
     })
     :next(function(output)
       local bufnr = require("thetto.util.git").diff_buffer()
@@ -163,7 +175,11 @@ function M.action_preview(items, _, ctx)
   end
 
   local bufnr = require("thetto.util.git").diff_buffer()
-  local promise = require("thetto.util.git").diff(bufnr, { "git", "--no-pager", "diff", "--date=iso", "--", item.path })
+  local promise = require("thetto.util.git").diff(
+    item.git_root,
+    bufnr,
+    { "git", "--no-pager", "diff", "--date=iso", "--", item.path }
+  )
   local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
   if err then
     return nil, err

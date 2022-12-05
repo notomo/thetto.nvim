@@ -37,6 +37,7 @@ function M.collect(source_ctx)
         value = "",
         desc = output,
         kind_name = "git/status/message",
+        git_root = git_root,
       }
     end
 
@@ -46,6 +47,7 @@ function M.collect(source_ctx)
         value = "",
         desc = output,
         kind_name = "git/status/message",
+        git_root = git_root,
       }
     end
 
@@ -69,6 +71,7 @@ function M.collect(source_ctx)
       column_offsets = {
         value = #indent + #status + 1,
       },
+      git_root = git_root,
     }
   end, { cwd = git_root })
 end

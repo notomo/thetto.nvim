@@ -1,5 +1,9 @@
 local M = {}
 
+function M.to_git_root(items)
+  return items[1].git_root
+end
+
 function M.render_diff(bufnr, item)
   local cmd = { "git", "--no-pager", "show", "--date=iso" }
   local target = item.commit_hash or item.stash_name
@@ -9,7 +13,7 @@ function M.render_diff(bufnr, item)
   if item.path then
     vim.list_extend(cmd, { "--", item.path })
   end
-  return require("thetto.util.git").diff(bufnr, cmd)
+  return require("thetto.util.git").diff(item.git_root, bufnr, cmd)
 end
 
 function M.open_diff(items, f)

@@ -22,7 +22,7 @@ function M.collect(source_ctx)
         scope = scope,
       },
     }
-  end)
+  end, { cwd = git_root })
 end
 
 M.kind_name = "file"

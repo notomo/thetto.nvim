@@ -24,8 +24,9 @@ function M.collect(source_ctx)
       value = output,
       path = abs_path,
       commit_hash = commit_hash,
+      git_root = git_root,
     }
-  end)
+  end, { cwd = git_root })
 end
 
 M.kind_name = "git/commit"

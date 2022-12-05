@@ -49,9 +49,11 @@ function M.action_fixup(items)
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job").promise({ "git", "commit", "--fixup=" .. item.commit_hash }):next(function()
-    return require("thetto.command").reload(bufnr)
-  end)
+  return require("thetto.util.job")
+    .promise({ "git", "commit", "--fixup=" .. item.commit_hash }, { cwd = item.git_root })
+    :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
 end
 
 function M.action_rebase_interactively(items)
@@ -59,7 +61,10 @@ function M.action_rebase_interactively(items)
   if not item then
     return nil
   end
-  return require("thetto.util.job").promise({ "git", "rebase", "-i", "--autosquash", item.commit_hash .. "~" })
+  return require("thetto.util.job").promise(
+    { "git", "rebase", "-i", "--autosquash", item.commit_hash .. "~" },
+    { cwd = item.git_root }
+  )
 end
 
 function M.action_reset(items)
@@ -68,9 +73,11 @@ function M.action_reset(items)
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job").promise({ "git", "reset", item.commit_hash }):next(function()
-    return require("thetto.command").reload(bufnr)
-  end)
+  return require("thetto.util.job")
+    .promise({ "git", "reset", item.commit_hash }, { cwd = item.git_root })
+    :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
 end
 
 function M.action_checkout(items)
@@ -79,9 +86,11 @@ function M.action_checkout(items)
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job").promise({ "git", "checkout", item.commit_hash }):next(function()
-    return require("thetto.command").reload(bufnr)
-  end)
+  return require("thetto.util.job")
+    .promise({ "git", "checkout", item.commit_hash }, { cwd = item.git_root })
+    :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
 end
 
 M.action_diff = M.action_tab_open
@@ -103,7 +112,7 @@ function M.action_compare(items)
     return nil
   end
   local commit_hash = item.commit_hash or "HEAD"
-  return require("thetto.util.git").compare(item.path, commit_hash .. "^", item.path, commit_hash)
+  return require("thetto.util.git").compare(item.git_root, item.path, commit_hash .. "^", item.path, commit_hash)
 end
 --
 M.default_action = "open"

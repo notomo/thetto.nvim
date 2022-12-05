@@ -8,7 +8,7 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local _, err = filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
@@ -30,6 +30,7 @@ function M.collect(source_ctx)
     return {
       value = value,
       commit_hash = commit_hash,
+      git_root = git_root,
       column_offsets = {
         commit_hash = 0,
         message = #commit_hash + 1,
@@ -37,7 +38,7 @@ function M.collect(source_ctx)
         branch_info = #commit_hash + 1 + #message + 1 + #user_name + 1,
       },
     }
-  end)
+  end, { cwd = git_root })
 end
 
 M.highlight = require("thetto.util.highlight").columns({

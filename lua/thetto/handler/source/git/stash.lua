@@ -3,7 +3,7 @@ local filelib = require("thetto.lib.file")
 local M = {}
 
 function M.collect(source_ctx)
-  local _, err = filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
@@ -14,12 +14,13 @@ function M.collect(source_ctx)
     return {
       value = output,
       stash_name = stash_name,
+      git_root = git_root,
       column_offsets = {
         stash_name = 0,
         description = #stash_name + 1,
       },
     }
-  end)
+  end, { cwd = git_root })
 end
 
 M.highlight = require("thetto.util.highlight").columns({
@@ -69,9 +70,11 @@ M.actions = {
         if not input or input == "" then
           return require("thetto.vendor.misclib.message").info("invalid input to create stash")
         end
-        return require("thetto.util.job").promise({ "git", "stash", "save", input }):next(function()
-          return require("thetto.vendor.misclib.message").info(("Created stash: %s"):format(input))
-        end)
+        return require("thetto.util.job")
+          .promise({ "git", "stash", "save", input }, { cwd = item.git_root })
+          :next(function()
+            return require("thetto.vendor.misclib.message").info(("Created stash: %s"):format(input))
+          end)
       end)
   end,
 
@@ -83,6 +86,7 @@ M.actions = {
     return require("thetto.util.job")
       .promise({ "git", "stash", "pop", item.stash_name }, {
         on_exit = function() end,
+        cwd = item.git_root,
       })
       :next(function()
         return require("thetto.vendor.misclib.message").info(("Pop stash: %s"):format(item.stash_name))
@@ -97,6 +101,7 @@ M.actions = {
     return require("thetto.util.job")
       .promise({ "git", "stash", "apply", item.stash_name }, {
         on_exit = function() end,
+        cwd = item.git_root,
       })
       :next(function()
         return require("thetto.vendor.misclib.message").info(("Applied stash: %s"):format(item.stash_name))
@@ -111,6 +116,7 @@ M.actions = {
     return require("thetto.util.job")
       .promise({ "git", "stash", "drop", item.stash_name }, {
         on_exit = function() end,
+        cwd = item.git_root,
       })
       :next(function()
         return require("thetto.vendor.misclib.message").info(("Drop stash: %s"):format(item.stash_name))

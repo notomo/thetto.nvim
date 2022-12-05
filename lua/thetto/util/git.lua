@@ -1,10 +1,10 @@
 local M = {}
 
-function M.diff(bufnr, cmd)
-  local git_root, err = require("thetto.lib.file").find_git_root()
-  if err then
-    return require("thetto.vendor.promise").reject(err)
-  end
+function M.root()
+  return require("thetto.lib.file").find_git_root()
+end
+
+function M.diff(git_root, bufnr, cmd)
   cmd = cmd or { "git", "--no-pager", "diff", "--date=iso" }
   return require("thetto.util.job")
     .promise(cmd, {
@@ -177,12 +177,7 @@ function M.content(git_root, path_or_bufnr, revision)
     end)
 end
 
-function M.compare(path_before, revision_before, path_after, revision_after)
-  local git_root, err = require("thetto.lib.file").find_git_root()
-  if err then
-    return require("thetto.vendor.promise").reject(err)
-  end
-
+function M.compare(git_root, path_before, revision_before, path_after, revision_after)
   local before = M.content(git_root, path_before, revision_before)
   local after = M.content(git_root, path_after, revision_after)
   return require("thetto.vendor.promise").all({ before, after }):next(function(result)

@@ -3,7 +3,7 @@ local filelib = require("thetto.lib.file")
 local M = {}
 
 function M.collect(source_ctx)
-  local _, err = filelib.find_git_root()
+  local git_root, err = filelib.find_git_root()
   if err ~= nil then
     return nil, err
   end
@@ -27,13 +27,14 @@ function M.collect(source_ctx)
       value = ("%s %s %s"):format(commit_hash, message, path),
       path = path,
       commit_hash = commit_hash,
+      git_root = git_root,
       column_offsets = {
         commit_hash = 0,
         message = #commit_hash + 1,
         path = #commit_hash + 1 + #message + 1,
       },
     }
-  end)
+  end, { cwd = git_root })
 end
 
 M.highlight = require("thetto.util.highlight").columns({
