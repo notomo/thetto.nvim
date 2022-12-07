@@ -35,7 +35,7 @@ function M.action_delete(items, action_ctx)
 end
 
 function M.action_force_delete(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, ctx, {
+  return require("thetto.util.action").call(action_ctx.kind_name, "delete", items, ctx, {
     args = { "-D" },
   })
 end
