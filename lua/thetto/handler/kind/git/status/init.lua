@@ -139,6 +139,12 @@ function M.action_commit_amend(items, action_ctx, ctx)
   })
 end
 
+function M.action_commit_empty(items, action_ctx, ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, ctx, {
+    args = { "--allow-empty" },
+  })
+end
+
 function M.action_compare(items)
   local item = items[1]
   if not item then
