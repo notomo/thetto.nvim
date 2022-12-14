@@ -181,11 +181,12 @@ function M.action_preview(items, _, ctx)
   end
 
   local bufnr = require("thetto.util.git").diff_buffer()
-  local promise = require("thetto.util.git").diff(
-    item.git_root,
-    bufnr,
-    { "git", "--no-pager", "diff", "--date=iso", "--", item.path }
-  )
+  local cmd = { "git", "--no-pager", "diff", "--date=iso" }
+  if item.index_status == "staged" then
+    table.insert(cmd, "--cached")
+  end
+  vim.list_extend(cmd, { "--", item.path })
+  local promise = require("thetto.util.git").diff(item.git_root, bufnr, cmd)
   local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
   if err then
     return nil, err
