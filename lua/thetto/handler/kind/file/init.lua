@@ -88,7 +88,7 @@ function M.action_preview(items, action_ctx, ctx)
   if item == nil then
     return
   end
-  if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns) then
+  if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
     return nil, ctx.ui:open_preview(item, { lines = { "IGNORED" } })
   end
   if vim.fn.isdirectory(item.path) == 1 then
