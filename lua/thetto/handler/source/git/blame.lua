@@ -22,6 +22,9 @@ function M.collect(source_ctx)
     end,
     others = function(line)
       local index = line:find(" ")
+      if not index then
+        return
+      end
       local key = line:sub(1, index - 1)
       local value = line:sub(index + 1)
       commits[state_commit_hash][key] = value
