@@ -170,10 +170,17 @@ function M.action_diff(items)
     end)
 end
 
-function M.action_preview(items, _, ctx)
+M.opts.preview = {
+  ignore_patterns = {},
+}
+function M.action_preview(items, action_ctx, ctx)
   local item = items[1]
   if not item then
     return nil
+  end
+
+  if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns) then
+    return nil, ctx.ui:open_preview(item, { lines = { "IGNORED" } })
   end
 
   if item.index_status == "untracked" then

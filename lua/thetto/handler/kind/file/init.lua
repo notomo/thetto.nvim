@@ -3,6 +3,8 @@ local filelib = require("thetto.lib.file")
 local M = {}
 M.__index = M
 
+M.opts = {}
+
 local adjust_cursor = function(item)
   if item.pattern ~= nil then
     vim.fn.search(item.pattern)
@@ -78,10 +80,16 @@ function M.action_vsplit_open(items)
   end
 end
 
-function M.action_preview(items, _, ctx)
+M.opts.preview = {
+  ignore_patterns = {},
+}
+function M.action_preview(items, action_ctx, ctx)
   local item = items[1]
   if item == nil then
     return
+  end
+  if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns) then
+    return nil, ctx.ui:open_preview(item, { lines = { "IGNORED" } })
   end
   if vim.fn.isdirectory(item.path) == 1 then
     return require("thetto.util.action").call("file/directory", "preview", items, ctx)
@@ -89,9 +97,8 @@ function M.action_preview(items, _, ctx)
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
     return nil, ctx.ui:open_preview(item, { bufnr = bufnr, row = item.row, range = item.range })
-  else
-    return nil, ctx.ui:open_preview(item, { path = item.path, row = item.row, range = item.range })
   end
+  return nil, ctx.ui:open_preview(item, { path = item.path, row = item.row, range = item.range })
 end
 
 function M.action_load_buffer(items)
