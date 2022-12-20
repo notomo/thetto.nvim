@@ -19,37 +19,39 @@ end
 local to_git_root = require("thetto.handler.kind.git._util").to_git_root
 
 function M.action_toggle_stage(items)
-  local promises = {}
-
-  local will_be_stage = vim.tbl_filter(function(item)
-    return item.index_status ~= "staged"
-  end, items)
-  if #will_be_stage > 0 then
-    local stage = require("thetto.util.job").promise({
-      "git",
-      "add",
-      unpack(to_paths(will_be_stage)),
-    }, { cwd = to_git_root(items) })
-    table.insert(promises, stage)
-  end
-
-  local will_be_unstage = vim.tbl_filter(function(item)
-    return item.index_status == "staged"
-  end, items)
-  if #will_be_unstage > 0 then
-    local unstage = require("thetto.util.job").promise({
-      "git",
-      "restore",
-      "--staged",
-      unpack(to_paths(will_be_unstage)),
-    }, { cwd = to_git_root(items) })
-    table.insert(promises, unstage)
-  end
-
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.vendor.promise").all(promises):next(function()
-    return require("thetto.command").reload(bufnr)
-  end)
+  return require("thetto.vendor.promise")
+    .resolve()
+    :next(function()
+      local will_be_stage = vim.tbl_filter(function(item)
+        return item.index_status ~= "staged"
+      end, items)
+      if #will_be_stage == 0 then
+        return nil
+      end
+      return require("thetto.util.job").promise({
+        "git",
+        "add",
+        unpack(to_paths(will_be_stage)),
+      }, { cwd = to_git_root(items) })
+    end)
+    :next(function()
+      local will_be_unstage = vim.tbl_filter(function(item)
+        return item.index_status == "staged"
+      end, items)
+      if #will_be_unstage == 0 then
+        return nil
+      end
+      return require("thetto.util.job").promise({
+        "git",
+        "restore",
+        "--staged",
+        unpack(to_paths(will_be_unstage)),
+      }, { cwd = to_git_root(items) })
+    end)
+    :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
 end
 
 function M.action_discard(items)
