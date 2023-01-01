@@ -1,5 +1,4 @@
-local ReturnValue = require("thetto.vendor.misclib.error_handler").for_return_value()
-local ShowError = require("thetto.vendor.misclib.error_handler").for_show_error()
+local M = {}
 
 local Context = require("thetto.core.context")
 local Promise = require("thetto.vendor.promise")
@@ -16,7 +15,7 @@ local _execute_action = function(ctx, action_name, raw_args)
     end)
 end
 
-function ReturnValue.start(source_name, raw_args)
+function M.start(source_name, raw_args)
   vim.validate({ source_name = { source_name, "string" } })
 
   local source_config
@@ -81,7 +80,7 @@ function ReturnValue.start(source_name, raw_args)
     end)
 end
 
-function ReturnValue.reload(bufnr)
+function M.reload(bufnr)
   return Promise.new(function(resolve, reject)
     local ctx, ctx_err = Context.get_from_path(bufnr)
     if ctx_err then
@@ -100,7 +99,7 @@ function ReturnValue.reload(bufnr)
   end)
 end
 
-function ReturnValue.resume(source_name)
+function M.resume(source_name)
   local old_ctx = Context.get(source_name)
   if old_ctx then
     old_ctx.ui:close(true)
@@ -114,27 +113,27 @@ function ReturnValue.resume(source_name)
   return ctx.ui:resume()
 end
 
-function ReturnValue.execute(action_name, raw_args)
+function M.execute(action_name, raw_args)
   local ctx, ctx_err = Context.get_from_path()
-  if ctx_err ~= nil then
+  if ctx_err then
     return Promise.reject(ctx_err)
   end
   return _execute_action(ctx, action_name, raw_args)
 end
 
-function ReturnValue.get()
+function M.get()
   local ctx, ctx_err = Context.get_from_path()
-  if ctx_err ~= nil then
-    return nil, ctx_err
+  if ctx_err then
+    require("thetto.vendor.misclib.message").error(ctx_err)
   end
   local range = require("thetto.vendor.misclib.visual_mode").row_range()
   return ctx.ui:selected_items(nil, range)
 end
 
-function ReturnValue.resume_execute(raw_args)
+function M.resume_execute(raw_args)
   local args = require("thetto.core.argument").ResumeExecuteArgs.new(raw_args)
   local ctx, ctx_err = Context.resume(args.source_name)
-  if ctx_err ~= nil then
+  if ctx_err then
     return Promise.reject(ctx_err)
   end
   ctx.ui:update_offset(args.opts.offset)
@@ -144,20 +143,20 @@ function ReturnValue.resume_execute(raw_args)
   return ctx.executor:actions(items, ctx, args.action_name, {}, args.action_opts)
 end
 
-function ShowError.setup(setting)
-  return require("thetto.core.option").set_default(setting)
+function M.setup(setting)
+  require("thetto.core.option").set_default(setting)
 end
 
-function ShowError.setup_store(name, opts)
+function M.setup_store(name, opts)
   local store, err = require("thetto.core.store").new(name, opts)
-  if err ~= nil then
-    return err
+  if err then
+    require("thetto.vendor.misclib.message").error(err)
   end
-  return store:start()
+  store:start()
 end
 
-function ShowError.register_source(name, handler)
-  return require("thetto.core.items.source").register(name, handler)
+function M.register_source(name, handler)
+  require("thetto.core.items.source").register(name, handler)
 end
 
-return vim.tbl_extend("force", ReturnValue:methods(), ShowError:methods())
+return M
