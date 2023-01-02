@@ -6,7 +6,10 @@ local Sidecar = {}
 Sidecar.__index = Sidecar
 
 function Sidecar.new()
-  local tbl = { _window = nil, _decorator_factory = Decorator.factory("thetto-preview") }
+  local tbl = {
+    _window = nil,
+    _decorator_factory = Decorator.factory("thetto-preview"),
+  }
   return setmetatable(tbl, Sidecar)
 end
 
@@ -18,9 +21,13 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   end
 
   if not self:_opened() then
+    local border_char = "―"
+    if vim.o.ambiwidth == "double" then
+      border_char = "-"
+    end
     self._window = vim.api.nvim_open_win(bufnr, false, {
       width = sidecar_width,
-      height = height,
+      height = height - 1,
       relative = "editor",
       row = pos_row,
       col = left_column + width + 1,
@@ -28,8 +35,8 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
       external = false,
       style = "minimal",
       border = {
-        { "", "ThettoInput" },
-        { "", "ThettoInput" },
+        { " ", "ThettoInput" },
+        { border_char, "ThettoAboveBorder" },
         { " ", "ThettoInput" },
         { " ", "ThettoInput" },
         { "", "ThettoInput" },
@@ -40,6 +47,17 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
     })
   else
     vim.api.nvim_win_set_buf(self._window, bufnr)
+  end
+
+  if self._window then
+    local title = open_target.title or ""
+    if title ~= "" then
+      title = " " .. title .. " "
+    end
+    vim.api.nvim_win_set_config(self._window, {
+      title = { { title, "ThettoFloatTitle" } },
+      title_pos = "center",
+    })
   end
 
   local err = window_open_callback(self._decorator_factory, self._window)

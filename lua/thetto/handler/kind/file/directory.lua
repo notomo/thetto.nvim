@@ -43,7 +43,9 @@ function M.action_preview(items, _, ctx)
   local is_preview = true
   local bufnr = M.after(item.path, is_preview)
   if bufnr and vim.api.nvim_buf_is_loaded(bufnr) then
-    return nil, ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+    return nil, ctx.ui:open_preview(item, {
+      raw_bufnr = bufnr,
+    })
   end
 end
 

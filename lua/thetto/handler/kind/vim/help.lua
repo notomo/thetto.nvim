@@ -66,10 +66,12 @@ function M.action_preview(items, _, ctx)
   end)
 
   return nil,
-    ctx.ui:open_preview(
-      item,
-      { raw_bufnr = bufnr, row = cursor[1], range = { s = { column = cursor[2] }, e = { column = -1 } } }
-    )
+    ctx.ui:open_preview(item, {
+      raw_bufnr = bufnr,
+      row = cursor[1],
+      range = { s = { column = cursor[2] }, e = { column = -1 } },
+      title = vim.fn.fnamemodify(item.path, ":t"),
+    })
 end
 
 M.default_action = "open"

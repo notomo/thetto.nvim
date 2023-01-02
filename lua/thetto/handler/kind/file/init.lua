@@ -96,9 +96,21 @@ function M.action_preview(items, action_ctx, ctx)
   end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
-    return nil, ctx.ui:open_preview(item, { bufnr = bufnr, row = item.row, range = item.range })
+    return nil,
+      ctx.ui:open_preview(item, {
+        bufnr = bufnr,
+        row = item.row,
+        range = item.range,
+        title = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t"),
+      })
   end
-  return nil, ctx.ui:open_preview(item, { path = item.path, row = item.row, range = item.range })
+  return nil,
+    ctx.ui:open_preview(item, {
+      path = item.path,
+      row = item.row,
+      range = item.range,
+      title = vim.fn.fnamemodify(item.path, ":t"),
+    })
 end
 
 function M.action_load_buffer(items)
