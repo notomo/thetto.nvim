@@ -7,7 +7,7 @@ describe("require handler", function()
   local pattern = helper.root .. "/lua/thetto/handler/**/*.lua"
   local paths = vim.fn.glob(pattern, false, true)
   for _, path in ipairs(paths) do
-    local module_name = vim.split(path, "thetto.nvim/lua/", true)[2]:gsub(".lua$", ""):gsub("/", "%.")
+    local module_name = vim.split(path, "thetto.nvim/lua/", {plain=true})[2]:gsub(".lua$", ""):gsub("/", "%.")
     it(module_name, function()
       require(module_name)
     end)

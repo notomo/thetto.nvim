@@ -13,7 +13,7 @@ function M.collect(source_ctx)
       on_exit = function() end,
     })
     :next(function(output)
-      local outputs = vim.split(output, " ", true)
+      local outputs = vim.split(output, " ", {plain=true})
       outputs = vim.list_slice(outputs, 2)
       return vim.tbl_map(function(path)
         local kind_name

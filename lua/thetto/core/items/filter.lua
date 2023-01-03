@@ -44,7 +44,7 @@ function Filter.parse(name, modifier_factory)
     name = name:sub(2)
   end
 
-  local args = vim.split(name, ":", true)
+  local args = vim.split(name, ":", {plain=true})
   name = args[1]
   local key = args[2]
 

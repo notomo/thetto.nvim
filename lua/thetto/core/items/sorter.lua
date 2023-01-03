@@ -26,7 +26,7 @@ function Sorter.parse(name)
     name = name:sub(2)
   end
 
-  local args = vim.split(name, ":", true)
+  local args = vim.split(name, ":", {plain=true})
   name = args[1]
   local key = args[2]
 

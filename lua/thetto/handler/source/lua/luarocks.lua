@@ -22,7 +22,7 @@ function M._find_dir(name, paths)
     return M._find_dir(name:gsub("^lua", ""), paths)
   end
   if name:find("%-") then
-    local splitted = vim.split(name, "-", true)
+    local splitted = vim.split(name, "-", {plain=true})
     return M._find_dir(splitted[1], paths)
   end
 
@@ -37,8 +37,8 @@ function M.collect(source_ctx)
     local version = factors[2]
     local path = pathlib.join(factors[4], name, version)
 
-    local package_paths = vim.split(package.path, ";", true)
-    vim.list_extend(package_paths, vim.split(package.cpath, ";", true))
+    local package_paths = vim.split(package.path, ";", {plain=true})
+    vim.list_extend(package_paths, vim.split(package.cpath, ";", {plain=true}))
     local source_path = M._find_dir(name, package_paths)
 
     local desc = ("%s %s"):format(name, version)

@@ -57,7 +57,7 @@ function M._to_items(source_ctx, patterns, path)
 end
 
 function M._match(pattern, path)
-  local parts = vim.split(pattern, "%", true)
+  local parts = vim.split(pattern, "%", {plain=true})
   parts = vim.tbl_filter(function(part)
     return part ~= ""
   end, parts)

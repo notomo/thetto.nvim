@@ -8,7 +8,7 @@ function M.collect()
 
   local paths = vim.api.nvim_get_runtime_file("doc/tags", true)
 
-  local pack_path = vim.split(vim.o.packpath, ",", true)[1]
+  local pack_path = vim.split(vim.o.packpath, ",", {plain=true})[1]
   pack_path = vim.fn.fnamemodify(pack_path, ":p")
   local pattern = pack_path .. "pack/*/opt/*/doc/tags"
   vim.list_extend(paths, vim.fn.glob(pattern, false, true))
