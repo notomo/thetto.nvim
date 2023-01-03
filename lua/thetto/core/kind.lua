@@ -172,7 +172,7 @@ function Kind.all()
   local already = {}
   local all = {}
   for _, path in ipairs(paths) do
-    local kind_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/kind/", {plain=true})[2]
+    local kind_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/kind/", { plain = true })[2]
     local name = kind_file:sub(1, #kind_file - 4)
     local ignored = vim.startswith(vim.fs.basename(kind_file), "_")
     if not ignored and not already[name] then

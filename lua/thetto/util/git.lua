@@ -15,7 +15,7 @@ function M.diff(git_root, bufnr, cmd)
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return
       end
-      local lines = vim.split(output, "\n", {plain=true})
+      local lines = vim.split(output, "\n", { plain = true })
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
     end)
 end
@@ -32,7 +32,7 @@ function M._apply(git_root, diff, path_a, path_b, path_from_git_root)
     return
   end
 
-  local diff_lines = vim.split(diff, "\n", {plain=true})
+  local diff_lines = vim.split(diff, "\n", { plain = true })
   local replaced_path = "/" .. path_from_git_root
   diff_lines[1] = diff_lines[1]:gsub(path_a, replaced_path)
   diff_lines[1] = diff_lines[1]:gsub(path_b, replaced_path)
@@ -147,7 +147,7 @@ function M.content(git_root, path_or_bufnr, revision)
     })
     :next(function(output)
       local bufnr = vim.api.nvim_create_buf(false, true)
-      local lines = vim.split(output, "\n", {plain=true})
+      local lines = vim.split(output, "\n", { plain = true })
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
       vim.bo[bufnr].bufhidden = "wipe"
       vim.bo[bufnr].buftype = "acwrite"

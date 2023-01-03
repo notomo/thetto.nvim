@@ -27,7 +27,7 @@ function M.collect(source_ctx)
 
   return require("thetto.util.job").run(cmd, source_ctx, to_item, {
     to_outputs = function(output)
-      local outputs = vim.split(output, "\n", {plain=true})
+      local outputs = vim.split(output, "\n", { plain = true })
       remove_header(outputs)
       return outputs
     end,

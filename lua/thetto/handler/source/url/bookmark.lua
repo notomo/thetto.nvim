@@ -30,7 +30,7 @@ function M.collect(source_ctx)
   local f = io.open(file_path, "r")
   local i = 1
   for line in f:lines() do
-    local url = encode(vim.fn.reverse(vim.split(line, "\t", {plain=true}))[1])
+    local url = encode(vim.fn.reverse(vim.split(line, "\t", { plain = true }))[1])
     table.insert(items, {
       value = line,
       path = file_path,

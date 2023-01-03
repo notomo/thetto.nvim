@@ -13,7 +13,7 @@ function M.collect(source_ctx)
   local parsers, next_parser
   parsers = {
     commit_hash = function(line)
-      local splitted = vim.split(line, " ", {plain=true})
+      local splitted = vim.split(line, " ", { plain = true })
       state_commit_hash = splitted[1]
       if not commits[state_commit_hash] then
         commits[state_commit_hash] = {}

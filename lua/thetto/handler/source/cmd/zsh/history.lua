@@ -10,7 +10,7 @@ function M.collect(source_ctx)
   if not f then
     return {}
   end
-  local lines = vim.fn.reverse(vim.split(f:read("*a"), "\n", {plain=true}))
+  local lines = vim.fn.reverse(vim.split(f:read("*a"), "\n", { plain = true }))
   f:close()
 
   local cmds = vim.tbl_map(function(s)

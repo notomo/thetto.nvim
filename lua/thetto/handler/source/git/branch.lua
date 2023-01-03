@@ -28,7 +28,7 @@ function M.collect(source_ctx)
     :next(function(heads)
       local head_output = vim.tbl_filter(function(line)
         return vim.startswith(line, "*")
-      end, vim.split(heads, "\n", {plain=true}))[1]
+      end, vim.split(heads, "\n", { plain = true }))[1]
       local current_branch = string.match(head_output, "* (.*)")
       return require("thetto.util.job").start(cmd, source_ctx, function(output)
         local branch_name, commit_hash, message = output:match("^([^\t]+)\t(%S+) (.*)")
