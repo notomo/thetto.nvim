@@ -26,4 +26,6 @@ end
 
 M.kind_name = "github/user"
 
+M.filters = require("thetto.util.filter").prepend("interactive")
+
 return M

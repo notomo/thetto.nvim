@@ -40,4 +40,6 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
+M.filters = require("thetto.util.filter").prepend("interactive")
+
 return M
