@@ -74,16 +74,22 @@ local default = {
   can_resume = true,
 }
 
+local function build_filters(filters, ...)
+  if not filters and vim.tbl_count({ ... }) == 0 then
+    return {}
+  end
+  if type(filters) == "function" then
+    return filters(build_filters(...))
+  end
+  return filters or build_filters(...)
+end
+
 function Option.new(raw_opts, raw_source_opts, source_config)
   local opts = vim.tbl_extend("force", default, M.user_default.global_opts, source_config.global_opts or {}, raw_opts)
 
   local filters = opts.filters
   opts.filters = function(source_filters)
-    local others = source_config.filters or source_filters or M.user_default.filters
-    if type(filters) == "function" then
-      return filters(others)
-    end
-    return filters or others
+    return build_filters(filters, source_config.filters, source_filters, M.user_default.filters, { "substring" })
   end
 
   local sorters = opts.sorters
