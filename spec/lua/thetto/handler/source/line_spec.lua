@@ -20,6 +20,25 @@ test3]])
     assert.current_line("test2")
   end)
 
+  it("can show ranged lines", function()
+    helper.set_lines([[
+test1
+test2
+test3]])
+
+    thetto.start("line", {
+      opts = { insert = false },
+      source_opts = {
+        start_row = 1,
+        end_row = 2,
+      },
+    })
+
+    thetto.execute()
+
+    assert.current_line("test2")
+  end)
+
   it("can execute tab_oepn", function()
     helper.set_lines([[
 test1
