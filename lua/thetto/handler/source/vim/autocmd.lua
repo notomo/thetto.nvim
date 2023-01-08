@@ -1,8 +1,17 @@
 local M = {}
 
-function M.collect()
+M.opts = {
+  buffer = nil,
+}
+
+function M.collect(source_ctx)
   local items = {}
-  for _, autocmd in ipairs(vim.api.nvim_get_autocmds({})) do
+
+  local buffer = source_ctx.opts.buffer == 0 and vim.api.nvim_get_current_buf() or source_ctx.opts.buffer
+  local autocmds = vim.api.nvim_get_autocmds({
+    buffer = buffer,
+  })
+  for _, autocmd in ipairs(autocmds) do
     local parts = {}
     if autocmd.group_name then
       table.insert(parts, autocmd.group_name)
