@@ -6,7 +6,6 @@ describe("vim/buffer source", function()
   after_each(helper.after_each)
 
   it("can show buffers", function()
-    helper.test_data:create_dir("dir")
     helper.test_data:create_file("dir/foo")
     helper.test_data:create_file("dir/file")
 

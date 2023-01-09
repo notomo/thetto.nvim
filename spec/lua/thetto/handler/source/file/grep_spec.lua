@@ -51,7 +51,6 @@ foo]])
   end)
 
   it("can show grep results in project dir", function()
-    helper.test_data:create_dir("0_root_pattern")
     helper.test_data:create_file("0_root_pattern/in_root_pattern", [[hoge in root_pattern]])
 
     helper.sync_start(

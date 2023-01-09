@@ -8,7 +8,6 @@ describe("file/in_dir source", function()
 
   it("can show current dir files", function()
     helper.test_data:create_file("oldfile", [[for mru test]])
-    helper.test_data:create_dir("dir")
     helper.test_data:create_file("dir/file")
 
     thetto.start("file/in_dir", { opts = { insert = false } })

@@ -22,7 +22,6 @@ describe("alter source", function()
       source = { ["file/alter"] = { opts = { pattern_groups = { { "%/from/%_test.lua", "%/to/%.lua" } } } } },
     })
 
-    helper.test_data:create_dir("from")
     helper.test_data:create_dir("from/dir")
     helper.test_data:create_file("from/file_test.lua")
     vim.cmd.edit("./from/file_test.lua")
