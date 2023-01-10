@@ -4,6 +4,7 @@ M.behaviors = {
   fixup = { quit = false },
   reset = { quit = false },
   checkout = { quit = false },
+  compare = { quit = false },
 }
 
 local open_diff = require("thetto.handler.kind.git._util").open_diff
