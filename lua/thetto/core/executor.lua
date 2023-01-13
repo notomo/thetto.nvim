@@ -88,19 +88,25 @@ end
 
 local Promise = require("thetto.vendor.promise")
 function Executor._execute(ctx, actions)
-  local promise = Promise.resolve()
+  local promise
   for _, action in ipairs(actions) do
     local result, err = action(ctx)
     if err ~= nil then
-      return promise:next(function()
+      local current = promise or Promise.resolve()
+      return current:next(function()
         return Promise.reject(err)
       end)
     end
-    promise = promise:next(function()
-      return Promise.resolve(result)
-    end)
+    if not promise then
+      -- to remove unneeded promise:next()
+      promise = Promise.resolve(result)
+    else
+      promise = promise:next(function()
+        return Promise.resolve(result)
+      end)
+    end
   end
-  return promise
+  return promise or Promise.resolve()
 end
 
 function Executor.actions(self, items, ctx, main_action_name, fallback_action_names, action_opts, allow_no_items)
