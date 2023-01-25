@@ -4,11 +4,14 @@ M.opts = {
   owner = nil,
   repo_with_owner = nil,
   extra_args = {},
+  milestone = nil,
+  labels = {},
+  allow_empty_input = false,
 }
 
 function M.collect(source_ctx)
   local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
-  if not pattern then
+  if not pattern and not source_ctx.opts.allow_empty_input then
     return subscriber
   end
 
@@ -32,8 +35,16 @@ function M.collect(source_ctx)
   if owner then
     vim.list_extend(cmd, { "--owner", owner })
   end
+  if source_ctx.opts.milestone then
+    vim.list_extend(cmd, { "--milestone", source_ctx.opts.milestone })
+  end
+  for _, label in ipairs(source_ctx.opts.labels) do
+    vim.list_extend(cmd, { "--label", label })
+  end
   vim.list_extend(cmd, source_ctx.opts.extra_args)
-  vim.list_extend(cmd, vim.split(pattern, "%s+"))
+  if pattern then
+    vim.list_extend(cmd, vim.split(pattern, "%s+"))
+  end
 
   return require("thetto.util.job").run(cmd, source_ctx, function(issue)
     local mark
