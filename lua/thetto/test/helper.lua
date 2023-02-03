@@ -14,7 +14,6 @@ function helper.after_each()
   helper.test_data:teardown()
   helper.cleanup()
   helper.cleanup_loaded_modules(plugin_name)
-  print(" \n")
 end
 
 function helper.set_lines(lines)
