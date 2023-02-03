@@ -22,7 +22,7 @@ local adjust_cursor = function(item)
   if item.row > count then
     row = count
   end
-  local range = item.range or { s = { column = 0 } }
+  local range = item.range or { s = { column = item.column or 0 } }
   vim.api.nvim_win_set_cursor(0, { row, range.s.column })
 end
 
