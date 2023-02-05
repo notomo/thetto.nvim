@@ -27,4 +27,8 @@ end
 
 M.kind_name = "position"
 
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

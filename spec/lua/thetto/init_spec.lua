@@ -403,6 +403,29 @@ describe("thetto", function()
 
     assert.equal(test_source1, called_source_name)
   end)
+
+  it("can set source specific behaviors", function()
+    local source = "test_behaviros"
+    thetto.register_source(source, {
+      collect = function()
+        return {
+          {
+            value = "test1",
+          },
+          {
+            value = "test2",
+          },
+        }
+      end,
+      behaviors = {
+        display_limit = 1,
+      },
+    })
+
+    thetto.start(source, { opts = { insert = false } })
+
+    assert.no.exists_pattern("test2")
+  end)
 end)
 
 describe("thetto.reload()", function()

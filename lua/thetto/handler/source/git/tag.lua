@@ -25,4 +25,8 @@ end
 
 M.kind_name = "git/tag"
 
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

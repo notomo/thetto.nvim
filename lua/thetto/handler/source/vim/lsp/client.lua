@@ -23,4 +23,8 @@ end
 
 M.kind_name = "word"
 
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

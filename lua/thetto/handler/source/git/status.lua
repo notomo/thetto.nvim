@@ -76,8 +76,6 @@ function M.collect(source_ctx)
   end, { cwd = git_root })
 end
 
-M.kind_name = "git/status/file"
-
 local hl_groups = {
   staged = "String",
   conflict = "Special",
@@ -93,5 +91,13 @@ M.highlight = require("thetto.util.highlight").columns({
     end_key = "value",
   },
 })
+
+M.kind_name = "git/status/file"
+
+M.behaviors = {
+  insert = false,
+  display_limit = 10000,
+  cwd = require("thetto.util.cwd").project(),
+}
 
 return M

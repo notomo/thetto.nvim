@@ -39,4 +39,8 @@ end
 
 M.kind_name = "file"
 
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

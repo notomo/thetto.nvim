@@ -85,37 +85,48 @@ local function build_filters(filters, ...)
 end
 
 function Option.new(raw_opts, raw_source_opts, source_config)
-  local opts = vim.tbl_extend("force", default, M.user_default.global_opts, source_config.global_opts or {}, raw_opts)
+  raw_opts = raw_opts or {}
+  local opts = {}
 
-  local filters = opts.filters
+  local filters = raw_opts.filters
   opts.filters = function(source_filters)
     return build_filters(filters, source_config.filters, source_filters, M.user_default.filters, { "substring" })
   end
 
-  local sorters = opts.sorters
+  local sorters = raw_opts.sorters
   opts.sorters = function(source_sorters)
     return sorters or source_config.sorters or source_sorters or M.user_default.sorters
   end
 
-  local cwd = opts.cwd
-  if type(cwd) == "function" then
-    cwd = cwd()
-  end
-  cwd = vim.fn.expand(cwd)
-  if cwd == "." then
-    cwd = vim.fn.fnamemodify(".", ":p")
-  end
-  if cwd ~= "/" and vim.endswith(cwd, "/") then
-    cwd = cwd:sub(1, #cwd - 1)
-  end
-  opts.cwd = cwd
+  opts.behaviors = function(behaviors)
+    behaviors = behaviors or {}
 
-  if type(opts.pattern) == "function" then
-    opts.pattern = opts.pattern()
-  end
+    local merged =
+      vim.tbl_extend("force", default, M.user_default.global_opts, behaviors, source_config.global_opts or {}, raw_opts)
 
-  if not opts.range then
-    opts.range = require("thetto.vendor.misclib.visual_mode").row_range()
+    local cwd = merged.cwd
+    if type(cwd) == "function" then
+      cwd = cwd()
+    end
+    cwd = vim.fn.expand(cwd)
+    if cwd == "." then
+      cwd = vim.fn.fnamemodify(".", ":p")
+    end
+    if cwd ~= "/" and vim.endswith(cwd, "/") then
+      cwd = cwd:sub(1, #cwd - 1)
+    end
+    merged.cwd = cwd
+
+    local pattern = merged.pattern
+    if type(pattern) == "function" then
+      merged.pattern = pattern()
+    end
+
+    if not merged.range then
+      merged.range = require("thetto.vendor.misclib.visual_mode").row_range()
+    end
+
+    return merged
   end
 
   local source_opts = vim.tbl_extend("force", source_config.opts or {}, raw_source_opts)

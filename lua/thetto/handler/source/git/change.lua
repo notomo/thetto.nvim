@@ -31,4 +31,8 @@ end
 
 M.kind_name = "git/commit"
 
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

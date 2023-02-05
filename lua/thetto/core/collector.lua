@@ -1,4 +1,3 @@
-local Source = require("thetto.core.items.source")
 local SourceContext = require("thetto.core.items.source_context")
 local SourceResult = require("thetto.core.items.source_result")
 local Items = require("thetto.core.items")
@@ -11,13 +10,10 @@ local vim = vim
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source_name, source_opts, opts)
-  local source, err = Source.new(source_name, source_opts, opts)
-  if err ~= nil then
-    return nil, err
-  end
+function Collector.new(source)
+  local behaviors = source.behaviors
 
-  local modifier_factory = require("thetto.core.items.filter_modifier_factory").new(opts.cwd)
+  local modifier_factory = require("thetto.core.items.filter_modifier_factory").new(behaviors.cwd)
   local filters, ferr = Filters.new(source.filters, modifier_factory)
   if ferr ~= nil then
     return nil, ferr
@@ -33,24 +29,24 @@ function Collector.new(source_name, source_opts, opts)
     selected = {},
     filters = filters,
     sorters = sorters,
-    input_lines = listlib.fill(opts.input_lines, #source.filters, ""),
+    input_lines = listlib.fill(behaviors.input_lines, #source.filters, ""),
     source_ctx = SourceContext.new(
-      opts.pattern,
-      opts.cwd,
-      opts.throttle_ms,
-      opts.range,
+      behaviors.pattern,
+      behaviors.cwd,
+      behaviors.throttle_ms,
+      behaviors.range,
       filters:has_interactive(),
       vim.api.nvim_get_current_buf(),
       source.opts
     ),
     _result = SourceResult.zero(),
-    _ignorecase = opts.ignorecase,
-    _smartcase = opts.smartcase,
+    _ignorecase = behaviors.ignorecase,
+    _smartcase = behaviors.smartcase,
   }
   local self = setmetatable(tbl, Collector)
-  self.items = self:_items(0, nil, opts.display_limit)
+  self.items = self:_items(0, nil, behaviors.display_limit)
 
-  self.update_with_throttle = wraplib.throttle_with_last(opts.throttle_ms, function(_, callback)
+  self.update_with_throttle = wraplib.throttle_with_last(behaviors.throttle_ms, function(_, callback)
     local update_err = self:update()
     if callback then
       callback()

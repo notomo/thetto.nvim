@@ -19,4 +19,8 @@ end
 
 M.kind_name = "git/remote"
 
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

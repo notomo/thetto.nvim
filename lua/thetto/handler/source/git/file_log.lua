@@ -10,4 +10,9 @@ end
 M.highlight = require("thetto.handler.source.git.log").highlight
 M.kind_name = require("thetto.handler.source.git.log").kind_name
 
+M.behaviors = {
+  insert = false,
+  cwd = require("thetto.util.cwd").project(),
+}
+
 return M

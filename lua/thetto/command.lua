@@ -34,7 +34,14 @@ function M.start(source_name, raw_args)
     old_ctx.ui:close()
   end
 
-  local collector, err = require("thetto.core.collector").new(source_name, source_opts, opts)
+  local source, source_err = require("thetto.core.items.source").new(source_name, source_opts, opts)
+  if source_err ~= nil then
+    require("thetto.vendor.misclib.message").warn(source_err)
+    return Promise.resolve()
+  end
+  local behaviors = source.behaviors
+
+  local collector, err = require("thetto.core.collector").new(source)
   if err ~= nil then
     require("thetto.vendor.misclib.message").warn(err)
     return Promise.resolve()
@@ -42,30 +49,30 @@ function M.start(source_name, raw_args)
 
   local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name, collector.source.actions)
   local executor =
-    require("thetto.core.executor").new(collector.source.kind_name, args.action_opts, opts.action, execute_opts)
-  local ui = require("thetto.view.ui").new(collector, opts.insert)
-  local ctx = Context.new(source_name, collector, ui, executor, opts.can_resume)
+    require("thetto.core.executor").new(collector.source.kind_name, args.action_opts, behaviors.action, execute_opts)
+  local ui = require("thetto.view.ui").new(collector, behaviors.insert)
+  local ctx = Context.new(source_name, collector, ui, executor, behaviors.can_resume)
 
   local promise = Promise.new(function(resolve, reject)
-    local start_err = collector:start(opts.pattern, resolve, reject)
+    local start_err = collector:start(behaviors.pattern, resolve, reject)
     if start_err ~= nil then
       return reject(start_err)
     end
 
-    local open_err = ui:open(opts.immediately, executor:auto(ctx, opts.auto))
+    local open_err = ui:open(behaviors.immediately, executor:auto(ctx, behaviors.auto))
     if err then
       return reject(open_err)
     end
-    if opts.immediately then
-      ui:close(nil, opts.immediately)
+    if behaviors.immediately then
+      ui:close(nil, behaviors.immediately)
     end
 
     return collector:update()
   end):next(function()
-    ui:scroll(opts.offset, opts.search_offset)
+    ui:scroll(behaviors.offset, behaviors.search_offset)
   end)
 
-  if not opts.immediately then
+  if not behaviors.immediately then
     return promise:catch(function(e)
       require("thetto.vendor.misclib.message").warn(e)
     end)
@@ -73,7 +80,7 @@ function M.start(source_name, raw_args)
 
   return promise
     :next(function()
-      return _execute_action(ctx, opts.action, { action_opts = args.action_opts })
+      return _execute_action(ctx, behaviors.action, { action_opts = args.action_opts })
     end)
     :catch(function(e)
       require("thetto.vendor.misclib.message").warn(e)

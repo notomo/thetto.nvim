@@ -72,6 +72,11 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "git/branch"
 
+M.behaviors = {
+  insert = false,
+  cwd = require("thetto.util.cwd").project(),
+}
+
 M.sorters = { "-numeric:_is_current_branch", "length" }
 
 return M

@@ -55,4 +55,9 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "cmd/make/target"
 
+M.behaviors = {
+  insert = false,
+  cwd = require("thetto.util.cwd").upward({ "Makefile" }),
+}
+
 return M

@@ -40,6 +40,7 @@ function Source.new(name, source_opts, opts)
   local tbl = {
     name = name,
     opts = vim.tbl_extend("force", origin.opts or {}, source_opts),
+    behaviors = opts.behaviors(origin.behaviors),
     filters = opts.filters(origin.filters),
     sorters = opts.sorters(origin.sorters),
     _origin = origin,

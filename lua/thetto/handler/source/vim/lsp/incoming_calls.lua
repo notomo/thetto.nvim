@@ -49,6 +49,11 @@ M.highlight = require("thetto.util.highlight").columns({
 })
 
 M.kind_name = "file"
+
+M.behaviors = {
+  cwd = require("thetto.util.cwd").project(),
+}
+
 M.sorters = { "row" }
 
 return M

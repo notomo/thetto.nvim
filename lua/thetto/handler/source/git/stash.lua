@@ -32,6 +32,11 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "word"
 
+M.behaviors = {
+  insert = false,
+  cwd = require("thetto.util.cwd").project(),
+}
+
 M.actions = {
 
   action_tab_open = function(items)
