@@ -10,9 +10,16 @@ function M.render_diff(bufnr, item)
   if target then
     table.insert(cmd, target)
   end
+
+  table.insert(cmd, "--")
+
+  local paths = {}
   if item.path then
-    vim.list_extend(cmd, { "--", item.path })
+    table.insert(paths, item.path)
   end
+  vim.list_extend(paths, item.paths or {})
+  vim.list_extend(cmd, paths)
+
   return require("thetto.util.git").diff(item.git_root, bufnr, cmd)
 end
 

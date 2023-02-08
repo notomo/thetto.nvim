@@ -37,6 +37,7 @@ function M.collect(source_ctx)
         user_name = #commit_hash + 1 + #message + 1,
         branch_info = #commit_hash + 1 + #message + 1 + #user_name + 1,
       },
+      paths = source_ctx.opts.paths,
     }
   end, { cwd = git_root })
 end
