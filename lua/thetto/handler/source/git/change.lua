@@ -5,6 +5,7 @@ local M = {}
 
 M.opts = {
   commit_hash = nil,
+  paths = {},
 }
 
 function M.collect(source_ctx)
@@ -18,6 +19,7 @@ function M.collect(source_ctx)
   if commit_hash then
     table.insert(cmd, ("%s^...%s"):format(commit_hash, commit_hash))
   end
+  vim.list_extend(cmd, { "--", unpack(source_ctx.opts.paths) })
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local abs_path = pathlib.join(git_root, output)
     return {
