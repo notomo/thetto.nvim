@@ -26,6 +26,7 @@ function M.collect(source_ctx)
     return {
       value = ("%s %s %s"):format(commit_hash, message, path),
       path = path,
+      paths = { path },
       commit_hash = commit_hash,
       git_root = git_root,
       column_offsets = {
