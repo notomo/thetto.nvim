@@ -145,6 +145,12 @@ function M.content(git_root, path_or_bufnr, revision)
       cwd = git_root,
       on_exit = function() end,
     })
+    :catch(function(err)
+      if err:match(" does not exist in ") or err:match(" exists on disk, but not in ") then
+        return ""
+      end
+      return require("thetto.vendor.promise").reject(err)
+    end)
     :next(function(output)
       local bufnr = vim.api.nvim_create_buf(false, true)
       local lines = vim.split(output, "\n", { plain = true })
