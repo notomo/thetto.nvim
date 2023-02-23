@@ -104,7 +104,7 @@ function M.action_list_children(items)
   return require("thetto").start("git/change", {
     source_opts = {
       commit_hash = item.commit_hash,
-      paths = item.paths,
+      path = item.path,
     },
   })
 end

@@ -6,6 +6,7 @@ end
 
 function M.render_diff(bufnr, item)
   local cmd = { "git", "--no-pager", "show", "--date=iso" }
+
   local target = item.commit_hash or item.stash_name
   if target then
     table.insert(cmd, target)
@@ -13,13 +14,15 @@ function M.render_diff(bufnr, item)
 
   table.insert(cmd, "--")
 
-  local paths = {}
-  if item.path then
-    table.insert(paths, item.path)
+  if item.path and target then
+    -- fallback for renamed file path
+    return require("thetto.util.git").exists(item.git_root, target, item.path):next(function(ok)
+      if ok then
+        table.insert(cmd, item.path)
+      end
+      return require("thetto.util.git").diff(item.git_root, bufnr, cmd)
+    end)
   end
-  vim.list_extend(paths, item.paths or {})
-  vim.list_extend(cmd, paths)
-
   return require("thetto.util.git").diff(item.git_root, bufnr, cmd)
 end
 

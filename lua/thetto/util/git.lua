@@ -4,6 +4,18 @@ function M.root()
   return require("thetto.lib.file").find_git_root()
 end
 
+function M.exists(git_root, commit_hash, path)
+  local cmd = { "git", "show", "--quiet", "--pretty=format:%h", commit_hash, "--", path }
+  return require("thetto.util.job")
+    .promise(cmd, {
+      cwd = git_root,
+      on_exit = function() end,
+    })
+    :next(function(output)
+      return output ~= ""
+    end)
+end
+
 function M.diff(git_root, bufnr, cmd)
   cmd = cmd or { "git", "--no-pager", "diff", "--date=iso" }
   return require("thetto.util.job")

@@ -5,7 +5,7 @@ local M = {}
 
 M.opts = {
   commit_hash = nil,
-  paths = {},
+  path = nil,
 }
 
 local status_mapping = {
@@ -14,6 +14,34 @@ local status_mapping = {
   M = "modify",
   R = "rename",
 }
+
+function M._to_item(git_root, commit_hash, output)
+  local status_mark, path_parts = output:match("^(.)%S*%s+(.*)")
+  local status = status_mapping[status_mark]
+
+  local path = path_parts
+  local rename_from = ""
+  if status == "rename" then
+    local parts = vim.split(path_parts, "%s+")
+    path = parts[1]
+    rename_from = (" <- %s"):format(parts[2])
+  end
+  local desc = ("%s %s%s"):format(status_mark, path, rename_from)
+
+  local abs_path = pathlib.join(git_root, path)
+  return {
+    value = path,
+    desc = desc,
+    path = abs_path,
+    commit_hash = commit_hash,
+    status = status,
+    git_root = git_root,
+    column_offsets = {
+      value = 2,
+      rename_from = 2 + #path,
+    },
+  }
+end
 
 function M.collect(source_ctx)
   local git_root, err = filelib.find_git_root()
@@ -26,34 +54,22 @@ function M.collect(source_ctx)
   if commit_hash then
     table.insert(cmd, ("%s^...%s"):format(commit_hash, commit_hash))
   end
-  vim.list_extend(cmd, { "--", unpack(source_ctx.opts.paths) })
+  table.insert(cmd, "--")
+
+  if commit_hash and source_ctx.opts.path then
+    -- fallback for renamed file path
+    return require("thetto.util.git").exists(git_root, commit_hash, source_ctx.opts.path):next(function(ok)
+      if ok then
+        table.insert(cmd, source_ctx.opts.path)
+      end
+      return require("thetto.util.job").start(cmd, source_ctx, function(output)
+        return M._to_item(git_root, commit_hash, output)
+      end, { cwd = git_root })
+    end)
+  end
 
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
-    local status_mark, path_parts = output:match("^(.)%S*%s+(.*)")
-    local status = status_mapping[status_mark]
-
-    local path = path_parts
-    local rename_from = ""
-    if status == "rename" then
-      local parts = vim.split(path_parts, "%s+")
-      path = parts[1]
-      rename_from = (" <- %s"):format(parts[2])
-    end
-    local desc = ("%s %s%s"):format(status_mark, path, rename_from)
-
-    local abs_path = pathlib.join(git_root, path)
-    return {
-      value = path,
-      desc = desc,
-      path = abs_path,
-      commit_hash = commit_hash,
-      status = status,
-      git_root = git_root,
-      column_offsets = {
-        value = 2,
-        rename_from = 2 + #path,
-      },
-    }
+    return M._to_item(git_root, commit_hash, output)
   end, { cwd = git_root })
 end
 
