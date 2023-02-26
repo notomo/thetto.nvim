@@ -44,7 +44,7 @@ end
 local set_filetype = function(bufnr, hint)
   local filetype, on_detect = vim.filetype.match(hint)
   if filetype then
-    on_detect = on_detect or function() end
+    on_detect = on_detect or function(_) end
     vim.bo[bufnr].filetype = filetype
     on_detect(bufnr)
   end

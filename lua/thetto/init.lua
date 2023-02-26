@@ -4,8 +4,8 @@ function M.start(source_name, args)
   return require("thetto.command").start(source_name, args)
 end
 
-function M.reload()
-  return require("thetto.command").reload()
+function M.reload(bufnr)
+  return require("thetto.command").reload(bufnr)
 end
 
 function M.resume(source_name)

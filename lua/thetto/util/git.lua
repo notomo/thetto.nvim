@@ -184,7 +184,7 @@ function M.content(git_root, path_or_bufnr, revision)
 
       local filetype, on_detect = vim.filetype.match({ buf = bufnr, filename = path })
       if filetype then
-        on_detect = on_detect or function() end
+        on_detect = on_detect or function(_) end
         vim.bo[bufnr].filetype = filetype
         on_detect(bufnr)
       end
