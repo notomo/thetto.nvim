@@ -42,10 +42,19 @@ function Kind.__index(self, k)
   return rawget(Kind, k) or self._origin[k] or base[k]
 end
 
+function Kind.will_skip_action(self, action_name)
+  return vim.tbl_get(self.behaviors, action_name, "skip") or false
+end
+
 function Kind.action_kind_name(self, action_name)
   local key = self:_action_key(action_name)
-  if self._origin[key] then
+  if rawget(self._origin, key) then
     return self.name
+  end
+  for _, extend in ipairs(self._origin.extends or {}) do
+    if extend[key] then
+      return extend.name
+    end
   end
   if base[key] then
     return "base"

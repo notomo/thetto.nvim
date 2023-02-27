@@ -1,3 +1,3 @@
-local M = vim.deepcopy(require("thetto.handler.kind.git.status"))
+local M = {}
 
-return require("thetto.core.kind").extend(M, "file")
+return require("thetto.core.kind").extend(M, "git/status", "file")

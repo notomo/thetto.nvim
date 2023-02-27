@@ -60,7 +60,9 @@ function Executor._actions(self, items, ctx, action_name, action_opts, allow_no_
     if err ~= nil then
       return nil, err
     end
-    table.insert(item_kind_pairs, { item, kind:action_kind_name(action_name) })
+    if not kind:will_skip_action(action_name) then
+      table.insert(item_kind_pairs, { item, kind:action_kind_name(action_name) })
+    end
   end
   if #item_kind_pairs == 0 then
     table.insert(item_kind_pairs, { {}, allow_no_items and self._default_kind_name or "base" })
