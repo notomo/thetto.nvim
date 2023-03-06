@@ -12,7 +12,7 @@ ItemList.hl_ns_name = "thetto-list-highlight"
 
 local FILETYPE = "thetto"
 
-function ItemList.new(source_name, width, height, row, column)
+function ItemList.new(source_name, width, height, row, column, cwd)
   local bufnr = bufferlib.scratch(function(b)
     local name = ("thetto://%s/%s"):format(source_name, FILETYPE)
     bufferlib.delete_by_name(name)
@@ -43,6 +43,9 @@ function ItemList.new(source_name, width, height, row, column)
       { " ", "NormalFloat" },
     },
   })
+  vim.api.nvim_win_call(window, function()
+    vim.cmd.lcd(require("thetto.lib.file").escape(cwd))
+  end)
 
   local group_name = "theto_closed_" .. bufnr
   vim.api.nvim_create_augroup(group_name, {})

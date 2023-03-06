@@ -50,7 +50,7 @@ function M.start(source_name, raw_args)
   local execute_opts = require("thetto.core.option").ExecuteOption.new(source_name, collector.source.actions)
   local executor =
     require("thetto.core.executor").new(collector.source.kind_name, args.action_opts, behaviors.action, execute_opts)
-  local ui = require("thetto.view.ui").new(collector, behaviors.insert)
+  local ui = require("thetto.view.ui").new(collector, behaviors.insert, behaviors.cwd)
   local ctx = Context.new(source_name, collector, ui, executor, behaviors.can_resume)
 
   local promise = Promise.new(function(resolve, reject)

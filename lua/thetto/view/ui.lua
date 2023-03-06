@@ -13,7 +13,7 @@ local _inputter_ns = vim.api.nvim_create_namespace(Inputter.hl_ns_name)
 local UI = {}
 UI.__index = UI
 
-function UI.new(collector, insert)
+function UI.new(collector, insert, cwd)
   vim.validate({
     collector = { collector, "table" },
     insert = { insert, "boolean" },
@@ -23,6 +23,7 @@ function UI.new(collector, insert)
     _state = State.new(insert),
     _debounce_ms_on_move = 70,
     _initialized_preview = false,
+    _cwd = cwd,
   }
   return setmetatable(tbl, UI)
 end
@@ -46,10 +47,10 @@ function UI.open(self, immediately, on_move, needs_preview)
   local row = self:_row(input_lines)
   local column = self:_column()
 
-  self._inputter = Inputter.new(source_name, filters, input_lines, width, height, row, column)
+  self._inputter = Inputter.new(source_name, filters, input_lines, width, height, row, column, self._cwd)
   self._collector:subscribe_input(immediately, self._inputter:observable())
 
-  self._item_list = ItemList.new(source_name, width, height, row, column)
+  self._item_list = ItemList.new(source_name, width, height, row, column, self._cwd)
   self._status_line = StatusLine.new(source_name, width, height, row, column)
   self._sidecar = Sidecar.new()
 

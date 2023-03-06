@@ -10,7 +10,7 @@ Inputter.hl_ns_name = "thetto-input-filter-info"
 
 local FILETYPE = "thetto-input"
 
-function Inputter.new(source_name, filters, input_lines, width, height, row, column)
+function Inputter.new(source_name, filters, input_lines, width, height, row, column, cwd)
   local bufnr = vim.api.nvim_create_buf(false, true)
   local name = ("thetto://%s/%s"):format(source_name, FILETYPE)
   bufferlib.delete_by_name(name)
@@ -40,6 +40,9 @@ function Inputter.new(source_name, filters, input_lines, width, height, row, col
     },
   })
   vim.wo[window].winhighlight = "Normal:ThettoInput,CursorLine:ThettoInput"
+  vim.api.nvim_win_call(window, function()
+    vim.cmd.lcd(require("thetto.lib.file").escape(cwd))
+  end)
 
   local tbl = {
     _bufnr = bufnr,
