@@ -1,7 +1,7 @@
 local M = {}
 
-function M.root()
-  return require("thetto.lib.file").find_git_root()
+function M.root(cwd)
+  return require("thetto.lib.file").find_git_root(cwd)
 end
 
 function M.exists(git_root, commit_hash, path)

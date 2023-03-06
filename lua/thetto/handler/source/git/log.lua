@@ -8,7 +8,7 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local git_root, err = filelib.find_git_root()
+  local git_root, err = filelib.find_git_root(source_ctx.cwd)
   if err ~= nil then
     return nil, err
   end
