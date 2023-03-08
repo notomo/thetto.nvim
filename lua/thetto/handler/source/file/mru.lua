@@ -13,7 +13,7 @@ function M.collect(source_ctx)
     return nil, err
   end
 
-  local paths = store:data()
+  local paths = store.data()
   for _, bufnr in ipairs(vim.fn.range(vim.fn.bufnr("$"), 1, -1)) do
     if not vim.api.nvim_buf_is_valid(bufnr) then
       goto continue
@@ -36,7 +36,7 @@ function M.collect(source_ctx)
   local home = pathlib.home()
 
   local items = {}
-  for _, path in ipairs(vim.tbl_filter(store:validator(), paths)) do
+  for _, path in ipairs(vim.tbl_filter(store.validate, paths)) do
     local relative_path = to_relative(path)
     local value = relative_path:gsub(home, "~")
     local item = { value = value, path = path }

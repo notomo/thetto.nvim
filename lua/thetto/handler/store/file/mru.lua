@@ -1,50 +1,51 @@
 local listlib = require("thetto.lib.list")
 local filelib = require("thetto.lib.file")
+local pathlib = require("thetto.lib.path")
 local vim = vim
 
 local M = {}
 
-M.limit = 500
-M.ignore_pattern = "^$"
+local _paths = {}
 
-function M.start(self)
-  local paths = filelib.read_lines(self.file_path, 0, self.limit)
-  self.persist.paths = vim.tbl_filter(self:validator(), paths)
+M.opts = {
+  file_path = pathlib.user_data_path("store_file_mru.txt"),
+  save_events = { "QuitPre" },
+  limit = 500,
+}
 
-  vim.api.nvim_create_augroup(self.augroup_name, {})
+function M.start(opts)
+  opts = vim.tbl_extend("force", M.opts, opts or {})
+
+  local paths = filelib.read_lines(opts.file_path, 0, opts.limit)
+  _paths = vim.tbl_filter(M.validate, paths)
+
+  local group = vim.api.nvim_create_augroup("thetto_file_mru", {})
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
-    group = self.augroup_name,
+    group = group,
     pattern = { "*" },
     callback = function(args)
-      self:add(args.buf)
+      M.add(args.buf, opts.limit)
     end,
   })
-
-  vim.api.nvim_create_autocmd({ "QuitPre" }, {
-    group = self.augroup_name,
+  vim.api.nvim_create_autocmd(opts.save_events, {
+    group = group,
     pattern = { "*" },
     callback = function()
-      self:save()
+      M.save(opts.file_path)
     end,
+    once = true,
   })
 end
 
-function M.data(self)
-  return vim.fn.reverse(self.persist.paths)
+function M.data()
+  return vim.fn.reverse(_paths)
 end
 
-function M.validator(self)
-  local regex = vim.regex(self.ignore_pattern)
-  return function(path)
-    return not regex:match_str(path) and filelib.readable(path)
-  end
+function M.validate(path)
+  return filelib.readable(path)
 end
 
-function M.is_valid(self, path)
-  return self:validator()(path)
-end
-
-function M.add(self, bufnr)
+function M.add(bufnr, limit)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     return
   end
@@ -54,20 +55,20 @@ function M.add(self, bufnr)
     return
   end
 
-  if not self:is_valid(path) then
+  if not M.validate(path) then
     return
   end
 
-  local removed = listlib.remove(self.persist.paths, path)
-  if not removed and #self.persist.paths > self.limit then
-    table.remove(self.persist.paths, 1)
+  local removed = listlib.remove(_paths, path)
+  if not removed and #_paths > limit then
+    table.remove(_paths, 1)
   end
 
-  table.insert(self.persist.paths, path)
+  table.insert(_paths, path)
 end
 
-function M.save(self)
-  filelib.write_lines(self.file_path, self.persist.paths)
+function M.save(file_path)
+  filelib.write_lines(file_path, M.data())
 end
 
 return M

@@ -1,6 +1,5 @@
 local helper = require("thetto.test.helper")
 local thetto = helper.require("thetto")
-local store = helper.require("thetto.core.store")
 
 describe("file/mru store", function()
   local store_file_path
@@ -15,19 +14,21 @@ describe("file/mru store", function()
     local file_path1 = helper.test_data:create_file("file1")
     local file_path2 = helper.test_data:create_file("file2")
 
-    thetto.setup_store("file/mru", { file_path = store_file_path })
+    thetto.setup_store("file/mru", {
+      file_path = store_file_path,
+      save_events = { "TabNew" },
+    })
     vim.cmd.edit("file1")
     vim.cmd.edit("file2")
-
-    local data = store.get("file/mru"):data()
-
-    assert.equals(file_path2, data[1])
-    assert.equals(file_path1, data[2])
-
-    store.get("file/mru"):save()
+    vim.cmd.tabedit()
 
     local f = io.open(store_file_path)
     local content = vim.fn.split(f:read("*a"), "\n", false)
-    assert.is_same(vim.fn.reverse(data), content)
+    f:close()
+    local want = {
+      file_path2,
+      file_path1,
+    }
+    assert.is_same(want, content)
   end)
 end)

@@ -155,11 +155,11 @@ function M.setup(setting)
 end
 
 function M.setup_store(name, opts)
-  local store, err = require("thetto.core.store").new(name, opts)
+  local store, err = require("thetto.core.store").new(name)
   if err then
     require("thetto.vendor.misclib.message").error(err)
   end
-  store:start()
+  store.start(opts)
 end
 
 function M.register_source(name, handler)
