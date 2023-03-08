@@ -26,8 +26,8 @@ describe("file/mru store", function()
     local content = vim.fn.split(f:read("*a"), "\n", false)
     f:close()
     local want = {
-      file_path2,
       file_path1,
+      file_path2,
     }
     assert.is_same(want, content)
   end)

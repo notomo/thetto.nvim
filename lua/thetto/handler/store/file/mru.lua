@@ -68,7 +68,7 @@ function M.add(bufnr, limit)
 end
 
 function M.save(file_path)
-  filelib.write_lines(file_path, M.data())
+  filelib.write_lines(file_path, _paths)
 end
 
 return M
