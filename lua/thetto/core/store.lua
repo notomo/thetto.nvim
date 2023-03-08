@@ -6,7 +6,10 @@ local _stores = {}
 local Store = {}
 
 function Store.new(name, opts)
-  vim.validate({ name = { name, "string" }, opts = { opts, "table", true } })
+  vim.validate({
+    name = { name, "string" },
+    opts = { opts, "table", true },
+  })
   opts = opts or {}
 
   local store = modulelib.find("thetto.handler.store." .. name)
@@ -23,17 +26,14 @@ function Store.new(name, opts)
     _store = store,
   }
   local self = setmetatable(tbl, Store)
+
   _stores[name] = self
+
   return self, nil
 end
 
 function Store.__index(self, k)
   return rawget(Store, k) or self._store[k]
-end
-
-function Store.quit(self)
-  _stores[self.name] = nil
-  vim.api.nvim_create_augroup(self.augroup_name, {})
 end
 
 function Store.get(name)

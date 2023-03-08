@@ -9,10 +9,7 @@ describe("file/mru store", function()
     store_file_path = helper.test_data:create_file("store.txt")
   end)
 
-  after_each(function()
-    store.get("file/mru"):quit()
-    helper.after_each()
-  end)
+  after_each(helper.after_each)
 
   it("can store mru file paths", function()
     local file_path1 = helper.test_data:create_file("file1")

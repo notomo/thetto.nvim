@@ -24,7 +24,7 @@ function M.collect(source_ctx)
       goto continue
     end
 
-    table.insert(paths, vim.api.nvim_buf_get_name(bufnr))
+    table.insert(paths, name)
     ::continue::
   end
   vim.list_extend(paths, vim.v.oldfiles)

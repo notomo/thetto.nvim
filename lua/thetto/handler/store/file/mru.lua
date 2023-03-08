@@ -19,6 +19,7 @@ function M.start(self)
       self:add(args.buf)
     end,
   })
+
   vim.api.nvim_create_autocmd({ "QuitPre" }, {
     group = self.augroup_name,
     pattern = { "*" },
