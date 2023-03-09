@@ -20,15 +20,22 @@ function Kind.new(executor, name)
   local user_opts = kind_actions.opts or {}
   local user_behaviors = kind_actions.behaviors or {}
 
+  local opts = vim.deepcopy(origin.opts or {})
+  local behaviors = vim.deepcopy(origin.behaviors or {})
+  for _, extend in ipairs(origin.extends or {}) do
+    opts = vim.tbl_deep_extend("keep", opts, extend.opts or {})
+    behaviors = vim.tbl_deep_extend("keep", behaviors, extend.behaviors or {})
+  end
+
   local tbl = {
     name = name,
     executor = executor,
     default_action = kind_actions.default_action or executor.default_action_name,
-    opts = vim.tbl_deep_extend("force", base.opts, origin.opts or {}, user_opts, execute_opts.source_actions.opts),
+    opts = vim.tbl_deep_extend("force", base.opts, opts, user_opts, execute_opts.source_actions.opts),
     behaviors = vim.tbl_deep_extend(
       "force",
       base.behaviors,
-      origin.behaviors or {},
+      behaviors,
       user_behaviors,
       execute_opts.source_actions.behaviors
     ),
