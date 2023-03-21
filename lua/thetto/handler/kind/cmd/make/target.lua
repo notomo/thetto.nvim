@@ -15,8 +15,11 @@ function M.action_execute(items, action_ctx)
     require("thetto.lib.buffer").open_scratch_tab()
     local cmd = { "make" }
     vim.list_extend(cmd, action_ctx.opts.args)
-    vim.list_extend(cmd, { item.path, item.value })
-    local opts = { cwd = vim.fn.fnamemodify(item.path, ":h") }
+
+    local path = item.included_from or item.path
+    vim.list_extend(cmd, { path, item.value })
+
+    local opts = { cwd = vim.fn.fnamemodify(path, ":h") }
     action_ctx.opts.driver(cmd, opts)
   end
 end

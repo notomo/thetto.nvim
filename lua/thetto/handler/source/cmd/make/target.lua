@@ -3,7 +3,7 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M._load(path, cwd)
+function M._load(path, cwd, included_from)
   if not filelib.readable(path) then
     return {}
   end
@@ -11,8 +11,11 @@ function M._load(path, cwd)
   local items = {}
   local row = 1
   local f = io.open(path, "r")
+  local dir_path = vim.fs.dirname(path)
   local to_relative = pathlib.relative_modifier(cwd)
   for line in f:lines() do
+    vim.list_extend(items, M._parse_include(line, dir_path, path))
+
     local target = vim.fn.matchstr(line, "\\v^\\zs\\S*\\ze:[^=]*$")
     if not (target == "" or target == ".PHONY" or target:find(":") ~= nil) then
       local path_row = ("%s:%d"):format(to_relative(path), row)
@@ -21,6 +24,7 @@ function M._load(path, cwd)
         desc = desc,
         value = target,
         path = path,
+        included_from = included_from,
         row = row,
         column_offsets = { value = #path_row + 1 },
       })
@@ -30,6 +34,21 @@ function M._load(path, cwd)
   f:close()
 
   return items
+end
+
+function M._parse_include(line, dir_path, included_from)
+  -- support one file path (no glob)
+  local included = line:match("^include (.+)")
+  if not included then
+    return {}
+  end
+
+  local path = vim.fn.simplify(dir_path .. "/" .. included)
+  if not filelib.readable(path) then
+    return {}
+  end
+
+  return M._load(path, dir_path, included_from)
 end
 
 function M.collect(source_ctx)

@@ -19,6 +19,8 @@ test:
 	invalid:
 		echo 'test'
 
+include sub/included.mk
+
 .PHONY: test
 
 ]]
@@ -38,6 +40,13 @@ sub_test:
 	echo 1
 ]]
     )
+    helper.test_data:create_file(
+      "sub/included.mk",
+      [[
+included:
+	echo 1
+]]
+    )
   end)
   after_each(helper.after_each)
 
@@ -46,6 +55,7 @@ sub_test:
 
     assert.exists_pattern("Makefile:6 test")
     assert.exists_pattern("test.mk:1 build")
+    assert.exists_pattern("sub/included.mk:1 included")
     assert.no.exists_pattern("TEST")
     assert.no.exists_pattern("invalid")
     assert.no.exists_pattern(".PHONY")
