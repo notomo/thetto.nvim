@@ -177,6 +177,9 @@ function ItemList.enable_on_moved(self, source_name)
 end
 
 function ItemList.set_row(self, row)
+  if not self:is_valid() then
+    return
+  end
   cursorlib.set_row(row, self._window, self._bufnr)
 end
 
