@@ -17,7 +17,7 @@ describe("vim/highlight_group source", function()
     thetto.execute("move_to_list")
 
     assert.exists_pattern([[xxx ThettoTestLink { link = "Comment" }]])
-    assert.exists_pattern([[ThettoTestDef { blend = 50, bold = true, foreground = 0, reverse = true }]])
+    assert.exists_pattern([[ThettoTestDef { blend = 50, bold = true, fg = 0, reverse = true }]])
   end)
 
   it("can clear highlight group", function()
