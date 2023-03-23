@@ -218,8 +218,8 @@ end
 ItemList.setup_highlight_groups = function()
   local highlightlib = require("thetto.vendor.misclib.highlight")
   highlightlib.define("ThettoAboveBorder", {
-    fg = vim.api.nvim_get_hl_by_name("Comment", true).foreground,
-    bg = vim.api.nvim_get_hl_by_name("NormalFloat", true).background,
+    fg = vim.api.nvim_get_hl(0, { name = "Comment" }).fg,
+    bg = vim.api.nvim_get_hl(0, { name = "NormalFloat" }).bg,
   })
 end
 

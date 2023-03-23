@@ -343,8 +343,8 @@ local setup_highlight_groups = function()
   vim.api.nvim_set_hl(0, "ThettoPreview", { default = true, link = "Search" })
   vim.api.nvim_set_hl(0, "ThettoFilterInfo", { default = true, link = "Comment" })
   require("thetto.vendor.misclib.highlight").define("ThettoFloatTitle", {
-    fg = vim.api.nvim_get_hl_by_name("Comment", true).foreground,
-    bg = vim.api.nvim_get_hl_by_name("NormalFloat", true).background,
+    fg = vim.api.nvim_get_hl(0, { name = "Comment" }).fg,
+    bg = vim.api.nvim_get_hl(0, { name = "NormalFloat" }).bg,
   })
 end
 
