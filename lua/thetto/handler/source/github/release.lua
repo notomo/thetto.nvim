@@ -20,7 +20,7 @@ function M.collect(source_ctx)
       mark = "R"
     end
     local title = ("%s %s"):format(mark, release.name)
-    local desc = ("%s %s"):format(title, release.tag_name)
+    local desc = ("%s %s (%s)"):format(title, release.tag_name, release.published_at)
     return {
       value = release.name,
       url = release.html_url,
