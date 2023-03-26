@@ -44,7 +44,7 @@ function ItemList.new(source_name, width, height, row, column, cwd)
     },
   })
   vim.api.nvim_win_call(window, function()
-    vim.cmd.lcd(require("thetto.lib.file").escape(cwd))
+    require("thetto.lib.file").lcd(cwd)
   end)
 
   local group_name = "theto_closed_" .. bufnr

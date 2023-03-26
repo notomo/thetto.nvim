@@ -6,7 +6,7 @@ function M.after(_, _) end
 
 function M.action_cd(items)
   for _, item in ipairs(items) do
-    vim.cmd.lcd(filelib.escape(item.path))
+    filelib.lcd(item.path)
     M.after(item.path)
   end
 end
@@ -14,7 +14,7 @@ end
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
     require("thetto.lib.buffer").open_scratch_tab()
-    vim.cmd.lcd(filelib.escape(item.path))
+    filelib.lcd(item.path)
     M.after(item.path)
   end
 end
@@ -22,7 +22,7 @@ end
 function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     vim.cmd.vsplit()
-    vim.cmd.lcd(filelib.escape(item.path))
+    filelib.lcd(item.path)
     M.after(item.path)
   end
 end

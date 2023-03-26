@@ -41,7 +41,7 @@ function Inputter.new(source_name, filters, input_lines, width, height, row, col
   })
   vim.wo[window].winhighlight = "Normal:ThettoInput,CursorLine:ThettoInput"
   vim.api.nvim_win_call(window, function()
-    vim.cmd.lcd(require("thetto.lib.file").escape(cwd))
+    require("thetto.lib.file").lcd(cwd)
   end)
 
   local tbl = {
