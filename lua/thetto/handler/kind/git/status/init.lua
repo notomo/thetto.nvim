@@ -176,7 +176,7 @@ M.opts.preview = {
   ignore_patterns = {},
 }
 function M.action_preview(items, action_ctx, ctx)
-  local item = items[1]
+  local item = ctx.ui:current_item()
   if not item then
     return nil
   end

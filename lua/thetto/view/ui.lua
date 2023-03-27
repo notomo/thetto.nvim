@@ -268,13 +268,19 @@ function UI.selected_items(self, action_name, range)
     return items
   end
 
-  local index
-  if self._item_list:is_valid() then
-    index = self._item_list:cursor()[1]
-  else
-    index = self._state.row
+  local current_item = self:current_item()
+  if current_item then
+    return { current_item }
   end
-  return { self._collector.items[index] }
+  return { self._collector.items[self._state.row] }
+end
+
+function UI.current_item(self)
+  if not self._item_list:is_valid() then
+    return nil
+  end
+  local index = self._item_list:cursor()[1]
+  return self._collector.items[index]
 end
 
 function UI.open_preview(self, item, open_target)

@@ -29,8 +29,8 @@ function M.action_tab_open(items)
   end)
 end
 
-function M.action_preview(items, _, ctx)
-  local item = items[1]
+function M.action_preview(_, _, ctx)
+  local item = ctx.ui:current_item()
   if not item then
     return nil
   end
