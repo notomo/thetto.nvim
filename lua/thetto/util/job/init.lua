@@ -11,7 +11,12 @@ local job_start = function(cmd, opts)
   if not log_file then
     return nil, "could not open log file: " .. log_path
   end
-  local msg = table.concat(cmd, " ")
+  local msg
+  if type(cmd) == "table" then
+    msg = table.concat(cmd, " ")
+  else
+    msg = cmd
+  end
   log_file:write(("[%s] %s\n"):format(os.date(), msg))
   log_file:close()
 
