@@ -49,6 +49,10 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoFilterRegexMatch", { default = true, link = "Boolean" })
 
+local highlight_opts = {
+  priority = vim.highlight.priorities.user - 1,
+}
+
 function M.highlight(self, filter_ctx, _, first_line, items, decorator)
   if self.inversed or filter_ctx.input_line == "" then
     return
@@ -76,7 +80,13 @@ function M.highlight(self, filter_ctx, _, first_line, items, decorator)
 
     local offset = offsets[self.key] or 0
     for _, pos in ipairs(positions) do
-      decorator:highlight("ThettoFilterRegexMatch", first_line + i - 1, offset + pos[1], offset + pos[2])
+      decorator:highlight(
+        "ThettoFilterRegexMatch",
+        first_line + i - 1,
+        offset + pos[1],
+        offset + pos[2],
+        highlight_opts
+      )
     end
   end
 end

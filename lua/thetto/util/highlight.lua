@@ -61,6 +61,10 @@ local to_column = function(hl_column)
   }
 end
 
+local highlight_opts = {
+  priority = vim.highlight.priorities.user - 1,
+}
+
 function M.columns(hl_columns)
   local columns = vim.tbl_map(function(hl_column)
     return to_column(hl_column)
@@ -75,7 +79,7 @@ function M.columns(hl_columns)
 
         local start_column = column.to_start(item)
         local end_column = column.to_end(item)
-        decorator:highlight(hl_group, first_line + i - 1, start_column, end_column)
+        decorator:highlight(hl_group, first_line + i - 1, start_column, end_column, highlight_opts)
 
         ::continue::
       end
