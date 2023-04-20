@@ -68,7 +68,7 @@ function M.new(target, width, height)
       if ok then
         return nil
       end
-      if err:match("outside range") then
+      if err:match("out of range") then
         -- workaround for outdated positions in language server
         return err
       end
