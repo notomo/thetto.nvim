@@ -7,6 +7,9 @@ M.opts = {
     return tostring(item)
   end,
   on_choice = function() end,
+  get_range = function(_)
+    return nil
+  end,
 }
 
 function M.collect(source_ctx)
@@ -14,10 +17,12 @@ function M.collect(source_ctx)
   for _, item in ipairs(source_ctx.opts.items) do
     local value = source_ctx.opts.format_item(item)
     local desc = ("%s %s"):format(source_ctx.opts.prompt, value)
+    local range = source_ctx.opts.get_range(item)
     table.insert(items, {
       value = value,
       desc = desc,
       raw = item,
+      range = range,
       on_choice = source_ctx.opts.on_choice,
       column_offsets = {
         value = #source_ctx.opts.prompt + 1,
