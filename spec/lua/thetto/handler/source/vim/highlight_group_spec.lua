@@ -16,7 +16,7 @@ describe("vim/highlight_group source", function()
 
     thetto.execute("move_to_list")
 
-    assert.exists_pattern([[xxx ThettoTestLink { link = "Comment" }]])
+    assert.exists_pattern([[xxx ThettoTestLink { default = true, link = "Comment" }]])
     assert.exists_pattern(
       [[ThettoTestDef { blend = 50, bold = true, cterm = { bold = true, reverse = true }, fg = 0, reverse = true }]]
     )
