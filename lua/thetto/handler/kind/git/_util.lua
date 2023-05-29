@@ -37,4 +37,15 @@ function M.open_diff(items, f)
   return require("thetto.vendor.promise").all(promises)
 end
 
+function M.open(items, f)
+  local promises = {}
+  for _, item in ipairs(items) do
+    local promise = require("thetto.util.git").content(item.git_root, item.path, item.commit_hash):next(function(path)
+      f(path)
+    end)
+    table.insert(promises, promise)
+  end
+  return require("thetto.vendor.promise").all(promises)
+end
+
 return M

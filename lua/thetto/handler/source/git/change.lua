@@ -93,7 +93,7 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.kind_name = "git/commit"
+M.kind_name = "git/change"
 
 M.behaviors = {
   cwd = require("thetto.util.cwd").project(),
