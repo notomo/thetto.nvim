@@ -5,7 +5,7 @@ local M = {}
 
 function M.collect(source_ctx)
   return function(observer)
-    return require("thetto.handler.source.lsp_adapter.outgoing_calls")
+    return require("thetto.handler.source.vim.lsp.outgoing_calls")
       .request(source_ctx.bufnr, "callHierarchy/incomingCalls")
       :next(function(result)
         local to_relative = pathlib.relative_modifier(source_ctx.cwd)
