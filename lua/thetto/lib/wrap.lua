@@ -6,7 +6,7 @@ function M.debounce(ms, f)
   local timer = nil
   return function(...)
     if timer == nil then
-      timer = vim.loop.new_timer()
+      timer = vim.uv.new_timer()
     end
     timer:stop()
     local args = { ... }
@@ -24,7 +24,7 @@ function M.debounce_promise(ms, f)
   local timer = nil
   return function(...)
     if timer == nil then
-      timer = vim.loop.new_timer()
+      timer = vim.uv.new_timer()
     end
     timer:stop()
     local args = { ... }
@@ -41,12 +41,12 @@ function M.debounce_promise(ms, f)
 end
 
 function M.throttle_with_last(ms, f)
-  local last_ms = vim.loop.now() - ms
-  local timer = vim.loop.new_timer()
+  local last_ms = vim.uv.now() - ms
+  local timer = vim.uv.new_timer()
   return function(...)
     timer:stop()
 
-    local now = vim.loop.now()
+    local now = vim.uv.now()
     local elapsed_ms = now - last_ms
     last_ms = now
 

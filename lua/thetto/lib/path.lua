@@ -37,7 +37,7 @@ function M.find_root(pattern)
   return vim.split(M.adjust_sep(file), "/lua/", { plain = true })[1], nil
 end
 
-if vim.loop.os_uname().version:match("Windows") then
+if vim.uv.os_uname().version:match("Windows") then
   function M.adjust_sep(path)
     return path:gsub("\\", "/")
   end
