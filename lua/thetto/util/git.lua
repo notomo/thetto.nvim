@@ -204,9 +204,21 @@ function M.compare(git_root, path_before, revision_before, path_after, revision_
 
     vim.cmd.edit(before_buffer_path)
     vim.cmd.diffthis()
+    local before_winbar = vim.wo.winbar
+    local before_window_id = vim.api.nvim_get_current_win()
 
     vim.cmd.vsplit({ args = { after_buffer_path }, mods = { split = "belowright" } })
     vim.cmd.diffthis()
+
+    local after_winbar = vim.wo.winbar
+    local after_window_id = vim.api.nvim_get_current_win()
+
+    -- to match the height of two windows
+    if before_winbar == "" and after_winbar ~= "" then
+      vim.wo[before_window_id].winbar = after_winbar
+    elseif before_winbar ~= "" and after_winbar == "" then
+      vim.wo[after_window_id].winbar = before_winbar
+    end
   end)
 end
 
