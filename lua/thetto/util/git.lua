@@ -175,7 +175,7 @@ function M.content(git_root, path_or_bufnr, revision)
         revision = revision,
       }
 
-      local buffer_path = "thetto-git://" .. git_root .. "/" .. treeish
+      local buffer_path = "thetto-git://" .. vim.fs.joinpath(git_root, treeish)
       local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
       if old ~= -1 then
         vim.api.nvim_buf_delete(old, { force = true })

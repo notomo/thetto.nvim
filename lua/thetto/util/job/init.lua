@@ -6,7 +6,7 @@ local job_start = function(cmd, opts)
   local log_dir = vim.fn.stdpath("log")
   vim.fn.mkdir(log_dir, "p")
 
-  local log_path = require("thetto.lib.path").join(log_dir, "thetto.log")
+  local log_path = vim.fs.joinpath(log_dir, "thetto.log")
   local log_file = io.open(log_path, "a")
   if not log_file then
     return nil, "could not open log file: " .. log_path

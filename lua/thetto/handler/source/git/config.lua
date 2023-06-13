@@ -13,7 +13,7 @@ function M.collect(source_ctx)
     local scope, path, value = output:match("(%S+)%s+(%S+)%s+(.*)")
     path = path:sub(#"file:" + 1)
     if scope == "local" then
-      path = require("thetto.lib.path").join(git_root, path)
+      path = vim.fs.joinpath(git_root, path)
     end
     return {
       value = value,

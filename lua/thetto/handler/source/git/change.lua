@@ -1,4 +1,3 @@
-local pathlib = require("thetto.lib.path")
 local filelib = require("thetto.lib.file")
 
 local M = {}
@@ -28,7 +27,7 @@ function M._to_item(git_root, commit_hash, output)
   end
   local desc = ("%s %s%s"):format(status_mark, path, rename_from)
 
-  local abs_path = pathlib.join(git_root, path)
+  local abs_path = vim.fs.joinpath(git_root, path)
   return {
     value = path,
     desc = desc,

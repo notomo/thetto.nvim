@@ -25,10 +25,6 @@ function M.parse_with_row(line)
   return path, tonumber(row), matched_line
 end
 
-function M.join(...)
-  return table.concat({ ... }, "/")
-end
-
 function M.find_root(pattern)
   local file = vim.api.nvim_get_runtime_file("lua/" .. pattern, false)[1]
   if file == nil then

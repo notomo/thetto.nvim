@@ -1,5 +1,3 @@
-local pathlib = require("thetto.lib.path")
-
 local M = {}
 
 function M._find_dir(name, paths)
@@ -35,7 +33,7 @@ function M.collect(source_ctx)
     local factors = vim.split(output, "%s+")
     local name = factors[1]
     local version = factors[2]
-    local path = pathlib.join(factors[4], name, version)
+    local path = vim.fs.joinpath(factors[4], name, version)
 
     local package_paths = vim.split(package.path, ";", { plain = true })
     vim.list_extend(package_paths, vim.split(package.cpath, ";", { plain = true }))

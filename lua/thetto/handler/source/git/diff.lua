@@ -1,4 +1,3 @@
-local pathlib = require("thetto.lib.path")
 local filelib = require("thetto.lib.file")
 
 local M = {}
@@ -50,7 +49,7 @@ function M.collect(source_ctx)
     return {
       value = hunk.desc,
       row = hunk.row,
-      path = path or pathlib.join(git_root, hunk.path),
+      path = path or vim.fs.joinpath(git_root, hunk.path),
     }
   end, {
     cwd = git_root,

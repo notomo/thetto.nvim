@@ -1,4 +1,3 @@
-local pathlib = require("thetto.lib.path")
 local filelib = require("thetto.lib.file")
 
 local M = {}
@@ -52,7 +51,7 @@ function M.collect(source_ctx)
     end
 
     local path_status, path = parsers[index_status](target)
-    local abs_path = pathlib.join(git_root, path)
+    local abs_path = vim.fs.joinpath(git_root, path)
 
     local kind
     if vim.fn.isdirectory(abs_path) == 1 then
