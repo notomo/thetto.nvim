@@ -102,7 +102,7 @@ function helper.search(pattern)
 end
 
 function helper.path(path)
-  return helper.test_data.full_path .. (path or "")
+  return helper.test_data:path(path or "")
 end
 
 function helper.window_count()
@@ -137,7 +137,7 @@ asserts.create("dir_name"):register_eq(function()
 end)
 
 asserts.create("current_dir"):register_eq(function()
-  return vim.fn.getcwd():gsub(helper.test_data.full_path .. "?", "")
+  return vim.fn.getcwd():gsub(helper.test_data:path("?"), "")
 end)
 
 return helper
