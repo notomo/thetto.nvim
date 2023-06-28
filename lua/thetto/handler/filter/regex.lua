@@ -53,6 +53,8 @@ local highlight_opts = {
   priority = vim.highlight.priorities.user - 1,
 }
 
+local MAX_COUNT_PER_REGEX_IN_LINE = 100
+
 function M.highlight(self, filter_ctx, _, first_line, items, decorator)
   if self.inversed or filter_ctx.input_line == "" then
     return
@@ -72,9 +74,17 @@ function M.highlight(self, filter_ctx, _, first_line, items, decorator)
 
     local positions = {}
     for _, regex in ipairs(regexes) do
-      local s, e = regex:match_str(value)
-      if s ~= nil and e - s > 0 then
-        table.insert(positions, { s, e })
+      local str = value
+      local index = 0
+      for _ = 0, MAX_COUNT_PER_REGEX_IN_LINE, 1 do
+        local s, e = regex:match_str(str)
+        if s ~= nil and e - s > 0 then
+          table.insert(positions, { index + s, index + e })
+        else
+          break
+        end
+        str = str:sub(e + 1)
+        index = index + e
       end
     end
 
