@@ -27,7 +27,7 @@ function M.collect(source_ctx)
     "search",
     "issues",
     "--json",
-    "author,createdAt,state,title,url",
+    "author,createdAt,state,title,url,number",
   }
   if repo_with_owner and repo_with_owner ~= "" then
     vim.list_extend(cmd, { "--repo", repo_with_owner })
@@ -53,16 +53,20 @@ function M.collect(source_ctx)
     else
       mark = "C"
     end
-    local title = ("%s %s"):format(mark, issue.title)
+    local value = ("%s #%d %s"):format(mark, issue.number, issue.title)
     local at = "" .. issue.createdAt
     local by = "by " .. issue.author.login
-    local desc = ("%s %s %s"):format(title, at, by)
+    local desc = ("%s %s %s"):format(value, at, by)
     return {
-      value = issue.title,
+      value = value,
       url = issue.url,
       desc = desc,
       issue = { is_opened = issue.state == "open" },
-      column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
+      column_offsets = {
+        value = 0,
+        at = #value + 1,
+        by = #value + #at + 1,
+      },
     }
   end, {
     to_outputs = function(output)
