@@ -2,12 +2,21 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-function M.after(_, _) end
+local after = function(path, bufnr)
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "ThettoDirectoryOpened",
+    modeline = false,
+    data = {
+      path = path,
+      bufnr = bufnr,
+    },
+  })
+end
 
 function M.action_cd(items)
   for _, item in ipairs(items) do
     filelib.lcd(item.path)
-    M.after(item.path)
+    after(item.path)
   end
 end
 
@@ -15,7 +24,7 @@ function M.action_tab_open(items)
   for _, item in ipairs(items) do
     require("thetto.lib.buffer").open_scratch_tab()
     filelib.lcd(item.path)
-    M.after(item.path)
+    after(item.path)
   end
 end
 
@@ -23,7 +32,7 @@ function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     vim.cmd.vsplit()
     filelib.lcd(item.path)
-    M.after(item.path)
+    after(item.path)
   end
 end
 
@@ -40,8 +49,8 @@ function M.action_preview(_, _, ctx)
   if item == nil then
     return
   end
-  local is_preview = true
-  local bufnr = M.after(item.path, is_preview)
+  local bufnr = vim.api.nvim_create_buf(false, true)
+  after(item.path, bufnr)
   if bufnr and vim.api.nvim_buf_is_loaded(bufnr) then
     return nil, ctx.ui:open_preview(item, {
       raw_bufnr = bufnr,
