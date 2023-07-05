@@ -26,6 +26,7 @@ function M.collect(source_ctx)
       value = message,
       desc = desc,
       row = diagnostic.lnum + 1,
+      column = diagnostic.col,
       path = path,
       severity = diagnostic.severity,
       column_offsets = {
