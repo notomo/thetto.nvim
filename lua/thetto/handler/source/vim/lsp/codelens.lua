@@ -15,6 +15,8 @@ function M.collect(source_ctx)
           value = codelens.command.title,
           bufnr = source_ctx.bufnr,
           row = codelens.range.start.line + 1,
+          end_row = codelens.range["end"].line + 1,
+          column = codelens.range.start.character,
           range = util.range(codelens.range),
         })
       end

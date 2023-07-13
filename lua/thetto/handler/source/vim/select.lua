@@ -17,12 +17,13 @@ function M.collect(source_ctx)
   for _, item in ipairs(source_ctx.opts.items) do
     local value = source_ctx.opts.format_item(item)
     local desc = ("%s %s"):format(source_ctx.opts.prompt, value)
-    local range = source_ctx.opts.get_range(item)
+    local range = source_ctx.opts.get_range(item) or { s = {}, e = {} }
     table.insert(items, {
       value = value,
       desc = desc,
       raw = item,
-      range = range,
+      row = range.s.row,
+      end_row = range.e.row,
       on_choice = source_ctx.opts.on_choice,
       column_offsets = {
         value = #source_ctx.opts.prompt + 1,

@@ -15,7 +15,8 @@ function M._to_item(cwd)
     return {
       path = path,
       row = row,
-      column = v.location.range.start.character + 1,
+      end_row = v.location.range["end"].line + 1,
+      column = v.location.range.start.character,
       desc = desc,
       value = v.name,
       kind = kind,

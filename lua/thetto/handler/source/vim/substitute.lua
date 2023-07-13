@@ -20,10 +20,11 @@ function M.collect(source_ctx)
   local items = {}
   for name, c in pairs(source_ctx.opts.commands) do
     local cmd_prefix = source_ctx.opts.range
-    local range = nil
+    local row, end_row
     if source_ctx.range ~= nil then
       cmd_prefix = ("%d,%d"):format(source_ctx.range.first, source_ctx.range.last)
-      range = source_ctx.range
+      row = source_ctx.range.first
+      end_row = source_ctx.range.last
     end
 
     local flags = c.flags
@@ -44,7 +45,8 @@ function M.collect(source_ctx)
       value = name,
       excmd = excmd,
       bufnr = bufnr,
-      range = range,
+      row = row,
+      end_row = end_row,
       cmd_prefix = cmd_prefix,
       column_offsets = { excmd = #name + 1, value = 0 },
     })

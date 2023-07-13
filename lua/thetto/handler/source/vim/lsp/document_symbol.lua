@@ -38,7 +38,8 @@ function M._to_items(source_ctx, item, parent_key, current_path)
   table.insert(items, {
     path = current_path,
     row = range.start.line + 1,
-    column = range.start.character + 1,
+    end_row = range["end"].line + 1,
+    column = range.start.character,
     desc = desc,
     value = name,
     kind = kind,

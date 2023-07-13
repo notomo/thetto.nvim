@@ -18,12 +18,8 @@ function M.action_preview(_, _, ctx)
     return
   end
 
-  local first = 0
-  local last = -1
-  if item.range ~= nil then
-    first = item.range.first - 1
-    last = item.range.last
-  end
+  local first = item.row or 0
+  local last = item.end_row or -1
 
   if not vim.api.nvim_buf_is_valid(item.bufnr) then
     return

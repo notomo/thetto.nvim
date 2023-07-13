@@ -13,6 +13,8 @@ function M._to_item(cwd)
       value = ("%s:%d"):format(relative_path, row),
       path = path,
       row = row,
+      end_row = v.range["end"].line + 1,
+      column = v.range.start.character,
       range = util.range(v.range),
       column_offsets = {
         ["path:relative"] = 0,

@@ -51,6 +51,8 @@ function M.collect(source_ctx)
               desc = ("%s %s()"):format(path_with_row, value),
               value = value,
               row = row,
+              end_row = range["end"].line + 1,
+              column = range.start.character,
               range = util.range(range),
               column_offsets = {
                 ["path:relative"] = 0,
