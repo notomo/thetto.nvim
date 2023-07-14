@@ -1,5 +1,3 @@
-local util = require("thetto.util.lsp")
-
 local M = {}
 
 function M.collect(source_ctx)
@@ -15,9 +13,9 @@ function M.collect(source_ctx)
           value = codelens.command.title,
           bufnr = source_ctx.bufnr,
           row = codelens.range.start.line + 1,
-          end_row = codelens.range["end"].line + 1,
+          end_row = codelens.range["end"].line,
           column = codelens.range.start.character,
-          range = util.range(codelens.range),
+          end_column = codelens.range["end"].character,
         })
       end
       observer:next(items)

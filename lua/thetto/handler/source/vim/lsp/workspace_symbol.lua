@@ -1,5 +1,4 @@
 local pathlib = require("thetto.lib.path")
-local util = require("thetto.util.lsp")
 
 local M = {}
 
@@ -15,8 +14,9 @@ function M._to_item(cwd)
     return {
       path = path,
       row = row,
-      end_row = v.location.range["end"].line + 1,
+      end_row = v.location.range["end"].line,
       column = v.location.range.start.character,
+      end_column = v.location.range["end"].character,
       desc = desc,
       value = v.name,
       kind = kind,
@@ -25,7 +25,6 @@ function M._to_item(cwd)
         value = #path_row + 1,
         kind = #desc - #kind - 2,
       },
-      range = util.range(v.location.range),
     }
   end
 end

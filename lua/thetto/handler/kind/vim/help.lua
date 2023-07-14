@@ -70,7 +70,8 @@ function M.action_preview(_, _, ctx)
     ctx.ui:open_preview(item, {
       raw_bufnr = bufnr,
       row = cursor[1],
-      range = { s = { column = cursor[2] }, e = { column = -1 } },
+      column = cursor[2],
+      end_column = -1,
       title = vim.fn.fnamemodify(item.path, ":t"),
     })
 end

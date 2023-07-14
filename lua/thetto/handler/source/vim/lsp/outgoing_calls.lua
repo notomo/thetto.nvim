@@ -1,5 +1,4 @@
 local pathlib = require("thetto.lib.path")
-local util = require("thetto.util.lsp")
 
 local M = {}
 
@@ -51,9 +50,9 @@ function M.collect(source_ctx)
               desc = ("%s %s()"):format(path_with_row, value),
               value = value,
               row = row,
-              end_row = range["end"].line + 1,
+              end_row = range["end"].line,
               column = range.start.character,
-              range = util.range(range),
+              end_column = range["end"].character,
               column_offsets = {
                 ["path:relative"] = 0,
                 value = #path_with_row + 1,

@@ -1,5 +1,3 @@
-local util = require("thetto.util.lsp")
-
 local M = {}
 
 M.opts = {
@@ -38,13 +36,13 @@ function M._to_items(source_ctx, item, parent_key, current_path)
   table.insert(items, {
     path = current_path,
     row = range.start.line + 1,
-    end_row = range["end"].line + 1,
+    end_row = range["end"].line,
     column = range.start.character,
+    end_column = range["end"].character,
     desc = desc,
     value = name,
     kind = kind,
     column_offsets = { value = 0, kind = #desc - #kind - 1 },
-    range = util.range(item.selectionRange),
   })
 
   for _, v in ipairs(item.children or {}) do

@@ -102,7 +102,7 @@ function M.action_preview(items, action_ctx, ctx)
         row = item.row,
         end_row = item.end_row,
         column = item.column,
-        range = item.range,
+        end_column = item.end_column,
         title = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t"),
       })
   end
@@ -112,7 +112,7 @@ function M.action_preview(items, action_ctx, ctx)
       row = item.row,
       end_row = item.end_row,
       column = item.column,
-      range = item.range,
+      end_column = item.end_column,
       title = vim.fn.fnamemodify(item.path, ":t"),
     })
 end

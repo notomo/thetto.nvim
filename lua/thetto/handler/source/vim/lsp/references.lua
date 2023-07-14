@@ -1,5 +1,4 @@
 local pathlib = require("thetto.lib.path")
-local util = require("thetto.util.lsp")
 
 local M = {}
 
@@ -13,9 +12,9 @@ function M._to_item(cwd)
       value = ("%s:%d"):format(relative_path, row),
       path = path,
       row = row,
-      end_row = v.range["end"].line + 1,
+      end_row = v.range["end"].line,
       column = v.range.start.character,
-      range = util.range(v.range),
+      end_column = v.range["end"].character,
       column_offsets = {
         ["path:relative"] = 0,
       },

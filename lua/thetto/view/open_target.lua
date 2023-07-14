@@ -9,16 +9,16 @@ local new_buffer = function(lines)
   return bufnr
 end
 
-local highlight = function(decorator_factory, bufnr, row, range, height)
+local highlight = function(decorator_factory, bufnr, row, end_row, column, end_column, height)
   if not row then
     return
   end
 
   local decorator = decorator_factory:create(bufnr)
-  if range then
+  if column then
     local row_limit = row + height - 1
-    local end_row = range.e.row and (range.e.row > row_limit) and row_limit or range.e.row
-    decorator:highlight_range("ThettoPreview", row - 1, end_row, range.s.column, range.e.column)
+    end_row = end_row and (end_row > row_limit) and row_limit or end_row
+    decorator:highlight_range("ThettoPreview", row - 1, end_row, column, end_column)
   else
     decorator:highlight("ThettoPreview", row - 1, 0, -1)
   end
@@ -27,13 +27,14 @@ local highlight = function(decorator_factory, bufnr, row, range, height)
   end
 end
 
-local set_cursor = function(window_id, row, range, width)
+local set_cursor = function(window_id, row, column, end_column, width)
   if not row then
     return
   end
-  range = range or { s = { column = 0 }, e = { column = -1 } }
-  vim.api.nvim_win_set_cursor(window_id, { row, range.s.column })
-  if range.e.column <= width then
+  column = column or 0
+  end_column = end_column or -1
+  vim.api.nvim_win_set_cursor(window_id, { row, column })
+  if end_column <= width then
     return
   end
   vim.api.nvim_win_call(window_id, function()
@@ -63,8 +64,9 @@ function M.new(target, width, height)
   end
   return bufnr,
     function(decorator_factory, window_id)
-      set_cursor(window_id, target.row, target.range, width)
-      local ok, err = pcall(highlight, decorator_factory, bufnr, target.row, target.range, height)
+      set_cursor(window_id, target.row, target.column, target.end_column, width)
+      local ok, err =
+        pcall(highlight, decorator_factory, bufnr, target.row, target.end_row, target.column, target.end_column, height)
       if ok then
         return nil
       end
