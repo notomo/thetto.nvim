@@ -21,7 +21,7 @@ function Sidecar.open(self, item, open_target, width, height, pos_row, left_colu
   end
 
   if not self:_opened() then
-    local border_char = "―"
+    local border_char = "─"
     if vim.o.ambiwidth == "double" then
       border_char = "-"
     end

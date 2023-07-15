@@ -20,7 +20,7 @@ function ItemList.new(source_name, width, height, row, column, cwd)
     vim.bo[b].filetype = FILETYPE
   end)
 
-  local border_char = "―"
+  local border_char = "─"
   if vim.o.ambiwidth == "double" then
     border_char = "-"
   end
