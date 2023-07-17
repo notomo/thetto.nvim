@@ -10,34 +10,34 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local items = {}
-
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local bufnr, opts = unpack(source_ctx.opts.args)
-  for _, diagnostic in ipairs(vim.diagnostic.get(bufnr, opts)) do
-    if not vim.api.nvim_buf_is_valid(diagnostic.bufnr) then
-      goto continue
-    end
-    local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
-    local relative_path = to_relative(path)
-    local message = diagnostic.message:gsub("\n", " ")
-    local desc = ("%s %s [%s:%s]"):format(relative_path, PREFIX .. message, diagnostic.source, diagnostic.code)
-    table.insert(items, {
-      value = message,
-      desc = desc,
-      row = diagnostic.lnum + 1,
-      column = diagnostic.col,
-      path = path,
-      severity = diagnostic.severity,
-      column_offsets = {
-        path = 0,
-        prefix = #relative_path + 1,
-        value = #relative_path + 1 + PREFIX_LENGTH,
-      },
-    })
-    ::continue::
-  end
-  return items
+  return vim
+    .iter(vim.diagnostic.get(bufnr, opts))
+    :map(function(diagnostic)
+      if not vim.api.nvim_buf_is_valid(diagnostic.bufnr) then
+        return
+      end
+
+      local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
+      local relative_path = to_relative(path)
+      local message = diagnostic.message:gsub("\n", " ")
+      local desc = ("%s %s [%s:%s]"):format(relative_path, PREFIX .. message, diagnostic.source, diagnostic.code)
+      return {
+        value = message,
+        desc = desc,
+        row = diagnostic.lnum + 1,
+        column = diagnostic.col,
+        path = path,
+        severity = diagnostic.severity,
+        column_offsets = {
+          path = 0,
+          prefix = #relative_path + 1,
+          value = #relative_path + 1 + PREFIX_LENGTH,
+        },
+      }
+    end)
+    :totable()
 end
 
 local hl_groups = {

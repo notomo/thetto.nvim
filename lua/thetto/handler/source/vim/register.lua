@@ -52,17 +52,17 @@ local names = {
 }
 
 function M.collect()
-  local items = {}
-  for _, name in ipairs(names) do
-    local register = vim.fn.getreg(name)
-    if register == "" then
-      goto continue
-    end
-    local value = ("%s %s"):format(name, register:gsub("\n", "\\n"))
-    table.insert(items, { value = value })
-    ::continue::
-  end
-  return items
+  return vim
+    .iter(names)
+    :map(function(name)
+      local register = vim.fn.getreg(name)
+      if register == "" then
+        return
+      end
+      local value = ("%s %s"):format(name, register:gsub("\n", "\\n"))
+      return { value = value }
+    end)
+    :totable()
 end
 
 M.kind_name = "word"
