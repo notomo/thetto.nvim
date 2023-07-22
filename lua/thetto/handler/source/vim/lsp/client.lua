@@ -1,7 +1,7 @@
 local M = {}
 
 function M.collect()
-  local clients = vim.lsp.get_active_clients()
+  local clients = vim.lsp.get_clients()
   local items = {}
   for _, client in ipairs(clients) do
     local config = {
