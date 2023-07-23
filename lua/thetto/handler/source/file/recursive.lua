@@ -39,19 +39,20 @@ function M.collect(source_ctx)
   local cmd = source_ctx.opts.get_command(source_ctx.cwd, source_ctx.opts.max_depth)
 
   local to_items = function(cwd, data)
-    local items = {}
     local paths = require("thetto.util.job.parse").output(data)
-    for _, path in ipairs(paths) do
-      if path == "" or path == cwd then
-        goto continue
-      end
-      local relative_path = require("thetto.lib.path").to_relative(path, cwd)
-      table.insert(items, {
-        value = relative_path,
-        path = path,
-      })
-      ::continue::
-    end
+    local items = vim
+      .iter(paths)
+      :map(function(path)
+        if path == "" or path == cwd then
+          return
+        end
+        local relative_path = require("thetto.lib.path").to_relative(path, cwd)
+        return {
+          value = relative_path,
+          path = path,
+        }
+      end)
+      :totable()
     return vim.mpack.encode(items)
   end
 

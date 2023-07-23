@@ -31,24 +31,32 @@ function M._to_items(source_ctx, patterns, path)
   local candidates = vim.deepcopy(patterns)
   table.remove(candidates, index)
 
-  local items = {}
   local home = pathlib.home()
-  for _, pattern in ipairs(candidates) do
-    local format_pattern, count = pattern:gsub("%%", "%%s")
-    if count ~= #matches then
-      goto continue
-    end
+  local items = vim
+    .iter(candidates)
+    :map(function(pattern)
+      local format_pattern, count = pattern:gsub("%%", "%%s")
+      if count ~= #matches then
+        return
+      end
 
-    local abs_path = format_pattern:format(unpack(matches))
-    local value = abs_path:gsub(home, "~")
-    if filelib.readable(abs_path) then
-      table.insert(items, { value = value, path = abs_path })
-    elseif source_ctx.opts.allow_new then
-      table.insert(items, { value = value, path = abs_path, kind_name = "file/new" })
-    end
+      local abs_path = format_pattern:format(unpack(matches))
+      local value = abs_path:gsub(home, "~")
+      if filelib.readable(abs_path) then
+        return {
+          value = value,
+          path = abs_path,
+        }
+      elseif source_ctx.opts.allow_new then
+        return {
+          value = value,
+          path = abs_path,
+          kind_name = "file/new",
+        }
+      end
+    end)
+    :totable()
 
-    ::continue::
-  end
   if #items == 0 then
     return nil
   end

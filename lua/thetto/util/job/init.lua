@@ -68,18 +68,17 @@ function M.run(cmd, source_ctx, to_item, opts)
           return observer:error(stderr:str())
         end
 
-        local items = {}
         local out_or_err = code ~= 0 and stderr:str() or stdout:str()
-        for _, output in ipairs(opts.to_outputs(out_or_err)) do
-          local item = to_item(output, code)
-          if not item then
-            goto continue
-          end
-
-          table.insert(items, item)
-
-          ::continue::
-        end
+        local items = vim
+          .iter(opts.to_outputs(out_or_err))
+          :map(function(output)
+            local item = to_item(output, code)
+            if not item then
+              return
+            end
+            return item
+          end)
+          :totable()
         observer:next(items)
         observer:complete()
       end,
@@ -104,16 +103,7 @@ function M.start(cmd, source_ctx, to_item, opts)
   opts = vim.tbl_extend("force", default_opts, opts or {})
 
   local to_items = function(outputs)
-    local items = {}
-    for _, output in ipairs(outputs) do
-      local item = to_item(output)
-      if not item then
-        goto continue
-      end
-      table.insert(items, item)
-      ::continue::
-    end
-    return items
+    return vim.iter(outputs):map(to_item):totable()
   end
 
   local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()

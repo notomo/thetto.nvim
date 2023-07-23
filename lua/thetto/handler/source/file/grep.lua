@@ -14,42 +14,43 @@ function M.collect(source_ctx)
     return subscriber
   end
 
-  local paths = source_ctx.cwd
-  local cmd = vim.list_extend({ source_ctx.opts.command }, source_ctx.opts.command_opts)
-  for _, x in ipairs({
+  local cmd = { source_ctx.opts.command }
+  vim.list_extend(cmd, source_ctx.opts.command_opts)
+  vim.list_extend(cmd, {
     source_ctx.opts.recursive_opt,
     source_ctx.opts.pattern_opt,
     pattern,
     source_ctx.opts.separator,
-    paths,
-  }) do
-    if x == "" then
-      goto continue
-    end
-    table.insert(cmd, x)
-    ::continue::
-  end
+    source_ctx.cwd,
+  })
+  cmd = vim
+    .iter(cmd)
+    :filter(function(x)
+      return x ~= ""
+    end)
+    :totable()
 
   local to_items = function(cwd, data)
-    local items = {}
     local outputs = require("thetto.util.job.parse").output(data)
-    for _, output in ipairs(outputs) do
-      local path, row, matched_line = require("thetto.lib.path").parse_with_row(output)
-      if not path then
-        goto continue
-      end
-      local relative_path = require("thetto.lib.path").to_relative(path, cwd)
-      local label = ("%s:%d"):format(relative_path, row)
-      local desc = ("%s %s"):format(label, matched_line)
-      table.insert(items, {
-        desc = desc,
-        value = matched_line,
-        path = path,
-        row = row,
-        column_offsets = { ["path:relative"] = 0, value = #label + 1 },
-      })
-      ::continue::
-    end
+    local items = vim
+      .iter(outputs)
+      :map(function(output)
+        local path, row, matched_line = require("thetto.lib.path").parse_with_row(output)
+        if not path then
+          return
+        end
+        local relative_path = require("thetto.lib.path").to_relative(path, cwd)
+        local label = ("%s:%d"):format(relative_path, row)
+        local desc = ("%s %s"):format(label, matched_line)
+        return {
+          desc = desc,
+          value = matched_line,
+          path = path,
+          row = row,
+          column_offsets = { ["path:relative"] = 0, value = #label + 1 },
+        }
+      end)
+      :totable()
     return vim.mpack.encode(items)
   end
 

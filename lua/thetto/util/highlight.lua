@@ -71,18 +71,16 @@ function M.columns(hl_columns)
   end, hl_columns)
   return function(decorator, items, first_line, _)
     for i, item in ipairs(items) do
-      for _, column in ipairs(columns) do
+      vim.iter(columns):each(function(column)
         local hl_group = column.to_hl_group(item)
         if not hl_group then
-          goto continue
+          return
         end
 
         local start_column = column.to_start(item)
         local end_column = column.to_end(item)
         decorator:highlight(hl_group, first_line + i - 1, start_column, end_column, highlight_opts)
-
-        ::continue::
-      end
+      end)
     end
   end
 end

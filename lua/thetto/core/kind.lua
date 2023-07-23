@@ -112,22 +112,23 @@ end
 function Kind.action_infos(self)
   local already = {}
   local to_action_infos = function(from, actions)
-    local infos = {}
-    for key in pairs(actions) do
-      if already[key] then
-        goto continue
-      end
-      if vim.startswith(key, Action.PREFIX) then
+    return vim
+      .iter(actions)
+      :map(function(key)
+        if already[key] then
+          return
+        end
+        if not vim.startswith(key, Action.PREFIX) then
+          return
+        end
         local action_name = key:gsub("^" .. Action.PREFIX, "")
-        table.insert(infos, {
+        already[key] = true
+        return {
           from = from,
           name = action_name,
-        })
-        already[key] = true
-      end
-      ::continue::
-    end
-    return infos
+        }
+      end)
+      :totable()
   end
 
   local action_infos = {}

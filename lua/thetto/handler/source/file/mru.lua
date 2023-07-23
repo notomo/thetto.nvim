@@ -14,19 +14,22 @@ function M.collect(source_ctx)
   end
 
   local paths = store.data()
-  for _, bufnr in ipairs(vim.fn.range(vim.fn.bufnr("$"), 1, -1)) do
-    if not vim.api.nvim_buf_is_valid(bufnr) then
-      goto continue
-    end
+  local buffer_paths = vim
+    .iter(vim.fn.range(vim.fn.bufnr("$"), 1, -1))
+    :map(function(bufnr)
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
 
-    local name = vim.api.nvim_buf_get_name(bufnr)
-    if name == "" then
-      goto continue
-    end
+      local name = vim.api.nvim_buf_get_name(bufnr)
+      if name == "" then
+        return
+      end
 
-    table.insert(paths, name)
-    ::continue::
-  end
+      return name
+    end)
+    :totable()
+  vim.list_extend(paths, buffer_paths)
   vim.list_extend(paths, vim.v.oldfiles)
   paths = listlib.unique(paths)
 

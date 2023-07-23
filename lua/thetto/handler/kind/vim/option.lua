@@ -1,12 +1,12 @@
 local M = {}
 
 function M.action_toggle(items)
-  for _, item in ipairs(items) do
+  vim.iter(items):each(function(item)
     local name = item.option.name
     local info = vim.api.nvim_get_option_info2(name, {})
     if info.type == "boolean" then
       vim.cmd.setlocal(name .. "!")
-      goto continue
+      return
     end
 
     local prompt = ("setlocal %s="):format(name)
@@ -18,9 +18,7 @@ function M.action_toggle(items)
       value = tonumber(value)
     end
     vim.opt_local[name] = value
-
-    ::continue::
-  end
+  end)
 end
 
 M.default_action = "toggle"
