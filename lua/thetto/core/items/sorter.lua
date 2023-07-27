@@ -15,7 +15,14 @@ function Sorter.new(name, reversed, key)
     return nil, "not found sorter: " .. name
   end
 
-  local tbl = { reversed = reversed, key = key or "value", short_name = name, _origin = origin }
+  key = key or "value"
+  local tbl = {
+    reversed = reversed,
+    key = key,
+    keys = vim.split(key, ".", { plain = true }),
+    short_name = name,
+    _origin = origin,
+  }
   return setmetatable(tbl, Sorter), nil
 end
 

@@ -1,7 +1,7 @@
 local M = {}
 
 function M.value(self, item)
-  return item[self.key]
+  return vim.tbl_get(item, unpack(self.keys))
 end
 
 return M
