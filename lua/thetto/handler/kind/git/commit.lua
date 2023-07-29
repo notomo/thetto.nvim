@@ -2,6 +2,7 @@ local M = {}
 
 M.behaviors = {
   fixup = { quit = false },
+  reword = { quit = false },
   reset = { quit = false },
   checkout = { quit = false },
   compare = { quit = false },
@@ -52,6 +53,19 @@ function M.action_fixup(items)
   local bufnr = vim.api.nvim_get_current_buf()
   return require("thetto.util.job")
     .promise({ "git", "commit", "--fixup=" .. item.commit_hash }, { cwd = item.git_root })
+    :next(function()
+      return require("thetto.command").reload(bufnr)
+    end)
+end
+
+function M.action_reword(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  local bufnr = vim.api.nvim_get_current_buf()
+  return require("thetto.util.job")
+    .promise({ "git", "commit", "--fixup=reword:" .. item.commit_hash }, { cwd = item.git_root })
     :next(function()
       return require("thetto.command").reload(bufnr)
     end)
