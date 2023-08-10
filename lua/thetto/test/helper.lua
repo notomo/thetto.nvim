@@ -3,9 +3,12 @@ local plugin_name = helper.get_module_root(...)
 
 helper.root = helper.find_plugin_root(plugin_name)
 
+local ui_open = vim.ui.open
+
 function helper.before_each()
   vim.o.showmode = false
   vim.o.swapfile = false
+  vim.ui.open = ui_open
   helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root)
   helper.test_data:cd("")
 end

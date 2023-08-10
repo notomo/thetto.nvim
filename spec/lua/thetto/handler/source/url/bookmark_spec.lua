@@ -18,6 +18,13 @@ describe("url/bookmark source", function()
 
     assert.exists_pattern("https://example.com")
 
+    local called = false
+    vim.ui.open = function(_)
+      called = true
+    end
+
     thetto.execute()
+
+    assert.is_true(called)
   end)
 end)
