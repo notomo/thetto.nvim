@@ -1,46 +1,59 @@
 local M = {}
 
 M.opts = {
-  owner = ":owner",
-  repo = ":repo",
-  state = "open",
-  sort = "created",
-  sort_direction = "desc",
+  owner = nil,
+  repo_with_owner = nil,
+  extra_args = {},
+  allow_empty_input = false,
 }
 
 function M.collect(source_ctx)
+  local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
+  if not pattern and not source_ctx.opts.allow_empty_input then
+    return subscriber
+  end
+
+  local repo_with_owner = source_ctx.opts.repo_with_owner
+  local owner = source_ctx.opts.owner
+  if not (repo_with_owner or owner) and repo_with_owner ~= "" then
+    repo_with_owner =
+      vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
+  end
+
   local cmd = {
     "gh",
-    "api",
-    "-X",
-    "GET",
-    ("repos/%s/%s/pulls"):format(source_ctx.opts.owner, source_ctx.opts.repo),
-    "-F",
-    "per_page=100",
-    "-F",
-    "state=" .. source_ctx.opts.state,
-    "-F",
-    "sort=" .. source_ctx.opts.sort,
-    "-F",
-    "direction=" .. source_ctx.opts.sort_direction,
+    "search",
+    "prs",
+    "--json",
+    "author,createdAt,state,title,url,number,isDraft",
   }
+  if repo_with_owner and repo_with_owner ~= "" then
+    vim.list_extend(cmd, { "--repo", repo_with_owner })
+  end
+  if owner then
+    vim.list_extend(cmd, { "--owner", owner })
+  end
+  vim.list_extend(cmd, source_ctx.opts.extra_args)
+  if pattern then
+    vim.list_extend(cmd, vim.split(pattern, "%s+"))
+  end
+
   return require("thetto.util.job").run(cmd, source_ctx, function(pr)
     local mark
-    if pr.draft then
+    if pr.isDraft then
       mark = "D"
     else
       mark = "R"
     end
     local title = ("%s %s"):format(mark, pr.title)
-    local at = pr.created_at
-    local by = "by " .. pr.user.login
-    local branch = pr.head.ref
-    local desc = ("%s %s %s (%s)"):format(title, at, by, branch)
+    local at = pr.createdAt
+    local by = "by " .. pr.author.login
+    local desc = ("%s %s %s"):format(title, at, by)
     return {
       value = pr.title,
-      url = pr.html_url,
+      url = pr.url,
       desc = desc,
-      pr = { is_draft = pr.draft },
+      pr = { is_draft = pr.isDraft },
       column_offsets = { value = #mark + 1, at = #title + 1, by = #title + #at + 1 },
     }
   end, {
@@ -67,5 +80,7 @@ M.highlight = require("thetto.util.highlight").columns({
 })
 
 M.kind_name = "github/pull_request"
+
+M.filters = require("thetto.util.filter").prepend("interactive")
 
 return M
