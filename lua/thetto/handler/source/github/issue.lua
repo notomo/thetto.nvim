@@ -17,7 +17,7 @@ function M.collect(source_ctx)
 
   local repo_with_owner = source_ctx.opts.repo_with_owner
   local owner = source_ctx.opts.owner
-  if not (repo_with_owner or owner) and repo_with_owner ~= "" then
+  if not (owner or repo_with_owner) then
     repo_with_owner =
       vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
   end

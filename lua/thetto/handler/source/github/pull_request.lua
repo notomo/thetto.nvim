@@ -4,7 +4,8 @@ M.opts = {
   owner = nil,
   repo_with_owner = nil,
   extra_args = {},
-  allow_empty_input = false,
+  allow_empty_input = true,
+  state = "open",
 }
 
 function M.collect(source_ctx)
@@ -15,7 +16,7 @@ function M.collect(source_ctx)
 
   local repo_with_owner = source_ctx.opts.repo_with_owner
   local owner = source_ctx.opts.owner
-  if not (repo_with_owner or owner) and repo_with_owner ~= "" then
+  if not (owner or repo_with_owner) then
     repo_with_owner =
       vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
   end
@@ -32,6 +33,9 @@ function M.collect(source_ctx)
   end
   if owner then
     vim.list_extend(cmd, { "--owner", owner })
+  end
+  if source_ctx.opts.state ~= "" then
+    vim.list_extend(cmd, { "--state", source_ctx.opts.state })
   end
   vim.list_extend(cmd, source_ctx.opts.extra_args)
   if pattern then
