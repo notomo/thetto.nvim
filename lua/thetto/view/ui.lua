@@ -113,7 +113,7 @@ end
 function UI.highlight_item_list(self, first_line, last_line)
   local collector_items = self._collector.items:values()
   local raw_items = {}
-  for i = first_line + 1, last_line, 1 do
+  for i = first_line + 1, last_line + 1, 1 do
     table.insert(raw_items, collector_items[i])
   end
 
@@ -124,12 +124,12 @@ function UI.highlight_item_list(self, first_line, last_line)
   self._item_list:highlight(first_line, raw_items, source, filters, filter_ctxs, source_ctx)
 end
 
-function UI._highlight_inputter_win(_, _, bufnr, topline, botline_guess)
+function UI._highlight_inputter_win(_, _, bufnr)
   local ctx, err = Context.get_from_path(bufnr, "%-input$")
   if err ~= nil then
     return false
   end
-  ctx.ui:highlight_inputter(topline, botline_guess)
+  ctx.ui:highlight_inputter()
   return false
 end
 
