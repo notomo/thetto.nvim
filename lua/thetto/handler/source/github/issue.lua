@@ -91,7 +91,7 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.kind_name = "url"
+M.kind_name = "github/issue"
 
 M.filters = require("thetto.util.filter").prepend("interactive")
 
