@@ -71,4 +71,16 @@ function M.action_reopen(items)
   return require("thetto.util.job").execute(cmd)
 end
 
+function M.action_list_comment(items)
+  for _, item in ipairs(items) do
+    return require("thetto").start("github/issue_comment", {
+      source_opts = {
+        url = item.url,
+      },
+    })
+  end
+end
+
+M.action_list_children = M.action_list_comment
+
 return require("thetto.core.kind").extend(M, "url")
