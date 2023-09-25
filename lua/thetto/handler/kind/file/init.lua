@@ -10,7 +10,7 @@ local adjust_cursor = function(item)
     vim.fn.search(item.pattern)
     vim.fn.setreg("/", item.pattern)
     vim.opt.hlsearch = true
-    vim.cmd.let({ args = { "v:searchforward", "=", "1" } })
+    vim.v.searchforward = 1
     return
   end
 
