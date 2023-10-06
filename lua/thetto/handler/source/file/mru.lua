@@ -5,7 +5,12 @@ local vim = vim
 
 local M = {}
 
-M.opts = { cwd_marker = "%s/" }
+M.opts = {
+  cwd_marker = "%s/",
+  filter = function(_)
+    return true
+  end,
+}
 
 function M.collect(source_ctx)
   local store, err = Store.new_or_get("file/mru")
@@ -38,17 +43,23 @@ function M.collect(source_ctx)
   local cwd_marker = source_ctx.opts.cwd_marker:format(dir)
   local home = pathlib.home()
 
-  local items = {}
-  for _, path in ipairs(vim.tbl_filter(store.validate, paths)) do
-    local relative_path = to_relative(path)
-    local value = relative_path:gsub(home, "~")
-    local item = { value = value, path = path }
-    if path ~= relative_path then
-      item.value = cwd_marker .. relative_path
-    end
-    table.insert(items, item)
-  end
-  return items
+  return vim
+    .iter(paths)
+    :filter(function(path)
+      return store.validate(path) and source_ctx.opts.filter(path)
+    end)
+    :map(function(path)
+      local relative_path = to_relative(path)
+      local value = relative_path:gsub(home, "~")
+      if path ~= relative_path then
+        value = cwd_marker .. relative_path
+      end
+      return {
+        value = value,
+        path = path,
+      }
+    end)
+    :totable()
 end
 
 M.kind_name = "file"
