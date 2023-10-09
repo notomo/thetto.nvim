@@ -133,6 +133,12 @@ function M.action_delete_buffer(items)
   end
 end
 
+function M.action_delete(items)
+  for _, item in ipairs(items) do
+    vim.fn.delete(item.path, "rf")
+  end
+end
+
 local to_dirs = function(items)
   local dirs = {}
   for _, item in ipairs(items) do

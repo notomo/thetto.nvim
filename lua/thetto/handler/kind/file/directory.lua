@@ -67,6 +67,12 @@ function M.action_list_parents(items)
   return require("thetto").start("file/in_dir", { opts = { cwd = path } })
 end
 
+function M.action_delete(items)
+  for _, item in ipairs(items) do
+    vim.fn.delete(item.path, "rf")
+  end
+end
+
 M.action_open = M.action_cd
 M.action_directory_open = M.action_open
 M.action_directory_tab_open = M.action_tab_open
