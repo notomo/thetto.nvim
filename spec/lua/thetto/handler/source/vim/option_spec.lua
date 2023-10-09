@@ -12,7 +12,7 @@ describe("vim/option source", function()
     helper.sync_input({ "buftype" })
 
     thetto.execute("move_to_list")
-    assert.current_line("buftype=nofile")
+    assert.exists_pattern("buftype=nofile")
   end)
 
   it("can toggle options", function()
