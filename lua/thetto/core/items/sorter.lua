@@ -64,4 +64,24 @@ function Sorter.__index(self, k)
   return rawget(Sorter, k) or self._origin[k]
 end
 
+local pathlib = require("thetto.lib.path")
+
+function Sorter.all()
+  local paths = vim.api.nvim_get_runtime_file("lua/thetto/handler/sorter/**/*.lua", true)
+  local all = {}
+  for _, path in ipairs(paths) do
+    local sorter_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/sorter/", { plain = true })[2]
+    local name = sorter_file:sub(1, #sorter_file - 4)
+    local ignored = vim.startswith(vim.fs.basename(sorter_file), "_")
+    if not ignored then
+      local sorter_info = {
+        name = name,
+        path = path,
+      }
+      table.insert(all, sorter_info)
+    end
+  end
+  return all
+end
+
 return Sorter

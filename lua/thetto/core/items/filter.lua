@@ -87,4 +87,24 @@ function Filter.__index(self, k)
   return rawget(Filter, k) or self._origin[k]
 end
 
+local pathlib = require("thetto.lib.path")
+
+function Filter.all()
+  local paths = vim.api.nvim_get_runtime_file("lua/thetto/handler/filter/**/*.lua", true)
+  local all = {}
+  for _, path in ipairs(paths) do
+    local filter_file = vim.split(pathlib.adjust_sep(path), "lua/thetto/handler/filter/", { plain = true })[2]
+    local name = filter_file:sub(1, #filter_file - 4)
+    local ignored = vim.startswith(vim.fs.basename(filter_file), "_")
+    if not ignored then
+      local filter_info = {
+        name = name,
+        path = path,
+      }
+      table.insert(all, filter_info)
+    end
+  end
+  return all
+end
+
 return Filter
