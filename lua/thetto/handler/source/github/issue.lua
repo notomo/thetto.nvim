@@ -7,43 +7,64 @@ M.opts = {
   milestone = nil,
   labels = {},
   allow_empty_input = false,
+  url = nil,
 }
 
 function M.collect(source_ctx)
   local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
-  if not pattern and not source_ctx.opts.allow_empty_input then
+  if not pattern and not source_ctx.opts.allow_empty_input and not source_ctx.opts.url then
     return subscriber
   end
 
-  local repo_with_owner = source_ctx.opts.repo_with_owner
-  local owner = source_ctx.opts.owner
-  if not (owner or repo_with_owner) then
-    repo_with_owner =
-      vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
-  end
+  local cmd
+  if source_ctx.opts.url then
+    local repo_with_owner = source_ctx.opts.url:match("https://github.com/([^/]+/[^/]+)")
+    if not repo_with_owner then
+      return {}
+    end
+    cmd = {
+      "gh",
+      "issue",
+      "view",
+      source_ctx.opts.url,
+      "--json",
+      "author,createdAt,state,title,url,number",
+      "--repo",
+      repo_with_owner,
+      "--jq",
+      "[.]",
+    }
+  else
+    local repo_with_owner = source_ctx.opts.repo_with_owner
+    local owner = source_ctx.opts.owner
+    if not (owner or repo_with_owner) then
+      repo_with_owner =
+        vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
+    end
 
-  local cmd = {
-    "gh",
-    "search",
-    "issues",
-    "--json",
-    "author,createdAt,state,title,url,number",
-  }
-  if repo_with_owner and repo_with_owner ~= "" then
-    vim.list_extend(cmd, { "--repo", repo_with_owner })
-  end
-  if owner then
-    vim.list_extend(cmd, { "--owner", owner })
-  end
-  if source_ctx.opts.milestone then
-    vim.list_extend(cmd, { "--milestone", source_ctx.opts.milestone })
-  end
-  for _, label in ipairs(source_ctx.opts.labels) do
-    vim.list_extend(cmd, { "--label", label })
-  end
-  vim.list_extend(cmd, source_ctx.opts.extra_args)
-  if pattern then
-    vim.list_extend(cmd, vim.split(pattern, "%s+"))
+    cmd = {
+      "gh",
+      "search",
+      "issues",
+      "--json",
+      "author,createdAt,state,title,url,number",
+    }
+    if repo_with_owner and repo_with_owner ~= "" then
+      vim.list_extend(cmd, { "--repo", repo_with_owner })
+    end
+    if owner then
+      vim.list_extend(cmd, { "--owner", owner })
+    end
+    if source_ctx.opts.milestone then
+      vim.list_extend(cmd, { "--milestone", source_ctx.opts.milestone })
+    end
+    for _, label in ipairs(source_ctx.opts.labels) do
+      vim.list_extend(cmd, { "--label", label })
+    end
+    vim.list_extend(cmd, source_ctx.opts.extra_args)
+    if pattern then
+      vim.list_extend(cmd, vim.split(pattern, "%s+"))
+    end
   end
 
   return require("thetto.util.job").run(cmd, source_ctx, function(issue)

@@ -6,40 +6,61 @@ M.opts = {
   extra_args = {},
   allow_empty_input = true,
   state = "open",
+  url = nil,
 }
 
 function M.collect(source_ctx)
   local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
-  if not pattern and not source_ctx.opts.allow_empty_input then
+  if not pattern and not source_ctx.opts.allow_empty_input and not source_ctx.opts.url then
     return subscriber
   end
 
-  local repo_with_owner = source_ctx.opts.repo_with_owner
-  local owner = source_ctx.opts.owner
-  if not (owner or repo_with_owner) then
-    repo_with_owner =
-      vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
-  end
+  local cmd
+  if source_ctx.opts.url then
+    local repo_with_owner = source_ctx.opts.url:match("https://github.com/([^/]+/[^/]+)")
+    if not repo_with_owner then
+      return {}
+    end
+    cmd = {
+      "gh",
+      "pr",
+      "view",
+      source_ctx.opts.url,
+      "--json",
+      "author,createdAt,state,title,url,number,isDraft",
+      "--repo",
+      repo_with_owner,
+      "--jq",
+      "[.]",
+    }
+  else
+    local repo_with_owner = source_ctx.opts.repo_with_owner
+    local owner = source_ctx.opts.owner
+    if not (owner or repo_with_owner) then
+      repo_with_owner =
+        vim.fn.systemlist({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" })[1]
+    end
 
-  local cmd = {
-    "gh",
-    "search",
-    "prs",
-    "--json",
-    "author,createdAt,state,title,url,number,isDraft",
-  }
-  if repo_with_owner and repo_with_owner ~= "" then
-    vim.list_extend(cmd, { "--repo", repo_with_owner })
-  end
-  if owner then
-    vim.list_extend(cmd, { "--owner", owner })
-  end
-  if source_ctx.opts.state ~= "" then
-    vim.list_extend(cmd, { "--state", source_ctx.opts.state })
-  end
-  vim.list_extend(cmd, source_ctx.opts.extra_args)
-  if pattern then
-    vim.list_extend(cmd, vim.split(pattern, "%s+"))
+    cmd = {
+      "gh",
+      "search",
+      "prs",
+      "--json",
+      "author,createdAt,state,title,url,number,isDraft",
+    }
+    if repo_with_owner and repo_with_owner ~= "" then
+      vim.list_extend(cmd, { "--repo", repo_with_owner })
+    end
+    if owner then
+      vim.list_extend(cmd, { "--owner", owner })
+    end
+    if source_ctx.opts.state ~= "" then
+      vim.list_extend(cmd, { "--state", source_ctx.opts.state })
+    end
+    vim.list_extend(cmd, source_ctx.opts.extra_args)
+    if pattern then
+      vim.list_extend(cmd, vim.split(pattern, "%s+"))
+    end
   end
 
   return require("thetto.util.job").run(cmd, source_ctx, function(pr)
