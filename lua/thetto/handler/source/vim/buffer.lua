@@ -1,6 +1,9 @@
 local M = {}
 
-M.opts = { buftype = nil }
+M.opts = {
+  buftype = nil,
+  modified = nil,
+}
 
 function M.collect(source_ctx)
   return vim
@@ -13,6 +16,9 @@ function M.collect(source_ctx)
         return
       end
       if source_ctx.opts.buftype ~= nil and vim.bo[bufnr].buftype ~= source_ctx.opts.buftype then
+        return
+      end
+      if source_ctx.opts.modified ~= nil and vim.bo[bufnr].modified ~= source_ctx.opts.modified then
         return
       end
 
