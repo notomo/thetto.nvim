@@ -1,9 +1,5 @@
 local M = {}
 
-M.opts = {
-  ignored_kind = { "variable", "field" },
-}
-
 function M.collect(source_ctx)
   local current_path = vim.fn.expand("%:p")
   return function(observer)
@@ -22,17 +18,14 @@ function M.collect(source_ctx)
 end
 
 function M._to_items(source_ctx, item, parent_key, current_path)
-  local kind = vim.lsp.protocol.SymbolKind[item.kind]
-  if vim.tbl_contains(source_ctx.opts.ignored_kind, kind:lower()) then
-    return {}
-  end
+  local symbol_kind = vim.lsp.protocol.SymbolKind[item.kind]
 
   local items = {}
 
   local range = item.selectionRange or item.location.range
   local name = parent_key .. item.name
   local detail = item.detail or ""
-  local desc = ("%s %s [%s]"):format(name, detail:gsub("\n", "\\n"), kind)
+  local desc = ("%s %s [%s]"):format(name, detail:gsub("\n", "\\n"), symbol_kind)
   table.insert(items, {
     path = current_path,
     row = range.start.line + 1,
@@ -41,8 +34,8 @@ function M._to_items(source_ctx, item, parent_key, current_path)
     end_column = range["end"].character,
     desc = desc,
     value = name,
-    kind = kind,
-    column_offsets = { value = 0, kind = #desc - #kind - 1 },
+    symbol_kind = symbol_kind,
+    column_offsets = { value = 0, symbol_kind = #desc - #symbol_kind - 1 },
   })
 
   for _, v in ipairs(item.children or {}) do
@@ -54,7 +47,7 @@ end
 M.highlight = require("thetto.util.highlight").columns({
   {
     group = "Statement",
-    start_key = "kind",
+    start_key = "symbol_kind",
   },
 })
 

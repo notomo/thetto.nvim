@@ -7,9 +7,6 @@ local M = {}
 
 M.opts = {
   cwd_marker = "%s/",
-  filter = function(_)
-    return true
-  end,
 }
 
 function M.collect(source_ctx)
@@ -46,7 +43,7 @@ function M.collect(source_ctx)
   return vim
     .iter(paths)
     :filter(function(path)
-      return store.validate(path) and source_ctx.opts.filter(path)
+      return store.validate(path)
     end)
     :map(function(path)
       local relative_path = to_relative(path)

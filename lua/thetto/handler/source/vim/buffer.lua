@@ -1,11 +1,6 @@
 local M = {}
 
-M.opts = {
-  buftype = nil,
-  modified = nil,
-}
-
-function M.collect(source_ctx)
+function M.collect()
   return vim
     .iter(vim.api.nvim_list_bufs())
     :map(function(bufnr)
@@ -13,12 +8,6 @@ function M.collect(source_ctx)
         return
       end
       if not vim.bo[bufnr].buflisted and vim.bo[bufnr].buftype ~= "terminal" then
-        return
-      end
-      if source_ctx.opts.buftype ~= nil and vim.bo[bufnr].buftype ~= source_ctx.opts.buftype then
-        return
-      end
-      if source_ctx.opts.modified ~= nil and vim.bo[bufnr].modified ~= source_ctx.opts.modified then
         return
       end
 

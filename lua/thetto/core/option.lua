@@ -67,6 +67,9 @@ local default = {
   display_limit = 100,
   throttle_ms = 50,
   filters = nil,
+  filter = function(_)
+    return true
+  end,
   sorters = nil,
   auto = "preview",
   immediately = false,

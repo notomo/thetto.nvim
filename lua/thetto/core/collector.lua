@@ -28,6 +28,7 @@ function Collector.new(source)
     source = source,
     selected = {},
     filters = filters,
+    filter = behaviors.filter,
     sorters = sorters,
     input_lines = listlib.fill(behaviors.input_lines, #source.filters, ""),
     source_ctx = SourceContext.new(
@@ -257,6 +258,7 @@ function Collector._items(self, page, page_offset, display_limit)
     self._result,
     self.input_lines,
     self.filters,
+    self.filter,
     self.sorters,
     self._ignorecase,
     self._smartcase,

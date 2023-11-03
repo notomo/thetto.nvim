@@ -23,18 +23,6 @@ describe("vim/buffer source", function()
     assert.buffer_name_tail("foo")
   end)
 
-  it("can show terminal buffers", function()
-    local bufnr = vim.api.nvim_create_buf(true, true)
-    vim.api.nvim_buf_set_name(bufnr, "foo")
-
-    vim.fn.termopen({ "echo", "1111" })
-
-    thetto.start("vim/buffer", { source_opts = { buftype = "terminal" }, opts = { insert = false } })
-
-    assert.exists_pattern("term://")
-    assert.no.exists_pattern("foo")
-  end)
-
   it("can execute tab_drop", function()
     local bufnr = vim.api.nvim_create_buf(true, true)
     vim.api.nvim_buf_set_name(bufnr, "foo")

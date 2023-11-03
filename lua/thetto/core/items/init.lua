@@ -2,7 +2,18 @@ local FilterContexts = require("thetto.core.items.filter_contexts")
 
 local Items = {}
 
-function Items.new(result, input_lines, filters, sorters, ignorecase, smartcase, display_limit, page, page_offset)
+function Items.new(
+  result,
+  input_lines,
+  filters,
+  filter,
+  sorters,
+  ignorecase,
+  smartcase,
+  display_limit,
+  page,
+  page_offset
+)
   page_offset = page_offset or 0
 
   local items = {}
@@ -11,6 +22,7 @@ function Items.new(result, input_lines, filters, sorters, ignorecase, smartcase,
   end
 
   local filter_ctxs = FilterContexts.new(ignorecase, smartcase, input_lines)
+  items = vim.tbl_filter(filter, items)
   items = filters:apply(filter_ctxs, items)
   items = sorters:apply(items)
 
