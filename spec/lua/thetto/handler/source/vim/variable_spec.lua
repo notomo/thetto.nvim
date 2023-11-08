@@ -6,13 +6,13 @@ describe("vim/variable source", function()
   after_each(helper.after_each)
 
   it("can show variables", function()
-    vim.b.hoge_foo = vim.empty_dict()
+    vim.b.hoge_foo = { a = "b" }
 
     thetto.start("vim/variable")
 
     helper.sync_input({ "hoge_foo" })
     thetto.execute("move_to_list")
 
-    assert.exists_pattern("b:hoge_foo={}")
+    assert.exists_pattern([[b:hoge_foo={ a = "b" }]])
   end)
 end)

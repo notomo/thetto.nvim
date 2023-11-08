@@ -20,9 +20,9 @@ function M.collect()
     end
 
     if type(var) == "string" then
-      var = '"' .. var:gsub("\n", "\\n") .. '"'
+      var = vim.inspect(var, { newline = "\\n" })
     elseif type(var) == "table" then
-      var = vim.json.encode(var)
+      var = vim.inspect(var, { newline = " ", indent = "" })
     end
 
     local value = ("%s=%s"):format(name, var)
