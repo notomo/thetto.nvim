@@ -12,9 +12,22 @@ function M._load(path)
   f:close()
   local content = vim.json.decode(json)
 
+  local lines = vim.split(json, "\n", { plain = true })
+  local rows = {}
+  for row, line in ipairs(lines) do
+    local k, v = line:match([["([^"]+)": "([^"]+)"]])
+    if k and v then
+      rows[k .. v] = row
+    end
+  end
+
   local items = {}
-  for key in pairs(content.scripts) do
-    table.insert(items, { value = key, path = path })
+  for k, v in pairs(content.scripts) do
+    table.insert(items, {
+      value = k,
+      path = path,
+      row = rows[k .. v],
+    })
   end
 
   return items
