@@ -69,7 +69,8 @@ function M.collect(source_ctx)
 
   return require("thetto.util.job").run(cmd, source_ctx, function(issue)
     local mark
-    if issue.state == "open" then
+    local is_opened = issue.state:lower() == "open"
+    if is_opened then
       mark = "O"
     else
       mark = "C"
@@ -82,7 +83,7 @@ function M.collect(source_ctx)
       value = value,
       url = issue.url,
       desc = desc,
-      issue = { is_opened = issue.state == "open" },
+      issue = { is_opened = is_opened },
       column_offsets = {
         value = 0,
         at = #value + 1,
