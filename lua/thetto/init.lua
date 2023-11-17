@@ -1,39 +1,23 @@
 local M = {}
 
-function M.start(source_name, args)
-  return require("thetto.command").start(source_name, args)
+function M.start(source, opts)
+  return require("thetto.command").start(source, opts)
 end
 
 function M.reload(bufnr)
   return require("thetto.command").reload(bufnr)
 end
 
-function M.resume(source_name)
-  return require("thetto.command").resume(source_name)
+function M.resume(opts)
+  return require("thetto.command").resume(opts)
 end
 
-function M.execute(action_name, args)
-  return require("thetto.command").execute(action_name, args)
+function M.execute(opts)
+  return require("thetto.command").execute(opts)
 end
 
 function M.get()
   return require("thetto.command").get()
-end
-
-function M.resume_execute(args)
-  return require("thetto.command").resume_execute(args)
-end
-
-function M.setup(setting)
-  require("thetto.command").setup(setting)
-end
-
-function M.setup_store(name, opts)
-  require("thetto.command").setup_store(name, opts)
-end
-
-function M.register_source(name, handler)
-  require("thetto.command").register_source(name, handler)
 end
 
 return M
