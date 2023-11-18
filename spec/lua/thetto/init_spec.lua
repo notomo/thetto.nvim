@@ -6,14 +6,18 @@ describe("thetto.start()", function()
   after_each(helper.after_each)
 
   it("wip", function()
-    local got = thetto.start({
-      collect = function()
-        return {
-          { value = "line1" },
-          { value = "line2" },
-        }
-      end,
-    })
-    vim.print(got)
+    local p = thetto
+      .start({
+        collect = function()
+          return {
+            { value = "line1" },
+            { value = "line2" },
+          }
+        end,
+      })
+      :next(function(items)
+        vim.print(items)
+      end)
+    helper.wait(p)
   end)
 end)

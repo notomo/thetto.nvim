@@ -3,9 +3,10 @@ local M = {}
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source)
+function Collector.new(source, pipeline)
   local tbl = {
     _source = source,
+    _pipeline = pipeline,
     _subscription = nil,
   }
   return setmetatable(tbl, Collector)
@@ -30,13 +31,13 @@ function Collector.start(self, consumer)
   return require("thetto.vendor.promise").new(function(resolve, reject)
     self._subscription = observable:subscribe({
       next = function(items)
-        consumer:consume(items)
-      end,
-      error = function(e)
-        reject(consumer:error(e))
+        consumer:consume(self._pipeline(items))
       end,
       complete = function()
         resolve(consumer:complete())
+      end,
+      error = function(e)
+        reject(consumer:on_error(e))
       end,
     })
   end)
@@ -50,9 +51,9 @@ function Collector.finished(self)
   return self._subscription and self._subscription:closed()
 end
 
-function M.factory(source)
+function M.factory(source, pipeline)
   return function()
-    return Collector.new(source)
+    return Collector.new(source, pipeline)
   end
 end
 

@@ -3,19 +3,23 @@ local M = {}
 function M.start(source, raw_opts)
   local opts = require("thetto.core.option").new_start_opts(raw_opts)
 
-  local collector_factory = require("thetto.core.collector").factory(source)
+  local collector_factory = require("thetto.core.collector").factory(source, opts.pipeline)
   local collector = collector_factory()
-  local consumer = require("thetto.core.consumer").new(opts.pipeline, opts.consume)
+  local consumer = opts.consumer_factory()
   local executor = require("thetto.core.executor").new(opts.kinds)
 
-  require("thetto.core.context").set({
+  local ctx = require("thetto.core.context").new({
     collector_factory = collector_factory,
     collector = collector,
     consumer = consumer,
     executor = executor,
   })
 
-  return collector:start(consumer)
+  local on_discard = function()
+    collector:stop()
+  end
+
+  return collector:start(ctx.consumer)
 end
 
 function M.reload(bufnr)

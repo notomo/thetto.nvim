@@ -4,8 +4,8 @@ local default_start_opts = {
   pipeline = function(items)
     return items
   end,
-  consume = function(items)
-    return items
+  consumer_factory = function()
+    return require("thetto.handler.consumer.ui").new()
   end,
   kind = {},
 }

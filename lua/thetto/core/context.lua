@@ -25,7 +25,7 @@ end
 
 local _ctxs = {}
 
-function M.set(fields)
+function M.new(fields)
   local ctx = Context.new(fields)
   table.insert(_ctxs, 1, ctx)
   return ctx
