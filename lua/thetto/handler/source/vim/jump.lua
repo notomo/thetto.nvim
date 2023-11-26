@@ -29,7 +29,11 @@ function M.collect(source_ctx)
       end
       current_path = path
 
-      local line = vim.api.nvim_buf_get_lines(bufnr, jump.lnum - 1, jump.lnum, false)[1] or ""
+      local line = vim.api.nvim_buf_get_lines(bufnr, jump.lnum - 1, jump.lnum, false)[1]
+      if not line then
+        return
+      end
+
       local name = to_relative(path)
       local row = jump.lnum
       local label = ("%s:%d"):format(name:gsub(home, "~"), row)
