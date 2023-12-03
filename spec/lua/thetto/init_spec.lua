@@ -1,5 +1,5 @@
-local helper = require("thetto.test.helper")
-local thetto = helper.require("thetto")
+local helper = require("thetto2.test.helper")
+local thetto = helper.require("thetto2")
 
 describe("thetto.start()", function()
   before_each(helper.before_each)
