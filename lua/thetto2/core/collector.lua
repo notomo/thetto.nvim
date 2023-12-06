@@ -1,5 +1,3 @@
-local M = {}
-
 local Collector = {}
 Collector.__index = Collector
 
@@ -9,6 +7,8 @@ function Collector.new(source, pipeline, consumer_factory)
     _pipeline = pipeline,
     _consumer_factory = consumer_factory,
 
+    _all_items = {},
+    _pipeline_ctx = require("thetto2.core.pipeline_context").new(),
     _subscription = nil,
     _consumer = nil,
   }
@@ -16,40 +16,43 @@ function Collector.new(source, pipeline, consumer_factory)
 end
 
 function Collector.start(self)
-  return self:_start(nil)
+  local subscriber = self:_create_subscriber()
+  local consumer = self:_create_consumer()
+  return self:_start(subscriber, consumer)
 end
 
 function Collector.restart(self)
   self:_stop()
-  return self:_start(self._consumer)
+
+  self._all_items = {}
+  local subscriber = self:_create_subscriber()
+
+  return self:_start(subscriber, self._consumer)
 end
 
-function Collector._start(self, consumer)
-  local subscriber_or_items = self._source.collect()
+function Collector.replay(self)
+  self:_stop()
 
-  local subscriber
-  if type(subscriber_or_items) == "table" then
-    subscriber = function(observer)
-      observer:next(subscriber_or_items)
-      observer:complete()
-    end
-  else
-    subscriber = subscriber_or_items
+  local all_items = self._all_items
+  local subscriber = function(observer)
+    observer:next(all_items)
+    observer:complete()
   end
+  self._all_items = {}
 
-  local on_change = function(...)
-    self:_run_pipeline(...)
-  end
-  local on_discard = function()
-    self:_stop()
-  end
-  self._consumer = consumer or self._consumer_factory(self._pipeline, on_change, on_discard)
+  local consumer = self:_create_consumer()
+  return self:_start(subscriber, consumer)
+end
+
+function Collector._start(self, subscriber, consumer)
+  self._consumer = consumer
 
   local observable = require("thetto2.vendor.misclib.observable").new(subscriber)
   return require("thetto2.vendor.promise").new(function(resolve, reject)
     self._subscription = observable:subscribe({
       next = function(items)
-        self._consumer:consume(self._pipeline:apply(items))
+        vim.list_extend(self._all_items, items)
+        self:_run_pipeline(self._pipeline_ctx)
       end,
       complete = function()
         resolve(self._consumer:complete())
@@ -61,22 +64,37 @@ function Collector._start(self, consumer)
   end)
 end
 
-function Collector.finished(self)
-  return self._subscription and self._subscription:closed()
-end
-
 function Collector._stop(self)
   return self._subscription and self._subscription:unsubscribe()
 end
 
-function Collector._run_pipeline(self, row, get_lines)
-  return nil
+function Collector._run_pipeline(self, pipeline_ctx)
+  self._pipeline_ctx = pipeline_ctx
+  self._consumer:consume(self._pipeline:apply(pipeline_ctx, self._all_items))
 end
 
-function M.factory(source, pipeline, consumer_factory)
-  return function()
-    return Collector.new(source, pipeline, consumer_factory)
+function Collector._create_subscriber(self)
+  local subscriber_or_items = self._source.collect()
+  if type(subscriber_or_items) == "function" then
+    return subscriber_or_items
+  end
+
+  return function(observer)
+    observer:next(subscriber_or_items)
+    observer:complete()
   end
 end
 
-return M
+function Collector._create_consumer(self)
+  return self._consumer_factory(self._pipeline, {
+    on_change = vim.schedule_wrap(function(pipeline_ctx_factory)
+      local pipeline_ctx = pipeline_ctx_factory()
+      self:_run_pipeline(pipeline_ctx)
+    end),
+    on_discard = function()
+      self:_stop()
+    end,
+  })
+end
+
+return Collector

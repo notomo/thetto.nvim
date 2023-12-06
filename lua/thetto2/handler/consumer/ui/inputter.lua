@@ -1,15 +1,18 @@
 local M = {}
 M.__index = M
 
-function M.open(setup_close_autocmd, layout, raw_input_filters, on_change)
+function M.open(closer, layout, raw_input_filters, on_change)
   local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.bo[bufnr].bufhidden = "wipe"
+
   vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = function(_, _, _, row)
-      on_change(row, function()
+    on_lines = function(_, _, _, _)
+      on_change(function()
         if not vim.api.nvim_buf_is_valid(bufnr) then
-          return nil
+          return require("thetto2.core.pipeline_context").new()
         end
-        return vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+        local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
+        return require("thetto2.core.pipeline_context").new(inputs)
       end)
     end,
   })
@@ -35,7 +38,7 @@ function M.open(setup_close_autocmd, layout, raw_input_filters, on_change)
     },
   })
 
-  setup_close_autocmd(window_id)
+  closer:setup_autocmd(window_id)
 
   local tbl = {
     _bufnr = bufnr,
@@ -43,6 +46,11 @@ function M.open(setup_close_autocmd, layout, raw_input_filters, on_change)
     _closed = false,
   }
   return setmetatable(tbl, M)
+end
+
+function M.enter(self)
+  require("thetto2.vendor.misclib.window").safe_enter(self._window_id)
+  vim.cmd.startinsert()
 end
 
 function M.close(self)

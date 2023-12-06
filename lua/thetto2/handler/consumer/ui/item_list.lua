@@ -1,8 +1,9 @@
 local M = {}
 M.__index = M
 
-function M.open(setup_close_autocmd, layout)
+function M.open(closer, layout)
   local bufnr = vim.api.nvim_create_buf(false, true)
+  vim.bo[bufnr].bufhidden = "wipe"
 
   local border_char = "─"
   if vim.o.ambiwidth == "double" then
@@ -31,7 +32,7 @@ function M.open(setup_close_autocmd, layout)
     },
   })
 
-  setup_close_autocmd(window_id)
+  closer:setup_autocmd(window_id)
 
   return setmetatable({
     _bufnr = bufnr,

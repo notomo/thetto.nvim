@@ -1,40 +1,21 @@
 local UI = {}
 UI.__index = UI
 
-function UI.new(filters, on_change, on_discard)
-  local group_name = "thetto_ui_" .. tostring(vim.uv.hrtime())
-  local group = vim.api.nvim_create_augroup(group_name, {})
-  local pattern = { "_thetto_closed_" .. group_name }
-  local setup_close_autocmd = function(window_id)
-    vim.api.nvim_create_autocmd({ "WinClosed" }, {
-      pattern = { "*" },
-      callback = function(args)
-        if tonumber(args.file) ~= window_id then
-          return
-        end
-        vim.api.nvim_exec_autocmds("User", {
-          pattern = pattern,
-          group = group,
-        })
-        return true
-      end,
-    })
-  end
+function UI.new(filters, callbacks)
+  -- close old ui on the same tabpage
 
+  local closer = require("thetto2.handler.consumer.ui.closer").new()
   local layout = require("thetto2.handler.consumer.ui.layout").new()
-  local item_list = require("thetto2.handler.consumer.ui.item_list").open(setup_close_autocmd, layout)
-  local inputter = require("thetto2.handler.consumer.ui.inputter").open(setup_close_autocmd, layout, filters, on_change)
+  local item_list = require("thetto2.handler.consumer.ui.item_list").open(closer, layout)
+  local inputter = require("thetto2.handler.consumer.ui.inputter").open(closer, layout, filters, callbacks.on_change)
 
-  vim.api.nvim_create_autocmd({ "User" }, {
-    group = group,
-    pattern = pattern,
-    callback = function()
-      item_list:close()
-      inputter:close()
-      on_discard()
-    end,
-    once = true,
-  })
+  closer:setup(function()
+    item_list:close()
+    inputter:close()
+    callbacks.on_discard()
+  end)
+
+  inputter:enter()
 
   -- setup highligh provider
   -- setup on moved autocmd

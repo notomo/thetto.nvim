@@ -2,15 +2,12 @@ local M = {}
 
 local default_start_opts = {
   pipeline_factory = function()
-    return {
-      filters = {},
-      apply = function(_, items)
-        return items
-      end,
-    }
+    return require("thetto2.core.pipeline").new({
+      require("thetto2.handler.pipeline.filter.substring"),
+    })
   end,
-  consumer_factory = function(pipeline, on_change, on_discard)
-    return require("thetto2.handler.consumer.ui").new(pipeline.filters, on_change, on_discard)
+  consumer_factory = function(pipeline, callbacks)
+    return require("thetto2.handler.consumer.ui").new(pipeline:filters(), callbacks)
   end,
   kind = {},
 }

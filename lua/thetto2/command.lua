@@ -4,13 +4,10 @@ function M.start(source, raw_opts)
   local opts = require("thetto2.core.option").new_start_opts(raw_opts)
 
   local pipeline = opts.pipeline_factory()
-  local collector_factory = require("thetto2.core.collector").factory(source, pipeline, opts.consumer_factory)
-  local collector = collector_factory()
-
+  local collector = require("thetto2.core.collector").new(source, pipeline, opts.consumer_factory)
   local executor = require("thetto2.core.executor").new(opts.kinds)
 
   require("thetto2.core.context").new({
-    collector_factory = collector_factory,
     collector = collector,
     executor = executor,
   })
@@ -23,6 +20,7 @@ function M.reload(bufnr)
   if ctx_err then
     return ctx_err
   end
+
   return ctx.collector:restart()
 end
 
@@ -32,7 +30,7 @@ function M.resume(raw_opts)
     return ctx_err
   end
 
-  return ctx.consume(ctx.items)
+  return ctx.collector:replay()
 end
 
 function M.execute(raw_opts)
