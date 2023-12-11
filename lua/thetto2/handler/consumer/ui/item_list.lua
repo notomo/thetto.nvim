@@ -4,6 +4,7 @@ M.__index = M
 function M.open(closer, layout)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
+  vim.bo[bufnr].filetype = "thetto2"
 
   local border_char = "─"
   if vim.o.ambiwidth == "double" then

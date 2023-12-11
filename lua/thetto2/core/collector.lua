@@ -74,7 +74,8 @@ function Collector._run_pipeline(self, pipeline_ctx)
 end
 
 function Collector._create_subscriber(self)
-  local subscriber_or_items = self._source.collect()
+  local source_ctx = require("thetto2.core.source_context").new(self._source)
+  local subscriber_or_items = self._source.collect(source_ctx)
   if type(subscriber_or_items) == "function" then
     return subscriber_or_items
   end

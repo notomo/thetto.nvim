@@ -4,6 +4,7 @@ M.__index = M
 function M.open(closer, layout, raw_input_filters, on_change)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
+  vim.bo[bufnr].filetype = "thetto2-input"
 
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function(_, _, _, _)
