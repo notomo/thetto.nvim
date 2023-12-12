@@ -1,11 +1,12 @@
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source, pipeline, consumer_factory)
+function Collector.new(source, pipeline, ctx_key, consumer_factory)
   local tbl = {
     _source = source,
     _pipeline = pipeline,
     _consumer_factory = consumer_factory,
+    _ctx_key = ctx_key,
 
     _all_items = {},
     _pipeline_ctx = require("thetto2.core.pipeline_context").new(),
@@ -87,7 +88,7 @@ function Collector._create_subscriber(self)
 end
 
 function Collector._create_consumer(self)
-  return self._consumer_factory(self._pipeline, {
+  return self._consumer_factory(self._pipeline, self._ctx_key, {
     on_change = vim.schedule_wrap(function(pipeline_ctx_factory)
       local pipeline_ctx = pipeline_ctx_factory()
       self:_run_pipeline(pipeline_ctx)

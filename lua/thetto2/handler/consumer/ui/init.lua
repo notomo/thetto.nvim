@@ -1,13 +1,14 @@
 local UI = {}
 UI.__index = UI
 
-function UI.new(filters, callbacks)
+function UI.new(filters, ctx_key, callbacks)
   -- close old ui on the same tabpage
 
   local closer = require("thetto2.handler.consumer.ui.closer").new()
   local layout = require("thetto2.handler.consumer.ui.layout").new()
-  local item_list = require("thetto2.handler.consumer.ui.item_list").open(closer, layout)
-  local inputter = require("thetto2.handler.consumer.ui.inputter").open(closer, layout, filters, callbacks.on_change)
+  local item_list = require("thetto2.handler.consumer.ui.item_list").open(ctx_key, closer, layout)
+  local inputter =
+    require("thetto2.handler.consumer.ui.inputter").open(ctx_key, closer, layout, filters, callbacks.on_change)
 
   closer:setup(function()
     item_list:close()

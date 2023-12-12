@@ -4,10 +4,11 @@ function M.start(source, raw_opts)
   local opts = require("thetto2.core.option").new_start_opts(raw_opts)
 
   local pipeline = opts.pipeline_factory()
-  local collector = require("thetto2.core.collector").new(source, pipeline, opts.consumer_factory)
+  local ctx_key = require("thetto2.core.context").new_key()
+  local collector = require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory)
   local executor = require("thetto2.core.executor").new(opts.kinds)
 
-  require("thetto2.core.context").new({
+  require("thetto2.core.context").set(ctx_key, {
     collector = collector,
     executor = executor,
   })

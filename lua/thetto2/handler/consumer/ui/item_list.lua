@@ -1,10 +1,11 @@
 local M = {}
 M.__index = M
 
-function M.open(closer, layout)
+function M.open(ctx_key, closer, layout)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "thetto2"
+  vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/list"):format(ctx_key))
 
   local border_char = "─"
   if vim.o.ambiwidth == "double" then
