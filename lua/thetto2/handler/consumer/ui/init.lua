@@ -18,7 +18,6 @@ function UI.new(filters, ctx_key, callbacks)
 
   inputter:enter()
 
-  -- setup highligh provider
   -- setup on moved autocmd
 
   local tbl = {

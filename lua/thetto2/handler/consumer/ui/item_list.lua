@@ -1,6 +1,8 @@
 local M = {}
 M.__index = M
 
+local _selfs = {}
+
 function M.open(ctx_key, closer, layout)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
@@ -36,10 +38,12 @@ function M.open(ctx_key, closer, layout)
 
   closer:setup_autocmd(window_id)
 
-  return setmetatable({
+  local self = setmetatable({
     _bufnr = bufnr,
     _window_id = window_id,
   }, M)
+  _selfs[bufnr] = self
+  return self
 end
 
 function M.redraw(self, items)
@@ -56,12 +60,29 @@ function M.redraw(self, items)
   end
 end
 
+local ns = vim.api.nvim_create_namespace("thetto2-list-highlight")
+
+function M._highlight_handler(_, _, bufnr, topline, botline_guess)
+  local self = _selfs[bufnr]
+  if not self then
+    return false
+  end
+  self:highlight(topline, botline_guess)
+  return false
+end
+
+function M.highlight(self)
+  return nil
+end
+
 function M.close(self)
   if self._closed then
     return
   end
   self._closed = true
+  _selfs[self._bufnr] = nil
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
+  vim.api.nvim_set_decoration_provider(ns, {})
 end
 
 return M
