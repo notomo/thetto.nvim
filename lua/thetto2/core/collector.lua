@@ -89,10 +89,10 @@ end
 
 function Collector._create_consumer(self)
   return self._consumer_factory(self._pipeline, self._ctx_key, {
-    on_change = vim.schedule_wrap(function(pipeline_ctx_factory)
+    on_change = function(pipeline_ctx_factory)
       local pipeline_ctx = pipeline_ctx_factory()
       self:_run_pipeline(pipeline_ctx)
-    end),
+    end,
     on_discard = function()
       self:_stop()
     end,

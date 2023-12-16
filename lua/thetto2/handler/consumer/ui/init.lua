@@ -28,7 +28,9 @@ function UI.new(filters, ctx_key, callbacks)
 end
 
 function UI.consume(self, items)
-  self._item_list:redraw(items)
+  vim.schedule(function()
+    self._item_list:redraw(items)
+  end)
 end
 
 function UI.on_error(self, err)

@@ -1,10 +1,9 @@
 local M = {}
 
-local default = {
+local default_behaviors = {
   cwd = function()
     return "."
   end,
-  opts = {},
 }
 
 local resolve_cwd = function(cwd)
@@ -22,11 +21,10 @@ local resolve_cwd = function(cwd)
 end
 
 function M.new(source)
-  local tbl = vim.tbl_extend("keep", source, default)
-  return {
-    cwd = resolve_cwd(tbl.cwd),
-    opts = tbl.opts,
-  }
+  local ctx = vim.tbl_extend("keep", source.behaviors or {}, default_behaviors)
+  ctx.cwd = resolve_cwd(ctx.cwd)
+  ctx.opts = source.opts
+  return ctx
 end
 
 return M
