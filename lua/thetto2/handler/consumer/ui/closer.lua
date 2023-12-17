@@ -14,6 +14,7 @@ end
 
 function M.setup_autocmd(self, window_id)
   vim.api.nvim_create_autocmd({ "WinClosed" }, {
+    group = self._group,
     pattern = { "*" },
     callback = function(args)
       if tonumber(args.file) ~= window_id then
@@ -29,7 +30,9 @@ function M.setup_autocmd(self, window_id)
   })
 
   local original_bufnr = vim.api.nvim_win_get_buf(window_id)
+
   vim.api.nvim_create_autocmd({ "BufLeave" }, {
+    group = self._group,
     buffer = original_bufnr,
     callback = function()
       vim.api.nvim_create_autocmd({ "BufEnter" }, {
@@ -48,6 +51,23 @@ function M.setup_autocmd(self, window_id)
         end,
         once = true,
       })
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({ "FileType" }, {
+    group = self._group,
+    pattern = { vim.bo[original_bufnr].filetype },
+    callback = function(args)
+      local bufnr = args.buf
+      if bufnr == original_bufnr then
+        return
+      end
+      vim.api.nvim_exec_autocmds("User", {
+        pattern = self._pattern,
+        group = self._group,
+        modeline = false,
+      })
+      return true
     end,
   })
 end

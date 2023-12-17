@@ -2,8 +2,6 @@ local UI = {}
 UI.__index = UI
 
 function UI.new(consumer_ctx, filters, callbacks)
-  -- close old ui on the same tabpage
-
   local closer = require("thetto2.handler.consumer.ui.closer").new()
   local layout = require("thetto2.handler.consumer.ui.layout").new()
   local item_list =
