@@ -7,6 +7,7 @@ M.__index = function(tbl, k)
   return rawget(M, k)
 end
 
+local _ctxs = {}
 local _ctx_map = {}
 
 function M.set(ctx_key, fields)
@@ -17,16 +18,27 @@ function M.set(ctx_key, fields)
   local ctx = setmetatable(tbl, M)
   ctx:update(fields)
 
+  M._expire_old()
   _ctx_map[ctx_key] = ctx
+  table.insert(_ctxs, 1, ctx)
 
   return ctx
+end
+
+local max_count = 10
+function M._expire_old()
+  local old_ctxs = vim.list_slice(_ctxs, max_count + 1)
+  for _, ctx in ipairs(old_ctxs) do
+    _ctx_map[ctx._key] = nil
+  end
+  _ctxs = vim.list_slice(_ctxs, 1, max_count)
 end
 
 function M.get(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
   local path = vim.api.nvim_buf_get_name(bufnr)
-  local ctx_key = path:match("^thetto://(.+)/")
+  local ctx_key = path:match("^thetto://([^/]+)/")
   if not ctx_key then
     return nil, "not found state in: " .. path
   end
