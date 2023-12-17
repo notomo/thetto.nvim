@@ -10,6 +10,7 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory)
 
     _all_items = {},
     _pipeline_ctx = require("thetto2.core.pipeline_context").new(),
+    _source_ctx = require("thetto2.core.source_context").new(source),
     _subscription = nil,
     _consumer = nil,
   }
@@ -26,6 +27,7 @@ function Collector.restart(self)
   self:_stop()
 
   self._all_items = {}
+  self._source_ctx = require("thetto2.core.source_context").new(self._source)
   local subscriber = self:_create_subscriber()
 
   return self:_start(subscriber, self._consumer)
@@ -75,8 +77,7 @@ function Collector._run_pipeline(self, pipeline_ctx)
 end
 
 function Collector._create_subscriber(self)
-  local source_ctx = require("thetto2.core.source_context").new(self._source)
-  local subscriber_or_items = self._source.collect(source_ctx)
+  local subscriber_or_items = self._source.collect(self._source_ctx)
   if type(subscriber_or_items) == "function" then
     return subscriber_or_items
   end
@@ -88,7 +89,7 @@ function Collector._create_subscriber(self)
 end
 
 function Collector._create_consumer(self)
-  return self._consumer_factory(self._pipeline, self._ctx_key, {
+  local callbacks = {
     on_change = function(pipeline_ctx_factory)
       local pipeline_ctx = pipeline_ctx_factory()
       self:_run_pipeline(pipeline_ctx)
@@ -96,7 +97,12 @@ function Collector._create_consumer(self)
     on_discard = function()
       self:_stop()
     end,
-  })
+  }
+  local consumer_ctx = {
+    ctx_key = self._ctx_key,
+    cwd = self._source_ctx.cwd,
+  }
+  return self._consumer_factory(consumer_ctx, self._pipeline, callbacks)
 end
 
 return Collector

@@ -6,8 +6,8 @@ local default_start_opts = {
       require("thetto2.handler.pipeline.filter.substring"),
     })
   end,
-  consumer_factory = function(pipeline, ctx_key, callbacks)
-    return require("thetto2.handler.consumer.ui").new(pipeline:filters(), ctx_key, callbacks)
+  consumer_factory = function(consumer_ctx, pipeline, callbacks)
+    return require("thetto2.handler.consumer.ui").new(consumer_ctx, pipeline:filters(), callbacks)
   end,
   kind = {},
 }

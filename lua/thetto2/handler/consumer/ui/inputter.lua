@@ -1,7 +1,7 @@
 local M = {}
 M.__index = M
 
-function M.open(ctx_key, closer, layout, raw_input_filters, on_change)
+function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "thetto2-input"
@@ -39,6 +39,13 @@ function M.open(ctx_key, closer, layout, raw_input_filters, on_change)
       { " ", "ThettoInput" },
     },
   })
+
+  vim.api.nvim_win_call(window_id, function()
+    local ok, result = pcall(require("thetto2.lib.file").lcd, cwd)
+    if not ok then
+      vim.notify("[thetto] " .. result, vim.log.levels.WARN)
+    end
+  end)
 
   closer:setup_autocmd(window_id)
 
