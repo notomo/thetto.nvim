@@ -22,7 +22,7 @@ function M.open(ctx_key, closer, layout)
     col = layout.column,
     external = false,
     style = "minimal",
-    footer = { { "TODO", "StatusLine" } },
+    footer = { { "running", "StatusLine" } },
     footer_pos = "left",
     border = {
       { " ", "NormalFloat" },
@@ -58,6 +58,12 @@ function M.redraw(self, items)
   if vim.api.nvim_win_is_valid(self._window_id) and vim.api.nvim_get_current_buf() ~= self._bufnr then
     vim.api.nvim_win_set_cursor(self._window_id, { 1, 0 })
   end
+end
+
+function M.redraw_status(self)
+  vim.api.nvim_win_set_config(self._window_id, {
+    footer = "",
+  })
 end
 
 local ns = vim.api.nvim_create_namespace("thetto2-list-highlight")

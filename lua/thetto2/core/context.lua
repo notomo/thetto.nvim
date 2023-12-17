@@ -7,7 +7,6 @@ M.__index = function(tbl, k)
   return rawget(M, k)
 end
 
-local _ctxs = {}
 local _ctx_map = {}
 
 function M.set(ctx_key, fields)
@@ -18,7 +17,6 @@ function M.set(ctx_key, fields)
   local ctx = setmetatable(tbl, M)
   ctx:update(fields)
 
-  table.insert(_ctxs, 1, ctx)
   _ctx_map[ctx_key] = ctx
 
   return ctx

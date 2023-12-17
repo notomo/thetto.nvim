@@ -37,6 +37,10 @@ function UI.on_error(self, err)
   error(err)
 end
 
-function UI.complete(self) end
+function UI.complete(self)
+  vim.schedule(function()
+    self._item_list:redraw_status()
+  end)
+end
 
 return UI
