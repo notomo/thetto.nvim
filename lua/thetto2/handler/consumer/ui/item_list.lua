@@ -45,6 +45,13 @@ function M.open(ctx_key, cwd, closer, layout)
 
   closer:setup_autocmd(window_id)
 
+  vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
+    buffer = bufnr,
+    callback = function()
+      require("thetto2").reload(bufnr)
+    end,
+  })
+
   local self = setmetatable({
     _bufnr = bufnr,
     _window_id = window_id,
@@ -67,9 +74,9 @@ function M.redraw(self, items)
   end
 end
 
-function M.redraw_status(self)
+function M.redraw_status(self, message)
   vim.api.nvim_win_set_config(self._window_id, {
-    footer = "",
+    footer = message,
   })
 end
 

@@ -32,20 +32,29 @@ function UI.new(consumer_ctx, filters, callbacks)
   return setmetatable(tbl, UI)
 end
 
-function UI.consume(self, items)
-  vim.schedule(function()
+local consumer_events = require("thetto2.core.consumer_events")
+
+local handlers = {
+  [consumer_events.items_changed] = vim.schedule_wrap(function(self, items)
     self._item_list:redraw(items)
-  end)
-end
+  end),
+  [consumer_events.source_stared] = vim.schedule_wrap(function(self)
+    self._item_list:redraw_status("running")
+  end),
+  [consumer_events.source_completed] = vim.schedule_wrap(function(self)
+    self._item_list:redraw_status("")
+  end),
+  [consumer_events.source_error] = function(self, err)
+    error(err)
+  end,
+}
 
-function UI.on_error(self, err)
-  error(err)
-end
-
-function UI.complete(self)
-  vim.schedule(function()
-    self._item_list:redraw_status()
-  end)
+function UI.consume(self, event_name, ...)
+  local handler = handlers[event_name]
+  if not handler then
+    return
+  end
+  return handler(self, ...)
 end
 
 return UI
