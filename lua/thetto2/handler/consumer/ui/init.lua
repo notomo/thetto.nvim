@@ -21,8 +21,6 @@ function UI.new(consumer_ctx, filters, callbacks)
     callbacks.on_discard()
   end)
 
-  inputter:enter()
-
   -- setup on moved autocmd
 
   local tbl = {

@@ -30,6 +30,10 @@ function M._expire_old()
   local old_ctxs = vim.list_slice(_ctxs, max_count + 1)
   for _, ctx in ipairs(old_ctxs) do
     _ctx_map[ctx._key] = nil
+    vim.api.nvim_exec_autocmds("User", {
+      pattern = "thetto_ctx_deleted_" .. ctx._key,
+      modeline = false,
+    })
   end
   _ctxs = vim.list_slice(_ctxs, 1, max_count)
 end

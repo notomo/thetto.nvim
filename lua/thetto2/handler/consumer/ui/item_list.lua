@@ -2,8 +2,14 @@ local M = {}
 M.__index = M
 
 local _selfs = {}
+local _states = {}
 
 function M.open(ctx_key, cwd, closer, layout)
+  local state = _states[ctx_key] or {
+    has_forcus = false,
+    cursor = { 1, 0 },
+  }
+
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "thetto2"
@@ -14,7 +20,7 @@ function M.open(ctx_key, cwd, closer, layout)
     border_char = "-"
   end
 
-  local window_id = vim.api.nvim_open_win(bufnr, false, {
+  local window_id = vim.api.nvim_open_win(bufnr, state.has_forcus, {
     width = layout.width - 2, -- NOTICE: calc border width
     height = layout.height - 1,
     relative = "editor",
@@ -43,6 +49,8 @@ function M.open(ctx_key, cwd, closer, layout)
     end
   end)
 
+  vim.api.nvim_win_set_cursor(window_id, state.cursor)
+
   closer:setup_autocmd(window_id)
 
   vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
@@ -52,9 +60,19 @@ function M.open(ctx_key, cwd, closer, layout)
     end,
   })
 
+  vim.api.nvim_create_autocmd({ "User" }, {
+    pattern = { "thetto_ctx_deleted_" .. ctx_key },
+    callback = function()
+      _states[ctx_key] = nil
+    end,
+    once = true,
+  })
+
   local self = setmetatable({
     _bufnr = bufnr,
     _window_id = window_id,
+    _ctx_key = ctx_key,
+    _closed = false,
   }, M)
   _selfs[bufnr] = self
   return self
@@ -101,6 +119,13 @@ function M.close(self)
   end
   self._closed = true
   _selfs[self._bufnr] = nil
+
+  local state = {
+    has_forcus = vim.api.nvim_get_current_win() == self._window_id,
+    cursor = vim.api.nvim_win_get_cursor(self._window_id),
+  }
+  _states[self._ctx_key] = state
+
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
   vim.api.nvim_set_decoration_provider(ns, {})
 end
