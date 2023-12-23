@@ -1,3 +1,5 @@
+--- @class ThettoUiItemList
+--- @field _closed boolean
 local M = {}
 M.__index = M
 
@@ -5,10 +7,14 @@ local _selfs = {}
 local _states = {}
 
 function M.open(ctx_key, cwd, closer, layout)
-  local state = _states[ctx_key] or {
-    has_forcus = false,
-    cursor = { 1, 0 },
-  }
+  local state = _states[ctx_key]
+    or {
+      has_forcus = false,
+      cursor = { 1, 0 },
+      status = "running",
+      source_name = nil,
+    }
+  _states[ctx_key] = state
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
@@ -28,7 +34,7 @@ function M.open(ctx_key, cwd, closer, layout)
     col = layout.column,
     external = false,
     style = "minimal",
-    footer = { { "running", "StatusLine" } },
+    footer = M._footer(state),
     footer_pos = "left",
     border = {
       { " ", "NormalFloat" },
@@ -78,7 +84,7 @@ function M.open(ctx_key, cwd, closer, layout)
   return self
 end
 
-function M.redraw(self, items)
+function M.redraw_list(self, items)
   local lines = vim.tbl_map(function(item)
     return item.desc or item.value
   end, items)
@@ -92,10 +98,21 @@ function M.redraw(self, items)
   end
 end
 
-function M.redraw_status(self, message)
+function M.redraw_footer(self, source_name, status)
+  local state = vim.tbl_extend("keep", {
+    source_name = source_name,
+    status = status,
+  }, _states[self._ctx_key])
+  _states[self._ctx_key] = state
+
   vim.api.nvim_win_set_config(self._window_id, {
-    footer = message,
+    footer = M._footer(state),
   })
+end
+
+function M._footer(state)
+  local line = ("%s %s"):format(state.source_name, state.status)
+  return { { line, "StatusLine" } }
 end
 
 local ns = vim.api.nvim_create_namespace("thetto2-list-highlight")

@@ -5,7 +5,10 @@ function M.by_name(source_name)
   if not origin then
     error("not found source: " .. source_name)
   end
-  return origin
+
+  local source = vim.deepcopy(origin)
+  source.name = source_name
+  return source
 end
 
 return M

@@ -1,7 +1,10 @@
-local UI = {}
-UI.__index = UI
+--- @class ThettoUi
+--- @field _item_list ThettoUiItemList
+--- @field _inputter ThettoUiInputter
+local Ui = {}
+Ui.__index = Ui
 
-function UI.new(consumer_ctx, filters, callbacks)
+function Ui.new(consumer_ctx, filters, callbacks)
   local closer = require("thetto2.handler.consumer.ui.closer").new()
   local layout = require("thetto2.handler.consumer.ui.layout").new()
   local item_list =
@@ -27,27 +30,30 @@ function UI.new(consumer_ctx, filters, callbacks)
     _item_list = item_list,
     _inputter = inputter,
   }
-  return setmetatable(tbl, UI)
+  return setmetatable(tbl, Ui)
 end
 
 local consumer_events = require("thetto2.core.consumer_events")
 
 local handlers = {
-  [consumer_events.items_changed] = vim.schedule_wrap(function(self, items)
-    self._item_list:redraw(items)
+  --- @param self ThettoUi
+  [consumer_events.all.items_changed] = vim.schedule_wrap(function(self, items)
+    self._item_list:redraw_list(items)
   end),
-  [consumer_events.source_stared] = vim.schedule_wrap(function(self)
-    self._item_list:redraw_status("running")
+  --- @param self ThettoUi
+  [consumer_events.all.source_started] = vim.schedule_wrap(function(self, source_name)
+    self._item_list:redraw_footer(source_name, "running")
   end),
-  [consumer_events.source_completed] = vim.schedule_wrap(function(self)
-    self._item_list:redraw_status("")
+  --- @param self ThettoUi
+  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
+    self._item_list:redraw_footer(nil, "")
   end),
-  [consumer_events.source_error] = function(self, err)
+  [consumer_events.all.source_error] = function(_, err)
     error(err)
   end,
 }
 
-function UI.consume(self, event_name, ...)
+function Ui.consume(self, event_name, ...)
   local handler = handlers[event_name]
   if not handler then
     return
@@ -55,4 +61,4 @@ function UI.consume(self, event_name, ...)
   return handler(self, ...)
 end
 
-return UI
+return Ui

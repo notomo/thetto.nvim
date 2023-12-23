@@ -22,7 +22,7 @@ end
 function Collector.start(self)
   local subscriber = self:_create_subscriber()
   local consumer = self:_create_consumer()
-  consumer:consume(consumer_events.source_stared)
+  consumer:consume(consumer_events.source_started(self._source.name))
   return self:_start(subscriber, consumer)
 end
 
@@ -33,7 +33,7 @@ function Collector.restart(self)
   self._source_ctx = require("thetto2.core.source_context").new(self._source)
   local subscriber = self:_create_subscriber()
 
-  self._consumer:consume(consumer_events.source_stared)
+  self._consumer:consume(consumer_events.source_started(self._source.name))
   return self:_start(subscriber, self._consumer)
 end
 
@@ -62,10 +62,10 @@ function Collector._start(self, subscriber, consumer)
         self:_run_pipeline(self._pipeline_ctx)
       end,
       complete = function()
-        resolve(self._consumer:consume(consumer_events.source_completed))
+        resolve(self._consumer:consume(consumer_events.source_completed()))
       end,
-      error = function(e)
-        reject(self._consumer:consume(consumer_events.source_error, e))
+      error = function(err)
+        reject(self._consumer:consume(consumer_events.source_error(err)))
       end,
     })
   end)
@@ -78,7 +78,7 @@ end
 function Collector._run_pipeline(self, pipeline_ctx)
   self._pipeline_ctx = pipeline_ctx
   local items = self._pipeline:apply(pipeline_ctx, self._all_items)
-  self._consumer:consume(consumer_events.items_changed, items)
+  self._consumer:consume(consumer_events.items_changed(items))
 end
 
 function Collector._create_subscriber(self)

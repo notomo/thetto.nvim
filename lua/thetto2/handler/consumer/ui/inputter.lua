@@ -1,3 +1,4 @@
+--- @class ThettoUiInputter
 local M = {}
 M.__index = M
 
