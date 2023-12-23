@@ -1,15 +1,17 @@
 --- @class ThettoUiInputter
+--- @field _closed boolean
 local M = {}
 M.__index = M
 
-local _states = {}
+local _resume_states = {}
 
 function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
-  local state = _states[ctx_key] or {
-    has_forcus = true,
-    cursor = { 1, 0 },
-    is_insert_mode = true,
-  }
+  local resume_state = _resume_states[ctx_key]
+    or {
+      has_forcus = true,
+      cursor = { 1, 0 },
+      is_insert_mode = true,
+    }
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
@@ -29,7 +31,7 @@ function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
   })
 
   local input_height = math.max(#raw_input_filters, 1)
-  local window_id = vim.api.nvim_open_win(bufnr, state.has_forcus, {
+  local window_id = vim.api.nvim_open_win(bufnr, resume_state.has_forcus, {
     width = layout.width - 2,
     height = input_height,
     relative = "editor",
@@ -56,8 +58,8 @@ function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
     end
   end)
 
-  vim.api.nvim_win_set_cursor(window_id, state.cursor)
-  if state.is_insert_mode then
+  vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
+  if resume_state.is_insert_mode then
     vim.cmd.startinsert()
   end
 
@@ -66,7 +68,7 @@ function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
   vim.api.nvim_create_autocmd({ "User" }, {
     pattern = { "thetto_ctx_deleted_" .. ctx_key },
     callback = function()
-      _states[ctx_key] = nil
+      _resume_states[ctx_key] = nil
     end,
     once = true,
   })
@@ -90,12 +92,12 @@ function M.close(self)
   end
   self._closed = true
 
-  local state = {
+  local resume_state = {
     has_forcus = vim.api.nvim_get_current_win() == self._window_id,
     cursor = vim.api.nvim_win_get_cursor(self._window_id),
     is_insert_mode = vim.api.nvim_get_mode().mode == "i",
   }
-  _states[self._ctx_key] = state
+  _resume_states[self._ctx_key] = resume_state
 
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
 end

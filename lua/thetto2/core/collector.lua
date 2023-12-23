@@ -78,7 +78,7 @@ end
 function Collector._run_pipeline(self, pipeline_ctx)
   self._pipeline_ctx = pipeline_ctx
   local items = self._pipeline:apply(pipeline_ctx, self._all_items)
-  self._consumer:consume(consumer_events.items_changed(items))
+  self._consumer:consume(consumer_events.items_changed(items, #self._all_items))
 end
 
 function Collector._create_subscriber(self)

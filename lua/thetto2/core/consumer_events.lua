@@ -9,8 +9,8 @@ local M = {
   all = events,
 }
 
-function M.items_changed(items)
-  return events.items_changed, items
+function M.items_changed(items, all_items_count)
+  return events.items_changed, items, all_items_count
 end
 
 function M.source_started(source_name)
