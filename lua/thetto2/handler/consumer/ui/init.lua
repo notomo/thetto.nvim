@@ -1,34 +1,42 @@
 --- @class ThettoUi
 --- @field _item_list ThettoUiItemList
 --- @field _inputter ThettoUiInputter
+--- @field _sidecar ThettoUiSidecar
 local Ui = {}
 Ui.__index = Ui
 
-function Ui.new(consumer_ctx, filters, callbacks)
+function Ui.new(consumer_ctx, filters, callbacks, has_sidecar, sidecar_action)
   local closer = require("thetto2.handler.consumer.ui.closer").new()
-  local layout = require("thetto2.handler.consumer.ui.layout").new()
+  local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, filters)
 
-  local item_list =
-    require("thetto2.handler.consumer.ui.item_list").open(consumer_ctx.ctx_key, consumer_ctx.cwd, closer, layout)
+  local item_list = require("thetto2.handler.consumer.ui.item_list").open(
+    consumer_ctx.ctx_key,
+    consumer_ctx.cwd,
+    closer,
+    layout.item_list
+  )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(
     consumer_ctx.ctx_key,
     consumer_ctx.cwd,
     closer,
-    layout,
-    filters,
+    layout.inputter,
     callbacks.on_change
   )
+
+  local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, closer, layout.sidecar)
 
   closer:setup(function()
     item_list:close()
     inputter:close()
+    sidecar:close()
     callbacks.on_discard()
   end)
 
   local tbl = {
     _item_list = item_list,
     _inputter = inputter,
+    _sidecar = sidecar,
   }
   return setmetatable(tbl, Ui)
 end

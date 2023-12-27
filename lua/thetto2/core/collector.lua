@@ -1,5 +1,11 @@
 local consumer_events = require("thetto2.core.consumer_events")
 
+--- @class ThettoCollector
+--- @field _all_items table
+--- @field _source_ctx table
+--- @field _pipeline_ctx table
+--- @field _subscription table
+--- @field _consumer ThettoConsumer
 local Collector = {}
 Collector.__index = Collector
 
@@ -23,18 +29,18 @@ function Collector.start(self)
   local subscriber = self:_create_subscriber()
   local consumer = self:_create_consumer()
   consumer:consume(consumer_events.source_started(self._source.name))
-  return self:_start(subscriber, consumer)
+  return self:_start(subscriber, consumer), consumer
 end
 
-function Collector.restart(self)
+function Collector.restart(self, consumer)
   self:_stop()
 
   self._all_items = {}
   self._source_ctx = require("thetto2.core.source_context").new(self._source)
   local subscriber = self:_create_subscriber()
 
-  self._consumer:consume(consumer_events.source_started(self._source.name))
-  return self:_start(subscriber, self._consumer)
+  consumer:consume(consumer_events.source_started(self._source.name))
+  return self:_start(subscriber, consumer)
 end
 
 function Collector.replay(self)
@@ -48,7 +54,7 @@ function Collector.replay(self)
   self._all_items = {}
 
   local consumer = self:_create_consumer()
-  return self:_start(subscriber, consumer)
+  return self:_start(subscriber, consumer), consumer
 end
 
 function Collector._start(self, subscriber, consumer)
@@ -93,6 +99,7 @@ function Collector._create_subscriber(self)
   end
 end
 
+--- @return ThettoConsumer
 function Collector._create_consumer(self)
   local callbacks = {
     on_change = function(pipeline_ctx_factory)

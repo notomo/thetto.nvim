@@ -5,7 +5,7 @@ M.__index = M
 
 local _resume_states = {}
 
-function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
+function M.open(ctx_key, cwd, closer, layout, on_change)
   local resume_state = _resume_states[ctx_key]
     or {
       has_forcus = true,
@@ -30,12 +30,11 @@ function M.open(ctx_key, cwd, closer, layout, raw_input_filters, on_change)
     end,
   })
 
-  local input_height = math.max(#raw_input_filters, 1)
   local window_id = vim.api.nvim_open_win(bufnr, resume_state.has_forcus, {
-    width = layout.width - 2,
-    height = input_height,
+    width = layout.width,
+    height = layout.height,
     relative = "editor",
-    row = layout.row + layout.height + 1,
+    row = layout.row,
     col = layout.column,
     external = false,
     style = "minimal",

@@ -8,36 +8,39 @@ function M.start(source, raw_opts)
   local collector = require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory)
   local executor = require("thetto2.core.executor").new(opts.kinds)
 
+  local promise, consumer = collector:start()
   require("thetto2.core.context").set(ctx_key, {
     collector = collector,
     executor = executor,
+    consumer = consumer,
   })
-
-  return collector:start()
+  return promise
 end
 
 function M.reload(bufnr)
-  local ctx, ctx_err = require("thetto2.core.context").get(bufnr)
-  if ctx_err then
-    return ctx_err
+  local ctx = require("thetto2.core.context").get(bufnr)
+  if type(ctx) == "string" then
+    return ctx
   end
 
   return ctx.collector:restart()
 end
 
 function M.resume(raw_opts)
-  local ctx, ctx_err = require("thetto2.core.context").get()
-  if ctx_err then
-    return ctx_err
+  local ctx = require("thetto2.core.context").get()
+  if type(ctx) == "string" then
+    return ctx
   end
 
-  return ctx.collector:replay()
+  local promise, consumer = ctx.collector:replay()
+  ctx:update({ consumer = consumer })
+  return promise
 end
 
 function M.execute(raw_opts)
-  local ctx, ctx_err = require("thetto2.core.context").get()
-  if ctx_err then
-    return ctx_err
+  local ctx = require("thetto2.core.context").get()
+  if type(ctx) == "string" then
+    return ctx
   end
 
   local selected_items = require("thetto2.core.items.selector").extract_selected(ctx.items)
@@ -45,12 +48,21 @@ function M.execute(raw_opts)
 end
 
 function M.get()
-  local ctx, ctx_err = require("thetto2.core.context").get()
-  if ctx_err then
-    return ctx_err
+  local ctx = require("thetto2.core.context").get()
+  if type(ctx) == "string" then
+    return ctx
   end
 
   return require("thetto2.core.items.selector").extract_selected(ctx.items)
+end
+
+function M.call_consumer(action_name, opts)
+  local ctx = require("thetto2.core.context").get()
+  if type(ctx) == "string" then
+    return ctx
+  end
+
+  return ctx.consumer:call(action_name, opts)
 end
 
 return M

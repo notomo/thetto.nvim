@@ -1,3 +1,7 @@
+--- @class ThettoContext
+--- @field collector ThettoCollector
+--- @field consumer ThettoConsumer
+--- @field _fields table
 local M = {}
 M.__index = function(tbl, k)
   local v = rawget(tbl._fields, k)
@@ -38,21 +42,22 @@ function M._expire_old()
   _ctxs = vim.list_slice(_ctxs, 1, max_count)
 end
 
+--- @return ThettoContext|string
 function M.get(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
 
   local path = vim.api.nvim_buf_get_name(bufnr)
   local ctx_key = path:match("^thetto://([^/]+)/")
   if not ctx_key then
-    return nil, "not found state in: " .. path
+    return "not found state in: " .. path
   end
 
   local ctx = _ctx_map[ctx_key]
   if not ctx then
-    return nil, "context is expired: " .. path
+    return "context is expired: " .. path
   end
 
-  return ctx, nil
+  return ctx
 end
 
 function M.update(self, fields)

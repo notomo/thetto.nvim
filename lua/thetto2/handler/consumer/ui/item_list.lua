@@ -32,14 +32,9 @@ function M.open(ctx_key, cwd, closer, layout)
   vim.bo[bufnr].filetype = "thetto2"
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/list"):format(ctx_key))
 
-  local border_char = "─"
-  if vim.o.ambiwidth == "double" then
-    border_char = "-"
-  end
-
   local window_id = vim.api.nvim_open_win(bufnr, resume_state.has_forcus, {
-    width = layout.width - 2, -- NOTICE: calc border width
-    height = layout.height - 1,
+    width = layout.width,
+    height = layout.height,
     relative = "editor",
     row = layout.row,
     col = layout.column,
@@ -49,7 +44,7 @@ function M.open(ctx_key, cwd, closer, layout)
     footer_pos = "left",
     border = {
       { " ", "NormalFloat" },
-      { border_char, "ThettoAboveBorder" },
+      { layout.border_char, "ThettoAboveBorder" },
       { " ", "NormalFloat" },
       { " ", "NormalFloat" },
       { " ", "StatusLine" },
@@ -172,7 +167,10 @@ function M._footer(state, row)
     state.all_items_count,
     state.start_index + row - 1
   )
-  return { { line, "StatusLine" }, { state.status, "Comment" } }
+  return {
+    { line, "StatusLine" },
+    { state.status, "Comment" },
+  }
 end
 
 local ns = vim.api.nvim_create_namespace("thetto2-list-highlight")
@@ -182,11 +180,15 @@ function M._highlight_handler(_, _, bufnr, topline, botline_guess)
   if not self then
     return false
   end
+
   self:highlight(topline, botline_guess)
+
   return false
 end
 
-function M.highlight(self)
+function M.highlight(self, topline, botline_guess)
+  local state = _states[self._ctx_key]
+
   return nil
 end
 
