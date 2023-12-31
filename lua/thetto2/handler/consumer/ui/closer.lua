@@ -1,3 +1,4 @@
+--- @class ThettoUiCloser
 local M = {}
 M.__index = M
 
@@ -20,11 +21,7 @@ function M.setup_autocmd(self, window_id)
       if tonumber(args.file) ~= window_id then
         return
       end
-      vim.api.nvim_exec_autocmds("User", {
-        pattern = self._pattern,
-        group = self._group,
-        modeline = false,
-      })
+      self:_execute_autocmd()
       return true
     end,
   })
@@ -43,11 +40,7 @@ function M.setup_autocmd(self, window_id)
           if bufnr == original_bufnr then
             return
           end
-          vim.api.nvim_exec_autocmds("User", {
-            pattern = self._pattern,
-            group = self._group,
-            modeline = false,
-          })
+          self:_execute_autocmd()
         end,
         once = true,
       })
@@ -62,11 +55,7 @@ function M.setup_autocmd(self, window_id)
       if bufnr == original_bufnr then
         return
       end
-      vim.api.nvim_exec_autocmds("User", {
-        pattern = self._pattern,
-        group = self._group,
-        modeline = false,
-      })
+      self:_execute_autocmd()
       return true
     end,
   })
@@ -81,6 +70,18 @@ function M.setup(self, handler)
       vim.api.nvim_clear_autocmds({ group = self._group })
     end,
     once = true,
+  })
+end
+
+function M.execute(self)
+  self:_execute_autocmd()
+end
+
+function M._execute_autocmd(self)
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = self._pattern,
+    group = self._group,
+    modeline = false,
   })
 end
 

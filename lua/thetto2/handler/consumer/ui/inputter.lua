@@ -83,6 +83,7 @@ end
 
 function M.enter(self)
   require("thetto2.vendor.misclib.window").safe_enter(self._window_id)
+  vim.cmd.startinsert()
 end
 
 function M.close(self)

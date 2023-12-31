@@ -23,7 +23,7 @@ function M.reload(bufnr)
     return ctx
   end
 
-  return ctx.collector:restart()
+  return ctx.collector:restart(ctx.consumer)
 end
 
 function M.resume(raw_opts)

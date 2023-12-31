@@ -20,4 +20,8 @@ function M.get()
   return require("thetto2.command").get()
 end
 
+function M.call_consumer(action_name, opts)
+  return require("thetto2.command").call_consumer(action_name, opts)
+end
+
 return M

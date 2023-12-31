@@ -192,6 +192,11 @@ function M.highlight(self, topline, botline_guess)
   return nil
 end
 
+function M.enter(self)
+  require("thetto2.vendor.misclib.window").safe_enter(self._window_id)
+  vim.cmd.stopinsert()
+end
+
 function M.close(self)
   if self._closed then
     return

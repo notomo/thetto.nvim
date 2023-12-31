@@ -2,6 +2,7 @@
 --- @field _item_list ThettoUiItemList
 --- @field _inputter ThettoUiInputter
 --- @field _sidecar ThettoUiSidecar
+--- @field _closer ThettoUiCloser
 local Ui = {}
 Ui.__index = Ui
 
@@ -37,6 +38,7 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar, sidecar_action)
     _item_list = item_list,
     _inputter = inputter,
     _sidecar = sidecar,
+    _closer = closer,
   }
   return setmetatable(tbl, Ui)
 end
@@ -67,6 +69,29 @@ function Ui.consume(self, event_name, ...)
     return
   end
   return handler(self, ...)
+end
+
+local actions = {
+  --- @param self ThettoUi
+  move_to_input = function(self)
+    self._inputter:enter()
+  end,
+  --- @param self ThettoUi
+  move_to_list = function(self)
+    self._item_list:enter()
+  end,
+  --- @param self ThettoUi
+  quit = function(self)
+    self._closer:execute()
+  end,
+}
+
+function Ui.call(self, action_name, opts)
+  local action = actions[action_name]
+  if not action then
+    return
+  end
+  return action(self)
 end
 
 return Ui
