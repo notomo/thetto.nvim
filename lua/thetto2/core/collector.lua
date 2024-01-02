@@ -60,11 +60,16 @@ end
 function Collector._start(self, subscriber, consumer)
   self._consumer = consumer
 
+  local default_kind_name = self._source.kind_name
   local observable = require("thetto2.vendor.misclib.observable").new(subscriber)
   return require("thetto2.vendor.promise").new(function(resolve, reject)
     self._subscription = observable:subscribe({
       next = function(items)
+        for _, item in ipairs(items) do
+          item.kind_name = item.kind_name or default_kind_name
+        end
         vim.list_extend(self._all_items, items)
+
         self:_run_pipeline(self._pipeline_ctx)
       end,
       complete = function()

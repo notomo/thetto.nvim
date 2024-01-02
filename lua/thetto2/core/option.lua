@@ -15,4 +15,11 @@ function M.new_start_opts(raw_opts)
   return vim.tbl_extend("force", default_start_opts, raw_opts or {})
 end
 
+local default_execute_opts = {
+  quit = true,
+}
+function M.new_execute_opts(raw_opts)
+  return vim.tbl_extend("force", default_execute_opts, raw_opts or {})
+end
+
 return M

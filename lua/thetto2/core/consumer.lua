@@ -11,4 +11,6 @@ function M.consume(self, event_name, ...) end
 --- @param opts table
 function M.call(self, action_name, opts) end
 
+function M.get_items(self) end
+
 return M

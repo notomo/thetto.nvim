@@ -94,4 +94,8 @@ function Ui.call(self, action_name, opts)
   return action(self)
 end
 
+function Ui.get_items(self)
+  return self._item_list:get_items()
+end
+
 return Ui

@@ -6,7 +6,7 @@ function M.start(source, raw_opts)
   local pipeline = opts.pipeline_factory()
   local ctx_key = require("thetto2.core.context").new_key()
   local collector = require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory)
-  local executor = require("thetto2.core.executor").new(opts.kinds)
+  local executor = require("thetto2.core.executor").new()
 
   local promise, consumer = collector:start()
   require("thetto2.core.context").set(ctx_key, {
@@ -37,14 +37,19 @@ function M.resume(raw_opts)
   return promise
 end
 
-function M.execute(raw_opts)
+function M.execute(action_item_groups, raw_opts)
+  local opts = require("thetto2.core.option").new_execute_opts(raw_opts)
+
   local ctx = require("thetto2.core.context").get()
   if type(ctx) == "string" then
     return ctx
   end
 
-  local selected_items = require("thetto2.core.items.selector").extract_selected(ctx.items)
-  return ctx.executor:execute_action(selected_items)
+  if opts.quit then
+    ctx.consumer:call("quit", {})
+  end
+
+  return ctx.executor:execute(action_item_groups)
 end
 
 function M.get()
@@ -53,7 +58,7 @@ function M.get()
     return ctx
   end
 
-  return require("thetto2.core.items.selector").extract_selected(ctx.items)
+  return ctx.consumer:get_items()
 end
 
 function M.call_consumer(action_name, opts)

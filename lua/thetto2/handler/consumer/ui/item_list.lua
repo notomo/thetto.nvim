@@ -214,4 +214,9 @@ function M.close(self)
   vim.api.nvim_set_decoration_provider(ns, {})
 end
 
+function M.get_items(self)
+  local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
+  return { _states[self._ctx_key].items[row] }
+end
+
 return M
