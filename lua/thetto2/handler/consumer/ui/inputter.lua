@@ -86,14 +86,14 @@ function M.enter(self)
   vim.cmd.startinsert()
 end
 
-function M.close(self)
+function M.close(self, current_window_id)
   if self._closed then
     return
   end
   self._closed = true
 
   local resume_state = {
-    has_forcus = vim.api.nvim_get_current_win() == self._window_id,
+    has_forcus = current_window_id == self._window_id,
     cursor = vim.api.nvim_win_get_cursor(self._window_id),
     is_insert_mode = vim.api.nvim_get_mode().mode == "i",
   }

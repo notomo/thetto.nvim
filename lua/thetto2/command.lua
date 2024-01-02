@@ -27,9 +27,9 @@ function M.reload(bufnr)
 end
 
 function M.resume(raw_opts)
-  local ctx = require("thetto2.core.context").get()
-  if type(ctx) == "string" then
-    return ctx
+  local ctx = require("thetto2.core.context").resume()
+  if not ctx then
+    return
   end
 
   local promise, consumer = ctx.collector:replay()

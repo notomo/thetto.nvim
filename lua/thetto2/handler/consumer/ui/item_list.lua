@@ -61,8 +61,6 @@ function M.open(ctx_key, cwd, closer, layout)
     end
   end)
 
-  vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
-
   closer:setup_autocmd(window_id)
 
   vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
@@ -88,6 +86,10 @@ function M.open(ctx_key, cwd, closer, layout)
     _closed = false,
   }, M)
   _selfs[bufnr] = self
+
+  local state = _states[ctx_key]
+  self:redraw_list(state.items, state.all_items_count)
+  vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
 
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
     buffer = bufnr,
@@ -197,7 +199,7 @@ function M.enter(self)
   vim.cmd.stopinsert()
 end
 
-function M.close(self)
+function M.close(self, current_window_id)
   if self._closed then
     return
   end
@@ -205,7 +207,7 @@ function M.close(self)
   _selfs[self._bufnr] = nil
 
   local resume_state = {
-    has_forcus = vim.api.nvim_get_current_win() == self._window_id,
+    has_forcus = current_window_id == self._window_id,
     cursor = vim.api.nvim_win_get_cursor(self._window_id),
   }
   _resume_states[self._ctx_key] = resume_state

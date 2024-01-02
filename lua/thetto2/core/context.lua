@@ -61,6 +61,12 @@ function M.get(bufnr)
   return ctx
 end
 
+function M.resume()
+  -- TODO
+  local ctx = _ctxs[1]
+  return ctx
+end
+
 function M.update(self, fields)
   self._fields = vim.tbl_extend("force", self._fields, fields)
 end
