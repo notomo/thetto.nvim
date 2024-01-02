@@ -85,6 +85,10 @@ local actions = {
   quit = function(self)
     self._closer:execute()
   end,
+  --- @param self ThettoUi
+  toggle_selection = function(self)
+    self._item_list:toggle_selection()
+  end,
 }
 
 function Ui.call(self, action_name, opts)

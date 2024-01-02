@@ -65,7 +65,9 @@ function Collector._start(self, subscriber, consumer)
   return require("thetto2.vendor.promise").new(function(resolve, reject)
     self._subscription = observable:subscribe({
       next = function(items)
-        for _, item in ipairs(items) do
+        local count = #self._all_items
+        for i, item in ipairs(items) do
+          item.index = count + i
           item.kind_name = item.kind_name or default_kind_name
         end
         vim.list_extend(self._all_items, items)

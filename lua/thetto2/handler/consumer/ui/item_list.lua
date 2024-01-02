@@ -3,6 +3,9 @@
 local M = {}
 M.__index = M
 
+local _ns_name = "thetto2-list-highlight"
+local _ns = vim.api.nvim_create_namespace(_ns_name)
+
 local _selfs = {}
 local _resume_states = {}
 local _states = {}
@@ -24,6 +27,7 @@ function M.open(ctx_key, cwd, closer, layout)
       start_index = 1,
       end_index = 1,
       all_items_count = 0,
+      selected_items = {},
     }
   _states[ctx_key] = state
 
@@ -84,10 +88,10 @@ function M.open(ctx_key, cwd, closer, layout)
     _window_id = window_id,
     _ctx_key = ctx_key,
     _closed = false,
+    _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
   }, M)
   _selfs[bufnr] = self
 
-  local state = _states[ctx_key]
   self:redraw_list(state.items, state.all_items_count)
   vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
 
@@ -95,6 +99,20 @@ function M.open(ctx_key, cwd, closer, layout)
     buffer = bufnr,
     callback = function()
       self:redraw_footer(nil, nil)
+    end,
+  })
+
+  vim.api.nvim_set_decoration_provider(_ns, {})
+  vim.api.nvim_set_decoration_provider(_ns, {
+    on_win = function(_, _, self_bufnr, topline, botline_guess)
+      local item_list = _selfs[self_bufnr]
+      if not item_list then
+        return false
+      end
+
+      item_list:highlight(topline, botline_guess)
+
+      return false
     end,
   })
 
@@ -175,23 +193,19 @@ function M._footer(state, row)
   }
 end
 
-local ns = vim.api.nvim_create_namespace("thetto2-list-highlight")
-
-function M._highlight_handler(_, _, bufnr, topline, botline_guess)
-  local self = _selfs[bufnr]
-  if not self then
-    return false
-  end
-
-  self:highlight(topline, botline_guess)
-
-  return false
-end
-
 function M.highlight(self, topline, botline_guess)
   local state = _states[self._ctx_key]
+  local items = state.items
 
-  return nil
+  local displayed_items = {}
+  for i = topline + 1, botline_guess + 1, 1 do
+    table.insert(displayed_items, items[i])
+  end
+
+  local selected_items = state.selected_items
+  self._decorator:filter("Statement", topline, displayed_items, function(item)
+    return selected_items[item.index] ~= nil
+  end)
 end
 
 function M.enter(self)
@@ -213,12 +227,52 @@ function M.close(self, current_window_id)
   _resume_states[self._ctx_key] = resume_state
 
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
-  vim.api.nvim_set_decoration_provider(ns, {})
+  vim.api.nvim_set_decoration_provider(_ns, {})
 end
 
 function M.get_items(self)
-  local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
-  return { _states[self._ctx_key].items[row] }
+  local state = _states[self._ctx_key]
+  if vim.tbl_isempty(state.selected_items) then
+    local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
+    return { state.items[row] }
+  end
+
+  if vim.tbl_islist(state.selected_items) then
+    return vim.iter(state.selected_items):totable()
+  end
+
+  return vim
+    .iter(state.selected_items)
+    :map(function(_, v)
+      return v
+    end)
+    :totable()
+end
+
+function M.toggle_selection(self)
+  local range = {
+    vim.fn.line("v"),
+    vim.fn.line("."),
+  }
+  table.sort(range, function(a, b)
+    return a < b
+  end)
+
+  local state = _states[self._ctx_key]
+
+  local start_index = state.start_index + range[1] - 1
+  local end_index = state.start_index + range[2] - 1
+  for index = start_index, end_index, 1 do
+    if state.selected_items[index] then
+      state.selected_items[index] = nil
+    else
+      state.selected_items[index] = state.items[index]
+    end
+  end
+
+  _states[self._ctx_key] = state
+
+  vim.api.nvim__buf_redraw_range(self._bufnr, 0, -1)
 end
 
 return M
