@@ -12,8 +12,8 @@ function M.resume(opts)
   return require("thetto2.command").resume(opts)
 end
 
-function M.execute(opts)
-  return require("thetto2.command").execute(opts)
+function M.execute(item_action_groups, opts)
+  return require("thetto2.command").execute(item_action_groups, opts)
 end
 
 function M.get()

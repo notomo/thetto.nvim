@@ -25,7 +25,7 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar, sidecar_action)
     callbacks.on_change
   )
 
-  local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, closer, layout.sidecar)
+  local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, layout.sidecar)
 
   closer:setup(function()
     local current_window_id = vim.api.nvim_get_current_win()

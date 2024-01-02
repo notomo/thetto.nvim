@@ -3,7 +3,7 @@
 local M = {}
 M.__index = M
 
-function M.open(ctx_key, closer, layout)
+function M.open(ctx_key, layout)
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/sidecar"):format(ctx_key))
