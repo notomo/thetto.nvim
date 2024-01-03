@@ -43,7 +43,7 @@ end
 function M._action_key(self, action_name)
   local name = action_name
   if name == "default" then
-    name = self.default_action
+    name = self._kind.default_action
   end
   return "action_" .. name, name
 end

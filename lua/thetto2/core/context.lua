@@ -60,6 +60,7 @@ function M.get(bufnr)
   return ctx
 end
 
+--- @return ThettoContext?
 function M.resume()
   -- TODO
   local ctx = _ctxs[1]

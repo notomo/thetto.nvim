@@ -2,12 +2,12 @@ local listlib = require("thetto2.vendor.misclib.collection.list")
 
 local M = {}
 
-function M.by_name(action_name, items, kind_name)
+function M.by_name(action_name, items, default_kind_name)
   action_name = action_name or "default"
 
   local item_kind_pairs = {}
   for _, item in ipairs(items) do
-    kind_name = kind_name or item.kind_name
+    local kind_name = default_kind_name or item.kind_name
     local kind = require("thetto2.core.kind").new(kind_name)
     table.insert(item_kind_pairs, { item, kind:action_kind_name(action_name) })
   end
@@ -36,10 +36,7 @@ end
 
 function M.call(kind_name, action_name, items, action_opts)
   local action_item_groups = M.by_name(action_name, items, kind_name)
-  return require("thetto2").execute(action_item_groups, {
-    quit = false,
-    action_opts = action_opts,
-  })
+  return require("thetto2.core.executor").execute(action_item_groups, action_opts)
 end
 
 return M
