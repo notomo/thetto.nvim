@@ -1,7 +1,6 @@
 --- @class ThettoContext
 --- @field collector ThettoCollector
 --- @field consumer ThettoConsumer
---- @field executor ThettoExecutor
 --- @field _fields table
 local M = {}
 M.__index = function(tbl, k)

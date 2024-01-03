@@ -1,13 +1,6 @@
---- @class ThettoExecutor
 local M = {}
-M.__index = M
 
-function M.new()
-  local tbl = {}
-  return setmetatable(tbl, M)
-end
-
-function M.execute(self, action_item_groups)
+function M.execute(action_item_groups)
   local Promise = require("thetto.vendor.promise")
 
   local promise

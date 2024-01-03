@@ -6,12 +6,10 @@ function M.start(source, raw_opts)
   local pipeline = opts.pipeline_factory()
   local ctx_key = require("thetto2.core.context").new_key()
   local collector = require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory)
-  local executor = require("thetto2.core.executor").new()
 
   local promise, consumer = collector:start()
   require("thetto2.core.context").set(ctx_key, {
     collector = collector,
-    executor = executor,
     consumer = consumer,
   })
   return promise
@@ -49,7 +47,7 @@ function M.execute(action_item_groups, raw_opts)
     ctx.consumer:call("quit", {})
   end
 
-  return ctx.executor:execute(action_item_groups)
+  return require("thetto2.core.executor").execute(action_item_groups)
 end
 
 function M.get()
