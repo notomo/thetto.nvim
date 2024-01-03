@@ -7,7 +7,7 @@ local default_start_opts = {
     })
   end,
   consumer_factory = function(consumer_ctx, pipeline, callbacks)
-    return require("thetto2.handler.consumer.ui").new(consumer_ctx, pipeline:filters(), callbacks, true, function() end)
+    return require("thetto2.handler.consumer.ui").new(consumer_ctx, pipeline:filters(), callbacks, true)
   end,
   kind = {},
 }

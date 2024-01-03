@@ -48,4 +48,13 @@ function M._action_key(self, action_name)
   return "action_" .. name, name
 end
 
+function M.get_preview(self, item)
+  local f = self._kind.get_preview
+  if not f then
+    return require("thetto2.vendor.promise").resolve(), { lines = {} }
+  end
+  local promise, preview = f(item)
+  return require("thetto2.vendor.promise").resolve(promise), preview
+end
+
 return M

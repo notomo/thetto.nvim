@@ -6,15 +6,18 @@
 local Ui = {}
 Ui.__index = Ui
 
-function Ui.new(consumer_ctx, filters, callbacks, has_sidecar, sidecar_action)
+function Ui.new(consumer_ctx, filters, callbacks, has_sidecar)
   local closer = require("thetto2.handler.consumer.ui.closer").new()
   local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, filters)
+
+  local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, has_sidecar, layout.sidecar)
 
   local item_list = require("thetto2.handler.consumer.ui.item_list").open(
     consumer_ctx.ctx_key,
     consumer_ctx.cwd,
     closer,
-    layout.item_list
+    layout.item_list,
+    sidecar
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(
@@ -24,8 +27,6 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar, sidecar_action)
     layout.inputter,
     callbacks.on_change
   )
-
-  local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, layout.sidecar)
 
   closer:setup(function()
     local current_window_id = vim.api.nvim_get_current_win()

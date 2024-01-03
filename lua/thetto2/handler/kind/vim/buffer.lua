@@ -1,4 +1,4 @@
-local filelib = require("thetto.lib.file")
+local filelib = require("thetto2.lib.file")
 
 local M = {}
 
@@ -31,12 +31,11 @@ function M.action_tab_drop(items)
   end
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil or not vim.api.nvim_buf_is_loaded(item.bufnr) then
+function M.get_preview(item)
+  if not vim.api.nvim_buf_is_loaded(item.bufnr) then
     return
   end
-  return nil, ctx.ui:open_preview(item, { bufnr = item.bufnr })
+  return nil, { bufnr = item.bufnr }
 end
 
 M.default_action = "open"

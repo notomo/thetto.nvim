@@ -1,4 +1,4 @@
-local filelib = require("thetto.lib.file")
+local filelib = require("thetto2.lib.file")
 
 local vim = vim
 

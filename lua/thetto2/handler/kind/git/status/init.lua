@@ -175,22 +175,19 @@ end
 M.opts.preview = {
   ignore_patterns = {},
 }
-function M.action_preview(items, action_ctx, ctx)
-  local item = ctx.ui:current_item()
-  if not item then
-    return nil
-  end
+function M.get_preview(item)
   if not item.path then
     return nil
   end
 
-  if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
-    return nil, ctx.ui:open_preview(item, { lines = { "IGNORED" } })
-  end
-
-  if item.index_status == "untracked" then
-    return require("thetto.util.action").call("file", "preview", items, ctx)
-  end
+  -- TODO
+  -- if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
+  --   return nil, { lines = { "IGNORED" } }
+  -- end
+  --
+  -- if item.index_status == "untracked" then
+  --   return require("thetto.util.action").call("file", "preview", items, ctx)
+  -- end
 
   local bufnr = require("thetto.util.git").diff_buffer()
   local cmd = { "git", "--no-pager", "diff", "--date=iso" }
@@ -199,11 +196,7 @@ function M.action_preview(items, action_ctx, ctx)
   end
   vim.list_extend(cmd, { "--", item.path })
   local promise = require("thetto.util.git").diff(item.git_root, bufnr, cmd)
-  local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
-  if err then
-    return nil, err
-  end
-  return promise
+  return promise, { raw_bufnr = bufnr }
 end
 
 return M

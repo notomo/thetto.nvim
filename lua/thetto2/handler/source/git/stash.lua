@@ -1,4 +1,4 @@
-local filelib = require("thetto.lib.file")
+local filelib = require("thetto2.lib.file")
 
 local M = {}
 
@@ -46,7 +46,7 @@ M.actions = {
     end)
   end,
 
-  action_preview = function(items, _, ctx)
+  get_preview = function(items, _, ctx)
     local item = items[1]
     if not item then
       return nil

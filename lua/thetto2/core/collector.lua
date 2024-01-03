@@ -60,7 +60,7 @@ end
 function Collector._start(self, subscriber, consumer)
   self._consumer = consumer
 
-  local default_kind_name = self._source.kind_name
+  local default_kind_name = self._source.kind_name or "base"
   local observable = require("thetto2.vendor.misclib.observable").new(subscriber)
   return require("thetto2.vendor.promise").new(function(resolve, reject)
     self._subscription = observable:subscribe({

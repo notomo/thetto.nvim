@@ -1,5 +1,6 @@
 --- @class ThettoUiItemList
 --- @field _closed boolean
+--- @field _sidecar ThettoUiSidecar
 local M = {}
 M.__index = M
 
@@ -10,7 +11,8 @@ local _selfs = {}
 local _resume_states = {}
 local _states = {}
 
-function M.open(ctx_key, cwd, closer, layout)
+--- @param sidecar ThettoUiSidecar
+function M.open(ctx_key, cwd, closer, layout, sidecar)
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = false,
     cursor = { 1, 0 },
@@ -87,8 +89,9 @@ function M.open(ctx_key, cwd, closer, layout)
     _bufnr = bufnr,
     _window_id = window_id,
     _ctx_key = ctx_key,
-    _closed = false,
+    _sidecar = sidecar,
     _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
+    _closed = false,
   }, M)
   _selfs[bufnr] = self
 
@@ -101,6 +104,15 @@ function M.open(ctx_key, cwd, closer, layout)
       self:redraw_footer(nil, nil)
     end,
   })
+
+  if sidecar:enabled() then
+    vim.api.nvim_create_autocmd({ "CursorMoved" }, {
+      buffer = bufnr,
+      callback = function()
+        self:_redraw_sidecar()
+      end,
+    })
+  end
 
   vim.api.nvim_set_decoration_provider(_ns, {})
   vim.api.nvim_set_decoration_provider(_ns, {
@@ -164,6 +176,8 @@ function M.redraw_list(self, items, all_items_count)
   vim.api.nvim_win_set_config(self._window_id, {
     footer = M._footer(state, row),
   })
+
+  self:_redraw_sidecar()
 end
 
 function M.redraw_footer(self, source_name, status)
@@ -230,11 +244,16 @@ function M.close(self, current_window_id)
   vim.api.nvim_set_decoration_provider(_ns, {})
 end
 
+function M.get_current_item(self)
+  local state = _states[self._ctx_key]
+  local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
+  return state.items[row]
+end
+
 function M.get_items(self)
   local state = _states[self._ctx_key]
   if vim.tbl_isempty(state.selected_items) then
-    local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
-    return { state.items[row] }
+    return { self:get_current_item() }
   end
 
   if vim.tbl_islist(state.selected_items) then
@@ -247,6 +266,21 @@ function M.get_items(self)
       return v
     end)
     :totable()
+end
+
+function M._redraw_sidecar(self)
+  if not self._sidecar:enabled() then
+    return
+  end
+
+  local item = self:get_current_item()
+  if not item then
+    return
+  end
+
+  local kind = require("thetto2.core.kind").new(item.kind_name)
+  local _, preview = kind:get_preview(item)
+  self._sidecar:redraw(preview)
 end
 
 function M.toggle_selection(self)

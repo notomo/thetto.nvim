@@ -1,4 +1,4 @@
-local filelib = require("thetto.lib.file")
+local filelib = require("thetto2.lib.file")
 
 local M = {}
 
@@ -44,17 +44,13 @@ function M.action_enter(items)
   return require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil then
-    return
-  end
+function M.get_preview(item)
   local bufnr = vim.api.nvim_create_buf(false, true)
   after(item.path, bufnr)
   if bufnr and vim.api.nvim_buf_is_loaded(bufnr) then
-    return nil, ctx.ui:open_preview(item, {
+    return nil, {
       raw_bufnr = bufnr,
-    })
+    }
   end
 end
 
