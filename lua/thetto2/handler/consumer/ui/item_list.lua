@@ -301,13 +301,13 @@ end
 function M._toggle_selection(self, s, e)
   local state = _states[self._ctx_key]
 
-  local start_index = state.start_index + s - 1
-  local end_index = state.start_index + e - 1
-  for index = start_index, end_index, 1 do
+  local ranged_items = vim.list_slice(state.items, s, e)
+  for _, item in ipairs(ranged_items) do
+    local index = item.index
     if state.selected_items[index] then
       state.selected_items[index] = nil
     else
-      state.selected_items[index] = state.items[index]
+      state.selected_items[index] = item
     end
   end
 
