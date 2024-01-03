@@ -291,11 +291,20 @@ function M.toggle_selection(self)
   table.sort(range, function(a, b)
     return a < b
   end)
+  self:_toggle_selection(range[1], range[2])
+end
 
+function M.toggle_all_selection(self)
+  local s = 1
+  local e = vim.api.nvim_buf_line_count(self._bufnr)
+  self:_toggle_selection(s, e)
+end
+
+function M._toggle_selection(self, s, e)
   local state = _states[self._ctx_key]
 
-  local start_index = state.start_index + range[1] - 1
-  local end_index = state.start_index + range[2] - 1
+  local start_index = state.start_index + s - 1
+  local end_index = state.start_index + e - 1
   for index = start_index, end_index, 1 do
     if state.selected_items[index] then
       state.selected_items[index] = nil

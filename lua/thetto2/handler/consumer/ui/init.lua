@@ -90,6 +90,10 @@ local actions = {
   toggle_selection = function(self)
     self._item_list:toggle_selection()
   end,
+  --- @param self ThettoUi
+  toggle_all_selection = function(self)
+    self._item_list:toggle_all_selection()
+  end,
 }
 
 function Ui.call(self, action_name, opts)
