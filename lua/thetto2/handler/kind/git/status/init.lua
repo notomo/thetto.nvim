@@ -135,14 +135,14 @@ function M.action_commit(items, action_ctx)
     end)
 end
 
-function M.action_commit_amend(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, ctx, {
+function M.action_commit_amend(items, action_ctx)
+  return require("thetto2.util.action").call(action_ctx.kind_name, "commit", items, {
     args = { "--amend" },
   })
 end
 
-function M.action_commit_empty(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, ctx, {
+function M.action_commit_empty(items, action_ctx)
+  return require("thetto2.util.action").call(action_ctx.kind_name, "commit", items, {
     args = { "--allow-empty" },
   })
 end
@@ -186,7 +186,7 @@ function M.get_preview(item)
   -- end
   --
   -- if item.index_status == "untracked" then
-  --   return require("thetto.util.action").call("file", "preview", items, ctx)
+  --   return require("thetto2.util.action").call("file", "preview", items, ctx)
   -- end
 
   local bufnr = require("thetto.util.git").diff_buffer()

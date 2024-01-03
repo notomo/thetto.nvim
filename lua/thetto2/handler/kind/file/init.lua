@@ -89,7 +89,7 @@ function M.get_preview(item, action_ctx)
   --   return nil, { lines = { "IGNORED" } }
   -- end
   -- if vim.fn.isdirectory(item.path) == 1 then
-  --   return require("thetto.util.action").call("file/directory", "preview", items, ctx)
+  --   return require("thetto2.util.action").call("file/directory", "preview", items, ctx)
   -- end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
@@ -146,12 +146,12 @@ local to_dirs = function(items)
   return dirs
 end
 
-function M.action_directory_open(items, _, ctx)
-  return require("thetto.util.action").call("file/directory", "open", to_dirs(items), ctx)
+function M.action_directory_open(items)
+  return require("thetto2.util.action").call("file/directory", "open", to_dirs(items))
 end
 
-function M.action_directory_tab_open(items, _, ctx)
-  return require("thetto.util.action").call("file/directory", "tab_open", to_dirs(items), ctx)
+function M.action_directory_tab_open(items)
+  return require("thetto2.util.action").call("file/directory", "tab_open", to_dirs(items))
 end
 
 function M.action_directory_enter(items)

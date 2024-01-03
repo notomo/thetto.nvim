@@ -40,7 +40,7 @@ function M.action_close(items, action_ctx)
   return require("thetto.util.job").execute(cmd)
 end
 
-function M.action_close_with_comment(items, action_ctx, ctx)
+function M.action_close_with_comment(items, action_ctx)
   return require("thetto.util.input")
     .promise({
       prompt = "Comment: ",
@@ -49,14 +49,14 @@ function M.action_close_with_comment(items, action_ctx, ctx)
       if not input or input == "" then
         return require("thetto.vendor.misclib.message").info("Canceled issue close with comment")
       end
-      return require("thetto.util.action").call(action_ctx.kind_name, "close", items, ctx, {
+      return require("thetto2.util.action").call(action_ctx.kind_name, "close", items, {
         comment = input,
       })
     end)
 end
 
-function M.action_close_not_planned(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "close", items, ctx, {
+function M.action_close_not_planned(items, action_ctx)
+  return require("thetto2.util.action").call(action_ctx.kind_name, "close", items, {
     reason = { "not planned" },
   })
 end

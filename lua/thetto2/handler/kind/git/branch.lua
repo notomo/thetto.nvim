@@ -34,8 +34,8 @@ function M.action_delete(items, action_ctx)
   return require("thetto.util.job").promise(cmd, { cwd = to_git_root(items) })
 end
 
-function M.action_force_delete(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "delete", items, ctx, {
+function M.action_force_delete(items, action_ctx)
+  return require("thetto2.util.action").call(action_ctx.kind_name, "delete", items, {
     args = { "-D" },
   })
 end
