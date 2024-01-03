@@ -136,7 +136,6 @@ function M.redraw_list(self, items, all_items_count)
     items = items,
     all_items_count = all_items_count,
   }, _states[self._ctx_key])
-  _states[self._ctx_key] = state
 
   local items_count = #state.items
   local page = math.min(state.page, math.floor(items_count / state.limit))
@@ -150,7 +149,7 @@ function M.redraw_list(self, items, all_items_count)
   state = vim.tbl_extend("keep", {
     start_index = start_index,
     end_index = end_index,
-  }, _states[self._ctx_key])
+  }, state)
   _states[self._ctx_key] = state
 
   local index = 1
@@ -252,20 +251,19 @@ end
 
 function M.get_items(self)
   local state = _states[self._ctx_key]
-  if vim.tbl_isempty(state.selected_items) then
+
+  local selected_items = {}
+  for _, item in ipairs(state.items) do
+    local selected_item = state.selected_items[item.index]
+    if selected_item then
+      table.insert(selected_items, selected_item)
+    end
+  end
+
+  if #selected_items == 0 then
     return { self:get_current_item() }
   end
-
-  if vim.tbl_islist(state.selected_items) then
-    return vim.iter(state.selected_items):totable()
-  end
-
-  return vim
-    .iter(state.selected_items)
-    :map(function(_, v)
-      return v
-    end)
-    :totable()
+  return selected_items
 end
 
 function M._redraw_sidecar(self)
