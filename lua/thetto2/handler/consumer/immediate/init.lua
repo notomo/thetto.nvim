@@ -3,9 +3,10 @@
 local M = {}
 M.__index = M
 
-function M.new(consumer_ctx)
+function M.new(consumer_ctx, action_name)
   local tbl = {
     _all_items = {},
+    _action_name = action_name,
   }
   return setmetatable(tbl, M)
 end
@@ -20,7 +21,7 @@ local handlers = {
   --- @param self ThettoImmediate
   [consumer_events.all.source_completed] = function(self)
     local items = { self._all_items[1] }
-    local action_item_groups = require("thetto2.util.action").by_name(nil, items)
+    local action_item_groups = require("thetto2.util.action").by_name(self._action_name, items)
     return require("thetto2.core.executor").execute(action_item_groups)
   end,
   [consumer_events.all.source_error] = function(_, err)

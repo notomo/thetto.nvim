@@ -38,4 +38,10 @@ function helper.wait(promise)
   on_finished:wait()
 end
 
+local asserts = require("vusted.assert").asserts
+
+asserts.create("lines"):register_eq(function()
+  return table.concat(vim.fn.getbufline("%", 0, "$"), "\n")
+end)
+
 return helper
