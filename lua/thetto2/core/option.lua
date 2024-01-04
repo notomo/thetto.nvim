@@ -24,6 +24,7 @@ end
 local default_resume_opts = {
   consumer_factory = require("thetto2.util.consumer").ui(),
   item_cursor_factory = require("thetto2.util.item_cursor").no(),
+  offset = 0,
 }
 function M.new_resume_opts(raw_opts)
   return vim.tbl_extend("force", default_resume_opts, raw_opts or {})
