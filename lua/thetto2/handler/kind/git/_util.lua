@@ -34,7 +34,7 @@ function M.open_diff(items, f)
     table.insert(promises, promise)
     f(bufnr)
   end
-  return require("thetto.vendor.promise").all(promises)
+  return require("thetto2.vendor.promise").all(promises)
 end
 
 function M.open(items, f)
@@ -45,7 +45,7 @@ function M.open(items, f)
     end)
     table.insert(promises, promise)
   end
-  return require("thetto.vendor.promise").all(promises)
+  return require("thetto2.vendor.promise").all(promises)
 end
 
 return M

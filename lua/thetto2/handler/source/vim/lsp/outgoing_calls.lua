@@ -4,7 +4,7 @@ local M = {}
 
 function M.request(bufnr, method)
   local params = vim.lsp.util.make_position_params()
-  return require("thetto.vendor.promise")
+  return require("thetto2.vendor.promise")
     .new(function(resolve, reject)
       vim.lsp.buf_request(bufnr, "textDocument/prepareCallHierarchy", params, function(err, result, ctx)
         if err then
@@ -19,7 +19,7 @@ function M.request(bufnr, method)
       end)
     end)
     :next(function(client, call_hierarchy_item)
-      return require("thetto.vendor.promise").new(function(resolve, reject)
+      return require("thetto2.vendor.promise").new(function(resolve, reject)
         client.request(method, { item = call_hierarchy_item }, function(err, result)
           if err then
             return reject(err)

@@ -22,7 +22,11 @@ function M.find_action(self, action_name)
   local key = self:_action_key(action_name)
   local action = self._kind[key]
   if action then
-    return action
+    local action_opts = self._kind.opts[action_name] or {}
+    return function(items, raw_action_ctx)
+      local action_ctx = vim.tbl_deep_extend("force", { opts = action_opts }, raw_action_ctx)
+      return action(items, action_ctx)
+    end
   end
 
   local err = ("not found action: kind=%s action=%s"):format(self._kind.name, action_name)

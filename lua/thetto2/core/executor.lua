@@ -1,11 +1,11 @@
 local M = {}
 
 function M.execute(action_item_groups, action_opts)
-  local Promise = require("thetto.vendor.promise")
+  local Promise = require("thetto2.vendor.promise")
 
   local promise
-  local action_ctx = { action_opts = action_opts }
   for _, group in ipairs(action_item_groups) do
+    local action_ctx = { opts = action_opts }
     local result, err = group.action(group.items, action_ctx)
     if err then
       local current = promise or Promise.resolve()

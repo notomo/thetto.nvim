@@ -20,7 +20,7 @@ local to_git_root = require("thetto.handler.kind.git._util").to_git_root
 
 function M.action_toggle_stage(items)
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.vendor.promise")
+  return require("thetto2.vendor.promise")
     .resolve()
     :next(function()
       local will_be_stage = vim.tbl_filter(function(item)
@@ -89,7 +89,7 @@ function M.action_discard(items)
       for _, path in ipairs(to_paths(delete_targets)) do
         vim.fn.delete(path, "rf")
       end
-      return require("thetto.vendor.promise").all(promises)
+      return require("thetto2.vendor.promise").all(promises)
     end)
     :next(function()
       return require("thetto.command").reload(bufnr)
@@ -131,7 +131,7 @@ function M.action_commit(items, action_ctx)
       if err and err:match("Please supply the message") then
         return
       end
-      return require("thetto.vendor.promise").reject(err)
+      return require("thetto2.vendor.promise").reject(err)
     end)
 end
 
