@@ -11,12 +11,14 @@ function M.open(ctx_key, cwd, closer, layout, on_change)
       has_forcus = true,
       cursor = { 1, 0 },
       is_insert_mode = true,
+      lines = {},
     }
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "thetto2-input"
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/inputter"):format(ctx_key))
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function(_, _, _, _)
@@ -96,6 +98,7 @@ function M.close(self, current_window_id)
     has_forcus = current_window_id == self._window_id,
     cursor = vim.api.nvim_win_get_cursor(self._window_id),
     is_insert_mode = vim.api.nvim_get_mode().mode == "i",
+    lines = vim.api.nvim_buf_get_lines(self._bufnr, 0, -1, false),
   }
   _resume_states[self._ctx_key] = resume_state
 
