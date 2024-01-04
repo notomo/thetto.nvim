@@ -117,6 +117,38 @@ line2]])
   end)
 end)
 
+describe("thetto.reload()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("restarts source", function()
+    local items = {
+      { value = "line1" },
+      { value = "line2" },
+    }
+
+    local p1 = thetto.start({
+      collect = function()
+        return items
+      end,
+    })
+    helper.wait(p1)
+
+    thetto.call_consumer("move_to_list")
+    table.insert(items, {
+      value = "line3",
+    })
+
+    local p2 = thetto.reload()
+    helper.wait(p2)
+
+    assert.lines([[
+line1
+line2
+line3]])
+  end)
+end)
+
 describe("thetto.get()", function()
   before_each(helper.before_each)
   after_each(helper.after_each)
