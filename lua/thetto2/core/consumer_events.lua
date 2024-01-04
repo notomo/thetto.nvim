@@ -17,8 +17,8 @@ function M.source_started(source_name)
   return events.source_started, source_name
 end
 
-function M.source_completed()
-  return events.source_completed
+function M.source_completed(item_cursor)
+  return events.source_completed, item_cursor
 end
 
 function M.source_error(err)

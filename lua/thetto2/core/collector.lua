@@ -5,15 +5,17 @@ local consumer_events = require("thetto2.core.consumer_events")
 --- @field _source_ctx table
 --- @field _pipeline_ctx table
 --- @field _subscription table
+--- @field _item_cursor_row integer
 --- @field _consumer ThettoConsumer
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source, pipeline, ctx_key, consumer_factory)
+function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory)
   local tbl = {
     _source = source,
     _pipeline = pipeline,
     _consumer_factory = consumer_factory,
+    _item_cursor_factory = item_cursor_factory,
     _ctx_key = ctx_key,
 
     _all_items = {},
@@ -21,6 +23,7 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory)
     _source_ctx = require("thetto2.core.source_context").new(source),
     _subscription = nil,
     _consumer = nil,
+    _item_cursor_row = 1,
   }
   return setmetatable(tbl, Collector)
 end
@@ -43,21 +46,24 @@ function Collector.restart(self, consumer)
   return self:_start(subscriber, consumer)
 end
 
-function Collector.replay(self)
+function Collector.replay(self, consumer_factory, item_cursor_factory)
+  item_cursor_factory = item_cursor_factory or self._item_cursor_factory
+
   self:_stop()
 
   local all_items = self._all_items
+  local item_cursor = item_cursor_factory(all_items)
   local subscriber = function(observer)
     observer:next(all_items)
     observer:complete()
   end
   self._all_items = {}
 
-  local consumer = self:_create_consumer()
-  return self:_start(subscriber, consumer), consumer
+  local consumer = self:_create_consumer(consumer_factory)
+  return self:_start(subscriber, consumer, item_cursor), consumer
 end
 
-function Collector._start(self, subscriber, consumer)
+function Collector._start(self, subscriber, consumer, default_item_cursor)
   self._consumer = consumer
 
   local default_kind_name = self._source.kind_name or "base"
@@ -75,7 +81,8 @@ function Collector._start(self, subscriber, consumer)
         self:_run_pipeline(self._pipeline_ctx)
       end,
       complete = function()
-        resolve(self._consumer:consume(consumer_events.source_completed()))
+        local item_cursor = default_item_cursor or self._item_cursor_factory(self._all_items)
+        resolve(self._consumer:consume(consumer_events.source_completed(item_cursor)))
       end,
       error = function(err)
         reject(self._consumer:consume(consumer_events.source_error(err)))
@@ -107,11 +114,16 @@ function Collector._create_subscriber(self)
 end
 
 --- @return ThettoConsumer
-function Collector._create_consumer(self)
+function Collector._create_consumer(self, consumer_factory)
+  consumer_factory = consumer_factory or self._consumer_factory
+
   local callbacks = {
     on_change = function(pipeline_ctx_factory)
       local pipeline_ctx = pipeline_ctx_factory()
       self:_run_pipeline(pipeline_ctx)
+    end,
+    on_row_changed = function(row)
+      self._item_cursor_row = row
     end,
     on_discard = function()
       self:_stop()
@@ -120,8 +132,9 @@ function Collector._create_consumer(self)
   local consumer_ctx = {
     ctx_key = self._ctx_key,
     cwd = self._source_ctx.cwd,
+    item_cursor_row = self._item_cursor_row,
   }
-  return self._consumer_factory(consumer_ctx, self._pipeline, callbacks)
+  return consumer_factory(consumer_ctx, self._pipeline, callbacks)
 end
 
 return Collector

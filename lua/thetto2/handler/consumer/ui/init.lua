@@ -17,7 +17,8 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar)
     consumer_ctx.cwd,
     closer,
     layout.item_list,
-    sidecar
+    sidecar,
+    consumer_ctx.item_cursor_row
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(
@@ -30,7 +31,8 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar)
 
   closer:setup(function()
     local current_window_id = vim.api.nvim_get_current_win()
-    item_list:close(current_window_id)
+    local row = item_list:close(current_window_id)
+    callbacks.on_row_changed(row)
     inputter:close(current_window_id)
     sidecar:close()
     callbacks.on_discard()
@@ -57,7 +59,8 @@ local handlers = {
     self._item_list:redraw_footer(source_name, "running")
   end),
   --- @param self ThettoUi
-  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
+  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self, item_cursor)
+    self._item_list:apply_item_cursor(item_cursor)
     self._item_list:redraw_footer(nil, "")
   end),
   [consumer_events.all.source_error] = function(_, err)

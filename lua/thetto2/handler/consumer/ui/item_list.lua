@@ -12,10 +12,10 @@ local _resume_states = {}
 local _states = {}
 
 --- @param sidecar ThettoUiSidecar
-function M.open(ctx_key, cwd, closer, layout, sidecar)
+function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row)
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = false,
-    cursor = { 1, 0 },
+    column = 0,
   }
   _resume_states[ctx_key] = resume_state
 
@@ -46,7 +46,7 @@ function M.open(ctx_key, cwd, closer, layout, sidecar)
     col = layout.column,
     external = false,
     style = "minimal",
-    footer = M._footer(state, resume_state.cursor[1]),
+    footer = M._footer(state, item_cursor_row),
     footer_pos = "left",
     border = {
       { " ", "NormalFloat" },
@@ -96,7 +96,7 @@ function M.open(ctx_key, cwd, closer, layout, sidecar)
   _selfs[bufnr] = self
 
   self:redraw_list(state.items, state.all_items_count)
-  vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
+  vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, resume_state.column })
 
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
     buffer = bufnr,
@@ -192,6 +192,13 @@ function M.redraw_footer(self, source_name, status)
   })
 end
 
+function M.apply_item_cursor(self, item_cursor)
+  local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
+  row = math.max(1, row + item_cursor.row_offset)
+  row = math.min(row, vim.api.nvim_buf_line_count(self._bufnr))
+  vim.api.nvim_win_set_cursor(self._window_id, { row, column })
+end
+
 function M._footer(state, row)
   local line = ("%s [ %s - %s / %s , %s ] "):format(
     state.source_name,
@@ -228,19 +235,22 @@ end
 
 function M.close(self, current_window_id)
   if self._closed then
-    return
+    return 1
   end
   self._closed = true
   _selfs[self._bufnr] = nil
 
+  local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
   local resume_state = {
     has_forcus = current_window_id == self._window_id,
-    cursor = vim.api.nvim_win_get_cursor(self._window_id),
+    column = column,
   }
   _resume_states[self._ctx_key] = resume_state
 
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
   vim.api.nvim_set_decoration_provider(_ns, {})
+
+  return row
 end
 
 function M.get_current_item(self)

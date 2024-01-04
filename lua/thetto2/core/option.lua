@@ -6,9 +6,8 @@ local default_start_opts = {
       require("thetto2.handler.pipeline.filter.substring"),
     })
   end,
-  consumer_factory = function(consumer_ctx, pipeline, callbacks)
-    return require("thetto2.handler.consumer.ui").new(consumer_ctx, pipeline:filters(), callbacks, true)
-  end,
+  consumer_factory = require("thetto2.util.consumer").ui(),
+  item_cursor_factory = require("thetto2.util.item_cursor").no(),
   kind = {},
 }
 function M.new_start_opts(raw_opts)
@@ -20,6 +19,14 @@ local default_execute_opts = {
 }
 function M.new_execute_opts(raw_opts)
   return vim.tbl_extend("force", default_execute_opts, raw_opts or {})
+end
+
+local default_resume_opts = {
+  consumer_factory = require("thetto2.util.consumer").ui(),
+  item_cursor_factory = require("thetto2.util.item_cursor").no(),
+}
+function M.new_resume_opts(raw_opts)
+  return vim.tbl_extend("force", default_resume_opts, raw_opts or {})
 end
 
 return M

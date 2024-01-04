@@ -5,7 +5,8 @@ function M.start(source, raw_opts)
 
   local pipeline = opts.pipeline_factory()
   local ctx_key = require("thetto2.core.context").new_key()
-  local collector = require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory)
+  local collector =
+    require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory, opts.item_cursor_factory)
 
   local promise, consumer = collector:start()
   require("thetto2.core.context").set(ctx_key, {
@@ -25,12 +26,14 @@ function M.reload(bufnr)
 end
 
 function M.resume(raw_opts)
+  local opts = require("thetto2.core.option").new_execute_opts(raw_opts)
+
   local ctx = require("thetto2.core.context").resume()
   if not ctx then
     return
   end
 
-  local promise, consumer = ctx.collector:replay()
+  local promise, consumer = ctx.collector:replay(opts.consumer_factory, opts.item_cursor_factory)
   ctx:update({ consumer = consumer })
   return promise
 end
