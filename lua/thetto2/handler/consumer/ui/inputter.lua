@@ -24,7 +24,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change)
     on_lines = function(_, _, _, _)
       on_change(function()
         if not vim.api.nvim_buf_is_valid(bufnr) then
-          return require("thetto2.core.pipeline_context").new()
+          return
         end
         local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
         return require("thetto2.core.pipeline_context").new(inputs)

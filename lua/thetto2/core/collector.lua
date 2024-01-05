@@ -19,7 +19,7 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_
     _ctx_key = ctx_key,
 
     _all_items = {},
-    _pipeline_ctx = require("thetto2.core.pipeline_context").new(),
+    _pipeline_ctx = require("thetto2.core.pipeline_context").new({}),
     _source_ctx = require("thetto2.core.source_context").new(source),
     _subscription = nil,
     _consumer = nil,
@@ -78,7 +78,7 @@ function Collector._start(self, subscriber, consumer, default_item_cursor)
         end
         vim.list_extend(self._all_items, items)
 
-        self:_run_pipeline(self._pipeline_ctx)
+        self:_run_pipeline()
       end,
       complete = function()
         local item_cursor = default_item_cursor or self._item_cursor_factory(self._all_items)
@@ -95,9 +95,8 @@ function Collector._stop(self)
   return self._subscription and self._subscription:unsubscribe()
 end
 
-function Collector._run_pipeline(self, pipeline_ctx)
-  self._pipeline_ctx = pipeline_ctx
-  local items = self._pipeline:apply(pipeline_ctx, self._all_items)
+function Collector._run_pipeline(self)
+  local items = self._pipeline:apply(self._pipeline_ctx, self._all_items)
   self._consumer:consume(consumer_events.items_changed(items, #self._all_items))
 end
 
@@ -120,7 +119,12 @@ function Collector._create_consumer(self, consumer_factory)
   local callbacks = {
     on_change = function(pipeline_ctx_factory)
       local pipeline_ctx = pipeline_ctx_factory()
-      self:_run_pipeline(pipeline_ctx)
+      if not pipeline_ctx then
+        return
+      end
+
+      self._pipeline_ctx = pipeline_ctx
+      self:_run_pipeline()
     end,
     on_row_changed = function(row)
       self._item_cursor_row = row

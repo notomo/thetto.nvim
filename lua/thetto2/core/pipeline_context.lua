@@ -3,7 +3,7 @@ M.__index = M
 
 function M.new(inputs)
   local tbl = {
-    inputs = inputs or {},
+    inputs = inputs,
   }
   return setmetatable(tbl, M)
 end
