@@ -98,21 +98,16 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row)
   self:redraw_list(state.items, state.all_items_count)
   vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, resume_state.column })
 
+  local on_cursor_moved = require("thetto2.lib.debounce").promise(100, function()
+    self:redraw_footer(nil, nil)
+    return self:_redraw_sidecar()
+  end)
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
     buffer = bufnr,
     callback = function()
-      self:redraw_footer(nil, nil)
+      on_cursor_moved()
     end,
   })
-
-  if sidecar:enabled() then
-    vim.api.nvim_create_autocmd({ "CursorMoved" }, {
-      buffer = bufnr,
-      callback = function()
-        self:_redraw_sidecar()
-      end,
-    })
-  end
 
   vim.api.nvim_set_decoration_provider(_ns, {})
   vim.api.nvim_set_decoration_provider(_ns, {
@@ -287,8 +282,9 @@ function M._redraw_sidecar(self)
   end
 
   local kind = require("thetto2.core.kind").new(item.kind_name)
-  local _, preview = kind:get_preview(item)
+  local promise, preview = kind:get_preview(item)
   self._sidecar:redraw(preview)
+  return promise
 end
 
 function M.toggle_selection(self)
