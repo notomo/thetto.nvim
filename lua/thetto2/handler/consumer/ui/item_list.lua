@@ -99,6 +99,10 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row)
   vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, resume_state.column })
 
   local on_cursor_moved = require("thetto2.lib.debounce").promise(100, function()
+    if self._closed then
+      return
+    end
+
     self:redraw_footer(nil, nil)
     return self:_redraw_sidecar()
   end)
@@ -127,6 +131,10 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row)
 end
 
 function M.redraw_list(self, items, all_items_count)
+  if self._closed then
+    return
+  end
+
   local state = vim.tbl_extend("keep", {
     items = items,
     all_items_count = all_items_count,
@@ -175,6 +183,10 @@ function M.redraw_list(self, items, all_items_count)
 end
 
 function M.redraw_footer(self, source_name, status)
+  if self._closed then
+    return
+  end
+
   local state = vim.tbl_extend("keep", {
     source_name = source_name,
     status = status,
@@ -188,6 +200,10 @@ function M.redraw_footer(self, source_name, status)
 end
 
 function M.apply_item_cursor(self, item_cursor)
+  if self._closed then
+    return
+  end
+
   local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
   row = math.max(1, row + item_cursor.row_offset)
   row = math.min(row, vim.api.nvim_buf_line_count(self._bufnr))

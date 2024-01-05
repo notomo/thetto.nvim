@@ -13,7 +13,7 @@ function M.new(has_sidecar, raw_input_filters)
   local inputter_height = math.max(#raw_input_filters, 1)
 
   local row = (entire_height - height) / 2
-  local column = (entire_width - width) / 2
+  local column
   if has_sidecar then
     column = left_column
   else
