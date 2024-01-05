@@ -124,7 +124,11 @@ function Collector._create_consumer(self, consumer_factory)
       end
 
       self._pipeline_ctx = pipeline_ctx
-      self:_run_pipeline()
+      if pipeline_ctx.need_source_invalidation then
+        self:restart()
+      else
+        self:_run_pipeline()
+      end
     end,
     on_row_changed = function(row)
       self._item_cursor_row = row

@@ -26,7 +26,8 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar)
     consumer_ctx.cwd,
     closer,
     layout.inputter,
-    callbacks.on_change
+    callbacks.on_change,
+    filters
   )
 
   closer:setup(function()

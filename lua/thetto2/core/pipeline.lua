@@ -19,12 +19,7 @@ function M.apply(self, pipeline_ctx, items)
 end
 
 function M.filters(self)
-  return vim
-    .iter(self._stages)
-    :filter(function(stage)
-      return stage.input_line_length ~= nil
-    end)
-    :totable()
+  return vim.iter(self._stages):totable()
 end
 
 return M

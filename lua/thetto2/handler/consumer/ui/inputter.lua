@@ -5,7 +5,7 @@ M.__index = M
 
 local _resume_states = {}
 
-function M.open(ctx_key, cwd, closer, layout, on_change)
+function M.open(ctx_key, cwd, closer, layout, on_change, filters)
   local resume_state = _resume_states[ctx_key]
     or {
       has_forcus = true,
@@ -21,13 +21,18 @@ function M.open(ctx_key, cwd, closer, layout, on_change)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
   vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = function(_, _, _, _)
+    on_lines = function(_, _, _, changed_row)
       on_change(function()
         if not vim.api.nvim_buf_is_valid(bufnr) then
           return
         end
+
         local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
-        return require("thetto2.core.pipeline_context").new(inputs)
+
+        local filter = filters[changed_row]
+        local need_source_invalidation = filter and filter.is_source_input
+
+        return require("thetto2.core.pipeline_context").new(inputs, need_source_invalidation)
       end)
     end,
   })

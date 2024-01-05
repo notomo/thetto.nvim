@@ -1,11 +1,7 @@
 local M = {}
 
 local default_start_opts = {
-  pipeline_factory = function()
-    return require("thetto2.core.pipeline").new({
-      require("thetto2.handler.pipeline.filter.substring"),
-    })
-  end,
+  pipeline_factory = require("thetto2.util.pipeline").default(),
   consumer_factory = require("thetto2.util.consumer").ui(),
   item_cursor_factory = require("thetto2.util.item_cursor").no(),
   kind = {},
