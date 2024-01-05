@@ -21,7 +21,7 @@ function M.setup_autocmd(self, window_id)
       if tonumber(args.file) ~= window_id then
         return
       end
-      self:_execute_autocmd()
+      self:execute()
       return true
     end,
   })
@@ -40,7 +40,7 @@ function M.setup_autocmd(self, window_id)
           if bufnr == original_bufnr then
             return
           end
-          self:_execute_autocmd()
+          self:execute()
         end,
         once = true,
       })
@@ -55,7 +55,7 @@ function M.setup_autocmd(self, window_id)
       if bufnr == original_bufnr then
         return
       end
-      self:_execute_autocmd()
+      self:execute()
       return true
     end,
   })
@@ -74,10 +74,6 @@ function M.setup(self, handler)
 end
 
 function M.execute(self)
-  self:_execute_autocmd()
-end
-
-function M._execute_autocmd(self)
   vim.api.nvim_exec_autocmds("User", {
     pattern = self._pattern,
     group = self._group,
