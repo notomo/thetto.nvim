@@ -30,7 +30,7 @@ function M.filter(name, fields)
 
   local filter = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
   filter.name = name
-  if filter.opts.inversed then
+  if vim.tbl_get(filter, "opts", "inversed") then
     filter.name = "-" .. filter.name
   end
   return filter
