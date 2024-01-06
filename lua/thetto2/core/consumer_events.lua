@@ -11,9 +11,9 @@ local M = {
 
 --- @param items table
 --- @param all_items_count integer
---- @param pipeline_ctx table
-function M.items_changed(items, all_items_count, pipeline_ctx)
-  return events.items_changed, items, all_items_count, pipeline_ctx
+--- @param pipeline_highlight fun()
+function M.items_changed(items, all_items_count, pipeline_highlight)
+  return events.items_changed, items, all_items_count, pipeline_highlight
 end
 
 --- @param source_name string

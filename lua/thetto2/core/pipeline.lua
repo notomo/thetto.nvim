@@ -10,13 +10,25 @@ function M.new(stages)
 end
 
 function M.apply(self, pipeline_ctx, items)
+  local highlights = {}
   for i, stage in ipairs(self._stages) do
     local stage_ctx = {
       input = pipeline_ctx.inputs[i] or "",
     }
-    items = stage.apply(stage_ctx, items, stage.opts)
+    local new_items, highlight = stage.apply(stage_ctx, items, stage.opts)
+    items = new_items
+    if highlight then
+      table.insert(highlights, highlight)
+    end
   end
-  return items
+
+  local pipeline_highlight = function(...)
+    for _, highlight in ipairs(highlights) do
+      highlight(...)
+    end
+  end
+
+  return items, pipeline_highlight
 end
 
 function M.filters(self)

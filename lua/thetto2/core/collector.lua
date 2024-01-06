@@ -7,6 +7,7 @@ local consumer_events = require("thetto2.core.consumer_events")
 --- @field _subscription table
 --- @field _item_cursor_row integer
 --- @field _consumer ThettoConsumer
+--- @field _pipeline ThettoPipeline
 local Collector = {}
 Collector.__index = Collector
 
@@ -98,8 +99,8 @@ function Collector._stop(self)
 end
 
 function Collector._run_pipeline(self)
-  local items = self._pipeline:apply(self._pipeline_ctx, self._all_items)
-  self._consumer:consume(consumer_events.items_changed(items, #self._all_items, self._pipeline_ctx))
+  local items, pipeline_highlight = self._pipeline:apply(self._pipeline_ctx, self._all_items)
+  self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
 end
 
 function Collector._create_subscriber(self)

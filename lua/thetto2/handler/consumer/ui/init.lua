@@ -8,8 +8,10 @@ Ui.__index = Ui
 
 --- @param pipeline ThettoPipeline
 function Ui.new(consumer_ctx, source, pipeline, callbacks, has_sidecar)
+  local filters = pipeline:filters()
+
   local closer = require("thetto2.handler.consumer.ui.closer").new()
-  local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, pipeline:filters())
+  local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, filters)
 
   local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, has_sidecar, layout.sidecar)
 
@@ -21,7 +23,8 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, has_sidecar)
     sidecar,
     consumer_ctx.item_cursor_row,
     source.highlight,
-    consumer_ctx.source_ctx.cwd
+    consumer_ctx.source_ctx.cwd,
+    filters
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(
@@ -55,8 +58,8 @@ local consumer_events = require("thetto2.core.consumer_events")
 
 local handlers = {
   --- @param self ThettoUi
-  [consumer_events.all.items_changed] = vim.schedule_wrap(function(self, items, all_items_count, pipeline_ctx)
-    self._item_list:update_for_filter_highlight(pipeline_ctx)
+  [consumer_events.all.items_changed] = vim.schedule_wrap(function(self, items, all_items_count, pipeline_highlight)
+    self._item_list:update_pipeline_highlight(pipeline_highlight)
     self._item_list:redraw_list(items, all_items_count)
   end),
   --- @param self ThettoUi

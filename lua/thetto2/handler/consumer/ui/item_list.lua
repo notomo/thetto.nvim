@@ -2,7 +2,7 @@
 --- @field _closed boolean
 --- @field _sidecar ThettoUiSidecar
 --- @field _source_ctx table
---- @field _pipeline_ctx table
+--- @field _pipeline_highlight fun(...)
 local M = {}
 M.__index = M
 
@@ -14,7 +14,7 @@ local _resume_states = {}
 local _states = {}
 
 --- @param sidecar ThettoUiSidecar
-function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx)
+function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx, filters)
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = false,
     column = 0,
@@ -95,7 +95,8 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_h
     _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
     _source_highlight = source_highlight or function() end,
     _source_ctx = source_ctx,
-    _pipeline_ctx = nil,
+    _filters = filters,
+    _pipeline_highlight = function() end,
     _closed = false,
   }, M)
   _selfs[bufnr] = self
@@ -233,8 +234,8 @@ function M.update_for_source_highlight(self, source_ctx)
   self._source_ctx = source_ctx
 end
 
-function M.update_for_filter_highlight(self, pipeline_ctx)
-  self._pipeline_ctx = pipeline_ctx
+function M.update_pipeline_highlight(self, pipeline_highlight)
+  self._pipeline_highlight = pipeline_highlight
 end
 
 function M.highlight(self, topline, botline_guess)
@@ -247,6 +248,7 @@ function M.highlight(self, topline, botline_guess)
   end
 
   self._source_highlight(self._decorator, displayed_items, topline, self._source_ctx)
+  self._pipeline_highlight(self._decorator, displayed_items, topline)
 
   local selected_items = state.selected_items
   self._decorator:filter("Statement", topline, displayed_items, function(item)
