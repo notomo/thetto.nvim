@@ -38,4 +38,23 @@ function M.is_ignorecase(ignorecase, smartcase, input)
   return not case_sensitive
 end
 
+function M.sorter(name, fields)
+  local origin = require("thetto2.vendor.misclib.module").find("thetto2.handler.pipeline.sorter." .. name)
+  if not origin then
+    error("not found sorter: " .. name)
+  end
+
+  local filter = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
+  filter.name = name
+  return filter
+end
+
+function M.field_sorter_convert(name, fields)
+  local origin = require("thetto2.vendor.misclib.module").find("thetto2.handler.pipeline.sorter.field._" .. name)
+  if not origin then
+    error("not found field sorter convert: " .. name)
+  end
+  return vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
+end
+
 return M

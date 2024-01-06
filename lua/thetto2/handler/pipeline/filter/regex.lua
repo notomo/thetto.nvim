@@ -62,4 +62,6 @@ M.opts = {
   end,
 }
 
+M.is_filter = true
+
 return M
