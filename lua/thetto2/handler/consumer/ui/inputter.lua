@@ -3,6 +3,10 @@
 local M = {}
 M.__index = M
 
+local _ns_name = "thetto2-inputter-highlight"
+local _ns = vim.api.nvim_create_namespace(_ns_name)
+
+local _selfs = {}
 local _resume_states = {}
 
 --- @param pipeline ThettoPipeline
@@ -106,9 +110,41 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
     _bufnr = bufnr,
     _window_id = window_id,
     _ctx_key = ctx_key,
+    _filters = filters,
+    _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
     _closed = false,
   }
-  return setmetatable(tbl, M)
+  local self = setmetatable(tbl, M)
+  _selfs[bufnr] = self
+
+  vim.api.nvim_set_decoration_provider(_ns, {})
+  vim.api.nvim_set_decoration_provider(_ns, {
+    on_win = function(_, _, self_bufnr, _, _)
+      local inputter = _selfs[self_bufnr]
+      if not inputter then
+        return false
+      end
+
+      inputter:highlight()
+
+      return false
+    end,
+  })
+
+  return self
+end
+
+function M.highlight(self)
+  local line_count = vim.api.nvim_buf_line_count(self._bufnr)
+  for i, filter in ipairs(self._filters) do
+    if i > line_count then
+      break
+    end
+    local filter_info = ("[%s]"):format(filter.name)
+    self._decorator:add_virtual_text(i - 1, 0, { { filter_info, "Comment" } }, {
+      virt_text_pos = "right_align",
+    })
+  end
 end
 
 function M.enter(self)
@@ -121,6 +157,7 @@ function M.close(self, current_window_id)
     return
   end
   self._closed = true
+  _selfs[self._bufnr] = nil
 
   local resume_state = {
     has_forcus = current_window_id == self._window_id,
