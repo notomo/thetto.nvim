@@ -1,10 +1,11 @@
 local M = {}
 M.__index = M
 
-function M.new(inputs, need_source_invalidation)
+function M.new(inputs, source_input, is_interactive)
   local tbl = {
     inputs = inputs,
-    need_source_invalidation = need_source_invalidation or false,
+    source_input = source_input,
+    is_interactive = is_interactive,
   }
   return setmetatable(tbl, M)
 end

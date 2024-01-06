@@ -5,13 +5,16 @@ M.__index = M
 
 local _resume_states = {}
 
-function M.open(ctx_key, cwd, closer, layout, on_change, filters)
+--- @param pipeline ThettoPipeline
+function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
+  local filters = pipeline:filters()
+
   local resume_state = _resume_states[ctx_key]
     or {
       has_forcus = true,
       cursor = { 1, 0 },
       is_insert_mode = true,
-      lines = {},
+      lines = vim.fn["repeat"]({ "" }, #filters),
     }
 
   local bufnr = vim.api.nvim_create_buf(false, true)
@@ -20,6 +23,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, filters)
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/inputter"):format(ctx_key))
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
+  local is_interactive = pipeline:has_source_input()
   vim.api.nvim_buf_attach(bufnr, false, {
     on_lines = function(_, _, _, changed_row)
       on_change(function()
@@ -29,10 +33,19 @@ function M.open(ctx_key, cwd, closer, layout, on_change, filters)
 
         local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
-        local filter = filters[changed_row]
+        local changed_index = changed_row + 1
+        local filter = filters[changed_index]
         local need_source_invalidation = filter and filter.is_source_input
+        local pattern
+        if need_source_invalidation then
+          pattern = inputs[changed_index]
+        end
 
-        return require("thetto2.core.pipeline_context").new(inputs, need_source_invalidation)
+        local source_input = {
+          pattern = pattern,
+          is_interactive = is_interactive,
+        }
+        return require("thetto2.core.pipeline_context").new(inputs, source_input)
       end)
     end,
   })

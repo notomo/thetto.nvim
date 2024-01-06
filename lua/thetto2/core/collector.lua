@@ -20,7 +20,9 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_
 
     _all_items = {},
     _pipeline_ctx = require("thetto2.core.pipeline_context").new({}),
-    _source_ctx = require("thetto2.core.source_context").new(source),
+    _source_ctx = require("thetto2.core.source_context").new(source, {
+      is_interactive = pipeline:has_source_input(),
+    }),
     _subscription = nil,
     _consumer = nil,
     _item_cursor_row = 1,
@@ -35,11 +37,11 @@ function Collector.start(self)
   return self:_start(subscriber, consumer), consumer
 end
 
-function Collector.restart(self, consumer)
+function Collector.restart(self, consumer, source_input)
   self:_stop()
 
   self._all_items = {}
-  self._source_ctx = require("thetto2.core.source_context").new(self._source)
+  self._source_ctx = require("thetto2.core.source_context").new(self._source, source_input)
   local subscriber = self:_create_subscriber()
 
   consumer:consume(consumer_events.source_started(self._source.name))
@@ -124,8 +126,8 @@ function Collector._create_consumer(self, consumer_factory)
       end
 
       self._pipeline_ctx = pipeline_ctx
-      if pipeline_ctx.need_source_invalidation then
-        self:restart()
+      if pipeline_ctx.source_input.pattern then
+        self:restart(self._consumer, pipeline_ctx.source_input)
       else
         self:_run_pipeline()
       end

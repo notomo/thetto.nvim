@@ -2,7 +2,7 @@ local M = {}
 
 function M.ui()
   return function(consumer_ctx, pipeline, callbacks)
-    return require("thetto2.handler.consumer.ui").new(consumer_ctx, pipeline:filters(), callbacks, true)
+    return require("thetto2.handler.consumer.ui").new(consumer_ctx, pipeline, callbacks, true)
   end
 end
 

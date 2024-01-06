@@ -6,9 +6,10 @@
 local Ui = {}
 Ui.__index = Ui
 
-function Ui.new(consumer_ctx, filters, callbacks, has_sidecar)
+--- @param pipeline ThettoPipeline
+function Ui.new(consumer_ctx, pipeline, callbacks, has_sidecar)
   local closer = require("thetto2.handler.consumer.ui.closer").new()
-  local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, filters)
+  local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, pipeline:filters())
 
   local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, has_sidecar, layout.sidecar)
 
@@ -27,7 +28,7 @@ function Ui.new(consumer_ctx, filters, callbacks, has_sidecar)
     closer,
     layout.inputter,
     callbacks.on_change,
-    filters
+    pipeline
   )
 
   closer:setup(function()

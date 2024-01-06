@@ -1,3 +1,4 @@
+--- @class ThettoPipeline
 local M = {}
 M.__index = M
 
@@ -20,6 +21,12 @@ end
 
 function M.filters(self)
   return vim.iter(self._stages):totable()
+end
+
+function M.has_source_input(self)
+  return vim.iter(self._stages):any(function(stage)
+    return stage.is_source_input
+  end)
 end
 
 return M
