@@ -19,6 +19,7 @@ function M.get_input(source_ctx)
 
   if not pattern or pattern == "" then
     return nil, function(observer)
+      observer:next({})
       observer:complete()
     end
   end

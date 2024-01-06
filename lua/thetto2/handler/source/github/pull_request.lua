@@ -10,7 +10,7 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
+  local pattern, subscriber = require("thetto2.util.source").get_input(source_ctx)
   if not pattern and not source_ctx.opts.allow_empty_input and not source_ctx.opts.url then
     return subscriber
   end

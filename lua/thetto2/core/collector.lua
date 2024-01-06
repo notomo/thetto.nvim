@@ -119,18 +119,16 @@ function Collector._create_consumer(self, consumer_factory)
   consumer_factory = consumer_factory or self._consumer_factory
 
   local callbacks = {
-    on_change = function(pipeline_ctx_factory)
-      local pipeline_ctx = pipeline_ctx_factory()
+    on_change = function(pipeline_ctx)
       if not pipeline_ctx then
         return
       end
-
       self._pipeline_ctx = pipeline_ctx
+
       if pipeline_ctx.source_input.pattern then
-        self:restart(self._consumer, pipeline_ctx.source_input)
-      else
-        self:_run_pipeline()
+        return self:restart(self._consumer, pipeline_ctx.source_input)
       end
+      return self:_run_pipeline()
     end,
     on_row_changed = function(row)
       self._item_cursor_row = row

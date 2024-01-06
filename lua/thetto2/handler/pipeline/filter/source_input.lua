@@ -5,5 +5,6 @@ function M.apply(_, items, _)
 end
 
 M.is_source_input = true
+M.debounce_ms = 300
 
 return M

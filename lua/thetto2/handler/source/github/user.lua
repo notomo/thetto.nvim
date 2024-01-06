@@ -1,7 +1,7 @@
 local M = {}
 
 function M.collect(source_ctx)
-  local pattern, subscriber = require("thetto.util.source").get_input(source_ctx)
+  local pattern, subscriber = require("thetto2.util.source").get_input(source_ctx)
   if not pattern then
     return subscriber
   end

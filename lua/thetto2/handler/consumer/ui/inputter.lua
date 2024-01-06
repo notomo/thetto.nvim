@@ -24,17 +24,17 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
   local is_interactive = pipeline:has_source_input()
-  vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = function(_, _, _, changed_row)
-      on_change(function()
+  local debounces = vim
+    .iter(filters)
+    :map(function(filter)
+      local debounce_ms = filter.debounce_ms or 50
+      return require("thetto2.lib.debounce").promise(debounce_ms, function(changed_index)
         if not vim.api.nvim_buf_is_valid(bufnr) then
           return
         end
 
         local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
-        local changed_index = changed_row + 1
-        local filter = filters[changed_index]
         local need_source_invalidation = filter and filter.is_source_input
         local pattern
         if need_source_invalidation then
@@ -46,6 +46,16 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
           is_interactive = is_interactive,
         }
         return require("thetto2.core.pipeline_context").new(inputs, source_input)
+      end)
+    end)
+    :totable()
+
+  vim.api.nvim_buf_attach(bufnr, false, {
+    on_lines = function(_, _, _, changed_row)
+      local changed_index = changed_row + 1
+      local debounce = debounces[changed_index]
+      debounce(changed_index):next(function(...)
+        return on_change(...)
       end)
     end,
   })
