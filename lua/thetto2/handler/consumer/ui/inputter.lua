@@ -113,7 +113,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
     _bufnr = bufnr,
     _window_id = window_id,
     _ctx_key = ctx_key,
-    _filters = filters,
+    _filter_infos = M._filter_infos(filters),
     _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
     _closed = false,
   }
@@ -148,13 +148,24 @@ function M._fill_lines(bufnr, filters)
   end
 end
 
+function M._filter_infos(filters)
+  return vim
+    .iter(filters)
+    :map(function(filter)
+      if filter.desc then
+        return ("[%s:%s]"):format(filter.name, filter.desc)
+      end
+      return ("[%s]"):format(filter.name)
+    end)
+    :totable()
+end
+
 function M.highlight(self)
   local line_count = vim.api.nvim_buf_line_count(self._bufnr)
-  for i, filter in ipairs(self._filters) do
+  for i, filter_info in ipairs(self._filter_infos) do
     if i > line_count then
       break
     end
-    local filter_info = ("[%s]"):format(filter.name)
     self._decorator:add_virtual_text(i - 1, 0, { { filter_info, "Comment" } }, {
       virt_text_pos = "right_align",
     })

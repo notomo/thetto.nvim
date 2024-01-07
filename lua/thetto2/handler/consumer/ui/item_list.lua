@@ -239,7 +239,10 @@ function M._sorter_info(sorters)
   local sorter_names = vim
     .iter(sorters)
     :map(function(sorter)
-      return sorter.name
+      if sorter.desc then
+        return ("%s:%s"):format(sorter.name, sorter.desc)
+      end
+      return ("%s"):format(sorter.name)
     end)
     :totable()
 
