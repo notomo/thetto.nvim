@@ -29,7 +29,7 @@ local handlers = {
     self._on_row_changed(row)
 
     local item = self._all_items[row]
-    local action_item_groups = require("thetto2.util.action").by_name(self._action_name, { item })
+    local action_item_groups = require("thetto2.util.action").grouping({ item }, { default_action = self._action_name })
     return require("thetto2.core.executor").execute(action_item_groups)
   end,
   [consumer_events.all.source_error] = function(_, err)
