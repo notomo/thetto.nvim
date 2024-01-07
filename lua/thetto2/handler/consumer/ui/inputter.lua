@@ -39,6 +39,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
           return
         end
 
+        M._fill_lines(bufnr, filters)
         local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
         local need_source_invalidation = filter and filter.is_source_input
@@ -134,6 +135,17 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
   })
 
   return self
+end
+
+function M._fill_lines(bufnr, filters)
+  local height = #filters
+
+  local line_count_diff = height - vim.api.nvim_buf_line_count(bufnr)
+  if line_count_diff > 0 then
+    vim.api.nvim_buf_set_lines(bufnr, height - 1, -1, false, vim.fn["repeat"]({ "" }, line_count_diff))
+  elseif line_count_diff < 0 then
+    vim.api.nvim_buf_set_lines(bufnr, height, -1, false, {})
+  end
 end
 
 function M.highlight(self)
