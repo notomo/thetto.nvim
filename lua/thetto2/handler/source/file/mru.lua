@@ -1,6 +1,6 @@
-local pathlib = require("thetto.lib.path")
-local listlib = require("thetto.lib.list")
-local Store = require("thetto.core.store")
+local pathlib = require("thetto2.lib.path")
+local listlib = require("thetto2.lib.list")
+local Store = require("thetto2.core.store")
 local vim = vim
 
 local M = {}

@@ -24,4 +24,8 @@ function M.call_consumer(action_name, opts)
   return require("thetto2.command").call_consumer(action_name, opts)
 end
 
+function M.setup_store(name, opts)
+  require("thetto2.command").setup_store(name, opts)
+end
+
 return M

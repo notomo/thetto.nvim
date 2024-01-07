@@ -74,4 +74,12 @@ function M.call_consumer(action_name, opts)
   return ctx.consumer:call(action_name, opts)
 end
 
+function M.setup_store(name, opts)
+  local store, err = require("thetto2.core.store").new(name)
+  if err then
+    error(err)
+  end
+  store.start(opts)
+end
+
 return M
