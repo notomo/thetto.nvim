@@ -16,7 +16,8 @@ local _resume_states = {}
 local _states = {}
 
 --- @param sidecar ThettoUiSidecar
-function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx, filters)
+--- @param pipeline ThettoPipeline
+function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx, pipeline)
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = false,
     column = 0,
@@ -34,6 +35,7 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_h
       end_index = 1,
       all_items_count = 0,
       selected_items = {},
+      sorter_info = M._sorter_info(pipeline:sorters()),
     }
   _states[ctx_key] = state
 
@@ -97,7 +99,7 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_h
     _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
     _source_highlight = source_highlight or function() end,
     _source_ctx = source_ctx,
-    _filters = filters,
+    _filters = pipeline:filters(),
     _pipeline_highlight = function() end,
     _closed = false,
   }, M)
@@ -219,8 +221,9 @@ function M.apply_item_cursor(self, item_cursor)
 end
 
 function M._footer(state, row)
-  local line = ("%s [ %s - %s / %s , %s ] "):format(
+  local line = ("%s%s [ %s - %s / %s , %s ] "):format(
     state.source_name,
+    state.sorter_info,
     state.start_index,
     state.end_index,
     state.all_items_count,
@@ -228,8 +231,23 @@ function M._footer(state, row)
   )
   return {
     { line, hl_groups.ThettoUiItemListFooter },
-    { state.status, "Comment" },
+    { state.status, hl_groups.ThettoUiItemListFooter },
   }
+end
+
+function M._sorter_info(sorters)
+  local sorter_names = vim
+    .iter(sorters)
+    :map(function(sorter)
+      return sorter.name
+    end)
+    :totable()
+
+  if #sorter_names == 0 then
+    return ""
+  end
+
+  return " sorter=" .. table.concat(sorter_names, ", ")
 end
 
 function M.update_for_source_highlight(self, source_ctx)

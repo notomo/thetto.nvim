@@ -37,9 +37,9 @@ function M.sorter(name, fields)
     error("not found sorter: " .. name)
   end
 
-  local filter = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
-  filter.name = name
-  return filter
+  local sorter = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
+  sorter.name = name
+  return sorter
 end
 
 function M.field_sorter_convert(name, fields)

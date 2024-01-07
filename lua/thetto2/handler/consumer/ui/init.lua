@@ -24,7 +24,7 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, has_sidecar)
     consumer_ctx.item_cursor_row,
     source.highlight,
     consumer_ctx.source_ctx.cwd,
-    filters
+    pipeline
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(

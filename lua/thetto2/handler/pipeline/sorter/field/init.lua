@@ -18,4 +18,6 @@ M.opts = {
   converts = {},
 }
 
+M.is_sorter = true
+
 return M

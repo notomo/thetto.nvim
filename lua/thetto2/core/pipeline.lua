@@ -40,6 +40,15 @@ function M.filters(self)
     :totable()
 end
 
+function M.sorters(self)
+  return vim
+    .iter(self._stages)
+    :filter(function(stage)
+      return stage.is_sorter
+    end)
+    :totable()
+end
+
 function M.has_source_input(self)
   return vim.iter(self._stages):any(function(stage)
     return stage.is_source_input
