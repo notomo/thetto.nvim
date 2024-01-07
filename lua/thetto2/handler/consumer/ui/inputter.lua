@@ -1,3 +1,5 @@
+local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
+
 --- @class ThettoUiInputter
 --- @field _closed boolean
 local M = {}
@@ -73,14 +75,14 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
     external = false,
     style = "minimal",
     border = {
-      { "", "ThettoInput" },
-      { "", "ThettoInput" },
-      { " ", "ThettoInput" },
-      { " ", "ThettoInput" },
-      { "", "ThettoInput" },
-      { "", "ThettoInput" },
-      { " ", "ThettoInput" },
-      { " ", "ThettoInput" },
+      { "" },
+      { "" },
+      { " ", hl_groups.ThettoUiBorder },
+      { " ", hl_groups.ThettoUiBorder },
+      { "" },
+      { "" },
+      { " ", hl_groups.ThettoUiBorder },
+      { " ", hl_groups.ThettoUiBorder },
     },
   })
 

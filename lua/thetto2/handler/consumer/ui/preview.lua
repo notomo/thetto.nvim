@@ -1,4 +1,5 @@
 local filelib = require("thetto2.lib.file")
+local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
 
 local M = {}
 
@@ -18,12 +19,12 @@ local highlight = function(decorator_factory, bufnr, row, end_row, column, end_c
   if column then
     local row_limit = row + height - 1
     end_row = end_row and (end_row > row_limit) and row_limit or end_row
-    decorator:highlight_range("ThettoPreview", row - 1, end_row, column, end_column)
+    decorator:highlight_range(hl_groups.ThettoUiPreview, row - 1, end_row, column, end_column)
   else
-    decorator:highlight("ThettoPreview", row - 1, 0, -1)
+    decorator:highlight(hl_groups.ThettoUiPreview, row - 1, 0, -1)
   end
   if vim.fn.getbufline(bufnr, row)[1] == "" then
-    decorator:add_virtual_text(row - 1, 0, { { " ", "ThettoPreview" } }, { virt_text_pos = "overlay" })
+    decorator:add_virtual_text(row - 1, 0, { { " ", hl_groups.ThettoUiPreview } }, { virt_text_pos = "overlay" })
   end
 end
 

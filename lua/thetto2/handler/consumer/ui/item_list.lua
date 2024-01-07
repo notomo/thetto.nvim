@@ -1,3 +1,5 @@
+local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
+
 --- @class ThettoUiItemList
 --- @field _closed boolean
 --- @field _sidecar ThettoUiSidecar
@@ -51,14 +53,14 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_h
     footer = M._footer(state, item_cursor_row),
     footer_pos = "left",
     border = {
-      { " ", "NormalFloat" },
-      { layout.border_char, "ThettoAboveBorder" },
-      { " ", "NormalFloat" },
-      { " ", "NormalFloat" },
-      { " ", "StatusLine" },
-      { " ", "StatusLine" },
-      { " ", "StatusLine" },
-      { " ", "NormalFloat" },
+      { " ", hl_groups.ThettoUiBorder },
+      { layout.border_char, hl_groups.ThettoUiAboveBorder },
+      { " ", hl_groups.ThettoUiBorder },
+      { " ", hl_groups.ThettoUiBorder },
+      { " ", hl_groups.ThettoUiItemListFooter },
+      { " ", hl_groups.ThettoUiItemListFooter },
+      { " ", hl_groups.ThettoUiItemListFooter },
+      { " ", hl_groups.ThettoUiBorder },
     },
   })
 
@@ -225,7 +227,7 @@ function M._footer(state, row)
     state.start_index + row - 1
   )
   return {
-    { line, "StatusLine" },
+    { line, hl_groups.ThettoUiItemListFooter },
     { state.status, "Comment" },
   }
 end

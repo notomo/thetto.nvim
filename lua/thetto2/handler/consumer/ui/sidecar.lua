@@ -1,3 +1,5 @@
+local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
+
 --- @class ThettoUiSidecar
 --- @field _closed boolean
 local M = {}
@@ -24,14 +26,14 @@ function M.open(ctx_key, has_sidecar, layout)
     external = false,
     style = "minimal",
     border = {
-      { " ", "ThettoInput" },
-      { layout.border_char, "ThettoAboveBorder" },
-      { " ", "ThettoInput" },
-      { " ", "ThettoInput" },
-      { "", "ThettoInput" },
-      { "", "ThettoInput" },
-      { " ", "ThettoInput" },
-      { " ", "ThettoInput" },
+      { " ", hl_groups.ThettoUiBorder },
+      { layout.border_char, hl_groups.ThettoUiAboveBorder },
+      { " ", hl_groups.ThettoUiBorder },
+      { " ", hl_groups.ThettoUiBorder },
+      { "" },
+      { "" },
+      { " ", hl_groups.ThettoUiBorder },
+      { " ", hl_groups.ThettoUiBorder },
     },
   })
 
@@ -59,7 +61,7 @@ function M.redraw(self, preview)
     title = " " .. title .. " "
   end
   vim.api.nvim_win_set_config(self._window_id, {
-    title = { { title, "Comment" } },
+    title = { { title, hl_groups.ThettoUiSidecarTitle } },
     title_pos = "center",
   })
 
