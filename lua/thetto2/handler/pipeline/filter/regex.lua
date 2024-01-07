@@ -19,7 +19,7 @@ local to_regexes = function(stage_ctx, ignorecase)
   return regexes
 end
 
-local is_ignorecase = require("thetto2.util.pipeline").is_ignorecase
+local is_ignorecase = require("thetto2.util.filter").is_ignorecase
 
 function M.apply(stage_ctx, items, opts)
   local highlight = function(...)

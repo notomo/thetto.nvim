@@ -12,7 +12,7 @@ local to_texts = function(stage_ctx, ignorecase)
   end, vim.split(input, "%s"))
 end
 
-local is_ignorecase = require("thetto2.util.pipeline").is_ignorecase
+local is_ignorecase = require("thetto2.util.filter").is_ignorecase
 
 function M.apply(stage_ctx, items, opts)
   local highlight = function(...)
