@@ -8,10 +8,13 @@ function M.start(source, raw_opts)
   local collector =
     require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory, opts.item_cursor_factory)
 
+  local actions = vim.tbl_deep_extend("force", source.actions or {}, opts.actions)
+
   local promise, consumer = collector:start()
   require("thetto2.core.context").set(ctx_key, {
     collector = collector,
     consumer = consumer,
+    actions = actions,
   })
   return promise
 end
@@ -62,7 +65,11 @@ function M.get()
     return ctx
   end
 
-  return ctx.consumer:get_items()
+  local items = ctx.consumer:get_items()
+  local metadata = {
+    actions = ctx.actions,
+  }
+  return items, metadata
 end
 
 function M.call_consumer(action_name, opts)

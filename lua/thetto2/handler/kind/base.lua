@@ -5,10 +5,6 @@ M.opts = {
   append = { key = "value", type = "" },
 }
 
-M.behaviors = {
-  debug_print = { quit = false },
-}
-
 function M.action_debug_print(items)
   for _, item in ipairs(items) do
     require("thetto.vendor.misclib.message").info(vim.inspect(item))

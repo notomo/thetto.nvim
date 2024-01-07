@@ -4,7 +4,7 @@ local default_start_opts = {
   pipeline_factory = require("thetto2.util.pipeline").default(),
   consumer_factory = require("thetto2.util.consumer").ui(),
   item_cursor_factory = require("thetto2.util.item_cursor").no(),
-  kind = {},
+  actions = {},
 }
 function M.new_start_opts(raw_opts)
   return vim.tbl_extend("force", default_start_opts, raw_opts or {})

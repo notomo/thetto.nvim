@@ -337,7 +337,7 @@ function M._redraw_sidecar(self)
     return
   end
 
-  local kind = require("thetto2.core.kind").new(item.kind_name)
+  local kind = require("thetto2.core.kind").by_name(item.kind_name)
   local promise, preview = kind:get_preview(item)
   self._sidecar:redraw(preview)
   return promise

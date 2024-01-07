@@ -48,8 +48,8 @@ M.actions = {
     end
     item.on_choice(item.raw)
   end,
-}
 
-M.default_action = "choose"
+  default_action = "choose",
+}
 
 return M
