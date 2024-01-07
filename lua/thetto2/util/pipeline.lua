@@ -1,19 +1,9 @@
 local M = {}
 
 function M.default()
-  return M.by_names({
-    "filter.substring",
+  return M.list({
+    M.filter("substring"),
   })
-end
-
-function M.by_names(names)
-  local stages = vim
-    .iter(names)
-    :map(function(name)
-      return require("thetto2.handler.pipeline." .. name)
-    end)
-    :totable()
-  return M.list(stages)
 end
 
 function M.list(stages)
