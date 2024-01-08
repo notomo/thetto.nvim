@@ -17,9 +17,9 @@ local _states = {}
 
 --- @param sidecar ThettoUiSidecar
 --- @param pipeline ThettoPipeline
-function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx, pipeline)
+function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx, pipeline, insert)
   local resume_state = _resume_states[ctx_key] or {
-    has_forcus = false,
+    has_forcus = not insert,
     column = 0,
   }
   _resume_states[ctx_key] = resume_state

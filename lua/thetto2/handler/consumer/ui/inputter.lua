@@ -12,14 +12,14 @@ local _selfs = {}
 local _resume_states = {}
 
 --- @param pipeline ThettoPipeline
-function M.open(ctx_key, cwd, closer, layout, on_change, pipeline)
+function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert)
   local filters = pipeline:filters()
 
   local resume_state = _resume_states[ctx_key]
     or {
-      has_forcus = true,
+      has_forcus = insert,
       cursor = { 1, 0 },
-      is_insert_mode = true,
+      is_insert_mode = insert,
       lines = vim.fn["repeat"]({ "" }, #filters),
     }
 

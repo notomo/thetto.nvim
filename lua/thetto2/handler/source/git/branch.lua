@@ -73,8 +73,11 @@ M.highlight = require("thetto2.util.highlight").columns({
 M.kind_name = "git/branch"
 
 M.behaviors = {
-  insert = false,
   cwd = require("thetto2.util.cwd").project(),
+}
+
+M.consumer_opts = {
+  ui = { insert = false },
 }
 
 M.modify_pipeline = require("thetto2.util.pipeline").append({

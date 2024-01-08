@@ -95,7 +95,10 @@ M.opts = { pattern_groups = {}, allow_new = false }
 
 M.behaviors = {
   immediately = true,
-  insert = false,
+}
+
+M.consumer_opts = {
+  ui = { insert = false },
 }
 
 M.kind_name = "file"
