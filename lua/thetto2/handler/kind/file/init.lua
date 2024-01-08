@@ -1,7 +1,6 @@
 local filelib = require("thetto2.lib.file")
 
 local M = {}
-M.__index = M
 
 M.opts = {}
 

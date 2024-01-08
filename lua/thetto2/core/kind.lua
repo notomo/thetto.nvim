@@ -4,6 +4,11 @@ local M = {}
 M.__index = M
 
 function M.by_name(kind_name, fields)
+  local kind = M._by_name(kind_name, fields)
+  return M._new(kind)
+end
+
+function M._by_name(kind_name, fields)
   local origin = require("thetto2.vendor.misclib.module").find("thetto2.handler.kind." .. kind_name)
   if not origin then
     error("not found kind: " .. kind_name)
@@ -11,8 +16,9 @@ function M.by_name(kind_name, fields)
 
   local kind = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
   kind.name = kind_name
+  kind._action_to_kind = kind._action_to_kind or {}
 
-  return M._new(kind)
+  return kind
 end
 
 function M._new(kind)
@@ -42,6 +48,10 @@ function M.action_kind_name(self, action_name)
   if rawget(self._origin, key) then
     return self._origin.name
   end
+  local extend_kind_name = self._origin._action_to_kind[key]
+  if extend_kind_name then
+    return extend_kind_name
+  end
   if base[key] then
     return "base"
   end
@@ -59,7 +69,6 @@ function M._action_key(self, action_name)
 end
 
 function M.get_preview(self, item)
-  vim.print(self._origin)
   local f = self._origin.get_preview
   if not f then
     return require("thetto2.vendor.promise").resolve(), { lines = {} }
@@ -88,15 +97,12 @@ function M.extend(raw_kind, ...)
   local extends = vim
     .iter({ ... })
     :map(function(kind_name)
-      local extend = M.by_name(kind_name)
-      extend._origin._action_to_kind = M._action_name_to_kind_name_map(kind_name, extend)
-      return extend._origin
+      local extend = M._by_name(kind_name)
+      extend._action_to_kind = M._action_name_to_kind_name_map(kind_name, extend)
+      return extend
     end)
     :totable()
-
-  local new_kind = vim.tbl_deep_extend("keep", raw_kind, unpack(extends))
-
-  return M._new(new_kind)
+  return vim.tbl_deep_extend("keep", raw_kind, unpack(extends))
 end
 
 return M
