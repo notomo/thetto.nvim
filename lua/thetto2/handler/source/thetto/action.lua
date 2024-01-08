@@ -1,36 +1,34 @@
-local Kind = require("thetto2.core.kind")
-local Context = require("thetto2.core.context")
-
 local M = {}
 
 function M.collect()
-  local ctx, ctx_err = Context.get_from_path()
-  if ctx_err ~= nil then
-    return nil, "must be executed in thetto buffer"
-  end
+  local items, metadata = require("thetto2").get()
+  local item = items[1]
 
-  local item = ctx.ui:selected_items()[1] or {}
-  local kind_name = item.kind_name or ctx.collector.source.kind_name
-  local kind = Kind.new(ctx.executor, kind_name)
-
-  local items = {}
-  local source_name = ctx.collector.source.name
-  for _, action_info in ipairs(kind:action_infos()) do
-    local action_name = action_info.name
-    local quit = (kind.behaviors[action_name] or {}).quit or false
-    local desc = ("%s (%s)"):format(action_name, action_info.from)
-    table.insert(items, {
-      value = action_name,
-      desc = desc,
-      source_name = source_name,
-      quit = quit,
-      column_offsets = {
-        value = 0,
-        from = #action_name + 1,
-      },
-    })
+  local kind_name
+  if item then
+    kind_name = item.kind_name
+  else
+    kind_name = "base"
   end
-  return items
+  local kind = require("thetto2.core.kind").by_name(kind_name)
+
+  return vim
+    .iter(kind:action_infos())
+    :map(function(action_info)
+      local action_name = action_info.name
+      local desc = ("%s (%s)"):format(action_name, action_info.from)
+      return {
+        value = action_name,
+        desc = desc,
+        column_offsets = {
+          value = 0,
+          from = #action_name + 1,
+        },
+        metadata = metadata,
+        item = item,
+      }
+    end)
+    :totable()
 end
 
 M.kind_name = "thetto/action"

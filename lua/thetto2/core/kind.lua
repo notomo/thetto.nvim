@@ -109,4 +109,32 @@ function M.extend(raw_kind, ...)
   return vim.tbl_deep_extend("keep", raw_kind, unpack(extends))
 end
 
+function M.action_infos(self)
+  local already = {}
+  local to_action_infos = function(from, actions)
+    return vim
+      .iter(actions)
+      :map(function(key)
+        if already[key] then
+          return
+        end
+        if not vim.startswith(key, ACTION_PREFIX) then
+          return
+        end
+        local action_name = key:gsub("^" .. ACTION_PREFIX, "")
+        already[key] = true
+        return {
+          from = from,
+          name = action_name,
+        }
+      end)
+      :totable()
+  end
+
+  local action_infos = {}
+  vim.list_extend(action_infos, to_action_infos(self._origin.name, self._origin))
+  vim.list_extend(action_infos, to_action_infos("base", base))
+  return action_infos
+end
+
 return M

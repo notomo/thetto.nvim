@@ -55,12 +55,12 @@ end
 function M.execute(action_item_groups, raw_opts)
   local opts = require("thetto2.core.option").new_execute_opts(raw_opts)
 
-  local ctx = require("thetto2.core.context").get()
-  if type(ctx) == "string" then
-    return ctx
-  end
-
   if opts.quit then
+    local ctx = require("thetto2.core.context").get()
+    if type(ctx) == "string" then
+      return ctx
+    end
+
     ctx.consumer:call("quit", {})
   end
 
