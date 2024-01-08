@@ -7,8 +7,14 @@ function M.start(source, raw_opts)
   local pipeline = require("thetto2.core.pipeline").new(stages)
 
   local ctx_key = require("thetto2.core.context").new_key()
-  local collector =
-    require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory, opts.item_cursor_factory)
+  local collector = require("thetto2.core.collector").new(
+    source,
+    pipeline,
+    ctx_key,
+    opts.consumer_factory,
+    opts.item_cursor_factory,
+    opts.source_bufnr
+  )
 
   local actions = vim.tbl_deep_extend("force", source.actions or {}, opts.actions)
 

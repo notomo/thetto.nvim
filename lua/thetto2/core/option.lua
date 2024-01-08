@@ -5,9 +5,14 @@ local default_start_opts = {
   consumer_factory = require("thetto2.util.consumer").ui(),
   item_cursor_factory = require("thetto2.util.item_cursor").no(),
   actions = {},
+  source_bufnr = 0,
 }
 function M.new_start_opts(raw_opts)
-  return vim.tbl_extend("force", default_start_opts, raw_opts or {})
+  local opts = vim.tbl_extend("force", default_start_opts, raw_opts or {})
+  if opts.source_bufnr == 0 then
+    opts.source_bufnr = vim.api.nvim_get_current_buf()
+  end
+  return opts
 end
 
 local default_execute_opts = {

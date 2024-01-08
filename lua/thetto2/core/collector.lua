@@ -11,17 +11,18 @@ local consumer_events = require("thetto2.core.consumer_events")
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory)
+function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr)
   local tbl = {
     _source = source,
     _pipeline = pipeline,
     _consumer_factory = consumer_factory,
     _item_cursor_factory = item_cursor_factory,
     _ctx_key = ctx_key,
+    _source_bufnr = source_bufnr,
 
     _all_items = {},
     _pipeline_ctx = require("thetto2.core.pipeline_context").new({}),
-    _source_ctx = require("thetto2.core.source_context").new(source, {
+    _source_ctx = require("thetto2.core.source_context").new(source, source_bufnr, {
       is_interactive = pipeline:has_source_input(),
     }),
     _subscription = nil,
@@ -42,7 +43,7 @@ function Collector.restart(self, consumer, source_input)
   self:_stop()
 
   self._all_items = {}
-  self._source_ctx = require("thetto2.core.source_context").new(self._source, source_input)
+  self._source_ctx = require("thetto2.core.source_context").new(self._source, self._source_bufnr, source_input)
   local subscriber = self:_create_subscriber()
 
   consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))

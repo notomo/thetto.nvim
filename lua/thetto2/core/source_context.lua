@@ -20,7 +20,7 @@ local resolve_cwd = function(cwd)
   return cwd
 end
 
-function M.new(source, source_input)
+function M.new(source, source_bufnr, source_input)
   source_input = source_input or {
     pattern = nil,
     is_interactive = false,
@@ -28,6 +28,7 @@ function M.new(source, source_input)
 
   local ctx = vim.tbl_extend("keep", source.behaviors or {}, default_behaviors)
   ctx.cwd = resolve_cwd(ctx.cwd)
+  ctx.bufnr = source_bufnr
   ctx.pattern = source_input.pattern
   ctx.interactive = source_input.is_interactive
   ctx.opts = source.opts

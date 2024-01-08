@@ -26,6 +26,8 @@ end
 
 M.kind_name = "github/user"
 
-M.filters = require("thetto.util.filter").prepend("interactive")
+M.modify_pipeline = require("thetto2.util.pipeline").prepend({
+  require("thetto2.util.filter").by_name("source_input"),
+})
 
 return M

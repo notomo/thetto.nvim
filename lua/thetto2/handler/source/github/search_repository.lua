@@ -53,6 +53,8 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "github/repository"
 
-M.filters = require("thetto.util.filter").prepend("interactive")
+M.modify_pipeline = require("thetto2.util.pipeline").prepend({
+  require("thetto2.util.filter").by_name("source_input"),
+})
 
 return M
