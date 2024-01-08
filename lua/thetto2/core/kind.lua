@@ -12,6 +12,10 @@ function M.by_name(kind_name, fields)
   local kind = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
   kind.name = kind_name
 
+  return M._new(kind)
+end
+
+function M._new(kind)
   local tbl = {
     _origin = kind,
   }
@@ -44,15 +48,18 @@ function M.action_kind_name(self, action_name)
   return self._origin.name
 end
 
+local ACTION_PREFIX = "action_"
+
 function M._action_key(self, action_name)
   local name = action_name
   if name == "default" then
     name = self._origin.default_action
   end
-  return "action_" .. name
+  return ACTION_PREFIX .. name
 end
 
 function M.get_preview(self, item)
+  vim.print(self._origin)
   local f = self._origin.get_preview
   if not f then
     return require("thetto2.vendor.promise").resolve(), { lines = {} }
@@ -61,9 +68,35 @@ function M.get_preview(self, item)
   return require("thetto2.vendor.promise").resolve(promise), preview
 end
 
-function M.extend(kind, name)
-  -- TODO
-  return kind
+function M._action_name_to_kind_name_map(kind_name, kind)
+  local action_name_to_kind_name = {}
+  vim
+    .iter(kind)
+    :map(function(k)
+      if not vim.startswith(k, ACTION_PREFIX) then
+        return nil
+      end
+      return k
+    end)
+    :each(function(k)
+      action_name_to_kind_name[k] = kind_name
+    end)
+  return action_name_to_kind_name
+end
+
+function M.extend(raw_kind, ...)
+  local extends = vim
+    .iter({ ... })
+    :map(function(kind_name)
+      local extend = M.by_name(kind_name)
+      extend._origin._action_to_kind = M._action_name_to_kind_name_map(kind_name, extend)
+      return extend._origin
+    end)
+    :totable()
+
+  local new_kind = vim.tbl_deep_extend("keep", raw_kind, unpack(extends))
+
+  return M._new(new_kind)
 end
 
 return M
