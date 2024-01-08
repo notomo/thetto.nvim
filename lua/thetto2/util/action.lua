@@ -5,10 +5,10 @@ local M = {}
 local grouping_default_opts = {
   actions = {
     opts = {},
-    default_action = "default",
+    default_action = nil,
     -- action_... = function
   },
-  action_name = nil,
+  action_name = "default",
   kind_name = nil,
 }
 function M.grouping(items, raw_opts)
