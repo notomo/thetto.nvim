@@ -1,5 +1,5 @@
-local pathlib = require("thetto.lib.path")
-local listlib = require("thetto.lib.list")
+local pathlib = require("thetto2.lib.path")
+local listlib = require("thetto2.lib.list")
 local filelib = require("thetto2.lib.file")
 
 local M = {}
@@ -40,7 +40,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoFileBookmarkDirectory", { default = true, link = "String" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "ThettoFileBookmarkDirectory",
     filter = function(item)

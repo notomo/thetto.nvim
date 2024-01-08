@@ -16,7 +16,7 @@ local to_paths = function(items)
   end, items)
 end
 
-local to_git_root = require("thetto.handler.kind.git._util").to_git_root
+local to_git_root = require("thetto2.handler.kind.git._util").to_git_root
 
 function M.action_toggle_stage(items)
   local bufnr = vim.api.nvim_get_current_buf()
@@ -29,7 +29,7 @@ function M.action_toggle_stage(items)
       if #will_be_stage == 0 then
         return nil
       end
-      return require("thetto.util.job").promise({
+      return require("thetto2.util.job").promise({
         "git",
         "add",
         unpack(to_paths(will_be_stage)),
@@ -42,7 +42,7 @@ function M.action_toggle_stage(items)
       if #will_be_unstage == 0 then
         return nil
       end
-      return require("thetto.util.job").promise({
+      return require("thetto2.util.job").promise({
         "git",
         "restore",
         "--staged",
@@ -50,7 +50,7 @@ function M.action_toggle_stage(items)
       }, { cwd = to_git_root(items) })
     end)
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto2.command").reload(bufnr)
     end)
 end
 
@@ -69,17 +69,17 @@ function M.action_discard(items)
   local delete_targets = vim.tbl_filter(function(item)
     return item.index_status == "untracked"
   end, items)
-  return require("thetto.util.input")
+  return require("thetto2.util.input")
     .promise({
       prompt = "Reset (y/n):\n" .. table.concat(paths, "\n"),
     })
     :next(function(input)
       if input ~= "y" then
-        return require("thetto.vendor.misclib.message").info("Canceled discard")
+        return require("thetto2.vendor.misclib.message").info("Canceled discard")
       end
       local promises = {}
       if #restore_targets > 0 then
-        local restore = require("thetto.util.job").promise({
+        local restore = require("thetto2.util.job").promise({
           "git",
           "restore",
           unpack(to_paths(restore_targets)),
@@ -92,7 +92,7 @@ function M.action_discard(items)
       return require("thetto2.vendor.promise").all(promises)
     end)
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto2.command").reload(bufnr)
     end)
 end
 
@@ -104,7 +104,7 @@ function M.action_stash(items)
   local bufnr = vim.api.nvim_get_current_buf()
   local paths = to_paths(items)
   local git_root = to_git_root(items)
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({
       "git",
       "stash",
@@ -112,8 +112,8 @@ function M.action_stash(items)
       unpack(paths),
     }, { cwd = git_root })
     :next(function()
-      require("thetto.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
-      return require("thetto.command").reload(bufnr)
+      require("thetto2.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
+      return require("thetto2.command").reload(bufnr)
     end)
 end
 
@@ -125,7 +125,7 @@ function M.action_commit(items, action_ctx)
     return nil
   end
   local git_root = to_git_root(items)
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({ "git", "commit", unpack(action_ctx.opts.args) }, { cwd = git_root })
     :catch(function(err)
       if err and err:match("Please supply the message") then
@@ -152,22 +152,22 @@ function M.action_compare(items)
   if not item then
     return nil
   end
-  return require("thetto.util.git").compare(item.git_root, item.path, "HEAD", item.path)
+  return require("thetto2.util.git").compare(item.git_root, item.path, "HEAD", item.path)
 end
 
 function M.action_diff(items)
   local paths = to_paths(items)
   local git_root = to_git_root(items)
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({ "git", "diff", unpack(paths) }, {
       on_exit = function() end,
       cwd = git_root,
     })
     :next(function(output)
-      local bufnr = require("thetto.util.git").diff_buffer()
+      local bufnr = require("thetto2.util.git").diff_buffer()
       local lines = vim.split(output, "\n", { plain = true })
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-      require("thetto.lib.buffer").open_scratch_tab()
+      require("thetto2.lib.buffer").open_scratch_tab()
       vim.cmd.buffer(bufnr)
     end)
 end
@@ -181,7 +181,7 @@ function M.get_preview(item)
   end
 
   -- TODO
-  -- if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
+  -- if require("thetto2.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
   --   return nil, { lines = { "IGNORED" } }
   -- end
   --
@@ -189,13 +189,13 @@ function M.get_preview(item)
   --   return require("thetto2.util.action").call("file", "preview", items, ctx)
   -- end
 
-  local bufnr = require("thetto.util.git").diff_buffer()
+  local bufnr = require("thetto2.util.git").diff_buffer()
   local cmd = { "git", "--no-pager", "diff", "--date=iso" }
   if item.index_status == "staged" then
     table.insert(cmd, "--cached")
   end
   vim.list_extend(cmd, { "--", item.path })
-  local promise = require("thetto.util.git").diff(item.git_root, bufnr, cmd)
+  local promise = require("thetto2.util.git").diff(item.git_root, bufnr, cmd)
   return promise, { raw_bufnr = bufnr }
 end
 

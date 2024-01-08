@@ -21,7 +21,7 @@ function M.action_kill(items)
 
   local cmds = M.get_cmds(pids)
   return require("thetto2.vendor.promise").all_settled(vim.tbl_map(function(cmd)
-    return require("thetto.util.job").promise(cmd)
+    return require("thetto2.util.job").promise(cmd)
   end, cmds))
 end
 

@@ -67,7 +67,7 @@ function M.collect(source_ctx)
     end
   end
 
-  return require("thetto.util.job").run(cmd, source_ctx, function(issue)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(issue)
     local mark
     local is_opened = issue.state:lower() == "open"
     if is_opened then
@@ -97,7 +97,7 @@ function M.collect(source_ctx)
   })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Character",
     else_group = "Boolean",

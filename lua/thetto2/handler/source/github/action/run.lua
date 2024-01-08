@@ -15,10 +15,10 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "gh", "api", "-X", "GET", path, "-F", "per_page=100" }
-  return require("thetto.util.job").run(cmd, source_ctx, function(run)
-    local mark = require("thetto.handler.source.github.action._util").conclusion_mark(run)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(run)
+    local mark = require("thetto2.handler.source.github.action._util").conclusion_mark(run)
     local title = ("%s %s"):format(mark, run.name)
-    local state = require("thetto.handler.source.github.action._util").state(run)
+    local state = require("thetto2.handler.source.github.action._util").state(run)
     local branch = ("[%s]"):format(run.head_branch)
     local desc = ("%s %s %s"):format(title, branch, state)
     return {
@@ -36,7 +36,7 @@ function M.collect(source_ctx)
   })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Conditional",
     start_key = "branch",

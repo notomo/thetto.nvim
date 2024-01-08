@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect(source_ctx)
   local cmd = { "docker", "images", "-f=dangling=false", "--format={{json .}}" }
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     local attrs = vim.json.decode(output)
     local id = attrs.ID
     local repository = attrs.Repository
@@ -26,7 +26,7 @@ function M.collect(source_ctx)
   end)
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "value",

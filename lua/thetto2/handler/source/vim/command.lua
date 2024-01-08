@@ -21,7 +21,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoVimCommandDefinition", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "ThettoVimCommandDefinition",
     start_key = "definition",

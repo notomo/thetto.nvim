@@ -11,7 +11,7 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "ctags", "--output-format=xref", "-f", "-", file_path }
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     local value, typ, row, path, line = output:match("(%S+)%s+(%S+)%s+(%d+)%s+(%S+)%s+(.+)")
     local _desc = ("%s [%s]"):format(value, typ)
     local desc = ("%s %s"):format(_desc, line)
@@ -29,7 +29,7 @@ end
 vim.api.nvim_set_hl(0, "ThettoCtagsType", { default = true, link = "Statement" })
 vim.api.nvim_set_hl(0, "ThettoCtagsLine", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "ThettoCtagsType",
     start_key = "type",

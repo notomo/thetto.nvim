@@ -3,7 +3,7 @@ local M = {}
 function M.collect(source_ctx)
   local cmd =
     { "gh", "repo", "list", "--limit=1000", "--json=url,owner,name,nameWithOwner,isArchived,isPrivate,isFork" }
-  return require("thetto.util.job").run(cmd, source_ctx, function(repo)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(repo)
     local mark
     if repo.isArchived then
       mark = "A"
@@ -43,7 +43,7 @@ end
 
 M.kind_name = "github/repository"
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_column = 1,

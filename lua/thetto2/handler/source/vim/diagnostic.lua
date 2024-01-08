@@ -1,4 +1,4 @@
-local pathlib = require("thetto.lib.path")
+local pathlib = require("thetto2.lib.path")
 
 local M = {}
 
@@ -48,7 +48,7 @@ local hl_groups = {
   [vim.diagnostic.severity.HINT] = "DiagnosticHint",
 }
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "prefix",

@@ -1,4 +1,4 @@
-local timelib = require("thetto.lib.time")
+local timelib = require("thetto2.lib.time")
 
 local M = {}
 
@@ -15,10 +15,10 @@ function M.collect(source_ctx)
     source_ctx.opts.job_id
   )
   local cmd = { "gh", "api", "-X", "GET", path }
-  return require("thetto.util.job").run(cmd, source_ctx, function(step)
-    local mark = require("thetto.handler.source.github.action._util").conclusion_mark(step)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(step)
+    local mark = require("thetto2.handler.source.github.action._util").conclusion_mark(step)
     local title = ("%s %s"):format(mark, step.name)
-    local state = require("thetto.handler.source.github.action._util").state(step)
+    local state = require("thetto2.handler.source.github.action._util").state(step)
     local elapsed_seconds = timelib.elapsed_seconds_for_iso_8601(step.started_at, step.completed_at)
     local desc = ("%s %s %s"):format(title, state, timelib.readable(elapsed_seconds))
     return {
@@ -40,7 +40,7 @@ function M.collect(source_ctx)
   })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     start_key = "state",

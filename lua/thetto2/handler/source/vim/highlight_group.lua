@@ -19,7 +19,7 @@ function M.collect()
   return items
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = function(item)
       return item.value

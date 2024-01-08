@@ -51,7 +51,7 @@ function M.action_tab_open(items)
   for _, item in ipairs(items) do
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      require("thetto.lib.buffer").open_scratch_tab()
+      require("thetto2.lib.buffer").open_scratch_tab()
       vim.cmd.buffer(bufnr)
     else
       vim.cmd.tabedit(filelib.escape(item.path))
@@ -85,7 +85,7 @@ M.opts.preview = {
 }
 function M.get_preview(item, action_ctx)
   -- TODO
-  -- if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
+  -- if require("thetto2.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
   --   return nil, { lines = { "IGNORED" } }
   -- end
   -- if vim.fn.isdirectory(item.path) == 1 then

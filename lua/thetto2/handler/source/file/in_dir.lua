@@ -35,7 +35,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoFileInDirDirectory", { default = true, link = "String" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "ThettoFileInDirDirectory",
     filter = function(item)

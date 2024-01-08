@@ -12,7 +12,7 @@ function M.collect(source_ctx)
     "-F",
     "per_page=100",
   }
-  return require("thetto.util.job").run(cmd, source_ctx, function(label)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(label)
     local name = label.name
     local label_desc = label.description
     if not label_desc then
@@ -32,7 +32,7 @@ function M.collect(source_ctx)
   })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     start_key = "description",

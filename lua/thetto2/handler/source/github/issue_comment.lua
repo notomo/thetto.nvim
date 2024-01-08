@@ -13,7 +13,7 @@ function M.collect(source_ctx)
     "--comments",
     "--json=comments",
   }
-  return require("thetto.util.job").run(cmd, source_ctx, function(comment)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(comment)
     return {
       value = comment.body:gsub("\n", " "),
       url = comment.url,

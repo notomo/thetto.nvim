@@ -1,4 +1,4 @@
-local pathlib = require("thetto.lib.path")
+local pathlib = require("thetto2.lib.path")
 
 local M = {}
 

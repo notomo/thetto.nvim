@@ -57,7 +57,7 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "git", "--no-pager", "diff", "--no-color", path }
-  return require("thetto.util.job").run(cmd, source_ctx, function(hunk)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(hunk)
     return {
       value = hunk.desc,
       row = hunk.row,
@@ -66,7 +66,7 @@ function M.collect(source_ctx)
   end, {
     cwd = git_root,
     to_outputs = function(output)
-      local lines = require("thetto.util.job.parse").output(output)
+      local lines = require("thetto2.util.job.parse").output(output)
       return to_hunks(lines)
     end,
   })
@@ -75,7 +75,7 @@ end
 M.kind_name = "file"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

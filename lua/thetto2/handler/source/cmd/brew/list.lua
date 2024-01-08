@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect(source_ctx)
   local cmd = { "brew", "list", "-1" }
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     return { value = output }
   end)
 end
@@ -17,7 +17,7 @@ M.actions = {
     end
     -- use install to update one package
     local cmd = { "brew", "install", item.value }
-    return require("thetto.util.job").execute(cmd)
+    return require("thetto2.util.job").execute(cmd)
   end,
 }
 

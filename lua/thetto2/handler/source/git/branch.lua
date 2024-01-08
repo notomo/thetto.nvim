@@ -20,7 +20,7 @@ function M.collect(source_ctx)
     table.insert(cmd, "--all")
   end
 
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({ "git", "branch", "--points-at", "HEAD" }, {
       on_exit = function() end,
       cwd = source_ctx.cwd,
@@ -30,7 +30,7 @@ function M.collect(source_ctx)
         return vim.startswith(line, "*")
       end, vim.split(heads, "\n", { plain = true }))[1]
       local current_branch = string.match(head_output, "* (.*)")
-      return require("thetto.util.job").start(cmd, source_ctx, function(output)
+      return require("thetto2.util.job").start(cmd, source_ctx, function(output)
         local branch_name, commit_hash, message = output:match("^([^\t]+)\t(%S+) (.*)")
         local is_current_branch = branch_name == current_branch
         return {
@@ -51,7 +51,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoGitActiveBranch", { default = true, link = "Type" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "value",
@@ -74,7 +74,7 @@ M.kind_name = "git/branch"
 
 M.behaviors = {
   insert = false,
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 M.modify_pipeline = require("thetto2.util.pipeline").append({

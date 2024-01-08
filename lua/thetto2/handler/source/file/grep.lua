@@ -31,15 +31,15 @@ function M.collect(source_ctx)
     :totable()
 
   local to_items = function(cwd, data)
-    local outputs = require("thetto.util.job.parse").output(data)
+    local outputs = require("thetto2.util.job.parse").output(data)
     local items = vim
       .iter(outputs)
       :map(function(output)
-        local path, row, matched_line = require("thetto.lib.path").parse_with_row(output)
+        local path, row, matched_line = require("thetto2.lib.path").parse_with_row(output)
         if not path then
           return
         end
-        local relative_path = require("thetto.lib.path").to_relative(path, cwd)
+        local relative_path = require("thetto2.lib.path").to_relative(path, cwd)
         local label = ("%s:%d"):format(relative_path, row)
         local desc = ("%s %s"):format(label, matched_line)
         return {
@@ -55,11 +55,11 @@ function M.collect(source_ctx)
   end
 
   return function(observer)
-    local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
-    local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
+    local output_buffer = require("thetto2.vendor.misclib.job.output").new_buffer()
+    local work_observer = require("thetto2.util.job.work_observer").new(observer, to_items, function(encoded)
       return vim.mpack.decode(encoded)
     end)
-    local job, err = require("thetto.util.job").execute(cmd, {
+    local job, err = require("thetto2.util.job").execute(cmd, {
       on_stdout = function(_, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())

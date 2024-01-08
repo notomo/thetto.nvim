@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect()
   local items = {}
-  local all_kinds, err = require("thetto.core.kind").all()
+  local all_kinds, err = require("thetto2.core.kind").all()
   if err then
     return nil, err
   end

@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect(source_ctx)
   local cmd = { "gh", "api", "-X", "GET", "user/starred", "-F", "per_page=100" }
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise(cmd, {
       cwd = source_ctx.cwd,
       on_exit = function() end,

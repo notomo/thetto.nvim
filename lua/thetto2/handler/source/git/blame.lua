@@ -36,14 +36,14 @@ function M.collect(source_ctx)
   local cmd = { "git", "--no-pager", "blame", "--porcelain", path }
 
   local row = 0
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({ "git", "rev-parse", "--short", "HEAD" }, {
       cwd = git_root,
       on_exit = function() end,
     })
     :next(function(short_commit_hash)
       local digit = #short_commit_hash
-      return require("thetto.util.job").start(cmd, source_ctx, function(output)
+      return require("thetto2.util.job").start(cmd, source_ctx, function(output)
         if not vim.startswith(output, "\t") then
           next_parser(output)
           return nil
@@ -72,7 +72,7 @@ function M.collect(source_ctx)
     end)
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "date",
@@ -91,7 +91,7 @@ M.highlight = require("thetto.util.highlight").columns({
 M.kind_name = "file"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

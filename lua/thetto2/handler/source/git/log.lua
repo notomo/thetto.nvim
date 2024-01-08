@@ -21,7 +21,7 @@ function M.collect(source_ctx)
   }
   vim.list_extend(cmd, source_ctx.opts.args)
   vim.list_extend(cmd, { "--", source_ctx.opts.path })
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     local commit_hash, user_name, message, branch_info = output:match("^(%S+)\t\t(<.*>)\t\t<(.*)>\t\t<(.*)>")
     if not commit_hash then
       return nil
@@ -42,7 +42,7 @@ function M.collect(source_ctx)
   end, { cwd = git_root })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "message",
@@ -62,7 +62,7 @@ M.kind_name = "git/commit"
 
 M.behaviors = {
   insert = false,
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

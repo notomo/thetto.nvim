@@ -17,7 +17,7 @@ function M.collect(source_ctx)
     "--pretty=format:%h %s",
   }
   local commit_hash, message
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     if not vim.startswith(output, " ") then
       commit_hash, message = output:match("^(%S+) (.*)")
       return nil
@@ -37,7 +37,7 @@ function M.collect(source_ctx)
   end, { cwd = git_root })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "message",
@@ -52,7 +52,7 @@ M.kind_name = "git/commit"
 
 M.behaviors = {
   insert = false,
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

@@ -9,7 +9,7 @@ function M.action_edit_last_comment(items)
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor", "--edit-last" }
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto2.util.job").execute(cmd)
 end
 
 function M.action_comment(items)
@@ -19,7 +19,7 @@ function M.action_comment(items)
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor" }
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto2.util.job").execute(cmd)
 end
 
 M.opts.close = {
@@ -37,17 +37,17 @@ function M.action_close(items, action_ctx)
     table.insert(cmd, "--comment=" .. action_ctx.opts.comment)
   end
 
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto2.util.job").execute(cmd)
 end
 
 function M.action_close_with_comment(items, action_ctx)
-  return require("thetto.util.input")
+  return require("thetto2.util.input")
     .promise({
       prompt = "Comment: ",
     })
     :next(function(input)
       if not input or input == "" then
-        return require("thetto.vendor.misclib.message").info("Canceled issue close with comment")
+        return require("thetto2.vendor.misclib.message").info("Canceled issue close with comment")
       end
       return require("thetto2.util.action").call(action_ctx.kind_name, "close", items, {
         comment = input,
@@ -68,7 +68,7 @@ function M.action_reopen(items)
   end
 
   local cmd = { "gh", "issue", "reopen", item.url }
-  return require("thetto.util.job").execute(cmd)
+  return require("thetto2.util.job").execute(cmd)
 end
 
 function M.action_list_comment(items)
@@ -83,4 +83,4 @@ end
 
 M.action_list_children = M.action_list_comment
 
-return require("thetto.core.kind").extend(M, "url")
+return require("thetto2.core.kind").extend(M, "url")

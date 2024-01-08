@@ -7,7 +7,7 @@ function M.collect(source_ctx)
     "list",
     "--format=json",
   }
-  return require("thetto.util.job").run(cmd, source_ctx, function(project)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(project)
     local value = ("%s %s"):format(project.title, project.url)
     return {
       value = value,

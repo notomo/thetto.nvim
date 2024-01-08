@@ -13,7 +13,7 @@ M.behaviors = {
   },
 }
 
-local git_status = require("thetto.handler.kind.git.status")
+local git_status = require("thetto2.handler.kind.git.status")
 M.opts.commit = git_status.opts.commit
 M.action_commit = git_status.action_commit
 M.action_commit_amend = git_status.action_commit_amend

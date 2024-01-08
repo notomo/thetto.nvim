@@ -1,12 +1,12 @@
 local M = {}
 
 function M.root(cwd)
-  return require("thetto.lib.file").find_git_root(cwd)
+  return require("thetto2.lib.file").find_git_root(cwd)
 end
 
 function M.exists(git_root, commit_hash, path)
   local cmd = { "git", "show", "--quiet", "--pretty=format:%h", commit_hash, "--", path }
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise(cmd, {
       cwd = git_root,
       on_exit = function() end,
@@ -18,7 +18,7 @@ end
 
 function M.diff(git_root, bufnr, cmd)
   cmd = cmd or { "git", "--no-pager", "diff", "--date=iso" }
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise(cmd, {
       cwd = git_root,
       on_exit = function() end,
@@ -56,14 +56,14 @@ function M._apply(git_root, diff, path_a, path_b, path_from_git_root)
   f:write(table.concat(diff_lines, "\n") .. "\n")
   f:close()
 
-  return require("thetto.util.job").promise({ "git", "apply", "--verbose", "--cached", patch_path }, {
+  return require("thetto2.util.job").promise({ "git", "apply", "--verbose", "--cached", patch_path }, {
     cwd = git_root,
     on_exit = function() end,
   })
 end
 
 function M._index_content_path(git_root, path_from_git_root)
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({ "git", "--no-pager", "show", ":" .. path_from_git_root }, {
       cwd = git_root,
       on_exit = function() end,
@@ -97,7 +97,7 @@ function M._enable_patch(git_root, path_from_git_root, bufnr)
           end
 
           return
-            require("thetto.util.job").promise(
+            require("thetto2.util.job").promise(
             { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
             {
               cwd = git_root,
@@ -115,7 +115,7 @@ function M._enable_patch(git_root, path_from_git_root, bufnr)
           vim.bo[bufnr].modified = false
         end)
         :catch(function(err)
-          require("thetto.vendor.misclib.message").warn(err)
+          require("thetto2.vendor.misclib.message").warn(err)
         end)
     end,
   })
@@ -141,13 +141,13 @@ end
 function M.content(git_root, path_or_bufnr, revision)
   local path = M._to_path(path_or_bufnr)
   if not revision then
-    return require("thetto.vendor.promise").resolve(path)
+    return require("thetto2.vendor.promise").resolve(path)
   end
 
   local path_from_git_root = path:sub(#git_root + 2)
   local treeish = ("%s:%s"):format(revision, path_from_git_root)
 
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise({
       "git",
       "--no-pager",
@@ -161,7 +161,7 @@ function M.content(git_root, path_or_bufnr, revision)
       if err:match(" does not exist in ") or err:match(" exists on disk, but not in ") then
         return ""
       end
-      return require("thetto.vendor.promise").reject(err)
+      return require("thetto2.vendor.promise").reject(err)
     end)
     :next(function(output)
       local bufnr = vim.api.nvim_create_buf(false, true)
@@ -198,9 +198,9 @@ end
 function M.compare(git_root, path_before, revision_before, path_after, revision_after)
   local before = M.content(git_root, path_before, revision_before)
   local after = M.content(git_root, path_after, revision_after)
-  return require("thetto.vendor.promise").all({ before, after }):next(function(result)
+  return require("thetto2.vendor.promise").all({ before, after }):next(function(result)
     local before_buffer_path, after_buffer_path = unpack(result)
-    require("thetto.lib.buffer").open_scratch_tab()
+    require("thetto2.lib.buffer").open_scratch_tab()
 
     vim.cmd.edit(before_buffer_path)
     vim.cmd.diffthis()

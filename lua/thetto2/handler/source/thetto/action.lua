@@ -1,5 +1,5 @@
-local Kind = require("thetto.core.kind")
-local Context = require("thetto.core.context")
+local Kind = require("thetto2.core.kind")
+local Context = require("thetto2.core.context")
 
 local M = {}
 
@@ -35,7 +35,7 @@ end
 
 M.kind_name = "thetto/action"
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     start_key = "from",

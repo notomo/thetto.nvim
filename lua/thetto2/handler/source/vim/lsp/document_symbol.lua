@@ -44,7 +44,7 @@ function M._to_items(source_ctx, item, parent_key, current_path)
   return items
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Statement",
     start_key = "symbol_kind",
@@ -54,7 +54,7 @@ M.highlight = require("thetto.util.highlight").columns({
 M.kind_name = "file"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

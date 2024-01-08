@@ -55,7 +55,7 @@ function M.action_clone(items)
   end
 
   local cmd = { "gh", "repo", "clone", item.value }
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto2.util.job").promise(cmd)
 end
 
-return require("thetto.core.kind").extend(M, "url")
+return require("thetto2.core.kind").extend(M, "url")

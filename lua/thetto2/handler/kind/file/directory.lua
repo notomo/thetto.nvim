@@ -22,7 +22,7 @@ end
 
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
-    require("thetto.lib.buffer").open_scratch_tab()
+    require("thetto2.lib.buffer").open_scratch_tab()
     filelib.lcd(item.path)
     after(item.path)
   end

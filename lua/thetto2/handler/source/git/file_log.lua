@@ -1,18 +1,18 @@
 local M = {}
 
 function M.collect(source_ctx)
-  return require("thetto.handler.source.git.log").collect(source_ctx:change_opts({
+  return require("thetto2.handler.source.git.log").collect(source_ctx:change_opts({
     args = { "--follow" },
     path = vim.api.nvim_buf_get_name(source_ctx.bufnr),
   }))
 end
 
-M.highlight = require("thetto.handler.source.git.log").highlight
-M.kind_name = require("thetto.handler.source.git.log").kind_name
+M.highlight = require("thetto2.handler.source.git.log").highlight
+M.kind_name = require("thetto2.handler.source.git.log").kind_name
 
 M.behaviors = {
   insert = false,
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

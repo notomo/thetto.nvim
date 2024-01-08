@@ -10,4 +10,4 @@ end
 
 M.action_list_parents = M.action_list_action_job
 
-return require("thetto.core.kind").extend(M, "url")
+return require("thetto2.core.kind").extend(M, "url")

@@ -73,4 +73,4 @@ end
 
 M.default_action = "open"
 
-return require("thetto.core.kind").extend(M, "file")
+return require("thetto2.core.kind").extend(M, "file")

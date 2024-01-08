@@ -9,7 +9,7 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "gron", "--monochrome", file_path }
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     local pattern = M._to_pattern(output)
     return {
       value = output,

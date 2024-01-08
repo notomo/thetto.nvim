@@ -1,3 +1,3 @@
 local M = {}
 
-return require("thetto.core.kind").extend(M, "git/status", "file")
+return require("thetto2.core.kind").extend(M, "git/status", "file")

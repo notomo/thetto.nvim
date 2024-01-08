@@ -19,7 +19,7 @@ function M.action_download_log(items)
     "api",
     ("/repos/:owner/:repo/actions/runs/%s/logs"):format(item.run.id),
   }
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise(cmd, {
       on_exit = function() end,
     })
@@ -32,10 +32,10 @@ function M.action_download_log(items)
       local output_dir = vim.fn.stdpath("cache") .. "/thetto/github_action_log/" .. item.run.id
       vim.fn.mkdir(output_dir, "p")
 
-      return require("thetto.util.job").promise({ "unzip", "-o", file_path, "-d", output_dir })
+      return require("thetto2.util.job").promise({ "unzip", "-o", file_path, "-d", output_dir })
     end)
 end
 
 M.action_list_children = M.action_list_action_step
 
-return require("thetto.core.kind").extend(M, "url")
+return require("thetto2.core.kind").extend(M, "url")

@@ -36,7 +36,7 @@ else
 end
 
 function M.collect(source_ctx)
-  return require("thetto.handler.source.file.recursive").collect(source_ctx)
+  return require("thetto2.handler.source.file.recursive").collect(source_ctx)
 end
 
 M.kind_name = "file/directory"

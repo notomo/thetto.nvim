@@ -21,9 +21,9 @@ function M.action_run(items)
   end
 
   local cmd = { "gh", "workflow", "run", item.workflow.file_name }
-  return require("thetto.util.job").promise(cmd):next(M.action_list_action_run)
+  return require("thetto2.util.job").promise(cmd):next(M.action_list_action_run)
 end
 
 M.action_list_children = M.action_list_action_run
 
-return require("thetto.core.kind").extend(M, "url")
+return require("thetto2.core.kind").extend(M, "url")

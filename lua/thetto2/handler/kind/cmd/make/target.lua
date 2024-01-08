@@ -12,7 +12,7 @@ M.opts.execute = {
 
 function M.action_execute(items, action_ctx)
   for _, item in ipairs(items) do
-    require("thetto.lib.buffer").open_scratch_tab()
+    require("thetto2.lib.buffer").open_scratch_tab()
     local cmd = { "make" }
     vim.list_extend(cmd, action_ctx.opts.args)
 
@@ -32,4 +32,4 @@ end
 
 M.default_action = "execute"
 
-return require("thetto.core.kind").extend(M, "file")
+return require("thetto2.core.kind").extend(M, "file")

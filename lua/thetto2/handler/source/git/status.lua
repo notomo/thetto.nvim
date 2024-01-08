@@ -28,7 +28,7 @@ function M.collect(source_ctx)
     conflict = parse_stage,
   }
   local index_status = "staged"
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     local changed_state = states[output]
     if changed_state then
       index_status = changed_state
@@ -79,7 +79,7 @@ local hl_groups = {
   staged = "String",
   conflict = "Special",
 }
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = function(item)
       if not item.index_status then
@@ -96,7 +96,7 @@ M.kind_name = "git/status/file"
 M.behaviors = {
   insert = false,
   display_limit = 10000,
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

@@ -7,7 +7,7 @@ M.opts = {
 
 function M.action_debug_print(items)
   for _, item in ipairs(items) do
-    require("thetto.vendor.misclib.message").info(vim.inspect(item))
+    require("thetto2.vendor.misclib.message").info(vim.inspect(item))
   end
 end
 
@@ -19,7 +19,7 @@ function M.action_debug_dump(items)
     local lines = { vim.json.encode(item) }
     vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 
-    require("thetto.lib.buffer").open_scratch_tab()
+    require("thetto2.lib.buffer").open_scratch_tab()
     vim.cmd.buffer(bufnr)
     vim.cmd("%!jq '.'")
   end
@@ -27,7 +27,7 @@ end
 
 function M.action_echo(items)
   for _, item in ipairs(items) do
-    require("thetto.vendor.misclib.message").info(item.value)
+    require("thetto2.vendor.misclib.message").info(item.value)
   end
 end
 
@@ -38,7 +38,7 @@ function M.action_yank(items, action_ctx)
   local value = table.concat(values, "\n")
   if value ~= "" then
     vim.fn.setreg(action_ctx.opts.register, value)
-    require("thetto.vendor.misclib.message").info("yank: " .. value)
+    require("thetto2.vendor.misclib.message").info("yank: " .. value)
   end
 end
 

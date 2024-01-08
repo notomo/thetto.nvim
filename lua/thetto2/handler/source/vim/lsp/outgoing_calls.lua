@@ -1,4 +1,4 @@
-local pathlib = require("thetto.lib.path")
+local pathlib = require("thetto2.lib.path")
 
 local M = {}
 
@@ -69,7 +69,7 @@ function M.collect(source_ctx)
   end
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "value",
@@ -79,7 +79,7 @@ M.highlight = require("thetto.util.highlight").columns({
 M.kind_name = "file"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 M.modify_pipeline = require("thetto2.util.pipeline").append({

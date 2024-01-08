@@ -15,7 +15,7 @@ function M.collect(source_ctx)
     table.insert(cmd, "--merged")
   end
 
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     return {
       value = output,
       git_root = git_root,
@@ -26,7 +26,7 @@ end
 M.kind_name = "git/tag"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M

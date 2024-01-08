@@ -7,7 +7,7 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "whereis", pattern }
-  return require("thetto.util.job")
+  return require("thetto2.util.job")
     .promise(cmd, {
       cwd = source_ctx.cwd,
       on_exit = function() end,
@@ -31,7 +31,7 @@ end
 
 M.kind_name = "file"
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "String",
     filter = function(item)

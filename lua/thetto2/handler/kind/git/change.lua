@@ -1,23 +1,23 @@
 local M = {}
 
 function M.action_open(items)
-  return require("thetto.handler.kind.git._util").open(items, function(bufnr)
+  return require("thetto2.handler.kind.git._util").open(items, function(bufnr)
     vim.cmd.buffer(bufnr)
   end)
 end
 
 function M.action_vsplit_open(items)
-  return require("thetto.handler.kind.git._util").open(items, function(bufnr)
+  return require("thetto2.handler.kind.git._util").open(items, function(bufnr)
     vim.cmd.vsplit()
     vim.cmd.buffer(bufnr)
   end)
 end
 
 function M.action_tab_open(items)
-  return require("thetto.handler.kind.git._util").open(items, function(bufnr)
-    require("thetto.lib.buffer").open_scratch_tab()
+  return require("thetto2.handler.kind.git._util").open(items, function(bufnr)
+    require("thetto2.lib.buffer").open_scratch_tab()
     vim.cmd.buffer(bufnr)
   end)
 end
 
-return require("thetto.core.kind").extend(M, "git/commit")
+return require("thetto2.core.kind").extend(M, "git/commit")

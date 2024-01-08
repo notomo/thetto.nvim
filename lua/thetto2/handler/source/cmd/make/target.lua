@@ -1,4 +1,4 @@
-local pathlib = require("thetto.lib.path")
+local pathlib = require("thetto2.lib.path")
 local filelib = require("thetto2.lib.file")
 
 local M = {}
@@ -65,7 +65,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoMakeTargetPath", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "ThettoMakeTargetPath",
     end_key = "value",
@@ -76,7 +76,7 @@ M.kind_name = "cmd/make/target"
 
 M.behaviors = {
   insert = false,
-  cwd = require("thetto.util.cwd").upward({ "Makefile" }),
+  cwd = require("thetto2.util.cwd").upward({ "Makefile" }),
 }
 
 return M

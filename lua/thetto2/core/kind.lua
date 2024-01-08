@@ -61,4 +61,9 @@ function M.get_preview(self, item)
   return require("thetto2.vendor.promise").resolve(promise), preview
 end
 
+function M.extend(kind, name)
+  -- TODO
+  return kind
+end
+
 return M

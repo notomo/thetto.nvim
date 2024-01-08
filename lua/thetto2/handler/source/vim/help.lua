@@ -1,4 +1,4 @@
-local listlib = require("thetto.lib.list")
+local listlib = require("thetto2.lib.list")
 local vim = vim
 
 local M = {}

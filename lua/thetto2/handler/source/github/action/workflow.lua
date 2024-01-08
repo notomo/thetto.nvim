@@ -12,7 +12,7 @@ function M.collect(source_ctx)
     "-F",
     "per_page=100",
   }
-  return require("thetto.util.job").run(cmd, source_ctx, function(workflow)
+  return require("thetto2.util.job").run(cmd, source_ctx, function(workflow)
     local mark
     if workflow.state == "active" then
       mark = "A"
@@ -39,7 +39,7 @@ function M.collect(source_ctx)
   })
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Character",
     else_group = "Comment",

@@ -1,4 +1,4 @@
-local joblib = require("thetto.vendor.misclib.job")
+local joblib = require("thetto2.vendor.misclib.job")
 
 local M = {}
 
@@ -45,7 +45,7 @@ end
 function M.run(cmd, source_ctx, to_item, opts)
   local default_opts = {
     to_outputs = function(output)
-      return require("thetto.util.job.parse").output(output)
+      return require("thetto2.util.job.parse").output(output)
     end,
     stop_on_error = true,
     input = nil,
@@ -59,8 +59,8 @@ function M.run(cmd, source_ctx, to_item, opts)
     opts.env = nil
   end
 
-  local stdout = require("thetto.vendor.misclib.job.output").new()
-  local stderr = require("thetto.vendor.misclib.job.output").new()
+  local stdout = require("thetto2.vendor.misclib.job.output").new()
+  local stderr = require("thetto2.vendor.misclib.job.output").new()
   return function(observer)
     return start(observer, cmd, {
       on_exit = function(_, code)
@@ -95,7 +95,7 @@ end
 function M.start(cmd, source_ctx, to_item, opts)
   local default_opts = {
     to_outputs = function(data)
-      return require("thetto.util.job.parse").output(data)
+      return require("thetto2.util.job.parse").output(data)
     end,
     input = nil,
     cwd = source_ctx.cwd,
@@ -106,8 +106,8 @@ function M.start(cmd, source_ctx, to_item, opts)
     return vim.iter(outputs):map(to_item):totable()
   end
 
-  local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
-  local stderr = require("thetto.vendor.misclib.job.output").new()
+  local output_buffer = require("thetto2.vendor.misclib.job.output").new_buffer()
+  local stderr = require("thetto2.vendor.misclib.job.output").new()
   return function(observer)
     return start(observer, cmd, {
       on_stdout = function(_, data)
@@ -146,7 +146,7 @@ function M.start(cmd, source_ctx, to_item, opts)
 end
 
 function M.execute(cmd, opts)
-  local stdout = require("thetto.vendor.misclib.job.output").new()
+  local stdout = require("thetto2.vendor.misclib.job.output").new()
   local default_opts = {
     on_exit = function()
       vim.api.nvim_echo({ { stdout:str() } }, true, {})
@@ -169,9 +169,9 @@ function M.promise(cmd, opts)
     return code ~= 0
   end
 
-  local stdout = require("thetto.vendor.misclib.job.output").new()
-  local stderr = require("thetto.vendor.misclib.job.output").new()
-  return require("thetto.vendor.promise").new(function(resolve, reject)
+  local stdout = require("thetto2.vendor.misclib.job.output").new()
+  local stderr = require("thetto2.vendor.misclib.job.output").new()
+  return require("thetto2.vendor.promise").new(function(resolve, reject)
     local default_opts = {
       stderr_buffered = true,
       stdout_buffered = true,

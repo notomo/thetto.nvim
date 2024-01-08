@@ -1,10 +1,10 @@
-local pathlib = require("thetto.lib.path")
+local pathlib = require("thetto2.lib.path")
 
 local M = {}
 
 function M.collect(source_ctx)
   return function(observer)
-    return require("thetto.handler.source.vim.lsp.outgoing_calls")
+    return require("thetto2.handler.source.vim.lsp.outgoing_calls")
       .request(source_ctx.bufnr, "callHierarchy/incomingCalls")
       :next(function(result)
         local to_relative = pathlib.relative_modifier(source_ctx.cwd)
@@ -42,7 +42,7 @@ function M.collect(source_ctx)
   end
 end
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "Comment",
     end_key = "value",
@@ -52,7 +52,7 @@ M.highlight = require("thetto.util.highlight").columns({
 M.kind_name = "file"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 M.modify_pipeline = require("thetto2.util.pipeline").append({

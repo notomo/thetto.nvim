@@ -1,4 +1,4 @@
-local pathlib = require("thetto.lib.path")
+local pathlib = require("thetto2.lib.path")
 
 local M = {}
 
@@ -54,7 +54,7 @@ end
 
 vim.api.nvim_set_hl(0, "ThettoVimJumpPath", { default = true, link = "Comment" })
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = "ThettoVimJumpPath",
     end_key = "value",

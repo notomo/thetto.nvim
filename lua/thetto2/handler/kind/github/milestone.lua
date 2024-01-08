@@ -13,4 +13,4 @@ end
 
 M.action_list_children = M.action_list_issue
 
-return require("thetto.core.kind").extend(M, "url")
+return require("thetto2.core.kind").extend(M, "url")

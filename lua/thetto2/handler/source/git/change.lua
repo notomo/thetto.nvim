@@ -57,17 +57,17 @@ function M.collect(source_ctx)
 
   if commit_hash and source_ctx.opts.path then
     -- fallback for renamed file path
-    return require("thetto.util.git").exists(git_root, commit_hash, source_ctx.opts.path):next(function(ok)
+    return require("thetto2.util.git").exists(git_root, commit_hash, source_ctx.opts.path):next(function(ok)
       if ok then
         table.insert(cmd, source_ctx.opts.path)
       end
-      return require("thetto.util.job").start(cmd, source_ctx, function(output)
+      return require("thetto2.util.job").start(cmd, source_ctx, function(output)
         return M._to_item(git_root, commit_hash, output)
       end, { cwd = git_root })
     end)
   end
 
-  return require("thetto.util.job").start(cmd, source_ctx, function(output)
+  return require("thetto2.util.job").start(cmd, source_ctx, function(output)
     return M._to_item(git_root, commit_hash, output)
   end, { cwd = git_root })
 end
@@ -79,7 +79,7 @@ local status_highlights = {
   rename = "DiffChange",
 }
 
-M.highlight = require("thetto.util.highlight").columns({
+M.highlight = require("thetto2.util.highlight").columns({
   {
     group = function(item)
       return status_highlights[item.status]
@@ -95,7 +95,7 @@ M.highlight = require("thetto.util.highlight").columns({
 M.kind_name = "git/change"
 
 M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
+  cwd = require("thetto2.util.cwd").project(),
 }
 
 return M
