@@ -9,6 +9,7 @@ Ui.__index = Ui
 local default_opts = {
   has_sidecar = true,
   insert = true,
+  display_limit = 500,
 }
 
 --- @param pipeline ThettoPipeline
@@ -33,7 +34,8 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, raw_opts)
     source.highlight,
     consumer_ctx.source_ctx.cwd,
     pipeline,
-    opts.insert
+    opts.insert,
+    opts.display_limit
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(

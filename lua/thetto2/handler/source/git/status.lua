@@ -94,12 +94,14 @@ M.highlight = require("thetto2.util.highlight").columns({
 M.kind_name = "git/status/file"
 
 M.behaviors = {
-  display_limit = 10000,
   cwd = require("thetto2.util.cwd").project(),
 }
 
 M.consumer_opts = {
-  ui = { insert = false },
+  ui = {
+    insert = false,
+    display_limit = 10000,
+  },
 }
 
 return M

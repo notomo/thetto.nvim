@@ -17,7 +17,19 @@ local _states = {}
 
 --- @param sidecar ThettoUiSidecar
 --- @param pipeline ThettoPipeline
-function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_highlight, source_ctx, pipeline, insert)
+function M.open(
+  ctx_key,
+  cwd,
+  closer,
+  layout,
+  sidecar,
+  item_cursor_row,
+  source_highlight,
+  source_ctx,
+  pipeline,
+  insert,
+  display_limit
+)
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = not insert,
     column = 0,
@@ -30,7 +42,7 @@ function M.open(ctx_key, cwd, closer, layout, sidecar, item_cursor_row, source_h
       status = "running",
       source_name = nil,
       page = 0,
-      limit = 100,
+      limit = display_limit,
       start_index = 1,
       end_index = 1,
       all_items_count = 0,
