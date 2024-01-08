@@ -28,6 +28,7 @@ function M.collect(source_ctx)
         desc = desc,
         row = diagnostic.lnum + 1,
         column = diagnostic.col,
+        end_column = diagnostic.end_col,
         path = path,
         severity = diagnostic.severity,
         column_offsets = {
@@ -62,6 +63,18 @@ M.highlight = require("thetto.util.highlight").columns({
 })
 
 M.kind_name = "file"
-M.sorters = { "row", "numeric:severity" }
+
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").fields({
+    {
+      name = "value",
+      field_name = "row",
+    },
+    {
+      name = "value",
+      field_name = "severity",
+    },
+  }),
+})
 
 return M

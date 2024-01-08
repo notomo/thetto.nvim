@@ -31,6 +31,8 @@ end
 
 M.kind_name = "vim/help"
 
-M.sorters = { "length" }
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").field_length_by_name("value"),
+})
 
 return M

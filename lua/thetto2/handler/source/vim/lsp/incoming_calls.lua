@@ -55,6 +55,8 @@ M.behaviors = {
   cwd = require("thetto.util.cwd").project(),
 }
 
-M.sorters = { "row" }
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").field_by_name("row"),
+})
 
 return M

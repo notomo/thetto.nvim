@@ -11,6 +11,9 @@ function M.collect()
 end
 
 M.kind_name = "word"
-M.sorters = { "numeric:namespace" }
+
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").field_by_name("namespace"),
+})
 
 return M

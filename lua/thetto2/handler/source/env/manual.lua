@@ -28,6 +28,8 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "env/manual"
 
-M.sorters = { "length" }
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").field_length_by_name("value"),
+})
 
 return M

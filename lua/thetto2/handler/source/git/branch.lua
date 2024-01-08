@@ -77,8 +77,6 @@ M.behaviors = {
   cwd = require("thetto.util.cwd").project(),
 }
 
-M.sorters = { "-numeric:_is_current_branch", "length" }
-
 M.modify_pipeline = require("thetto2.util.pipeline").append({
   require("thetto2.util.sorter").fields({
     {
