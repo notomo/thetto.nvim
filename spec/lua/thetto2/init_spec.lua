@@ -37,7 +37,7 @@ describe("thetto.start() immediate", function()
         }
       end,
     }, {
-      consumer_factory = require("thetto2.util.consumer").immediate("append"),
+      consumer_factory = require("thetto2.util.consumer").immediate({ action_name = "append" }),
     })
     helper.wait(p)
 

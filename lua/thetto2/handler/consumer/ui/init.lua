@@ -6,14 +6,21 @@
 local Ui = {}
 Ui.__index = Ui
 
+local default_opts = {
+  has_sidecar = true,
+}
+
 --- @param pipeline ThettoPipeline
-function Ui.new(consumer_ctx, source, pipeline, callbacks, has_sidecar)
+function Ui.new(consumer_ctx, source, pipeline, callbacks, raw_opts)
+  local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
+
   local filters = pipeline:filters()
 
   local closer = require("thetto2.handler.consumer.ui.closer").new()
-  local layout = require("thetto2.handler.consumer.ui.layout").new(has_sidecar, filters)
+  local layout = require("thetto2.handler.consumer.ui.layout").new(opts.has_sidecar, filters)
 
-  local sidecar = require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, has_sidecar, layout.sidecar)
+  local sidecar =
+    require("thetto2.handler.consumer.ui.sidecar").open(consumer_ctx.ctx_key, opts.has_sidecar, layout.sidecar)
 
   local item_list = require("thetto2.handler.consumer.ui.item_list").open(
     consumer_ctx.ctx_key,

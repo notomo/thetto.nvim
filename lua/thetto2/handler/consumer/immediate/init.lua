@@ -4,10 +4,15 @@
 local M = {}
 M.__index = M
 
-function M.new(consumer_ctx, action_name, callbacks)
+local default_opts = {
+  action_name = nil,
+}
+
+function M.new(consumer_ctx, callbacks, raw_opts)
+  local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
-    _action_name = action_name,
+    _action_name = opts.action_name,
     _item_cursor_row = consumer_ctx.item_cursor_row,
     _on_row_changed = callbacks.on_row_changed,
   }

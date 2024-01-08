@@ -77,6 +77,10 @@ function M.get_preview(self, item)
   return require("thetto2.vendor.promise").resolve(promise), preview
 end
 
+function M.can_preview(self)
+  return self._origin.get_preview ~= nil
+end
+
 function M._action_name_to_kind_name_map(kind_name, kind)
   local action_name_to_kind_name = {}
   vim
