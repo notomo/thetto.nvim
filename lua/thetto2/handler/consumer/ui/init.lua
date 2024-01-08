@@ -73,7 +73,7 @@ local handlers = {
     self._item_list:redraw_footer(nil, "")
   end),
   [consumer_events.all.source_error] = function(_, err)
-    error(err)
+    vim.notify(err, vim.log.levels.ERROR)
   end,
 }
 

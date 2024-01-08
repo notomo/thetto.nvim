@@ -43,6 +43,8 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "file"
 
-M.sorters = { "row" }
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").field_by_name("row"),
+})
 
 return M

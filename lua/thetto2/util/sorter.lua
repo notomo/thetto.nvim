@@ -16,7 +16,66 @@ function M.field_convert(name, fields)
   if not origin then
     error("not found field sorter convert: " .. name)
   end
-  return vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
+  local convert = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
+  convert.name = name
+  return convert
+end
+
+function M.field_by_name(name)
+  return require("thetto2.util.sorter").by_name("field", {
+    desc = name,
+    opts = {
+      converts = {
+        require("thetto2.util.sorter").field_convert("value", {
+          opts = {
+            to_field = function(item)
+              return item[name]
+            end,
+          },
+        }),
+      },
+    },
+  })
+end
+
+function M.field_length_by_name(name)
+  return require("thetto2.util.sorter").by_name("field", {
+    desc = ("%s:length"):format(name),
+    opts = {
+      converts = {
+        require("thetto2.util.sorter").field_convert("length", {
+          opts = {
+            to_field = function(item)
+              return item[name]
+            end,
+          },
+        }),
+      },
+    },
+  })
+end
+
+function M.fields(converts)
+  return require("thetto2.util.sorter").by_name("field", {
+    desc = vim
+      .iter(converts)
+      :map(function(convert)
+        return ("%s:%s"):format(convert.name, convert.field_name)
+      end)
+      :join(","),
+    opts = {
+      converts = vim.iter(converts):map(function(convert)
+        return require("thetto2.util.sorter").field_convert(convert.name, {
+          opts = {
+            to_field = function(item)
+              return item[convert.field_name]
+            end,
+          },
+          reversed = convert.reversed,
+        })
+      end),
+    },
+  })
 end
 
 return M

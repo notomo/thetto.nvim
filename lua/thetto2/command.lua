@@ -3,7 +3,9 @@ local M = {}
 function M.start(source, raw_opts)
   local opts = require("thetto2.core.option").new_start_opts(raw_opts)
 
-  local pipeline = opts.pipeline_factory()
+  local stages = opts.pipeline_stages_factory({}, { source = source })
+  local pipeline = require("thetto2.core.pipeline").new(stages)
+
   local ctx_key = require("thetto2.core.context").new_key()
   local collector =
     require("thetto2.core.collector").new(source, pipeline, ctx_key, opts.consumer_factory, opts.item_cursor_factory)

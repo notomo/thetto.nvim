@@ -79,4 +79,18 @@ M.behaviors = {
 
 M.sorters = { "-numeric:_is_current_branch", "length" }
 
+M.modify_pipeline = require("thetto2.util.pipeline").append({
+  require("thetto2.util.sorter").fields({
+    {
+      name = "value",
+      field_name = "_is_current_branch",
+      reversed = true,
+    },
+    {
+      name = "length",
+      field_name = "value",
+    },
+  }),
+})
+
 return M

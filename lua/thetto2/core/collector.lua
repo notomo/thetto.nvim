@@ -109,6 +109,27 @@ function Collector._create_subscriber(self)
     return subscriber_or_items
   end
 
+  if type(subscriber_or_items.next) == "function" then
+    -- promise case
+    return function(observer)
+      subscriber_or_items
+        :next(function(result)
+          if type(result) == "function" then
+            -- promise returns subscriber case
+            result(observer)
+            return
+          end
+
+          -- promise returns items case
+          observer:next(result)
+          observer:complete(result)
+        end)
+        :catch(function(err)
+          observer:error(err)
+        end)
+    end
+  end
+
   return function(observer)
     observer:next(subscriber_or_items)
     observer:complete()
