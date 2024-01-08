@@ -93,10 +93,6 @@ end
 
 M.opts = { pattern_groups = {}, allow_new = false }
 
-M.behaviors = {
-  immediately = true,
-}
-
 M.consumer_opts = {
   ui = { insert = false },
 }
