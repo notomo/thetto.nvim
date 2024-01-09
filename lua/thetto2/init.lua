@@ -28,4 +28,8 @@ function M.setup_store(name, opts)
   require("thetto2.command").setup_store(name, opts)
 end
 
+function M.register_source(source_name, source)
+  require("thetto2.core.source").register(source_name, source)
+end
+
 return M
