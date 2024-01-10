@@ -2,7 +2,19 @@ local base = require("thetto2.handler.kind.base")
 
 local M = {}
 
-function M.by_name(kind_name, fields)
+local _registered = {}
+
+local default_opts = {
+  use_registered = true,
+}
+function M.by_name(kind_name, fields, raw_opts)
+  local opts = vim.tbl_deep_extend("force", default_opts, raw_opts or {})
+
+  local registered = _registered[kind_name]
+  if opts.use_registered and registered then
+    return vim.tbl_deep_extend("force", vim.deepcopy(registered), fields or {})
+  end
+
   local origin = require("thetto2.vendor.misclib.module").find("thetto2.handler.kind." .. kind_name)
   if not origin then
     error("not found kind: " .. kind_name)
@@ -13,6 +25,10 @@ function M.by_name(kind_name, fields)
   kind.action_name_to_kind_name = kind.action_name_to_kind_name or {}
 
   return kind
+end
+
+function M.register(kind_name, kind)
+  _registered[kind_name] = kind
 end
 
 local ACTION_PREFIX = "action_"

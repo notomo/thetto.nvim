@@ -32,4 +32,8 @@ function M.register_source(source_name, source)
   require("thetto2.core.source").register(source_name, source)
 end
 
+function M.register_kind(kind_name, kind)
+  require("thetto2.core.kind").register(kind_name, kind)
+end
+
 return M
