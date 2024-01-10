@@ -13,7 +13,7 @@ function M.collect()
   local kind = require("thetto2.core.kind").by_name(kind_name)
 
   return vim
-    .iter(kind:action_infos())
+    .iter(require("thetto2.core.kind").action_infos(kind))
     :map(function(action_info)
       local action_name = action_info.name
       local desc = ("%s (%s)"):format(action_name, action_info.from)

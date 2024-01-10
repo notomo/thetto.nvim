@@ -22,7 +22,7 @@ function M.grouping(items, raw_opts)
     :map(function(item)
       local kind_name = default_kind_name or item.kind_name
       local kind = require("thetto2.core.kind").by_name(kind_name, opts.actions)
-      return { item, kind:action_kind_name(action_name) }
+      return { item, require("thetto2.core.kind").action_kind_name(kind, action_name) }
     end)
     :totable()
 
@@ -36,7 +36,7 @@ function M.grouping(items, raw_opts)
       local kind_name, item_pairs = unpack(item_group)
       local kind = require("thetto2.core.kind").by_name(kind_name, opts.actions)
       return {
-        action = kind:find_action(action_name),
+        action = require("thetto2.core.kind").find_action(kind, action_name),
         items = vim
           .iter(item_pairs)
           :map(function(pair)

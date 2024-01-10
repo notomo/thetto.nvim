@@ -1,14 +1,8 @@
 local base = require("thetto2.handler.kind.base")
 
 local M = {}
-M.__index = M
 
 function M.by_name(kind_name, fields)
-  local kind = M._by_name(kind_name, fields)
-  return M._new(kind)
-end
-
-function M._by_name(kind_name, fields)
   local origin = require("thetto2.vendor.misclib.module").find("thetto2.handler.kind." .. kind_name)
   if not origin then
     error("not found kind: " .. kind_name)
@@ -16,60 +10,52 @@ function M._by_name(kind_name, fields)
 
   local kind = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
   kind.name = kind_name
-  kind._action_to_kind = kind._action_to_kind or {}
+  kind.action_name_to_kind_name = kind.action_name_to_kind_name or {}
 
   return kind
 end
 
-function M._new(kind)
-  local tbl = {
-    _origin = kind,
-  }
-  return setmetatable(tbl, M)
+local ACTION_PREFIX = "action_"
+local action_key = function(kind, action_name)
+  local name = action_name
+  if name == "default" then
+    name = kind.default_action
+  end
+  return ACTION_PREFIX .. name
 end
 
-function M.find_action(self, action_name)
-  local key = self:_action_key(action_name)
-  local action = self._origin[key]
+function M.find_action(kind, action_name)
+  local key = action_key(kind, action_name)
+  local action = kind[key]
   if action then
-    local action_opts = self._origin.opts[action_name] or {}
+    local action_opts = kind.opts[action_name] or {}
     return function(items, raw_action_ctx)
       local action_ctx = vim.tbl_deep_extend("force", { opts = action_opts }, raw_action_ctx)
       return action(items, action_ctx)
     end
   end
 
-  local err = ("not found action: kind=%s action=%s"):format(self._origin.name, action_name)
+  local err = ("not found action: kind=%s action=%s"):format(kind.name, action_name)
   error(err)
 end
 
-function M.action_kind_name(self, action_name)
-  local key = self:_action_key(action_name)
-  if rawget(self._origin, key) then
-    return self._origin.name
+function M.action_kind_name(kind, action_name)
+  local key = action_key(kind, action_name)
+  if rawget(kind, key) then
+    return kind.name
   end
-  local extend_kind_name = self._origin._action_to_kind[key]
+  local extend_kind_name = kind.action_name_to_kind_name[key]
   if extend_kind_name then
     return extend_kind_name
   end
   if base[key] then
     return "base"
   end
-  return self._origin.name
+  return kind.name
 end
 
-local ACTION_PREFIX = "action_"
-
-function M._action_key(self, action_name)
-  local name = action_name
-  if name == "default" then
-    name = self._origin.default_action
-  end
-  return ACTION_PREFIX .. name
-end
-
-function M.get_preview(self, item)
-  local f = self._origin.get_preview
+function M.get_preview(kind, item)
+  local f = kind.get_preview
   if not f then
     return require("thetto2.vendor.promise").resolve(), { lines = {} }
   end
@@ -77,8 +63,8 @@ function M.get_preview(self, item)
   return require("thetto2.vendor.promise").resolve(promise), preview
 end
 
-function M.can_preview(self)
-  return self._origin.get_preview ~= nil
+function M.can_preview(kind)
+  return kind.get_preview ~= nil
 end
 
 function M._action_name_to_kind_name_map(kind_name, kind)
@@ -97,19 +83,19 @@ function M._action_name_to_kind_name_map(kind_name, kind)
   return action_name_to_kind_name
 end
 
-function M.extend(raw_kind, ...)
+function M.extend(kind, ...)
   local extends = vim
     .iter({ ... })
     :map(function(kind_name)
-      local extend = M._by_name(kind_name)
-      extend._action_to_kind = M._action_name_to_kind_name_map(kind_name, extend)
+      local extend = M.by_name(kind_name)
+      extend.action_name_to_kind_name = M._action_name_to_kind_name_map(kind_name, extend)
       return extend
     end)
     :totable()
-  return vim.tbl_deep_extend("keep", raw_kind, unpack(extends))
+  return vim.tbl_deep_extend("keep", kind, unpack(extends))
 end
 
-function M.action_infos(self)
+function M.action_infos(kind)
   local already = {}
   local to_action_infos = function(from, actions)
     return vim
@@ -132,7 +118,7 @@ function M.action_infos(self)
   end
 
   local action_infos = {}
-  vim.list_extend(action_infos, to_action_infos(self._origin.name, self._origin))
+  vim.list_extend(action_infos, to_action_infos(kind.name, kind))
   vim.list_extend(action_infos, to_action_infos("base", base))
   return action_infos
 end
