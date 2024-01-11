@@ -216,7 +216,6 @@ describe("thetto.register_source()", function()
 
   it("can register source", function()
     thetto.register_source("test", {
-      name = "test",
       collect = function()
         return {
           { value = "line1" },
@@ -230,5 +229,21 @@ describe("thetto.register_source()", function()
       { value = "line1" },
       { value = "line2" },
     }, got)
+  end)
+end)
+
+describe("thetto.register_kind()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can register kind", function()
+    thetto.register_kind("test", {
+      action_test = function()
+        return "value"
+      end,
+    })
+
+    local got = require("thetto2.util.kind").by_name("test").action_test()
+    assert.is_same("value", got)
   end)
 end)
