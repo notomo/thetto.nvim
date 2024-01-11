@@ -22,6 +22,28 @@ describe("thetto.start() default ui", function()
 line1
 line2]])
   end)
+
+  it("can filter by input", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+    }, {
+      pipeline_stages_factory = require("thetto2.util.pipeline").list({
+        require("thetto2.util.filter").by_name("substring"),
+      }),
+    })
+    helper.wait(p1)
+
+    helper.input("line2")
+    thetto.call_consumer("move_to_list")
+
+    assert.lines([[
+line2]])
+  end)
 end)
 
 describe("thetto.start() immediate", function()

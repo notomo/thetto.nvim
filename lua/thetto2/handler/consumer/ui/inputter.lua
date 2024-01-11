@@ -2,6 +2,7 @@ local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
 
 --- @class ThettoUiInputter
 --- @field _closed boolean
+--- @field _input_promise table
 local M = {}
 M.__index = M
 
@@ -57,16 +58,6 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert)
     end)
     :totable()
 
-  vim.api.nvim_buf_attach(bufnr, false, {
-    on_lines = function(_, _, _, changed_row)
-      local changed_index = changed_row + 1
-      local debounce = debounces[changed_index]
-      debounce(changed_index):next(function(...)
-        return on_change(...)
-      end)
-    end,
-  })
-
   local window_id = vim.api.nvim_open_win(bufnr, resume_state.has_forcus, {
     width = layout.width,
     height = layout.height,
@@ -119,6 +110,16 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert)
   }
   local self = setmetatable(tbl, M)
   _selfs[bufnr] = self
+
+  vim.api.nvim_buf_attach(bufnr, false, {
+    on_lines = function(_, _, _, changed_row)
+      local changed_index = changed_row + 1
+      local debounce = debounces[changed_index]
+      self._input_promise = debounce(changed_index):next(function(...)
+        return on_change(...)
+      end)
+    end,
+  })
 
   vim.api.nvim_set_decoration_provider(_ns, {})
   vim.api.nvim_set_decoration_provider(_ns, {
@@ -193,6 +194,10 @@ function M.close(self, current_window_id)
   _resume_states[self._ctx_key] = resume_state
 
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
+end
+
+function M.promise(self)
+  return self._input_promise
 end
 
 return M

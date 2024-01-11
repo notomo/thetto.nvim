@@ -38,6 +38,12 @@ function helper.wait(promise)
   on_finished:wait()
 end
 
+function helper.input(text)
+  vim.api.nvim_put({ text }, "c", true, true)
+  local p = require("thetto2").call_consumer("wait")
+  helper.wait(p)
+end
+
 local asserts = require("vusted.assert").asserts
 
 asserts.create("lines"):register_eq(function()

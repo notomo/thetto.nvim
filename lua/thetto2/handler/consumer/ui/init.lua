@@ -118,6 +118,10 @@ local actions = {
   toggle_all_selection = function(self)
     self._item_list:toggle_all_selection()
   end,
+  --- @param self ThettoUi
+  wait = function(self)
+    return self._inputter:promise()
+  end,
 }
 
 function Ui.call(self, action_name, opts)
