@@ -33,7 +33,7 @@ line2]])
       end,
     }, {
       pipeline_stages_factory = require("thetto2.util.pipeline").list({
-        require("thetto2.util.filter").by_name("substring"),
+        require("thetto2.util.filter").by_name("substring", { debounce_ms = 1 }),
       }),
     })
     helper.wait(p1)
@@ -43,6 +43,35 @@ line2]])
 
     assert.lines([[
 line2]])
+  end)
+
+  it("can change source input pattern interactively", function()
+    local p1 = thetto.start({
+      collect = function(source_ctx)
+        local pattern = source_ctx.pattern or ""
+        return {
+          { value = pattern .. "1" },
+          { value = pattern .. "2" },
+        }
+      end,
+    }, {
+      pipeline_stages_factory = require("thetto2.util.pipeline").list({
+        require("thetto2.util.filter").by_name("source_input", { debounce_ms = 1 }),
+      }),
+    })
+    helper.wait(p1)
+
+    thetto.call_consumer("move_to_list")
+    assert.lines([[
+1
+2]])
+
+    thetto.call_consumer("move_to_input")
+    helper.input("a")
+    thetto.call_consumer("move_to_list")
+    assert.lines([[
+a1
+a2]])
   end)
 
   it("can sort items", function()
