@@ -23,7 +23,7 @@ line1
 line2]])
   end)
 
-  it("can filter by input", function()
+  it("can filter items by input", function()
     local p1 = thetto.start({
       collect = function()
         return {
@@ -43,6 +43,39 @@ line2]])
 
     assert.lines([[
 line2]])
+  end)
+
+  it("can sort items", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          {
+            value = "line1",
+            row = 3,
+          },
+          {
+            value = "line2",
+            row = 1,
+          },
+          {
+            value = "line3",
+            row = 2,
+          },
+        }
+      end,
+    }, {
+      pipeline_stages_factory = require("thetto2.util.pipeline").list({
+        require("thetto2.util.sorter").field_by_name("row"),
+      }),
+    })
+    helper.wait(p1)
+
+    thetto.call_consumer("move_to_list")
+
+    assert.lines([[
+line2
+line3
+line1]])
   end)
 end)
 
