@@ -209,3 +209,26 @@ describe("thetto.get()", function()
     assert.same(want, got)
   end)
 end)
+
+describe("thetto.register_source()", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("can register source", function()
+    thetto.register_source("test", {
+      name = "test",
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+    })
+
+    local got = require("thetto2.util.source").by_name("test").collect()
+    assert.is_same({
+      { value = "line1" },
+      { value = "line2" },
+    }, got)
+  end)
+end)
