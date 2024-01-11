@@ -356,13 +356,7 @@ function M._redraw_sidecar(self)
 end
 
 function M.toggle_selection(self)
-  local range = {
-    vim.fn.line("v"),
-    vim.fn.line("."),
-  }
-  table.sort(range, function(a, b)
-    return a < b
-  end)
+  local range = require("thetto2.lib.visual_mode").range()
   self:_toggle_selection(range[1], range[2])
 end
 

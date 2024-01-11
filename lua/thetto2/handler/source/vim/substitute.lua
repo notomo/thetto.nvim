@@ -18,13 +18,15 @@ function M.collect(source_ctx)
   local bufnr = vim.api.nvim_get_current_buf()
 
   local items = {}
+  local is_visual_mode = require("thetto2.vendor.misclib.visual_mode").is_current()
   for name, c in pairs(source_ctx.opts.commands) do
     local cmd_prefix = source_ctx.opts.range
     local row, end_row
-    if source_ctx.range ~= nil then
-      cmd_prefix = ("%d,%d"):format(source_ctx.range.first, source_ctx.range.last)
-      row = source_ctx.range.first
-      end_row = source_ctx.range.last
+    if is_visual_mode then
+      local range = require("thetto2.lib.visual_mode").range()
+      cmd_prefix = ("%d,%d"):format(range[1], range[2])
+      row = range[1] - 1
+      end_row = range[2]
     end
 
     local flags = c.flags
