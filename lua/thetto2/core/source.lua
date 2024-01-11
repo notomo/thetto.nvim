@@ -20,6 +20,7 @@ function M.by_name(source_name, fields, raw_opts)
 
   local source = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
   source.name = source_name
+  source.can_resume = source.can_resume == nil and true or source.can_resume
   return source
 end
 
