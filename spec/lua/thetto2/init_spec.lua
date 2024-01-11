@@ -208,6 +208,33 @@ describe("thetto.get()", function()
     }
     assert.same(want, got)
   end)
+
+  it("returns metadata", function()
+    local p = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+      actions = {
+        opts = {
+          test = "value",
+        },
+      },
+    })
+    helper.wait(p)
+
+    local _, got = thetto.get()
+    local want = {
+      actions = {
+        opts = {
+          test = "value",
+        },
+      },
+    }
+    assert.same(want, got)
+  end)
 end)
 
 describe("thetto.register_source()", function()
