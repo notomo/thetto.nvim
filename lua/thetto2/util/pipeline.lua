@@ -30,10 +30,10 @@ end
 
 function M.apply_source()
   return function(current_stages, opts)
-    local modify = opts.source.modify_pipeline or function(stages)
+    local modify = opts.source.modify_pipeline or function(stages, _)
       return stages
     end
-    return modify(current_stages)
+    return modify(current_stages, opts)
   end
 end
 

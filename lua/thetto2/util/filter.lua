@@ -14,6 +14,15 @@ function M.by_name(name, fields)
   return filter
 end
 
+function M.item(f)
+  return {
+    apply = function(_, items, _)
+      return vim.iter(items):filter(f):totable()
+    end,
+    ignore_input = true,
+  }
+end
+
 function M.is_ignorecase(ignorecase, smartcase, input)
   local case_sensitive = not ignorecase and smartcase and input:find("[A-Z]")
   return not case_sensitive

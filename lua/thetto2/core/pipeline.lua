@@ -11,9 +11,18 @@ end
 
 function M.apply(self, pipeline_ctx, items)
   local highlights = {}
+  local input_index = 1
   for i, stage in ipairs(self._stages) do
+    local input
+    if stage.ignore_input then
+      input = ""
+    else
+      input = pipeline_ctx.inputs[input_index] or ""
+      input_index = input_index + 1
+    end
+
     local stage_ctx = {
-      input = pipeline_ctx.inputs[i] or "",
+      input = input,
     }
     local new_items, highlight = stage.apply(stage_ctx, items, stage.opts)
     items = new_items
