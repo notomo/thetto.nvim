@@ -120,6 +120,10 @@ local actions = {
     self._item_list:toggle_all_selection()
   end,
   --- @param self ThettoUi
+  increase_display_limit = function(self, increment)
+    self._item_list:increase_display_limit(increment)
+  end,
+  --- @param self ThettoUi
   wait = function(self)
     return self._inputter:promise()
   end,

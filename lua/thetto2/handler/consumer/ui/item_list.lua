@@ -386,4 +386,13 @@ function M._toggle_selection(self, s, e)
   vim.api.nvim__buf_redraw_range(self._bufnr, 0, -1)
 end
 
+function M.increase_display_limit(self, increment)
+  increment = increment or 1000
+
+  local state = _states[self._ctx_key]
+  state.limit = state.limit + increment
+  _states[self._ctx_key] = state
+  self:redraw_list(state.items, state.all_items_count)
+end
+
 return M
