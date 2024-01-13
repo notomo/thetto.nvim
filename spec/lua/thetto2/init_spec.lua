@@ -244,6 +244,46 @@ describe("thetto.resume()", function()
 line1
 line2]])
   end)
+
+  it("can resume previous and next", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+    })
+    helper.wait(p1)
+
+    thetto.call_consumer("quit")
+
+    local p2 = thetto.start({
+      collect = function()
+        return {
+          { value = "line3" },
+          { value = "line4" },
+        }
+      end,
+    })
+    helper.wait(p2)
+
+    local p3 = thetto.resume({ offset = -1 })
+    helper.wait(p3)
+
+    thetto.call_consumer("move_to_list")
+    assert.lines([[
+line1
+line2]])
+
+    local p4 = thetto.resume({ offset = 1 })
+    helper.wait(p4)
+
+    thetto.call_consumer("move_to_list")
+    assert.lines([[
+line3
+line4]])
+  end)
 end)
 
 describe("thetto.reload()", function()
