@@ -27,9 +27,9 @@ local handlers = {
     self._all_items = items
   end,
   --- @param self ThettoImmediate
+  --- @param item_cursor ThettoItemCursor
   [consumer_events.all.source_completed] = function(self, item_cursor)
-    local row = math.max(1, self._item_cursor_row + item_cursor.row_offset)
-    row = math.min(row, #self._all_items)
+    local row = item_cursor:apply(self._item_cursor_row, #self._all_items)
     self._item_cursor_row = row
     self._on_row_changed(row)
 

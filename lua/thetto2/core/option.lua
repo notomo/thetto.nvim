@@ -3,7 +3,7 @@ local M = {}
 local default_start_opts = {
   pipeline_stages_factory = require("thetto2.util.pipeline").default(),
   consumer_factory = require("thetto2.util.consumer").ui(),
-  item_cursor_factory = require("thetto2.util.item_cursor").no(),
+  item_cursor_factory = require("thetto2.util.item_cursor").top(),
   actions = {},
   source_bufnr = 0,
 }
@@ -12,6 +12,12 @@ function M.new_start_opts(raw_opts)
   if opts.source_bufnr == 0 then
     opts.source_bufnr = vim.api.nvim_get_current_buf()
   end
+
+  local raw_item_cursor_factory = opts.item_cursor_factory
+  opts.item_cursor_factory = function(all_items)
+    return require("thetto2.core.item_cursor").new(raw_item_cursor_factory(all_items))
+  end
+
   return opts
 end
 
@@ -24,11 +30,18 @@ end
 
 local default_resume_opts = {
   consumer_factory = require("thetto2.util.consumer").ui(),
-  item_cursor_factory = require("thetto2.util.item_cursor").no(),
+  item_cursor_factory = require("thetto2.util.item_cursor").top(),
   offset = 0,
 }
 function M.new_resume_opts(raw_opts)
-  return vim.tbl_extend("force", default_resume_opts, raw_opts or {})
+  local opts = vim.tbl_extend("force", default_resume_opts, raw_opts or {})
+
+  local raw_item_cursor_factory = opts.item_cursor_factory
+  opts.item_cursor_factory = function(all_items)
+    return require("thetto2.core.item_cursor").new(raw_item_cursor_factory(all_items))
+  end
+
+  return opts
 end
 
 return M

@@ -106,6 +106,27 @@ line2
 line3
 line1]])
   end)
+
+  it("can set default list cursor position", function()
+    local p = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+          { value = "line3" },
+        }
+      end,
+    }, {
+      item_cursor_factory = require("thetto2.util.item_cursor").search(function(item)
+        return item.value == "line2"
+      end),
+    })
+    helper.wait(p)
+
+    thetto.call_consumer("move_to_list")
+
+    assert.current_line("line2")
+  end)
 end)
 
 describe("thetto.start() immediate", function()

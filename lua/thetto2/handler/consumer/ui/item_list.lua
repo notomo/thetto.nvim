@@ -227,8 +227,7 @@ function M.apply_item_cursor(self, item_cursor)
   end
 
   local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
-  row = math.max(1, row + item_cursor.row_offset)
-  row = math.min(row, vim.api.nvim_buf_line_count(self._bufnr))
+  row = item_cursor:apply(row, vim.api.nvim_buf_line_count(self._bufnr))
   vim.api.nvim_win_set_cursor(self._window_id, { row, column })
 end
 
