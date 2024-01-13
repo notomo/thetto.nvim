@@ -4,6 +4,7 @@ local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
 --- @field _closed boolean
 --- @field _sidecar ThettoUiSidecar
 --- @field _source_ctx table
+--- @field _actions table
 --- @field _pipeline_highlight fun(...)
 local M = {}
 M.__index = M
@@ -28,7 +29,8 @@ function M.open(
   source_ctx,
   pipeline,
   insert,
-  display_limit
+  display_limit,
+  actions
 )
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = not insert,
@@ -113,6 +115,7 @@ function M.open(
     _source_ctx = source_ctx,
     _filters = pipeline:filters(),
     _pipeline_highlight = function() end,
+    _actions = actions,
     _closed = false,
   }, M)
   _selfs[bufnr] = self
@@ -348,7 +351,7 @@ function M._redraw_sidecar(self)
     return
   end
 
-  local kind = require("thetto2.core.kind").by_name(item.kind_name)
+  local kind = require("thetto2.core.kind").by_name(item.kind_name, self._actions)
   local promise, preview = require("thetto2.core.kind").get_preview(kind, item)
   self._sidecar:redraw(preview)
   return promise

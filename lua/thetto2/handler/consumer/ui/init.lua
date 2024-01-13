@@ -13,7 +13,7 @@ local default_opts = {
 }
 
 --- @param pipeline ThettoPipeline
-function Ui.new(consumer_ctx, source, pipeline, callbacks, raw_opts)
+function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
 
   local filters = pipeline:filters()
@@ -35,7 +35,8 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, raw_opts)
     consumer_ctx.source_ctx.cwd,
     pipeline,
     opts.insert,
-    opts.display_limit
+    opts.display_limit,
+    actions
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(

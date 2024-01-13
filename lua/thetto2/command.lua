@@ -7,6 +7,7 @@ function M.start(source, raw_opts)
   local stages = opts.pipeline_stages_factory({}, { source = source })
   local pipeline = require("thetto2.core.pipeline").new(stages)
 
+  local actions = vim.tbl_deep_extend("force", source.actions or {}, opts.actions)
   local ctx_key = require("thetto2.core.context").new_key()
   local collector = require("thetto2.core.collector").new(
     source,
@@ -14,10 +15,9 @@ function M.start(source, raw_opts)
     ctx_key,
     opts.consumer_factory,
     opts.item_cursor_factory,
-    opts.source_bufnr
+    opts.source_bufnr,
+    actions
   )
-
-  local actions = vim.tbl_deep_extend("force", source.actions or {}, opts.actions)
 
   local promise, consumer = collector:start()
   if source.can_resume ~= false then

@@ -127,6 +127,30 @@ line1]])
 
     assert.current_line("line2")
   end)
+
+  it("can preview item", function()
+    local p = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+          { value = "line3" },
+        }
+      end,
+      actions = {
+        get_preview = function(item)
+          return nil, {
+            lines = { "previewed " .. item.value },
+            title = "test",
+          }
+        end,
+      },
+    })
+    helper.wait(p)
+
+    helper.go_to_sidecar(" test ")
+    assert.current_line("previewed line1")
+  end)
 end)
 
 describe("thetto.start() immediate", function()

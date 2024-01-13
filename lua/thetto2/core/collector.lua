@@ -11,7 +11,7 @@ local consumer_events = require("thetto2.core.consumer_events")
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr)
+function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr, actions)
   local tbl = {
     _source = source,
     _pipeline = pipeline,
@@ -28,6 +28,7 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_
     _subscription = nil,
     _consumer = nil,
     _item_cursor_row = 1,
+    _actions = actions,
   }
   return setmetatable(tbl, Collector)
 end
@@ -165,7 +166,7 @@ function Collector._create_consumer(self, consumer_factory)
     source_ctx = self._source_ctx,
     item_cursor_row = self._item_cursor_row,
   }
-  return consumer_factory(consumer_ctx, self._source, self._pipeline, callbacks)
+  return consumer_factory(consumer_ctx, self._source, self._pipeline, callbacks, self._actions)
 end
 
 return Collector

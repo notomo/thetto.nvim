@@ -10,7 +10,7 @@ function M.collect()
   else
     kind_name = "base"
   end
-  local kind = require("thetto2.core.kind").by_name(kind_name)
+  local kind = require("thetto2.core.kind").by_name(kind_name, metadata.actions)
 
   return vim
     .iter(require("thetto2.core.kind").action_infos(kind))

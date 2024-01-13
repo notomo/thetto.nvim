@@ -44,6 +44,14 @@ function helper.input(text)
   helper.wait(p)
 end
 
+function helper.go_to_sidecar(title)
+  local preview_window_id = vim.iter(vim.api.nvim_tabpage_list_wins(0)):find(function(window_id)
+    local config = vim.api.nvim_win_get_config(window_id)
+    return vim.tbl_get(config, "title", 1, 1) == title
+  end)
+  vim.api.nvim_set_current_win(preview_window_id)
+end
+
 local asserts = require("vusted.assert").asserts
 
 asserts.create("lines"):register_eq(function()
