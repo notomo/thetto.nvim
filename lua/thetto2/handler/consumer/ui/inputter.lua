@@ -85,10 +85,10 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
     end
   end)
 
-  vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
   if resume_state.is_insert_mode then
     vim.cmd.startinsert()
   end
+  vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
 
   closer:setup_autocmd(window_id)
 
