@@ -51,9 +51,7 @@ M.highlight = require("thetto2.util.highlight").columns({
 
 M.kind_name = "file"
 
-M.behaviors = {
-  cwd = require("thetto2.util.cwd").project(),
-}
+M.cwd = require("thetto2.util.cwd").project()
 
 M.modify_pipeline = require("thetto2.util.pipeline").append({
   require("thetto2.util.sorter").field_by_name("row"),

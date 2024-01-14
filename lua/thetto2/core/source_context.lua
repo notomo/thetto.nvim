@@ -1,12 +1,10 @@
 local M = {}
 
-local default_behaviors = {
-  cwd = function()
-    return "."
-  end,
-}
-
 local resolve_cwd = function(cwd)
+  cwd = cwd or function()
+    return "."
+  end
+
   if type(cwd) == "function" then
     cwd = cwd()
   end
@@ -26,13 +24,13 @@ function M.new(source, source_bufnr, source_input)
     is_interactive = false,
   }
 
-  local ctx = vim.tbl_extend("keep", source.behaviors or {}, default_behaviors)
-  ctx.cwd = resolve_cwd(ctx.cwd)
-  ctx.bufnr = source_bufnr
-  ctx.pattern = source_input.pattern
-  ctx.interactive = source_input.is_interactive
-  ctx.opts = source.opts
-  return ctx
+  return {
+    cwd = resolve_cwd(source.cwd),
+    bufnr = source_bufnr,
+    pattern = source_input.pattern,
+    interactive = source_input.is_interactive,
+    opts = source.opts,
+  }
 end
 
 return M

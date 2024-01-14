@@ -23,8 +23,6 @@ end
 
 M.kind_name = "word"
 
-M.behaviors = {
-  cwd = require("thetto2.util.cwd").project(),
-}
+M.cwd = require("thetto2.util.cwd").project()
 
 return M

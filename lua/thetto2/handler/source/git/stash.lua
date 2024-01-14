@@ -32,9 +32,7 @@ M.highlight = require("thetto2.util.highlight").columns({
 
 M.kind_name = "word"
 
-M.behaviors = {
-  cwd = require("thetto2.util.cwd").project(),
-}
+M.cwd = require("thetto2.util.cwd").project()
 
 M.consumer_opts = {
   ui = { insert = false },

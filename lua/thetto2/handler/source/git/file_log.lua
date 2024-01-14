@@ -10,9 +10,7 @@ end
 M.highlight = require("thetto2.handler.source.git.log").highlight
 M.kind_name = require("thetto2.handler.source.git.log").kind_name
 
-M.behaviors = {
-  cwd = require("thetto2.util.cwd").project(),
-}
+M.cwd = require("thetto2.util.cwd").project()
 
 M.consumer_opts = {
   ui = { insert = false },
