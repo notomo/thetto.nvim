@@ -17,8 +17,8 @@ end
 
 function M.immediate(raw_opts)
   raw_opts = raw_opts or {}
-  return function(consumer_ctx, _, _, callbacks)
-    return require("thetto2.handler.consumer.immediate").new(consumer_ctx, callbacks, raw_opts)
+  return function(consumer_ctx, _, _, callbacks, actions)
+    return require("thetto2.handler.consumer.immediate").new(consumer_ctx, callbacks, actions, raw_opts)
   end
 end
 

@@ -8,11 +8,12 @@ local default_opts = {
   action_name = nil,
 }
 
-function M.new(consumer_ctx, callbacks, raw_opts)
+function M.new(consumer_ctx, callbacks, actions, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
     _action_name = opts.action_name,
+    _actions = actions,
     _item_cursor_row = consumer_ctx.item_cursor_row,
     _on_row_changed = callbacks.on_row_changed,
   }
@@ -34,7 +35,10 @@ local handlers = {
     self._on_row_changed(row)
 
     local item = self._all_items[row]
-    local action_item_groups = require("thetto2.util.action").grouping({ item }, { action_name = self._action_name })
+    local action_item_groups = require("thetto2.util.action").grouping({ item }, {
+      action_name = self._action_name,
+      actions = self._actions,
+    })
     return require("thetto2.core.executor").execute(action_item_groups)
   end,
   [consumer_events.all.source_error] = function(_, err)
