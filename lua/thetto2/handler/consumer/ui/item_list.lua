@@ -3,7 +3,6 @@ local hl_groups = require("thetto2.handler.consumer.ui.highlight_group")
 --- @class ThettoUiItemList
 --- @field _closed boolean
 --- @field _sidecar ThettoUiSidecar
---- @field _source_ctx table
 --- @field _actions table
 --- @field _pipeline_highlight fun(...)
 local M = {}
@@ -51,6 +50,7 @@ function M.open(
       all_items_count = 0,
       selected_items = {},
       sorter_info = M._sorter_info(pipeline:sorters()),
+      source_ctx = source_ctx,
     }
   _states[ctx_key] = state
 
@@ -121,7 +121,6 @@ function M.open(
     _sidecar = sidecar,
     _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
     _source_highlight = source_highlight or function() end,
-    _source_ctx = source_ctx,
     _filters = pipeline:filters(),
     _pipeline_highlight = function() end,
     _actions = actions,
@@ -277,7 +276,9 @@ function M._sorter_info(sorters)
 end
 
 function M.update_for_source_highlight(self, source_ctx)
-  self._source_ctx = source_ctx
+  local state = _states[self._ctx_key]
+  state.source_ctx = source_ctx
+  _states[self._ctx_key] = state
 end
 
 function M.update_pipeline_highlight(self, pipeline_highlight)
@@ -293,7 +294,7 @@ function M.highlight(self, topline, botline_guess)
     table.insert(displayed_items, items[i])
   end
 
-  self._source_highlight(self._decorator, displayed_items, topline, self._source_ctx)
+  self._source_highlight(self._decorator, displayed_items, topline, state.source_ctx)
   self._pipeline_highlight(self._decorator, displayed_items, topline)
 
   local selected_items = state.selected_items
