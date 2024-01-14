@@ -47,7 +47,8 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, raw_opts)
     layout.inputter,
     callbacks.on_change,
     pipeline,
-    opts.insert
+    opts.insert,
+    source.name
   )
 
   closer:setup(function()
@@ -125,17 +126,21 @@ local actions = {
     self._item_list:increase_display_limit(increment)
   end,
   --- @param self ThettoUi
+  recall_history = function(self, offset)
+    self._inputter:recall_history(offset)
+  end,
+  --- @param self ThettoUi
   wait = function(self)
     return self._inputter:promise()
   end,
 }
 
-function Ui.call(self, action_name, opts)
+function Ui.call(self, action_name, ...)
   local action = actions[action_name]
   if not action then
     return
   end
-  return action(self)
+  return action(self, ...)
 end
 
 function Ui.get_items(self)

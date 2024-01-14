@@ -13,7 +13,7 @@ local _selfs = {}
 local _resume_states = {}
 
 --- @param pipeline ThettoPipeline
-function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert)
+function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, source_name)
   local filters = pipeline:filters()
 
   local resume_state = _resume_states[ctx_key]
@@ -107,6 +107,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert)
     _filter_infos = M._filter_infos(filters),
     _decorator = require("thetto2.lib.decorator").factory(_ns_name):create(bufnr, true),
     _closed = false,
+    _input_filters = require("thetto2.handler.consumer.ui.input_filters").new(source_name, filters),
   }
   local self = setmetatable(tbl, M)
   _selfs[bufnr] = self
@@ -161,6 +162,18 @@ function M._filter_infos(filters)
     :totable()
 end
 
+function M.recall_history(self, offset)
+  local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
+  local current_line = vim.api.nvim_buf_get_lines(self._bufnr, row - 1, row, false)[1] or ""
+  local input_line = self._input_filters:recall_history(row, offset, current_line)
+  if not input_line then
+    return
+  end
+
+  vim.api.nvim_buf_set_lines(self._bufnr, row - 1, row, false, { input_line })
+  vim.api.nvim_win_set_cursor(self._window_id, { row, #input_line })
+end
+
 function M.highlight(self)
   local line_count = vim.api.nvim_buf_line_count(self._bufnr)
   for i, filter_info in ipairs(self._filter_infos) do
@@ -192,6 +205,8 @@ function M.close(self, current_window_id)
     lines = vim.api.nvim_buf_get_lines(self._bufnr, 0, -1, false),
   }
   _resume_states[self._ctx_key] = resume_state
+
+  self._input_filters:append(resume_state.lines)
 
   require("thetto2.vendor.misclib.window").safe_close(self._window_id)
 end
