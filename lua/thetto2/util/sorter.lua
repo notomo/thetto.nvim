@@ -21,7 +21,7 @@ function M.field_convert(name, fields)
   return convert
 end
 
-function M.field_by_name(name)
+function M.field_by_name(name, reversed)
   return require("thetto2.util.sorter").by_name("field", {
     desc = name,
     opts = {
@@ -32,13 +32,14 @@ function M.field_by_name(name)
               return item[name]
             end,
           },
+          reversed = reversed,
         }),
       },
     },
   })
 end
 
-function M.field_length_by_name(name)
+function M.field_length_by_name(name, reversed)
   return require("thetto2.util.sorter").by_name("field", {
     desc = ("%s:length"):format(name),
     opts = {
@@ -48,6 +49,7 @@ function M.field_length_by_name(name)
             to_field = function(item)
               return item[name]
             end,
+            reversed = reversed,
           },
         }),
       },
