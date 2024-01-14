@@ -12,7 +12,7 @@ end
 function M.apply(self, pipeline_ctx, items)
   local highlights = {}
   local input_index = 1
-  for i, stage in ipairs(self._stages) do
+  for _, stage in ipairs(self._stages) do
     local input
     if stage.ignore_input then
       input = ""
