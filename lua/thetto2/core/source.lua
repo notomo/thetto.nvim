@@ -28,4 +28,8 @@ function M.register(source_name, source)
   _registered[source_name] = source
 end
 
+function M.registered_names()
+  return vim.iter(vim.tbl_keys(_registered)):totable()
+end
+
 return M

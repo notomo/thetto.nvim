@@ -20,6 +20,14 @@ local get_all_source = function()
     end
   end
 
+  for _, name in ipairs(require("thetto2.core.source").registered_names()) do
+    if not already[name] then
+      table.insert(all, {
+        name = name,
+      })
+    end
+  end
+
   return all
 end
 

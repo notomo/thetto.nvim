@@ -139,4 +139,8 @@ function M.action_infos(kind)
   return action_infos
 end
 
+function M.registered_names()
+  return vim.iter(vim.tbl_keys(_registered)):totable()
+end
+
 return M

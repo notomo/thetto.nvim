@@ -18,6 +18,15 @@ local get_all_kind = function()
       already[name] = kind_info
     end
   end
+
+  for _, name in ipairs(require("thetto2.core.kind").registered_names()) do
+    if not already[name] then
+      table.insert(all, {
+        name = name,
+      })
+    end
+  end
+
   return all
 end
 
