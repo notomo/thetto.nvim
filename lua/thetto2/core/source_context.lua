@@ -24,10 +24,15 @@ function M.new(source, source_bufnr, source_input)
     is_interactive = false,
   }
 
+  local pattern = source_input.pattern
+  if source.get_pattern then
+    pattern = source.get_pattern()
+  end
+
   return {
     cwd = resolve_cwd(source.cwd),
     bufnr = source_bufnr,
-    pattern = source_input.pattern,
+    pattern = pattern,
     interactive = source_input.is_interactive,
     opts = source.opts,
   }

@@ -30,7 +30,8 @@ function M.open(
   pipeline,
   insert,
   display_limit,
-  actions
+  actions,
+  source_name
 )
   local resume_state = _resume_states[ctx_key] or {
     has_forcus = not insert,
@@ -42,7 +43,7 @@ function M.open(
     or {
       items = {},
       status = "running",
-      source_name = nil,
+      source_name = source_name,
       page = 0,
       limit = display_limit,
       start_index = 1,
@@ -103,6 +104,14 @@ function M.open(
       _states[ctx_key] = nil
     end,
     once = true,
+  })
+
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "Thetto2Opened",
+    data = {
+      source_name = source_name,
+      list_bufnr = bufnr,
+    },
   })
 
   local self = setmetatable({
@@ -318,6 +327,11 @@ function M.close(self, current_window_id)
   return row
 end
 
+function M._get_row_items(self, s, e)
+  local state = _states[self._ctx_key]
+  return vim.list_slice(state.items, s, e)
+end
+
 function M.get_current_item(self)
   local state = _states[self._ctx_key]
   local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
@@ -336,7 +350,8 @@ function M.get_items(self)
   end
 
   if #selected_items == 0 then
-    return { self:get_current_item() }
+    local range = require("thetto2.lib.visual_mode").range()
+    return self:_get_row_items(range[1], range[2])
   end
   return selected_items
 end

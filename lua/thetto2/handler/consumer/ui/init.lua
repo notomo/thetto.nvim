@@ -36,7 +36,8 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, raw_opts)
     pipeline,
     opts.insert,
     opts.display_limit,
-    actions
+    actions,
+    source.name
   )
 
   local inputter = require("thetto2.handler.consumer.ui.inputter").open(
