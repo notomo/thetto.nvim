@@ -45,7 +45,7 @@ function M.action_fixup(items)
   return require("thetto2.util.job")
     .promise({ "git", "commit", "--fixup=" .. item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 
@@ -58,7 +58,7 @@ function M.action_reword(items)
   return require("thetto2.util.job")
     .promise({ "git", "commit", "--fixup=reword:" .. item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 
@@ -82,7 +82,7 @@ function M.action_reset(items)
   return require("thetto2.util.job")
     .promise({ "git", "reset", item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 
@@ -95,7 +95,7 @@ function M.action_checkout(items)
   return require("thetto2.util.job")
     .promise({ "git", "checkout", item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 

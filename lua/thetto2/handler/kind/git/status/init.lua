@@ -50,7 +50,7 @@ function M.action_toggle_stage(items)
       }, { cwd = to_git_root(items) })
     end)
     :next(function()
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 
@@ -92,7 +92,7 @@ function M.action_discard(items)
       return require("thetto2.vendor.promise").all(promises)
     end)
     :next(function()
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 
@@ -113,7 +113,7 @@ function M.action_stash(items)
     }, { cwd = git_root })
     :next(function()
       require("thetto2.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
-      return require("thetto2.command").reload(bufnr)
+      return require("thetto2").reload(bufnr)
     end)
 end
 
