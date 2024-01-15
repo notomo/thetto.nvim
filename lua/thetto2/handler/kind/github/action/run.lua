@@ -2,9 +2,10 @@ local M = {}
 
 function M.action_list_action_job(items)
   for _, item in ipairs(items) do
-    return require("thetto").start("github/action/job", {
-      source_opts = { owner = item.run.owner, repo = item.run.repo, run_id = item.run.id },
+    local source = require("thetto2.util.source").by_name("github/action/job", {
+      opts = { owner = item.run.owner, repo = item.run.repo, run_id = item.run.id },
     })
+    return require("thetto2").start(source)
   end
 end
 

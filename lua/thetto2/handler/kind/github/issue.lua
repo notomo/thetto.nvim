@@ -73,11 +73,12 @@ end
 
 function M.action_list_comment(items)
   for _, item in ipairs(items) do
-    return require("thetto").start("github/issue_comment", {
-      source_opts = {
+    local source = require("thetto2.util.source").by_name("github/issue_comment", {
+      opts = {
         url = item.url,
       },
     })
+    return require("thetto2").start(source)
   end
 end
 

@@ -41,7 +41,8 @@ function M.action_enter(items)
   if item == nil then
     return
   end
-  return require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
+  local source = require("thetto2.util.source").by_name("file/in_dir", { cwd = item.path })
+  return require("thetto2").start(source)
 end
 
 function M.get_preview(item)
@@ -60,7 +61,8 @@ function M.action_list_parents(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h:h:h")
-  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  local source = require("thetto2.util.source").by_name("file/in_dir", { cwd = path })
+  return require("thetto2").start(source)
 end
 
 function M.action_delete(items)

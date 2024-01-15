@@ -106,12 +106,13 @@ function M.action_list_children(items)
   if not item then
     return nil
   end
-  return require("thetto").start("git/change", {
-    source_opts = {
+  local source = require("thetto2.util.source").by_name("git/change", {
+    opts = {
       commit_hash = item.commit_hash,
       path = item.path,
     },
   })
+  return require("thetto2").start(source)
 end
 
 function M.action_compare(items)

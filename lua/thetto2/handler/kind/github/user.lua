@@ -2,9 +2,10 @@ local M = {}
 
 function M.action_list_repository(items)
   for _, item in ipairs(items) do
-    return require("thetto").start("github/user_repository", {
-      source_opts = { owner = item.user.name, is_org = item.user.is_org },
+    local source = require("thetto2.util.source").by_name("github/user_repository", {
+      opts = { owner = item.user.name, is_org = item.user.is_org },
     })
+    return require("thetto2").start(source)
   end
 end
 

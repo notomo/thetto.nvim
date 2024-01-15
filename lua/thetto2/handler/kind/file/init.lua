@@ -159,7 +159,8 @@ function M.action_directory_enter(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h")
-  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  local source = require("thetto2.util.source").by_name("file/in_dir", { cwd = path })
+  return require("thetto2").start(source)
 end
 
 function M.action_list_parents(items)
@@ -168,7 +169,8 @@ function M.action_list_parents(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h:h")
-  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  local source = require("thetto2.util.source").by_name("file/in_dir", { cwd = path })
+  return require("thetto2").start(source)
 end
 
 M.action_list_siblings = M.action_directory_enter
