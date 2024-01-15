@@ -1,5 +1,14 @@
 local M = {}
 
+local error_handling = function(promise)
+  return promise:catch(function(err)
+    if not err then
+      return
+    end
+    require("thetto.vendor.misclib.message").warn(err)
+  end)
+end
+
 function M.start(source, raw_opts)
   vim.validate({ source = { source, "table" } })
   local opts = require("thetto2.core.option").new_start_opts(raw_opts)
@@ -27,16 +36,17 @@ function M.start(source, raw_opts)
       actions = actions,
     })
   end
-  return promise
+  return error_handling(promise)
 end
 
 function M.reload(bufnr)
   local ctx = require("thetto2.core.context").get(bufnr)
   if type(ctx) == "string" then
-    return ctx
+    require("thetto2.vendor.misclib.message").error(ctx)
   end
 
-  return ctx.collector:restart(ctx.consumer)
+  local promise = ctx.collector:restart(ctx.consumer)
+  return error_handling(promise)
 end
 
 function M.resume(raw_opts)
@@ -52,7 +62,7 @@ function M.resume(raw_opts)
 
   local promise, consumer = ctx.collector:replay(opts.consumer_factory, opts.item_cursor_factory)
   ctx:update({ consumer = consumer })
-  return promise
+  return error_handling(promise)
 end
 
 function M.execute(action_item_groups, raw_opts)
@@ -61,7 +71,7 @@ function M.execute(action_item_groups, raw_opts)
   if opts.quit then
     local ctx = require("thetto2.core.context").get()
     if type(ctx) == "string" then
-      return ctx
+      require("thetto2.vendor.misclib.message").error(ctx)
     end
 
     ctx.consumer:call("quit", {})
@@ -73,7 +83,7 @@ end
 function M.get()
   local ctx = require("thetto2.core.context").get()
   if type(ctx) == "string" then
-    return ctx
+    require("thetto2.vendor.misclib.message").error(ctx)
   end
 
   local items = ctx.consumer:get_items()
@@ -86,7 +96,7 @@ end
 function M.call_consumer(action_name, opts)
   local ctx = require("thetto2.core.context").get()
   if type(ctx) == "string" then
-    return ctx
+    require("thetto2.vendor.misclib.message").error(ctx)
   end
 
   return ctx.consumer:call(action_name, opts)
@@ -95,7 +105,7 @@ end
 function M.setup_store(name, opts)
   local store, err = require("thetto2.core.store").new(name)
   if err then
-    error(err)
+    require("thetto2.vendor.misclib.message").error(err)
   end
   store.start(opts)
 end

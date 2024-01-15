@@ -119,7 +119,14 @@ function Collector._run_pipeline(self)
 end
 
 function Collector._create_subscriber(self)
-  local subscriber_or_items = self._source.collect(self._source_ctx)
+  local subscriber_or_items, err = self._source.collect(self._source_ctx)
+  if err then
+    return function(observer)
+      local msg = require("thetto2.vendor.misclib.message").wrap(err)
+      observer:error(msg)
+    end
+  end
+
   if type(subscriber_or_items) == "function" then
     return subscriber_or_items
   end
