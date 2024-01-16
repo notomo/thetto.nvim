@@ -53,11 +53,12 @@ function Collector.start(self)
   return promise, consumer
 end
 
-function Collector.restart(self, consumer, source_input)
+function Collector.restart(self, consumer)
   self:_stop()
 
   self._all_items = {}
-  self._source_ctx = require("thetto2.core.source_context").new(self._source, self._source_bufnr, source_input)
+  self._source_ctx =
+    require("thetto2.core.source_context").new(self._source, self._source_bufnr, self._pipeline_ctx.source_input)
   local subscriber = self:_create_subscriber()
 
   consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
@@ -119,10 +120,10 @@ function Collector._run_pipeline(self)
 end
 
 function Collector._create_subscriber(self)
-  local subscriber_or_items, err = self._source.collect(self._source_ctx)
-  if err then
+  local subscriber_or_items, source_err = self._source.collect(self._source_ctx)
+  if source_err then
     return function(observer)
-      local msg = require("thetto2.vendor.misclib.message").wrap(err)
+      local msg = require("thetto2.vendor.misclib.message").wrap(source_err)
       observer:error(msg)
     end
   end
@@ -170,7 +171,7 @@ function Collector._create_consumer(self, consumer_factory)
       self._pipeline_ctx = pipeline_ctx
 
       if pipeline_ctx.source_input.pattern then
-        return self:restart(self._consumer, pipeline_ctx.source_input)
+        return self:restart(self._consumer)
       end
       return self:_run_pipeline()
     end,
