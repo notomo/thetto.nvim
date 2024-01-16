@@ -189,6 +189,13 @@ end
 function M.enter(self)
   require("thetto2.vendor.misclib.window").safe_enter(self._window_id)
   vim.cmd.startinsert()
+
+  local max_column = vim.fn.col("$")
+  local cursor = vim.api.nvim_win_get_cursor(self._window_id)
+  if cursor[2] ~= max_column then
+    cursor[2] = cursor[2] + 1
+    vim.api.nvim_win_set_cursor(self._window_id, cursor)
+  end
 end
 
 function M.close(self, current_window_id)
