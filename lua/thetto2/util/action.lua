@@ -35,8 +35,14 @@ function M.grouping(items, raw_opts)
     :map(function(item_group)
       local kind_name, item_pairs = unpack(item_group)
       local kind = require("thetto2.core.kind").by_name(kind_name, opts.actions)
+
+      local action = require("thetto2.core.kind").find_action(kind, action_name)
+      if not action then
+        return nil
+      end
+
       return {
-        action = require("thetto2.core.kind").find_action(kind, action_name),
+        action = action,
         items = vim
           .iter(item_pairs)
           :map(function(pair)

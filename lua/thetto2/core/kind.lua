@@ -50,9 +50,7 @@ function M.find_action(kind, action_name)
       return action(items, action_ctx)
     end
   end
-
-  local err = ("not found action: kind=%s action=%s"):format(kind.name, action_name)
-  error(err)
+  return nil
 end
 
 function M.action_kind_name(kind, action_name)
