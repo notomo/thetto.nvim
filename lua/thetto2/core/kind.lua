@@ -32,25 +32,31 @@ function M.register(kind_name, kind)
 end
 
 local ACTION_PREFIX = "action_"
-local action_key = function(kind, action_name)
-  local name = action_name
+local action_key = function(kind, raw_action_name)
+  local name = raw_action_name
   if name == "default" then
     name = kind.default_action
   end
-  return ACTION_PREFIX .. name
+  return ACTION_PREFIX .. name, name
 end
 
-function M.find_action(kind, action_name)
-  local key = action_key(kind, action_name)
+function M.find_action(kind, raw_action_name)
+  local key, action_name = action_key(kind, raw_action_name)
   local action = kind[key]
-  if action then
-    local action_opts = kind.opts[action_name] or {}
-    return function(items, raw_action_ctx)
-      local action_ctx = vim.tbl_deep_extend("force", { opts = action_opts }, raw_action_ctx)
-      return action(items, action_ctx)
-    end
+  if not action then
+    return nil
   end
-  return nil
+
+  local action_opts = kind.opts[action_name] or {}
+  if kind.name == "base" then
+    local base_action_opts = base.opts[action_name] or {}
+    action_opts = vim.tbl_deep_extend("force", base_action_opts, action_opts)
+  end
+
+  return function(items, raw_action_ctx)
+    local action_ctx = vim.tbl_deep_extend("force", { opts = action_opts }, raw_action_ctx)
+    return action(items, action_ctx)
+  end
 end
 
 function M.action_kind_name(kind, action_name)

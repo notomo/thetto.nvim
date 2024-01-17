@@ -1,9 +1,7 @@
 local M = {}
 
-M.opts = {
-  yank = { key = "value", register = "+" },
-  append = { key = "value", type = "" },
-}
+M.name = "base"
+M.opts = {}
 
 function M.action_debug_print(items)
   for _, item in ipairs(items) do
@@ -31,6 +29,7 @@ function M.action_echo(items)
   end
 end
 
+M.opts.yank = { key = "value", register = "+" }
 function M.action_yank(items, action_ctx)
   local values = vim.tbl_map(function(item)
     return item[action_ctx.opts.key]
@@ -42,6 +41,7 @@ function M.action_yank(items, action_ctx)
   end
 end
 
+M.opts.append = { key = "value", type = "" }
 function M.action_append(items, action_ctx)
   for _, item in ipairs(items) do
     vim.api.nvim_put({ item[action_ctx.opts.key] }, action_ctx.opts.type, true, true)
