@@ -64,4 +64,9 @@ function M.call(kind_name, action_name, items, action_opts)
   return require("thetto2.core.executor").execute(action_item_groups, action_opts)
 end
 
+function M.preview(kind_name, item, action_ctx)
+  local kind = require("thetto2.core.kind").by_name(kind_name)
+  return require("thetto2.core.kind").get_preview(kind, item, action_ctx)
+end
+
 return M

@@ -68,12 +68,15 @@ function M.action_kind_name(kind, action_name)
   return kind.name
 end
 
-function M.get_preview(kind, item)
+function M.get_preview(kind, item, raw_action_ctx)
   local f = kind.get_preview
   if not f then
     return require("thetto2.vendor.promise").resolve(), { lines = {} }
   end
-  local promise, preview = f(item)
+
+  local action_opts = vim.tbl_get(kind, "opts", "preview") or {}
+  local action_ctx = vim.tbl_deep_extend("force", { opts = action_opts }, raw_action_ctx or {})
+  local promise, preview = f(item, action_ctx)
   return require("thetto2.vendor.promise").resolve(promise), preview
 end
 

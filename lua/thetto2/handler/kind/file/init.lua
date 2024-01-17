@@ -83,13 +83,12 @@ M.opts.preview = {
   ignore_patterns = {},
 }
 function M.get_preview(item, action_ctx)
-  -- TODO
-  -- if require("thetto2.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
-  --   return nil, { lines = { "IGNORED" } }
-  -- end
-  -- if vim.fn.isdirectory(item.path) == 1 then
-  --   return require("thetto2.util.action").call("file/directory", "preview", items, ctx)
-  -- end
+  if require("thetto2.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
+    return nil, { lines = { "IGNORED" } }
+  end
+  if vim.fn.isdirectory(item.path) == 1 then
+    return require("thetto2.util.action").preview("file/directory", item, action_ctx)
+  end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
     return nil,

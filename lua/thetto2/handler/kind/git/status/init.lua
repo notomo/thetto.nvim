@@ -175,19 +175,18 @@ end
 M.opts.preview = {
   ignore_patterns = {},
 }
-function M.get_preview(item)
+function M.get_preview(item, action_ctx)
   if not item.path then
     return nil
   end
 
-  -- TODO
-  -- if require("thetto2.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
-  --   return nil, { lines = { "IGNORED" } }
-  -- end
-  --
-  -- if item.index_status == "untracked" then
-  --   return require("thetto2.util.action").call("file", "preview", items, ctx)
-  -- end
+  if require("thetto2.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
+    return nil, { lines = { "IGNORED" } }
+  end
+
+  if item.index_status == "untracked" then
+    return require("thetto2.util.action").preview("file", item, action_ctx)
+  end
 
   local bufnr = require("thetto2.util.git").diff_buffer()
   local cmd = { "git", "--no-pager", "diff", "--date=iso" }
