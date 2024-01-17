@@ -30,7 +30,7 @@ function M.apply(stage_ctx, items, opts)
   local to_field = opts.to_field
   local inversed = opts.inversed
   for _, item in ipairs(items) do
-    local field = to_field(item)
+    local field = to_field(item, stage_ctx)
     if ignorecase then
       field = field:lower()
     end
@@ -64,12 +64,12 @@ function M.highlight(stage_ctx, opts, decorator, items, first_line)
   local to_field = opts.to_field
   local to_offset = opts.to_offset
   for i, item in ipairs(items) do
-    local offset = to_offset(item)
+    local offset = to_offset(item, stage_ctx)
     if item.desc and not offset then
       return
     end
 
-    local field = to_field(item)
+    local field = to_field(item, stage_ctx)
     if ignorecase then
       field = field:lower()
     end
@@ -96,10 +96,10 @@ M.opts = {
   smartcase = true,
   ignorecase = false,
   inversed = false,
-  to_field = function(item)
+  to_field = function(item, _)
     return item.value
   end,
-  to_offset = function(item)
+  to_offset = function(item, _)
     local offsets = item.column_offsets or {}
     return offsets.value or 0
   end,

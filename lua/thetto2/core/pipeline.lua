@@ -9,7 +9,7 @@ function M.new(stages)
   return setmetatable(tbl, M)
 end
 
-function M.apply(self, pipeline_ctx, items)
+function M.apply(self, source_ctx, pipeline_ctx, items)
   local highlights = {}
   local input_index = 1
   for _, stage in ipairs(self._stages) do
@@ -23,6 +23,7 @@ function M.apply(self, pipeline_ctx, items)
 
     local stage_ctx = {
       input = input,
+      cwd = source_ctx.cwd,
     }
     local new_items, highlight = stage.apply(stage_ctx, items, stage.opts)
     items = new_items

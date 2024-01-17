@@ -12,6 +12,11 @@ local Collector = {}
 Collector.__index = Collector
 
 function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr, actions)
+  local source_ctx = require("thetto2.core.source_context").new(source, source_bufnr, {
+    is_interactive = pipeline:has_source_input(),
+  })
+  local pipeline_ctx = require("thetto2.core.pipeline_context").new({})
+
   local tbl = {
     _source = source,
     _pipeline = pipeline,
@@ -21,10 +26,8 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_
     _source_bufnr = source_bufnr,
 
     _all_items = {},
-    _pipeline_ctx = require("thetto2.core.pipeline_context").new({}),
-    _source_ctx = require("thetto2.core.source_context").new(source, source_bufnr, {
-      is_interactive = pipeline:has_source_input(),
-    }),
+    _pipeline_ctx = pipeline_ctx,
+    _source_ctx = source_ctx,
     _subscription = nil,
     _consumer = nil,
     _item_cursor_row = 1,
@@ -115,7 +118,7 @@ function Collector._stop(self)
 end
 
 function Collector._run_pipeline(self)
-  local items, pipeline_highlight = self._pipeline:apply(self._pipeline_ctx, self._all_items)
+  local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._pipeline_ctx, self._all_items)
   self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
 end
 
