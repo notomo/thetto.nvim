@@ -1,4 +1,3 @@
-PLUGIN_NAME=thetto2
 include spec/.shared/neovim-plugin.mk
 
 spec/.shared/neovim-plugin.mk:
