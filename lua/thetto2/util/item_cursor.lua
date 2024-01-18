@@ -16,6 +16,14 @@ function M.top()
   end
 end
 
+function M.bottom()
+  return function()
+    return {
+      row_offset = math.huge,
+    }
+  end
+end
+
 function M.search(f)
   return function(all_items)
     local row
