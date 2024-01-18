@@ -12,6 +12,9 @@ function M.by_name(kind_name, fields, raw_opts)
 
   local registered = _registered[kind_name]
   if opts.use_registered and registered then
+    if type(registered) == "function" then
+      registered = registered()
+    end
     return vim.tbl_deep_extend("force", vim.deepcopy(registered), fields or {})
   end
 
@@ -148,6 +151,10 @@ end
 
 function M.registered_names()
   return vim.iter(vim.tbl_keys(_registered)):totable()
+end
+
+function M.setup(kinds)
+  _registered = vim.tbl_extend("force", _registered, kinds or {})
 end
 
 return M

@@ -36,4 +36,9 @@ function M.register_kind(kind_name, kind)
   require("thetto.core.kind").register(kind_name, kind)
 end
 
+function M.set_default(setting)
+  require("thetto.core.source").setup(setting.sources)
+  require("thetto.core.kind").setup(setting.kinds)
+end
+
 return M

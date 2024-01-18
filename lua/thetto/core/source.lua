@@ -10,6 +10,9 @@ function M.by_name(source_name, fields, raw_opts)
 
   local registered = _registered[source_name]
   if opts.use_registered and registered then
+    if type(registered) == "function" then
+      registered = registered()
+    end
     return vim.tbl_deep_extend("force", vim.deepcopy(registered), fields or {})
   end
 
@@ -26,6 +29,10 @@ end
 
 function M.register(source_name, source)
   _registered[source_name] = source
+end
+
+function M.setup(sources)
+  _registered = vim.tbl_extend("force", _registered, sources or {})
 end
 
 function M.registered_names()
