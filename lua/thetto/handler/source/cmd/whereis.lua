@@ -40,6 +40,8 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.filters = require("thetto.util.filter").prepend("interactive")
+M.modify_pipeline = require("thetto.util.pipeline").prepend({
+  require("thetto.util.filter").by_name("source_input"),
+})
 
 return M

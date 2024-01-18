@@ -45,13 +45,15 @@ function M.collect(source_ctx)
 end
 
 M.kind_name = "file"
-M.default_action = "open_url"
 
 M.actions = {
   opts = { yank = { key = "url" } },
-  action_open_url = function(items, _, ctx)
-    return require("thetto.util.action").call("url", "open_browser", items, ctx)
+
+  action_open_url = function(items)
+    return require("thetto.util.action").call("url", "open_browser", items)
   end,
+
+  default_action = "open_url",
 }
 
 return M

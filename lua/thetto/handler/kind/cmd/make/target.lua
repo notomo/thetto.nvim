@@ -24,8 +24,8 @@ function M.action_execute(items, action_ctx)
   end
 end
 
-function M.action_dry_run(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, ctx, {
+function M.action_dry_run(items, action_ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, {
     args = { "-n", "-f" },
   })
 end

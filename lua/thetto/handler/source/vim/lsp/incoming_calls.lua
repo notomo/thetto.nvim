@@ -51,10 +51,10 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "file"
 
-M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
-}
+M.cwd = require("thetto.util.cwd").project()
 
-M.sorters = { "row" }
+M.modify_pipeline = require("thetto.util.pipeline").append({
+  require("thetto.util.sorter").field_by_name("row"),
+})
 
 return M

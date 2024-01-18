@@ -94,8 +94,6 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "git/change"
 
-M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
-}
+M.cwd = require("thetto.util.cwd").project()
 
 return M

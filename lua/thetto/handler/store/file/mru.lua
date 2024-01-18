@@ -38,7 +38,7 @@ function M.start(opts)
 end
 
 function M.data()
-  return vim.fn.reverse(_paths)
+  return vim.iter(_paths):rev():totable()
 end
 
 function M.validate(path)

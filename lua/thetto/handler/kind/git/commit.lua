@@ -30,19 +30,10 @@ function M.action_tab_open(items)
   end)
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if not item then
-    return nil
-  end
-
+function M.get_preview(item)
   local bufnr = require("thetto.util.git").diff_buffer()
   local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
-  local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
-  if err then
-    return nil, err
-  end
-  return promise
+  return promise, { raw_bufnr = bufnr }
 end
 
 function M.action_fixup(items)
@@ -54,7 +45,7 @@ function M.action_fixup(items)
   return require("thetto.util.job")
     .promise({ "git", "commit", "--fixup=" .. item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -67,7 +58,7 @@ function M.action_reword(items)
   return require("thetto.util.job")
     .promise({ "git", "commit", "--fixup=reword:" .. item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -91,7 +82,7 @@ function M.action_reset(items)
   return require("thetto.util.job")
     .promise({ "git", "reset", item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -104,7 +95,7 @@ function M.action_checkout(items)
   return require("thetto.util.job")
     .promise({ "git", "checkout", item.commit_hash }, { cwd = item.git_root })
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -115,12 +106,13 @@ function M.action_list_children(items)
   if not item then
     return nil
   end
-  return require("thetto").start("git/change", {
-    source_opts = {
+  local source = require("thetto.util.source").by_name("git/change", {
+    opts = {
       commit_hash = item.commit_hash,
       path = item.path,
     },
   })
+  return require("thetto").start(source)
 end
 
 function M.action_compare(items)

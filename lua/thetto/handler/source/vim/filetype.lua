@@ -11,6 +11,8 @@ end
 
 M.kind_name = "word"
 
-M.sorters = { "length" }
+M.modify_pipeline = require("thetto.util.pipeline").append({
+  require("thetto.util.sorter").field_length_by_name("value"),
+})
 
 return M

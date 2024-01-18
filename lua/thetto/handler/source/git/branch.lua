@@ -72,11 +72,24 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "git/branch"
 
-M.behaviors = {
-  insert = false,
-  cwd = require("thetto.util.cwd").project(),
+M.cwd = require("thetto.util.cwd").project()
+
+M.consumer_opts = {
+  ui = { insert = false },
 }
 
-M.sorters = { "-numeric:_is_current_branch", "length" }
+M.modify_pipeline = require("thetto.util.pipeline").append({
+  require("thetto.util.sorter").fields({
+    {
+      name = "value",
+      field_name = "_is_current_branch",
+      reversed = true,
+    },
+    {
+      name = "length",
+      field_name = "value",
+    },
+  }),
+})
 
 return M

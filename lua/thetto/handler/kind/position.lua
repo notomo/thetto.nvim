@@ -27,12 +27,8 @@ function M.action_vsplit_open(items)
   end
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil then
-    return
-  end
-  return nil, ctx.ui:open_preview(item, { bufnr = item.bufnr, row = item.row })
+function M.get_preview(item)
+  return nil, { bufnr = item.bufnr, row = item.row }
 end
 
 M.default_action = "open"

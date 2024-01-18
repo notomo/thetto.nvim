@@ -1,158 +1,128 @@
-local _contexts = {}
-
-local Context = {}
-Context.__index = Context
-
-local vim = vim
+--- @class ThettoContext
+--- @field collector ThettoCollector
+--- @field consumer ThettoConsumer
+--- @field _fields table
+local M = {}
+M.__index = function(tbl, k)
+  local v = rawget(tbl._fields, k)
+  if v then
+    return v
+  end
+  return rawget(M, k)
+end
 
 local now = function()
-  return vim.fn.reltimestr(vim.fn.reltime())
+  return vim.uv.hrtime()
 end
 
-function Context.new(source_name, collector, ui, executor, can_resume)
+local _ctx_map = {}
+
+function M.set(ctx_key, fields)
   local tbl = {
-    collector = collector,
-    ui = ui,
-    executor = executor,
-    _updated_at = now(),
-    _can_resume = can_resume,
+    _key = ctx_key,
+    _used_at = now(),
+    _fields = {},
   }
-  local self = setmetatable(tbl, Context)
-  _contexts[source_name] = self
-  return self
+  local ctx = setmetatable(tbl, M)
+  ctx:update(fields)
+
+  M._expire_old()
+  _ctx_map[ctx_key] = ctx
+
+  return ctx
 end
 
-function Context.get(source_name)
-  vim.validate({ source_name = { source_name, "string", true } })
-
-  if not source_name then
-    return nil, "no source_name"
-  end
-
-  local ctx = _contexts[source_name]
-  if not ctx then
-    return nil, "no context: " .. source_name
-  end
-  return ctx, nil
-end
-
-local api = vim.api
-
-function Context.get_from_path(bufnr, pattern)
-  vim.validate({ bufnr = { bufnr, "number", true }, pattern = { pattern, "string", true } })
-  bufnr = bufnr or api.nvim_get_current_buf()
-  pattern = pattern or ""
-
-  if not api.nvim_buf_is_valid(bufnr) then
-    return nil, "invalid buffer: " .. bufnr
-  end
-
-  local path = api.nvim_buf_get_name(bufnr)
-  local source_name = path:match("^thetto://(.+)/thetto" .. pattern)
-  if not source_name then
-    return nil, "not found state in: " .. path
-  end
-
-  local ctx, err = Context.get(source_name)
-  if err then
-    return nil, ("buffer=%d: %s"):format(bufnr, err)
-  end
-  return ctx, nil
-end
-
-local resume_candidates = function()
-  local ctxs = {}
-  for _, ctx in pairs(_contexts) do
-    if ctx._can_resume then
-      table.insert(ctxs, ctx)
-    end
-  end
-  return ipairs(ctxs)
-end
-
-function Context.resume(source_name)
-  if source_name ~= nil then
-    local ctx, err = Context.get(source_name)
-    if err then
-      return nil, err
-    end
-    if not ctx._can_resume then
-      return nil, "no context that can resume: " .. source_name
-    end
-    return ctx, nil
-  end
-
-  local recent = nil
-  local recent_time = 0
-  for _, ctx in resume_candidates() do
-    local time = tonumber(ctx._updated_at)
-    if recent_time < time then
-      recent = ctx
-      recent_time = time
-    end
-  end
-
-  if recent == nil then
-    return nil, "not found state for resume"
-  end
-  return recent, nil
-end
-
-function Context.resume_previous(self)
-  local resumed = nil
-  local at = 0
-  local max_at = tonumber(self._updated_at)
-  for _, ctx in resume_candidates() do
-    local updated_at = tonumber(ctx._updated_at)
-    if at < updated_at and updated_at < max_at then
-      resumed = ctx
-      at = updated_at
-    end
-  end
-  if not resumed then
-    return nil, "not found state for resume"
-  end
-  return resumed, nil
-end
-
-function Context.resume_next(self)
-  local resumed = nil
-  local min_at = tonumber(self._updated_at)
-  local at = min_at
-  for _, ctx in resume_candidates() do
-    local updated_at = tonumber(ctx._updated_at)
-    if min_at <= at and at < updated_at then
-      resumed = ctx
-      at = updated_at
-    end
-  end
-  if not resumed then
-    return nil, "not found state for resume"
-  end
-  return resumed, nil
-end
-
-function Context.on_close(self)
-  self._updated_at = now()
-end
-
-function Context.resume_last()
-  local all = {}
-  for _, ctx in resume_candidates() do
-    table.insert(all, ctx)
-  end
-  table.sort(all, function(a, b)
-    return a._updated_at < b._updated_at
+local max_count = 10
+function M._expire_old()
+  local ctxs = vim
+    .iter(_ctx_map)
+    :map(function(_, v)
+      return v
+    end)
+    :totable()
+  table.sort(ctxs, function(a, b)
+    return a._used_at > b._used_at
   end)
-  local resumed = all[1]
-  if not resumed then
-    return nil, "not found state for resume"
+
+  local old_ctxs = vim.list_slice(ctxs, max_count + 1)
+  for _, ctx in ipairs(old_ctxs) do
+    _ctx_map[ctx._key] = nil
+    vim.api.nvim_exec_autocmds("User", {
+      pattern = "thetto_ctx_deleted_" .. ctx._key,
+      modeline = false,
+    })
   end
-  return resumed, nil
 end
 
-function Context.all()
-  return pairs(_contexts)
+--- @return ThettoContext|string
+function M.get(bufnr)
+  bufnr = bufnr or vim.api.nvim_get_current_buf()
+
+  local path = vim.api.nvim_buf_get_name(bufnr)
+  local ctx_key = path:match("^thetto://([^/]+)/")
+  if not ctx_key then
+    return "not found state in: " .. path
+  end
+
+  local ctx = _ctx_map[ctx_key]
+  if not ctx then
+    return "context is expired: " .. path
+  end
+
+  return ctx
 end
 
-return Context
+--- @return ThettoContext?
+--- @return ThettoContext?
+function M.resume(offset)
+  local ctxs = vim
+    .iter(_ctx_map)
+    :map(function(_, v)
+      return v
+    end)
+    :totable()
+  table.sort(ctxs, function(a, b)
+    return a._used_at > b._used_at
+  end)
+
+  if #ctxs == 0 then
+    return nil
+  end
+
+  if offset == 0 then
+    local ctx = ctxs[1]
+    ctx._used_at = now()
+    return ctx
+  end
+
+  local current = M.get()
+  if type(current) == "string" then
+    return
+  end
+
+  local index = 1
+  for i, ctx in ipairs(ctxs) do
+    if ctx._key == current._key then
+      index = i
+      break
+    end
+  end
+  local wrapped_index = (index + offset) % #ctxs
+  if wrapped_index == 0 then
+    wrapped_index = #ctxs
+  end
+
+  local ctx = ctxs[wrapped_index]
+  ctx._used_at = now()
+  return ctx, current
+end
+
+function M.update(self, fields)
+  self._fields = vim.tbl_extend("force", self._fields, fields)
+end
+
+function M.new_key()
+  return tostring(now())
+end
+
+return M

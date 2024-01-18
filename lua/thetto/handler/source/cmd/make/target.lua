@@ -74,9 +74,10 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "cmd/make/target"
 
-M.behaviors = {
-  insert = false,
-  cwd = require("thetto.util.cwd").upward({ "Makefile" }),
+M.cwd = require("thetto.util.cwd").upward({ "Makefile" })
+
+M.consumer_opts = {
+  ui = { insert = false },
 }
 
 return M

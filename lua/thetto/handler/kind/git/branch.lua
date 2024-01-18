@@ -34,8 +34,8 @@ function M.action_delete(items, action_ctx)
   return require("thetto.util.job").promise(cmd, { cwd = to_git_root(items) })
 end
 
-function M.action_force_delete(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "delete", items, ctx, {
+function M.action_force_delete(items, action_ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "delete", items, {
     args = { "-D" },
   })
 end
@@ -94,19 +94,10 @@ function M.action_create(items)
     end)
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if not item then
-    return nil
-  end
-
+function M.get_preview(item)
   local bufnr = require("thetto.util.git").diff_buffer()
   local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
-  local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
-  if err then
-    return nil, err
-  end
-  return promise
+  return promise, { raw_bufnr = bufnr }
 end
 
 function M.action_merge(items)

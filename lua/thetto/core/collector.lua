@@ -1,292 +1,196 @@
-local SourceContext = require("thetto.core.items.source_context")
-local SourceResult = require("thetto.core.items.source_result")
-local Items = require("thetto.core.items")
-local Filters = require("thetto.core.items.filters")
-local Sorters = require("thetto.core.items.sorters")
-local wraplib = require("thetto.lib.wrap")
-local listlib = require("thetto.lib.list")
-local vim = vim
+local consumer_events = require("thetto.core.consumer_events")
 
+--- @class ThettoCollector
+--- @field _all_items table
+--- @field _source_ctx table
+--- @field _pipeline_ctx table
+--- @field _subscription table
+--- @field _item_cursor_row integer
+--- @field _consumer ThettoConsumer
+--- @field _pipeline ThettoPipeline
 local Collector = {}
 Collector.__index = Collector
 
-function Collector.new(source)
-  local behaviors = source.behaviors
-
-  local modifier_factory = require("thetto.core.items.filter_modifier_factory").new(behaviors.cwd)
-  local filters, ferr = Filters.new(source.filters, modifier_factory)
-  if ferr ~= nil then
-    return nil, ferr
-  end
-
-  local sorters, serr = Sorters.new(source.sorters)
-  if serr ~= nil then
-    return nil, serr
-  end
+function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr, actions)
+  local source_ctx = require("thetto.core.source_context").new(source, source_bufnr, {
+    is_interactive = pipeline:has_source_input(),
+  })
+  local pipeline_ctx = require("thetto.core.pipeline_context").new({})
 
   local tbl = {
-    source = source,
-    selected = {},
-    filters = filters,
-    filter = behaviors.filter,
-    sorters = sorters,
-    input_lines = listlib.fill(behaviors.input_lines, #source.filters, ""),
-    source_ctx = SourceContext.new(
-      behaviors.pattern,
-      behaviors.cwd,
-      behaviors.throttle_ms,
-      behaviors.range,
-      filters:has_interactive(),
-      vim.api.nvim_get_current_buf(),
-      source.opts
-    ),
-    _result = SourceResult.zero(),
-    _ignorecase = behaviors.ignorecase,
-    _smartcase = behaviors.smartcase,
+    _source = source,
+    _pipeline = pipeline,
+    _consumer_factory = consumer_factory,
+    _item_cursor_factory = item_cursor_factory,
+    _ctx_key = ctx_key,
+    _source_bufnr = source_bufnr,
+
+    _all_items = {},
+    _pipeline_ctx = pipeline_ctx,
+    _source_ctx = source_ctx,
+    _subscription = nil,
+    _consumer = nil,
+    _item_cursor_row = 1,
+    _actions = actions,
   }
-  local self = setmetatable(tbl, Collector)
-  self.items = self:_items(0, nil, behaviors.display_limit)
-
-  self.update_with_throttle = wraplib.throttle_with_last(behaviors.throttle_ms, function(_, callback)
-    local update_err = self:update()
-    if callback then
-      callback()
-    end
-    return update_err
-  end)
-
-  self._send_redraw_event = function() end
-
-  self._send_redraw_selection_event = function() end
-
-  return self, nil
+  return setmetatable(tbl, Collector)
 end
 
-function Collector.subscribe_input(self, immediately, input_observable, get_lines)
-  self.update_with_throttle = wraplib.throttle_with_last(self.source_ctx.throttle_ms, function(_, callback)
-    local input_lines = get_lines()
-    if input_lines then
-      self.input_lines = input_lines
-    end
-    local err = self:update()
-    if callback then
-      callback()
-    end
-    return err
-  end)
+function Collector.start(self)
+  local subscriber = self:_create_subscriber()
 
-  local update_with_debounces = vim.tbl_map(function(filter)
-    return wraplib.debounce(filter.debounce_ms, function()
-      return self:update_with_throttle()
-    end)
-  end, self.filters:values())
-  input_observable:subscribe({
-    next = function(row)
-      local filter_index = row + 1
-      local update_with_debounce = update_with_debounces[filter_index] or update_with_debounces[1]
-      update_with_debounce()
-    end,
-    complete = function()
-      if immediately then
+  local events = {}
+  local skeleton_consumer = self:_create_consumer(function()
+    return require("thetto.handler.consumer.skeleton").new(events)
+  end)
+  skeleton_consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
+
+  local promise = self:_start(subscriber, skeleton_consumer)
+
+  local consumer = self:_create_consumer()
+  self._consumer = consumer
+  for _, event in ipairs(events) do
+    consumer:consume(unpack(event))
+  end
+
+  return promise, consumer
+end
+
+function Collector.restart(self, consumer)
+  self:_stop()
+
+  self._all_items = {}
+  self._source_ctx =
+    require("thetto.core.source_context").new(self._source, self._source_bufnr, self._pipeline_ctx.source_input)
+  local subscriber = self:_create_subscriber()
+
+  consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
+  return self:_start(subscriber, consumer)
+end
+
+function Collector.replay(self, consumer_factory, item_cursor_factory)
+  item_cursor_factory = item_cursor_factory or self._item_cursor_factory
+
+  self:_stop()
+
+  local all_items = self._all_items
+  local item_cursor = item_cursor_factory(all_items)
+  local subscriber = function(observer)
+    observer:next(all_items)
+    observer:complete()
+  end
+  self._all_items = {}
+
+  local consumer = self:_create_consumer(consumer_factory)
+  return self:_start(subscriber, consumer, item_cursor), consumer
+end
+
+function Collector._start(self, subscriber, consumer, default_item_cursor)
+  self._consumer = consumer
+
+  local default_kind_name = self._source.kind_name or "base"
+  local observable = require("thetto.vendor.misclib.observable").new(subscriber)
+  return require("thetto.vendor.promise").new(function(resolve, reject)
+    self._subscription = observable:subscribe({
+      next = function(items)
+        local count = #self._all_items
+        for i, item in ipairs(items) do
+          item.index = count + i
+          item.kind_name = item.kind_name or default_kind_name
+        end
+        vim.list_extend(self._all_items, items)
+
+        self:_run_pipeline()
+      end,
+      complete = function()
+        local item_cursor = default_item_cursor or self._item_cursor_factory(self._all_items)
+        resolve(self._consumer:consume(consumer_events.source_completed(item_cursor)))
+      end,
+      error = function(err)
+        reject(self._consumer:consume(consumer_events.source_error(err)))
+      end,
+    })
+  end)
+end
+
+function Collector._stop(self)
+  return self._subscription and self._subscription:unsubscribe()
+end
+
+function Collector._run_pipeline(self)
+  local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._pipeline_ctx, self._all_items)
+  self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
+end
+
+function Collector._create_subscriber(self)
+  local subscriber_or_items, source_err = self._source.collect(self._source_ctx)
+  if source_err then
+    return function(observer)
+      local msg = require("thetto.vendor.misclib.message").wrap(source_err)
+      observer:error(msg)
+    end
+  end
+
+  if type(subscriber_or_items) == "function" then
+    return subscriber_or_items
+  end
+
+  if type(subscriber_or_items.next) == "function" then
+    -- promise case
+    return function(observer)
+      subscriber_or_items
+        :next(function(result)
+          if type(result) == "function" then
+            -- promise returns subscriber case
+            result(observer)
+            return
+          end
+
+          -- promise returns items case
+          observer:next(result)
+          observer:complete(result)
+        end)
+        :catch(function(err)
+          observer:error(err)
+        end)
+    end
+  end
+
+  return function(observer)
+    observer:next(subscriber_or_items)
+    observer:complete()
+  end
+end
+
+--- @return ThettoConsumer
+function Collector._create_consumer(self, consumer_factory)
+  consumer_factory = consumer_factory or self._consumer_factory
+
+  local callbacks = {
+    on_change = function(pipeline_ctx)
+      if not pipeline_ctx then
         return
       end
-      self:discard()
-    end,
-  })
-end
+      self._pipeline_ctx = pipeline_ctx
 
-function Collector.attach_ui(self, ui)
-  vim.validate({ ui = { ui, "table" } })
-  self._send_redraw_event = function()
-    return ui:redraw(self.input_lines)
-  end
-  self._send_redraw_selection_event = function(_, s, e)
-    return ui:redraw_selections(s, e)
-  end
-end
-
-function Collector.start(self, input_pattern, resolve, reject)
-  resolve = resolve or function() end
-  reject = reject or function(e)
-    require("thetto.vendor.misclib.message").warn(e)
-  end
-
-  local source_ctx = self.source_ctx:from(input_pattern or self.source_ctx.pattern)
-  local result, err = self.source:collect(source_ctx)
-  if err then
-    return err
-  end
-
-  self._result = result
-  self.source_ctx = source_ctx
-
-  self._result:start({
-    next = function(items)
-      self._result:append(items)
-      return self:update_with_throttle()
-    end,
-    error = function(e)
-      return self:update_with_throttle(function()
-        reject(e)
-      end)
-    end,
-    complete = function()
-      return self:update_with_throttle(resolve)
-    end,
-  })
-
-  return nil
-end
-
-function Collector.discard(self)
-  return self._result:discard()
-end
-
-function Collector.finished(self)
-  return self._result:finished()
-end
-
-function Collector.all_count(self)
-  return self._result:count()
-end
-
-function Collector.toggle_selections(self, items)
-  local rows = {}
-  for _, item in ipairs(items) do
-    local key = tostring(item.index)
-    if self.selected[key] then
-      self.selected[key] = nil
-    else
-      self.selected[key] = item
-    end
-
-    for row, filtered_item in self.items:iter() do
-      if filtered_item.index == item.index then
-        table.insert(rows, row)
-        filtered_item.selected = not filtered_item.selected
-        break
+      if pipeline_ctx.source_input.pattern then
+        return self:restart(self._consumer)
       end
-    end
-  end
-  self:_send_redraw_selection_event(rows[1] - 1, rows[#rows])
-end
-
-function Collector.toggle_all_selections(self)
-  self:toggle_selections(self.items:values())
-end
-
-function Collector.add_filter(self, name)
-  local filters, err = self.filters:add(name)
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_filters(filters)
-end
-
-function Collector.remove_filter(self, name)
-  local filters, err = self.filters:remove(name)
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_filters(filters)
-end
-
-function Collector.inverse_filter(self, name)
-  local filters, err = self.filters:inverse(name)
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_filters(filters)
-end
-
-function Collector.change_filter(self, old, new)
-  local filters, err = self.filters:change(old, new)
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_filters(filters)
-end
-
-function Collector._update_filters(self, filters)
-  self.filters = filters
-  return self:_update_items()
-end
-
-function Collector.reverse_sorter(self, name)
-  local sorters, err = self.sorters:reverse_one(name)
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_sorters(sorters)
-end
-
-function Collector.reverse(self)
-  local sorters, err = self.sorters:reverse()
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_sorters(sorters)
-end
-
-function Collector.toggle_sorter(self, name)
-  local sorters, err = self.sorters:toggle(name)
-  if err ~= nil then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_update_sorters(sorters)
-end
-
-function Collector.change_page_offset(self, page_offset)
-  return self:_update_items(page_offset)
-end
-
-function Collector.change_display_limit(self, offset)
-  return self:_update_items(nil, self.items.display_limit + offset)
-end
-
-function Collector._update_sorters(self, sorters)
-  self.sorters = sorters
-  return self:_update_items()
-end
-
-function Collector.update(self)
-  return self:_update_items()
-end
-
-function Collector._items(self, page, page_offset, display_limit)
-  return Items.new(
-    self._result,
-    self.input_lines,
-    self.filters,
-    self.filter,
-    self.sorters,
-    self._ignorecase,
-    self._smartcase,
-    display_limit or self.items.display_limit,
-    page or self.items.page,
-    page_offset
-  )
-end
-
-function Collector._update_items(self, page_offset, display_limit)
-  self.items = self:_items(nil, page_offset, display_limit)
-
-  if not self.source_ctx.interactive then
-    return self:_send_redraw_event()
-  end
-
-  local input_pattern = self.filters:extract_interactive(self.input_lines)
-  if self.source_ctx.pattern == input_pattern then
-    return self:_send_redraw_event()
-  end
-
-  self:discard()
-
-  local err = self:start(input_pattern)
-  if err then
-    return require("thetto.vendor.promise").reject(err)
-  end
-  return self:_send_redraw_event()
+      return self:_run_pipeline()
+    end,
+    on_row_changed = function(row)
+      self._item_cursor_row = row
+    end,
+    on_discard = function()
+      self:_stop()
+    end,
+  }
+  local consumer_ctx = {
+    ctx_key = self._ctx_key,
+    source_ctx = self._source_ctx,
+    item_cursor_row = self._item_cursor_row,
+  }
+  return consumer_factory(consumer_ctx, self._source, self._pipeline, callbacks, self._actions)
 end
 
 return Collector

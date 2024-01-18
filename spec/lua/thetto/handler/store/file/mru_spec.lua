@@ -5,10 +5,15 @@ describe("file/mru store", function()
   local store_file_path
   before_each(function()
     helper.before_each()
+    helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root)
+    helper.test_data:cd("")
     store_file_path = helper.test_data:create_file("store.txt")
   end)
 
-  after_each(helper.after_each)
+  after_each(function()
+    helper.test_data:teardown()
+    helper.after_each()
+  end)
 
   it("can store mru file paths", function()
     local file_path1 = helper.test_data:create_file("file1")

@@ -50,7 +50,7 @@ function M.action_toggle_stage(items)
       }, { cwd = to_git_root(items) })
     end)
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -92,7 +92,7 @@ function M.action_discard(items)
       return require("thetto.vendor.promise").all(promises)
     end)
     :next(function()
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -113,7 +113,7 @@ function M.action_stash(items)
     }, { cwd = git_root })
     :next(function()
       require("thetto.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
-      return require("thetto.command").reload(bufnr)
+      return require("thetto").reload(bufnr)
     end)
 end
 
@@ -135,14 +135,14 @@ function M.action_commit(items, action_ctx)
     end)
 end
 
-function M.action_commit_amend(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, ctx, {
+function M.action_commit_amend(items, action_ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, {
     args = { "--amend" },
   })
 end
 
-function M.action_commit_empty(items, action_ctx, ctx)
-  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, ctx, {
+function M.action_commit_empty(items, action_ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "commit", items, {
     args = { "--allow-empty" },
   })
 end
@@ -175,21 +175,17 @@ end
 M.opts.preview = {
   ignore_patterns = {},
 }
-function M.action_preview(items, action_ctx, ctx)
-  local item = ctx.ui:current_item()
-  if not item then
-    return nil
-  end
+function M.get_preview(item, action_ctx)
   if not item.path then
     return nil
   end
 
   if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
-    return nil, ctx.ui:open_preview(item, { lines = { "IGNORED" } })
+    return nil, { lines = { "IGNORED" } }
   end
 
   if item.index_status == "untracked" then
-    return require("thetto.util.action").call("file", "preview", items, ctx)
+    return require("thetto.util.action").preview("file", item, action_ctx)
   end
 
   local bufnr = require("thetto.util.git").diff_buffer()
@@ -199,11 +195,7 @@ function M.action_preview(items, action_ctx, ctx)
   end
   vim.list_extend(cmd, { "--", item.path })
   local promise = require("thetto.util.git").diff(item.git_root, bufnr, cmd)
-  local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
-  if err then
-    return nil, err
-  end
-  return promise
+  return promise, { raw_bufnr = bufnr }
 end
 
 return M

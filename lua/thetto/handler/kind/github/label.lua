@@ -2,12 +2,13 @@ local M = {}
 
 function M.action_list_issue(items)
   for _, item in ipairs(items) do
-    return require("thetto").start("github/issue", {
-      source_opts = {
+    local source = require("thetto.util.source").by_name("github/issue", {
+      opts = {
         labels = { item.value },
         allow_empty_input = true,
       },
     })
+    return require("thetto").start(source)
   end
 end
 

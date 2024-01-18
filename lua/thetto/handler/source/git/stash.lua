@@ -32,9 +32,10 @@ M.highlight = require("thetto.util.highlight").columns({
 
 M.kind_name = "word"
 
-M.behaviors = {
-  insert = false,
-  cwd = require("thetto.util.cwd").project(),
+M.cwd = require("thetto.util.cwd").project()
+
+M.consumer_opts = {
+  ui = { insert = false },
 }
 
 M.actions = {
@@ -46,7 +47,7 @@ M.actions = {
     end)
   end,
 
-  action_preview = function(items, _, ctx)
+  get_preview = function(items, _, ctx)
     local item = items[1]
     if not item then
       return nil

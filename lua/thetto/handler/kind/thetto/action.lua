@@ -2,12 +2,11 @@ local M = {}
 
 function M.action_execute(items)
   for _, item in ipairs(items) do
-    if item.quit then
-      require("thetto").resume_execute({ action_name = item.value, source_name = item.source_name })
-    else
-      require("thetto").resume(item.source_name)
-      require("thetto").execute(item.value)
-    end
+    local item_action_groups = require("thetto.util.action").grouping({ item.item }, {
+      action_name = item.value,
+      actions = item.metadata.actions,
+    })
+    require("thetto").execute(item_action_groups, { quit = false })
   end
 end
 

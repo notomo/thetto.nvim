@@ -43,8 +43,6 @@ end
 
 M.kind_name = "file"
 
-M.behaviors = {
-  cwd = require("thetto.util.cwd").project(),
-}
+M.cwd = require("thetto.util.cwd").project()
 
 return M

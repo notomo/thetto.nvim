@@ -96,8 +96,7 @@ function M._enable_patch(git_root, path_from_git_root, bufnr)
             f:close()
           end
 
-          return
-            require("thetto.util.job").promise(
+          return require("thetto.util.job").promise(
             { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
             {
               cwd = git_root,

@@ -41,20 +41,17 @@ function M.action_enter(items)
   if item == nil then
     return
   end
-  return require("thetto").start("file/in_dir", { opts = { cwd = item.path } })
+  local source = require("thetto.util.source").by_name("file/in_dir", { cwd = item.path })
+  return require("thetto").start(source)
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil then
-    return
-  end
+function M.get_preview(item)
   local bufnr = vim.api.nvim_create_buf(false, true)
   after(item.path, bufnr)
   if bufnr and vim.api.nvim_buf_is_loaded(bufnr) then
-    return nil, ctx.ui:open_preview(item, {
+    return nil, {
       raw_bufnr = bufnr,
-    })
+    }
   end
 end
 
@@ -64,7 +61,8 @@ function M.action_list_parents(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h:h:h")
-  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  local source = require("thetto.util.source").by_name("file/in_dir", { cwd = path })
+  return require("thetto").start(source)
 end
 
 function M.action_delete(items)

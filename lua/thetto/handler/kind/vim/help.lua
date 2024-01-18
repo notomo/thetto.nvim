@@ -1,8 +1,8 @@
 local M = {}
 
-function M.action_open(items, _, ctx)
+function M.action_open(items)
   for _, item in ipairs(items) do
-    local err = M._open(item, "", "open", ctx)
+    local err = M._open(item, "", "open")
     if err then
       return nil, err
     end
@@ -10,32 +10,32 @@ function M.action_open(items, _, ctx)
   end
 end
 
-function M.action_tab_open(items, _, ctx)
+function M.action_tab_open(items)
   for _, item in ipairs(items) do
-    local err = M._open(item, "tab", "tab_open", ctx)
+    local err = M._open(item, "tab", "tab_open")
     if err then
       return nil, err
     end
   end
 end
 
-function M.action_vsplit_open(items, _, ctx)
+function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
-    local err = M._open(item, "vertical", "vsplit_open", ctx)
+    local err = M._open(item, "vertical", "vsplit_open")
     if err then
       return nil, err
     end
   end
 end
 
-function M._open(item, help_prefix, edit_action, ctx)
+function M._open(item, help_prefix, edit_action)
   local ok = pcall(vim.cmd, ("%s help %s"):format(help_prefix, item.value))
   if ok then
     return
   end
 
   local items = { item }
-  local _, err = require("thetto.util.action").call("file", edit_action, items, ctx)
+  local _, err = require("thetto.util.action").call("file", edit_action, items)
   if err then
     return err
   end
@@ -45,12 +45,7 @@ function M._open(item, help_prefix, edit_action, ctx)
   vim.bo.modifiable = false
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil then
-    return
-  end
-
+function M.get_preview(item)
   local help_bufnr = vim.fn.bufadd(item.path)
   vim.fn.bufload(help_bufnr)
   local lines = vim.api.nvim_buf_get_lines(help_bufnr, 0, -1, false)
@@ -67,13 +62,13 @@ function M.action_preview(_, _, ctx)
   end)
 
   return nil,
-    ctx.ui:open_preview(item, {
+    {
       raw_bufnr = bufnr,
       row = cursor[1],
       column = cursor[2],
       end_column = -1,
       title = vim.fn.fnamemodify(item.path, ":t"),
-    })
+    }
 end
 
 M.default_action = "open"

@@ -12,12 +12,7 @@ function M.action_execute(items)
   end
 end
 
-function M.action_preview(_, _, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil then
-    return
-  end
-
+function M.get_preview(item)
   local first = item.row or 0
   local last = item.end_row or -1
 
@@ -37,7 +32,7 @@ function M.action_preview(_, _, ctx)
     M.after(item.value, cmd)
   end)
 
-  return nil, ctx.ui:open_preview(item, { raw_bufnr = bufnr })
+  return nil, { raw_bufnr = bufnr }
 end
 
 M.default_action = "execute"
