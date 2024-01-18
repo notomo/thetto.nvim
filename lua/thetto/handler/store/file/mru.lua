@@ -6,6 +6,7 @@ local vim = vim
 local M = {}
 
 local _paths = {}
+local _opts = {}
 
 M.opts = {
   file_path = pathlib.user_data_path("store_file_mru.txt"),
@@ -13,32 +14,36 @@ M.opts = {
   limit = 500,
 }
 
-function M.start(opts)
-  opts = vim.tbl_extend("force", M.opts, opts or {})
-
-  local paths = filelib.read_lines(opts.file_path, 0, opts.limit)
-  _paths = vim.tbl_filter(M.validate, paths)
+function M.start(raw_opts)
+  _opts = vim.tbl_extend("force", M.opts, raw_opts or {})
 
   local group = vim.api.nvim_create_augroup("thetto_file_mru", {})
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     group = group,
     pattern = { "*" },
     callback = function(args)
-      M.add(args.buf, opts.limit)
+      M.add(args.buf, _opts.limit)
     end,
   })
-  vim.api.nvim_create_autocmd(opts.save_events, {
+  vim.api.nvim_create_autocmd(_opts.save_events, {
     group = group,
     pattern = { "*" },
     callback = function()
-      M.save(opts.file_path)
+      M.save(_opts.file_path)
     end,
     once = true,
   })
 end
 
+function M._data()
+  local paths = filelib.read_lines(_opts.file_path, 0, _opts.limit)
+  return vim.tbl_filter(M.validate, paths)
+end
+
 function M.data()
-  return vim.iter(_paths):rev():totable()
+  local paths = M._data()
+  vim.list_extend(paths, _paths)
+  return vim.iter(paths):rev():totable()
 end
 
 function M.validate(path)
@@ -68,7 +73,14 @@ function M.add(bufnr, limit)
 end
 
 function M.save(file_path)
-  filelib.write_lines(file_path, _paths)
+  local paths = M._data()
+  for _, path in ipairs(_paths) do
+    listlib.remove(paths, path)
+  end
+  vim.list_extend(paths, _paths)
+  paths = vim.list_slice(paths, 0, _opts.limit)
+
+  filelib.write_lines(file_path, paths)
 end
 
 return M

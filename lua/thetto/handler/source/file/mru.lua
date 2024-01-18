@@ -32,7 +32,6 @@ function M.collect(source_ctx)
     end)
     :totable()
   vim.list_extend(paths, buffer_paths)
-  vim.list_extend(paths, vim.v.oldfiles)
   paths = listlib.unique(paths)
 
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
