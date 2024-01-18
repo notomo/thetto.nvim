@@ -1,7 +1,6 @@
 local filelib = require("thetto.lib.file")
 
 local M = {}
-M.__index = M
 
 M.opts = {}
 
@@ -83,38 +82,34 @@ end
 M.opts.preview = {
   ignore_patterns = {},
 }
-function M.action_preview(items, action_ctx, ctx)
-  local item = ctx.ui:current_item()
-  if item == nil then
-    return
-  end
+function M.get_preview(item, action_ctx)
   if require("thetto.lib.regex").match_any(item.path, action_ctx.opts.ignore_patterns or {}) then
-    return nil, ctx.ui:open_preview(item, { lines = { "IGNORED" } })
+    return nil, { lines = { "IGNORED" } }
   end
   if vim.fn.isdirectory(item.path) == 1 then
-    return require("thetto.util.action").call("file/directory", "preview", items, ctx)
+    return require("thetto.util.action").preview("file/directory", item, action_ctx)
   end
   local bufnr = get_bufnr(item)
   if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
     return nil,
-      ctx.ui:open_preview(item, {
+      {
         bufnr = bufnr,
         row = item.row,
         end_row = item.end_row,
         column = item.column,
         end_column = item.end_column,
         title = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t"),
-      })
+      }
   end
   return nil,
-    ctx.ui:open_preview(item, {
+    {
       path = item.path,
       row = item.row,
       end_row = item.end_row,
       column = item.column,
       end_column = item.end_column,
       title = vim.fn.fnamemodify(item.path, ":t"),
-    })
+    }
 end
 
 function M.action_load_buffer(items)
@@ -149,12 +144,12 @@ local to_dirs = function(items)
   return dirs
 end
 
-function M.action_directory_open(items, _, ctx)
-  return require("thetto.util.action").call("file/directory", "open", to_dirs(items), ctx)
+function M.action_directory_open(items)
+  return require("thetto.util.action").call("file/directory", "open", to_dirs(items))
 end
 
-function M.action_directory_tab_open(items, _, ctx)
-  return require("thetto.util.action").call("file/directory", "tab_open", to_dirs(items), ctx)
+function M.action_directory_tab_open(items)
+  return require("thetto.util.action").call("file/directory", "tab_open", to_dirs(items))
 end
 
 function M.action_directory_enter(items)
@@ -163,7 +158,8 @@ function M.action_directory_enter(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h")
-  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  local source = require("thetto.util.source").by_name("file/in_dir", { cwd = path })
+  return require("thetto").start(source)
 end
 
 function M.action_list_parents(items)
@@ -172,7 +168,8 @@ function M.action_list_parents(items)
     return
   end
   local path = vim.fn.fnamemodify(item.path, ":h:h")
-  return require("thetto").start("file/in_dir", { opts = { cwd = path } })
+  local source = require("thetto.util.source").by_name("file/in_dir", { cwd = path })
+  return require("thetto").start(source)
 end
 
 M.action_list_siblings = M.action_directory_enter
