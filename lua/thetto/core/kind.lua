@@ -25,7 +25,7 @@ function M.by_name(kind_name, fields, raw_opts)
 
   local kind = vim.tbl_deep_extend("force", vim.deepcopy(origin), fields or {})
   kind.name = kind_name
-  kind.action_name_to_kind_name = kind.action_name_to_kind_name or {}
+  kind._action_name_to_kind_name = kind._action_name_to_kind_name or {}
 
   return kind
 end
@@ -67,7 +67,7 @@ function M.action_kind_name(kind, action_name)
   if rawget(kind, key) then
     return kind.name
   end
-  local extend_kind_name = kind.action_name_to_kind_name[key]
+  local extend_kind_name = kind._action_name_to_kind_name[key]
   if extend_kind_name then
     return extend_kind_name
   end
@@ -114,7 +114,7 @@ function M.extend(kind, ...)
     .iter({ ... })
     :map(function(kind_name)
       local extend = M.by_name(kind_name)
-      extend.action_name_to_kind_name = M._action_name_to_kind_name_map(kind_name, extend)
+      extend._action_name_to_kind_name = M._action_name_to_kind_name_map(kind_name, extend)
       return extend
     end)
     :totable()
