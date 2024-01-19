@@ -2,14 +2,6 @@ local M = {}
 
 M.opts = {}
 
-M.behaviors = {
-  toggle_stage = { quit = false },
-  discard = { quit = false },
-  stash = { quit = false },
-  compare = { quit = false },
-  diff = { quit = false },
-}
-
 local to_paths = function(items)
   return vim.tbl_map(function(item)
     return item.path
