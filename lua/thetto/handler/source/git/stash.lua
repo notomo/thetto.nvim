@@ -47,19 +47,10 @@ M.actions = {
     end)
   end,
 
-  get_preview = function(items, _, ctx)
-    local item = items[1]
-    if not item then
-      return nil
-    end
-
+  get_preview = function(item)
     local bufnr = require("thetto.util.git").diff_buffer()
     local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
-    local err = ctx.ui:open_preview(item, { raw_bufnr = bufnr })
-    if err then
-      return nil, err
-    end
-    return promise
+    return promise, { raw_bufnr = bufnr }
   end,
 
   action_create = function(items)

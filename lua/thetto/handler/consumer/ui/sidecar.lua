@@ -48,10 +48,6 @@ function M.open(ctx_key, has_sidecar, layout)
 end
 
 function M.redraw(self, preview)
-  if not preview then
-    return
-  end
-
   local bufnr, callback =
     require("thetto.handler.consumer.ui.preview").new(preview, self._layout.width, self._layout.height)
   if not bufnr then
