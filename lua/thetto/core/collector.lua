@@ -36,7 +36,7 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_
 end
 
 function Collector.start(self)
-  local subscriber = self:_create_subscriber()
+  local subscriber = require("thetto.core.source_subscriber").new(self._source, self._source_ctx)
 
   local events = {}
   local skeleton_consumer = self:_create_consumer(function()
@@ -65,7 +65,7 @@ function Collector.restart(self, consumer, source_input_pattern)
     self._source_bufnr,
     source_input_pattern or self._pipeline:initial_source_input_pattern()
   )
-  local subscriber = self:_create_subscriber()
+  local subscriber = require("thetto.core.source_subscriber").new(self._source, self._source_ctx)
 
   consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
   return self:_start(subscriber, consumer)
@@ -123,46 +123,6 @@ end
 function Collector._run_pipeline(self)
   local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._all_items, self._inputs)
   self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
-end
-
-function Collector._create_subscriber(self)
-  local subscriber_or_items, source_err = self._source.collect(self._source_ctx)
-  if source_err then
-    return function(observer)
-      local msg = require("thetto.vendor.misclib.message").wrap(source_err)
-      observer:error(msg)
-    end
-  end
-
-  if type(subscriber_or_items) == "function" then
-    return subscriber_or_items
-  end
-
-  if type(subscriber_or_items.next) == "function" then
-    -- promise case
-    return function(observer)
-      subscriber_or_items
-        :next(function(result)
-          if type(result) == "function" then
-            -- promise returns subscriber case
-            result(observer)
-            return
-          end
-
-          -- promise returns items case
-          observer:next(result)
-          observer:complete(result)
-        end)
-        :catch(function(err)
-          observer:error(err)
-        end)
-    end
-  end
-
-  return function(observer)
-    observer:next(subscriber_or_items)
-    observer:complete()
-  end
 end
 
 --- @return ThettoConsumer
