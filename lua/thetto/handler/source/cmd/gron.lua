@@ -3,7 +3,7 @@ local filelib = require("thetto.lib.file")
 local M = {}
 
 function M.collect(source_ctx)
-  local file_path = vim.api.nvim_buf_get_name(0)
+  local file_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
   if not filelib.readable(file_path) then
     return {}, nil
   end

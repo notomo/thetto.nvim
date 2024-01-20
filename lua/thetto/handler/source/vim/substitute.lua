@@ -15,8 +15,6 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local bufnr = vim.api.nvim_get_current_buf()
-
   local items = {}
   local is_visual_mode = require("thetto.vendor.misclib.visual_mode").is_current()
   for name, c in pairs(source_ctx.opts.commands) do
@@ -46,7 +44,7 @@ function M.collect(source_ctx)
       desc = desc,
       value = name,
       excmd = excmd,
-      bufnr = bufnr,
+      bufnr = source_ctx.bufnr,
       row = row,
       end_row = end_row,
       cmd_prefix = cmd_prefix,

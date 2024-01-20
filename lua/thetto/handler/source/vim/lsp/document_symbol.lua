@@ -1,10 +1,10 @@
 local M = {}
 
 function M.collect(source_ctx)
-  local current_path = vim.fn.expand("%:p")
+  local current_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
   return function(observer)
     local method = "textDocument/documentSymbol"
-    local params = { textDocument = vim.lsp.util.make_text_document_params() }
+    local params = { textDocument = vim.lsp.util.make_text_document_params(source_ctx.bufnr) }
     local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
       local items = {}
       for _, v in ipairs(result or {}) do

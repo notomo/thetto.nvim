@@ -52,7 +52,7 @@ function M._parse_include(line, dir_path, included_from)
 end
 
 function M.collect(source_ctx)
-  local path = source_ctx.cwd .. "/Makefile"
+  local path = vim.fs.joinpath(source_ctx.cwd, "Makefile")
   local dir_path = vim.fn.fnamemodify(path, ":h")
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
 

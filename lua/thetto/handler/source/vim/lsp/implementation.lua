@@ -26,6 +26,7 @@ function M.collect(source_ctx)
   local to_item = M._to_item(source_ctx.cwd)
   return function(observer)
     local method = "textDocument/implementation"
+    -- TODO: ctx window
     local params = vim.lsp.util.make_position_params()
     local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
       local items = vim.tbl_map(function(e)

@@ -7,14 +7,15 @@ M.opts = { per_file = false }
 function M.collect(source_ctx)
   local home = pathlib.home()
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
-  local current_path = vim.api.nvim_buf_get_name(0)
+  local current_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
+  -- TODO: ctx window
   local jumps = vim.fn.reverse(vim.fn.getjumplist(0)[1])
   return vim
     .iter(jumps)
     :map(function(jump)
       local bufnr = jump.bufnr
       if bufnr == 0 then
-        bufnr = vim.api.nvim_get_current_buf()
+        bufnr = source_ctx.bufnr
       end
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return

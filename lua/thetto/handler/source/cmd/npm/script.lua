@@ -34,7 +34,7 @@ function M._load(path)
 end
 
 function M.collect(source_ctx)
-  local path = source_ctx.cwd .. "/package.json"
+  local path = vim.fs.joinpath(source_ctx.cwd, "package.json")
   return M._load(path)
 end
 

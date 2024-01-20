@@ -4,7 +4,7 @@ local filelib = require("thetto.lib.file")
 local M = {}
 
 function M.collect(source_ctx)
-  local path = vim.fn.expand("%:p")
+  local path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
   for _, patterns in ipairs(source_ctx.opts.pattern_groups) do
     local items = M._to_items(source_ctx, patterns, path)
     if items ~= nil then

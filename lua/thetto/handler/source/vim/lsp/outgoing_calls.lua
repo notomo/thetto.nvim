@@ -3,6 +3,7 @@ local pathlib = require("thetto.lib.path")
 local M = {}
 
 function M.request(bufnr, method)
+  -- TODO: ctx window
   local params = vim.lsp.util.make_position_params()
   return require("thetto.vendor.promise")
     .new(function(resolve, reject)
