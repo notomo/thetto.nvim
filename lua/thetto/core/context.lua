@@ -1,7 +1,7 @@
 --- @class ThettoContext
 --- @field collector ThettoCollector
 --- @field consumer ThettoConsumer
---- @field _fields table
+--- @field private _fields table
 local M = {}
 M.__index = function(tbl, k)
   local v = rawget(tbl._fields, k)
@@ -32,9 +32,16 @@ function M.set(ctx_key, fields)
   return ctx
 end
 
+local make_pattern = function(ctx_key)
+  return "thetto_ctx_deleted_" .. ctx_key
+end
+
+local _group = vim.api.nvim_create_augroup("thetto_ctx", {})
+
 function M.setup_expire(ctx_key, f)
   vim.api.nvim_create_autocmd({ "User" }, {
-    pattern = { "thetto_ctx_deleted_" .. ctx_key },
+    group = _group,
+    pattern = { make_pattern(ctx_key) },
     callback = f,
     once = true,
   })
@@ -56,7 +63,7 @@ function M._expire_old()
   for _, ctx in ipairs(old_ctxs) do
     _ctx_map[ctx._key] = nil
     vim.api.nvim_exec_autocmds("User", {
-      pattern = "thetto_ctx_deleted_" .. ctx._key,
+      pattern = make_pattern(ctx._key),
       modeline = false,
     })
   end

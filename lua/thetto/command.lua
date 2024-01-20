@@ -38,7 +38,7 @@ end
 function M.reload(bufnr)
   local ctx = require("thetto.core.context").get(bufnr)
   if type(ctx) == "string" then
-    require("thetto.vendor.misclib.message").error(ctx)
+    return require("thetto.vendor.misclib.message").error(ctx)
   end
 
   local promise = ctx.collector:restart(ctx.consumer)
@@ -67,7 +67,7 @@ function M.execute(action_item_groups, raw_opts)
   if opts.quit then
     local ctx = require("thetto.core.context").get()
     if type(ctx) == "string" then
-      require("thetto.vendor.misclib.message").error(ctx)
+      return require("thetto.vendor.misclib.message").error(ctx)
     end
 
     ctx.consumer:call("quit", {})
@@ -79,7 +79,7 @@ end
 function M.get()
   local ctx = require("thetto.core.context").get()
   if type(ctx) == "string" then
-    require("thetto.vendor.misclib.message").error(ctx)
+    return require("thetto.vendor.misclib.message").error(ctx)
   end
 
   local items = ctx.consumer:get_items()
@@ -92,7 +92,7 @@ end
 function M.call_consumer(action_name, opts)
   local ctx = require("thetto.core.context").get()
   if type(ctx) == "string" then
-    require("thetto.vendor.misclib.message").error(ctx)
+    return require("thetto.vendor.misclib.message").error(ctx)
   end
 
   return ctx.consumer:call(action_name, opts)
@@ -101,7 +101,7 @@ end
 function M.setup_store(name, opts)
   local store, err = require("thetto.core.store").new(name)
   if err then
-    require("thetto.vendor.misclib.message").error(err)
+    return require("thetto.vendor.misclib.message").error(err)
   end
   store.start(opts)
 end
