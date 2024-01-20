@@ -26,8 +26,7 @@ function M.collect(source_ctx)
   local to_item = M._to_item(source_ctx.cwd)
   return function(observer)
     local method = "textDocument/references"
-    -- TODO: ctx window
-    local params = vim.lsp.util.make_position_params()
+    local params = vim.lsp.util.make_position_params(source_ctx.window_id)
     params.context = {
       includeDeclaration = true,
     }

@@ -18,7 +18,7 @@ local resolve_cwd = function(cwd)
   return cwd
 end
 
-function M.new(source, source_bufnr, source_input_pattern)
+function M.new(source, source_bufnr, source_window_id, source_input_pattern)
   local pattern = source_input_pattern
   if not pattern and source.get_pattern then
     pattern = source.get_pattern()
@@ -27,6 +27,7 @@ function M.new(source, source_bufnr, source_input_pattern)
   return {
     cwd = resolve_cwd(source.cwd),
     bufnr = source_bufnr,
+    window_id = source_window_id,
     pattern = pattern or "",
     opts = source.opts,
   }

@@ -8,8 +8,7 @@ function M.collect(source_ctx)
   local home = pathlib.home()
   local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local current_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
-  -- TODO: ctx window
-  local jumps = vim.fn.reverse(vim.fn.getjumplist(0)[1])
+  local jumps = vim.fn.reverse(vim.fn.getjumplist(source_ctx.window_id)[1])
   return vim
     .iter(jumps)
     :map(function(jump)

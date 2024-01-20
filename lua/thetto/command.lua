@@ -21,6 +21,7 @@ function M.start(source, raw_opts)
     opts.consumer_factory,
     opts.item_cursor_factory,
     opts.source_bufnr,
+    opts.source_window_id,
     opts.actions
   )
 

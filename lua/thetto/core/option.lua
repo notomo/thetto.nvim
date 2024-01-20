@@ -6,6 +6,7 @@ local default_start_opts = {
   item_cursor_factory = require("thetto.util.item_cursor").top(),
   actions = {},
   source_bufnr = 0,
+  source_window_id = 0,
 }
 function M.new_start_opts(source, raw_opts)
   local opts = vim.tbl_extend("force", default_start_opts, raw_opts or {})
@@ -20,6 +21,12 @@ function M.new_start_opts(source, raw_opts)
 
   local actions = vim.tbl_deep_extend("force", source.actions or {}, opts.actions)
 
+  if opts.source_window_id == 0 then
+    opts.source_window_id = vim.api.nvim_get_current_win()
+  else
+    opts.source_bufnr = vim.api.nvim_win_get_buf(opts.source_window_id)
+  end
+
   if opts.source_bufnr == 0 then
     opts.source_bufnr = vim.api.nvim_get_current_buf()
   end
@@ -30,6 +37,7 @@ function M.new_start_opts(source, raw_opts)
     item_cursor_factory = item_cursor_factory,
     actions = actions,
     source_bufnr = opts.source_bufnr,
+    source_window_id = opts.source_window_id,
   }
 end
 

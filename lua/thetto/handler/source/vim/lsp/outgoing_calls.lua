@@ -2,9 +2,8 @@ local pathlib = require("thetto.lib.path")
 
 local M = {}
 
-function M.request(bufnr, method)
-  -- TODO: ctx window
-  local params = vim.lsp.util.make_position_params()
+function M.request(bufnr, window_id, method)
+  local params = vim.lsp.util.make_position_params(window_id)
   return require("thetto.vendor.promise")
     .new(function(resolve, reject)
       vim.lsp.buf_request(bufnr, "textDocument/prepareCallHierarchy", params, function(err, result, ctx)
@@ -33,7 +32,7 @@ end
 
 function M.collect(source_ctx)
   return function(observer)
-    return M.request(source_ctx.bufnr, "callHierarchy/outgoingCalls")
+    return M.request(source_ctx.bufnr, source_ctx.window_id, "callHierarchy/outgoingCalls")
       :next(function(result)
         local to_relative = pathlib.relative_modifier(source_ctx.cwd)
         local path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
