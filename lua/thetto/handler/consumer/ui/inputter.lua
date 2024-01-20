@@ -87,14 +87,9 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
   vim.api.nvim_win_set_cursor(window_id, resume_state.cursor)
 
   closer:setup_autocmd(window_id)
-
-  vim.api.nvim_create_autocmd({ "User" }, {
-    pattern = { "thetto_ctx_deleted_" .. ctx_key },
-    callback = function()
-      _resume_states[ctx_key] = nil
-    end,
-    once = true,
-  })
+  require("thetto.core.context").setup_expire(ctx_key, function()
+    _resume_states[ctx_key] = nil
+  end)
 
   local tbl = {
     _bufnr = bufnr,

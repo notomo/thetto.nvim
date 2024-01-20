@@ -32,6 +32,14 @@ function M.set(ctx_key, fields)
   return ctx
 end
 
+function M.setup_expire(ctx_key, f)
+  vim.api.nvim_create_autocmd({ "User" }, {
+    pattern = { "thetto_ctx_deleted_" .. ctx_key },
+    callback = f,
+    once = true,
+  })
+end
+
 local max_count = 10
 function M._expire_old()
   local ctxs = vim

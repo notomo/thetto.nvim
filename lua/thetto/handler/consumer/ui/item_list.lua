@@ -84,21 +84,16 @@ function M.open(
   require("thetto.handler.consumer.ui.current_dir").apply(window_id, cwd)
 
   closer:setup_autocmd(window_id)
+  require("thetto.core.context").setup_expire(ctx_key, function()
+    _resume_states[ctx_key] = nil
+    _states[ctx_key] = nil
+  end)
 
   vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
     buffer = bufnr,
     callback = function()
       require("thetto").reload(bufnr)
     end,
-  })
-
-  vim.api.nvim_create_autocmd({ "User" }, {
-    pattern = { "thetto_ctx_deleted_" .. ctx_key },
-    callback = function()
-      _resume_states[ctx_key] = nil
-      _states[ctx_key] = nil
-    end,
-    once = true,
   })
 
   vim.api.nvim_exec_autocmds("User", {
