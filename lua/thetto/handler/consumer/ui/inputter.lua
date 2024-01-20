@@ -31,30 +31,25 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/inputter"):format(ctx_key))
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
-  local is_interactive = pipeline:has_source_input()
   local debounces = vim
     .iter(filters)
     :map(function(filter)
       local debounce_ms = filter.debounce_ms or 50
       return require("thetto.lib.debounce").promise(debounce_ms, function(changed_index)
         if not vim.api.nvim_buf_is_valid(bufnr) then
-          return
+          return {}, nil
         end
 
         M._fill_lines(bufnr, filters)
         local inputs = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
 
         local need_source_invalidation = filter and filter.is_source_input
-        local pattern
+        local source_input_pattern
         if need_source_invalidation then
-          pattern = inputs[changed_index]
+          source_input_pattern = inputs[changed_index]
         end
 
-        local source_input = {
-          pattern = pattern,
-          is_interactive = is_interactive,
-        }
-        return require("thetto.core.pipeline_context").new(inputs, source_input)
+        return inputs, source_input_pattern
       end)
     end)
     :totable()

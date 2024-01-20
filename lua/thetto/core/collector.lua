@@ -3,8 +3,8 @@ local consumer_events = require("thetto.core.consumer_events")
 --- @class ThettoCollector
 --- @field _all_items table
 --- @field _source_ctx table
---- @field _pipeline_ctx table
 --- @field _subscription table
+--- @field _inputs table
 --- @field _item_cursor_row integer
 --- @field _consumer ThettoConsumer
 --- @field _pipeline ThettoPipeline
@@ -13,10 +13,7 @@ Collector.__index = Collector
 
 --- @param pipeline ThettoPipeline
 function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr, actions)
-  local source_ctx = require("thetto.core.source_context").new(source, source_bufnr, {
-    is_interactive = pipeline:has_source_input(),
-  })
-  local pipeline_ctx = require("thetto.core.pipeline_context").new({})
+  local source_ctx = require("thetto.core.source_context").new(source, source_bufnr, pipeline:has_source_input(), nil)
 
   local tbl = {
     _source = source,
@@ -27,7 +24,7 @@ function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_
     _source_bufnr = source_bufnr,
 
     _all_items = {},
-    _pipeline_ctx = pipeline_ctx,
+    _inputs = {},
     _source_ctx = source_ctx,
     _subscription = nil,
     _consumer = nil,
@@ -57,12 +54,18 @@ function Collector.start(self)
   return promise, consumer
 end
 
-function Collector.restart(self, consumer)
+--- @param consumer ThettoConsumer
+--- @param source_input_pattern string?
+function Collector.restart(self, consumer, source_input_pattern)
   self:_stop()
 
   self._all_items = {}
-  self._source_ctx =
-    require("thetto.core.source_context").new(self._source, self._source_bufnr, self._pipeline_ctx.source_input)
+  self._source_ctx = require("thetto.core.source_context").new(
+    self._source,
+    self._source_bufnr,
+    self._pipeline:has_source_input(),
+    source_input_pattern
+  )
   local subscriber = self:_create_subscriber()
 
   consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
@@ -119,7 +122,7 @@ function Collector._stop(self)
 end
 
 function Collector._run_pipeline(self)
-  local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._pipeline_ctx, self._all_items)
+  local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._all_items, self._inputs)
   self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
 end
 
@@ -168,14 +171,11 @@ function Collector._create_consumer(self, consumer_factory)
   consumer_factory = consumer_factory or self._consumer_factory
 
   local callbacks = {
-    on_change = function(pipeline_ctx)
-      if not pipeline_ctx then
-        return
-      end
-      self._pipeline_ctx = pipeline_ctx
+    on_change = function(inputs, source_input_pattern)
+      self._inputs = inputs
 
-      if pipeline_ctx.source_input.pattern then
-        return self:restart(self._consumer)
+      if source_input_pattern then
+        return self:restart(self._consumer, source_input_pattern)
       end
       return self:_run_pipeline()
     end,

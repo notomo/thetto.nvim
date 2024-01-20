@@ -18,13 +18,8 @@ local resolve_cwd = function(cwd)
   return cwd
 end
 
-function M.new(source, source_bufnr, source_input)
-  source_input = source_input or {
-    pattern = nil,
-    is_interactive = false,
-  }
-
-  local pattern = source_input.pattern
+function M.new(source, source_bufnr, is_interactive, source_input_pattern)
+  local pattern = source_input_pattern
   if source.get_pattern then
     pattern = source.get_pattern()
   end
@@ -33,7 +28,7 @@ function M.new(source, source_bufnr, source_input)
     cwd = resolve_cwd(source.cwd),
     bufnr = source_bufnr,
     pattern = pattern,
-    interactive = source_input.is_interactive,
+    interactive = is_interactive,
     opts = source.opts,
   }
 end

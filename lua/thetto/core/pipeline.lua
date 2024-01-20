@@ -9,7 +9,7 @@ function M.new(stages)
   return setmetatable(tbl, M)
 end
 
-function M.apply(self, source_ctx, pipeline_ctx, items)
+function M.apply(self, source_ctx, items, inputs)
   local highlights = {}
   local input_index = 1
   for _, stage in ipairs(self._stages) do
@@ -17,7 +17,7 @@ function M.apply(self, source_ctx, pipeline_ctx, items)
     if stage.ignore_input then
       input = ""
     else
-      input = pipeline_ctx.inputs[input_index] or ""
+      input = inputs[input_index] or ""
       input_index = input_index + 1
     end
 
