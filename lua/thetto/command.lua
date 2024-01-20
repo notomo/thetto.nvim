@@ -1,6 +1,6 @@
 local M = {}
 
-local error_handling = function(promise)
+local handle_error = function(promise)
   return promise:catch(function(err)
     if not err then
       return
@@ -11,21 +11,17 @@ end
 
 function M.start(source, raw_opts)
   vim.validate({ source = { source, "table" } })
-  local opts = require("thetto.core.option").new_start_opts(raw_opts)
+  local opts = require("thetto.core.option").new_start_opts(source, raw_opts)
 
-  local stages = opts.pipeline_stages_factory({}, { source = source })
-  local pipeline = require("thetto.core.pipeline").new(stages)
-
-  local actions = vim.tbl_deep_extend("force", source.actions or {}, opts.actions)
   local ctx_key = require("thetto.core.context").new_key()
   local collector = require("thetto.core.collector").new(
     source,
-    pipeline,
+    opts.pipeline,
     ctx_key,
     opts.consumer_factory,
     opts.item_cursor_factory,
     opts.source_bufnr,
-    actions
+    opts.actions
   )
 
   local promise, consumer = collector:start()
@@ -33,10 +29,10 @@ function M.start(source, raw_opts)
     require("thetto.core.context").set(ctx_key, {
       collector = collector,
       consumer = consumer,
-      actions = actions,
+      actions = opts.actions,
     })
   end
-  return error_handling(promise)
+  return handle_error(promise)
 end
 
 function M.reload(bufnr)
@@ -46,7 +42,7 @@ function M.reload(bufnr)
   end
 
   local promise = ctx.collector:restart(ctx.consumer)
-  return error_handling(promise)
+  return handle_error(promise)
 end
 
 function M.resume(raw_opts)
@@ -62,7 +58,7 @@ function M.resume(raw_opts)
 
   local promise, consumer = ctx.collector:replay(opts.consumer_factory, opts.item_cursor_factory)
   ctx:update({ consumer = consumer })
-  return error_handling(promise)
+  return handle_error(promise)
 end
 
 function M.execute(action_item_groups, raw_opts)
