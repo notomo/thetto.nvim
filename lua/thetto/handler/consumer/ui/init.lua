@@ -32,7 +32,7 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, raw_opts)
     sidecar,
     consumer_ctx.item_cursor_row,
     source.highlight,
-    consumer_ctx.source_ctx.cwd,
+    consumer_ctx.source_ctx,
     pipeline,
     opts.insert,
     opts.display_limit,

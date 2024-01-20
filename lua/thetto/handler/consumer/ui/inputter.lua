@@ -79,12 +79,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
     },
   })
 
-  vim.api.nvim_win_call(window_id, function()
-    local ok, result = pcall(require("thetto.lib.file").lcd, cwd)
-    if not ok then
-      vim.notify("[thetto] " .. result, vim.log.levels.WARN)
-    end
-  end)
+  require("thetto.handler.consumer.ui.current_dir").apply(window_id, cwd)
 
   if resume_state.is_insert_mode then
     vim.cmd.startinsert()

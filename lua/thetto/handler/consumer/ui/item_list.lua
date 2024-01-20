@@ -81,12 +81,7 @@ function M.open(
     },
   })
 
-  vim.api.nvim_win_call(window_id, function()
-    local ok, result = pcall(require("thetto.lib.file").lcd, cwd)
-    if not ok then
-      vim.notify("[thetto] " .. result, vim.log.levels.WARN)
-    end
-  end)
+  require("thetto.handler.consumer.ui.current_dir").apply(window_id, cwd)
 
   closer:setup_autocmd(window_id)
 
