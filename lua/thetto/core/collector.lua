@@ -51,20 +51,8 @@ end
 
 function Collector.start(self)
   local subscriber = require("thetto.core.source_subscriber").new(self._source, self._source_ctx)
-
-  local events = {}
-  local skeleton_consumer = self:_create_consumer(function()
-    return require("thetto.handler.consumer.skeleton").new(events)
-  end)
-
-  local promise = self:_start(subscriber, skeleton_consumer)
-
   local consumer = self:_create_consumer()
-  self._consumer = consumer
-  for _, event in ipairs(events) do
-    consumer:consume(unpack(event))
-  end
-
+  local promise = self:_start(subscriber, consumer)
   return promise, consumer
 end
 
