@@ -14,7 +14,7 @@ M.opts = {
   limit = 500,
 }
 
-function M.start(raw_opts)
+function M.setup(raw_opts)
   _opts = vim.tbl_extend("force", M.opts, raw_opts or {})
 
   local group = vim.api.nvim_create_augroup("thetto_file_mru", {})
@@ -22,22 +22,17 @@ function M.start(raw_opts)
     group = group,
     pattern = { "*" },
     callback = function(args)
-      M.add(args.buf, _opts.limit)
+      M._add(args.buf, _opts.limit)
     end,
   })
   vim.api.nvim_create_autocmd(_opts.save_events, {
     group = group,
     pattern = { "*" },
     callback = function()
-      M.save(_opts.file_path)
+      M._save(_opts.file_path)
     end,
     once = true,
   })
-end
-
-function M._data()
-  local paths = filelib.read_lines(_opts.file_path, 0, _opts.limit)
-  return vim.tbl_filter(M.validate, paths)
 end
 
 function M.data()
@@ -46,11 +41,16 @@ function M.data()
   return vim.iter(paths):rev():totable()
 end
 
-function M.validate(path)
+function M._data()
+  local paths = filelib.read_lines(_opts.file_path, 0, _opts.limit)
+  return vim.tbl_filter(M._validate, paths)
+end
+
+function M._validate(path)
   return filelib.readable(path)
 end
 
-function M.add(bufnr, limit)
+function M._add(bufnr, limit)
   if not vim.api.nvim_buf_is_valid(bufnr) then
     return
   end
@@ -60,7 +60,7 @@ function M.add(bufnr, limit)
     return
   end
 
-  if not M.validate(path) then
+  if not M._validate(path) then
     return
   end
 
@@ -72,7 +72,7 @@ function M.add(bufnr, limit)
   table.insert(_paths, path)
 end
 
-function M.save(file_path)
+function M._save(file_path)
   local paths = M._data()
   for _, path in ipairs(_paths) do
     listlib.remove(paths, path)

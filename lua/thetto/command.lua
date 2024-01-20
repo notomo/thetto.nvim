@@ -98,12 +98,13 @@ function M.call_consumer(action_name, opts)
   return ctx.consumer:call(action_name, opts)
 end
 
-function M.setup_store(name, opts)
-  local store, err = require("thetto.core.store").new(name)
-  if err then
-    return require("thetto.vendor.misclib.message").error(err)
+function M.setup_store(name, raw_opts)
+  local store = require("thetto.core.store").new(name)
+  if type(store) == "string" then
+    return require("thetto.vendor.misclib.message").error(store)
   end
-  store.start(opts)
+
+  store.setup(raw_opts)
 end
 
 return M

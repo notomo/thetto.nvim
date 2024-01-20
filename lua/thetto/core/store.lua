@@ -1,41 +1,30 @@
 local modulelib = require("thetto.vendor.misclib.module")
 
+local M = {}
+
 local _stores = {}
 
-local Store = {}
+--- @class ThettoStore
+--- @field data fun():table
+--- @field setup fun(raw_opts:table?)
 
-function Store.new(name)
-  vim.validate({
-    name = { name, "string" },
-  })
-
+--- @return ThettoStore|string
+function M.new(name)
   local store = modulelib.find("thetto.handler.store." .. name)
   if not store then
-    return nil, "not found store: " .. name
+    return "not found store: " .. name
   end
-
-  local tbl = {
-    name = name,
-    _store = store,
-  }
-  local self = setmetatable(tbl, Store)
-
-  _stores[name] = self
-
-  return self, nil
+  _stores[name] = store
+  return store
 end
 
-function Store.new_or_get(name)
-  vim.validate({ name = { name, "string" } })
+--- @return table
+function M.get_data(name)
   local store = _stores[name]
   if store then
-    return store
+    return store.data()
   end
-  return Store.new(name)
+  return {}
 end
 
-function Store.__index(self, k)
-  return rawget(Store, k) or self._store[k]
-end
-
-return Store
+return M

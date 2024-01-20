@@ -1,6 +1,6 @@
 local pathlib = require("thetto.lib.path")
+local filelib = require("thetto.lib.file")
 local listlib = require("thetto.lib.list")
-local Store = require("thetto.core.store")
 local vim = vim
 
 local M = {}
@@ -10,12 +10,7 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local store, err = Store.new_or_get("file/mru")
-  if err ~= nil then
-    return nil, err
-  end
-
-  local paths = store.data()
+  local paths = require("thetto.core.store").get_data("file/mru")
   local buffer_paths = vim
     .iter(vim.fn.range(vim.fn.bufnr("$"), 1, -1))
     :map(function(bufnr)
@@ -25,6 +20,10 @@ function M.collect(source_ctx)
 
       local name = vim.api.nvim_buf_get_name(bufnr)
       if name == "" then
+        return
+      end
+
+      if not filelib.readable(name) then
         return
       end
 
@@ -41,9 +40,6 @@ function M.collect(source_ctx)
 
   return vim
     .iter(paths)
-    :filter(function(path)
-      return store.validate(path)
-    end)
     :map(function(path)
       local relative_path = to_relative(path)
       local value = relative_path:gsub(home, "~")
