@@ -42,7 +42,6 @@ function Collector.start(self)
   local skeleton_consumer = self:_create_consumer(function()
     return require("thetto.handler.consumer.skeleton").new(events)
   end)
-  skeleton_consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
 
   local promise = self:_start(subscriber, skeleton_consumer)
 
