@@ -59,10 +59,16 @@ function M.sorters(self)
     :totable()
 end
 
-function M.has_source_input(self)
-  return vim.iter(self._stages):any(function(stage)
+function M.initial_source_input_pattern(self)
+  local has_source_input = vim.iter(self._stages):any(function(stage)
     return stage.is_source_input
   end)
+
+  if has_source_input then
+    return ""
+  end
+
+  return nil
 end
 
 return M

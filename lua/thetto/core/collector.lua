@@ -13,7 +13,8 @@ Collector.__index = Collector
 
 --- @param pipeline ThettoPipeline
 function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr, actions)
-  local source_ctx = require("thetto.core.source_context").new(source, source_bufnr, pipeline:has_source_input(), nil)
+  local source_ctx =
+    require("thetto.core.source_context").new(source, source_bufnr, pipeline:initial_source_input_pattern())
 
   local tbl = {
     _source = source,
@@ -63,8 +64,7 @@ function Collector.restart(self, consumer, source_input_pattern)
   self._source_ctx = require("thetto.core.source_context").new(
     self._source,
     self._source_bufnr,
-    self._pipeline:has_source_input(),
-    source_input_pattern
+    source_input_pattern or self._pipeline:initial_source_input_pattern()
   )
   local subscriber = self:_create_subscriber()
 
