@@ -232,6 +232,7 @@ function M.redraw_footer(self, source_name, status)
   })
 end
 
+--- @param item_cursor ThettoItemCursor
 function M.apply_item_cursor(self, item_cursor)
   if self._closed then
     return

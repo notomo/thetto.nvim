@@ -1,3 +1,5 @@
+--- @class ThettoUiInputFilters
+--- @field private _input_filters ThettoUiInputFilter[]
 local M = {}
 M.__index = M
 

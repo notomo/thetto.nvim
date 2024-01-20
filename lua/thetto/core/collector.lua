@@ -11,6 +11,7 @@ local consumer_events = require("thetto.core.consumer_events")
 local Collector = {}
 Collector.__index = Collector
 
+--- @param pipeline ThettoPipeline
 function Collector.new(source, pipeline, ctx_key, consumer_factory, item_cursor_factory, source_bufnr, actions)
   local source_ctx = require("thetto.core.source_context").new(source, source_bufnr, {
     is_interactive = pipeline:has_source_input(),

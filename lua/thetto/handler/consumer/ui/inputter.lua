@@ -3,6 +3,7 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @class ThettoUiInputter
 --- @field _closed boolean
 --- @field _input_promise table
+--- @field private _input_filters ThettoUiInputFilters
 local M = {}
 M.__index = M
 
