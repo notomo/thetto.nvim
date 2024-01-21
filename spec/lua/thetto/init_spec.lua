@@ -72,6 +72,13 @@ line2]])
     assert.lines([[
 a1
 a2]])
+
+    thetto.call_consumer("move_to_input")
+    helper.input("b")
+    thetto.call_consumer("move_to_list")
+    assert.lines([[
+ab1
+ab2]])
   end)
 
   it("can sort items", function()

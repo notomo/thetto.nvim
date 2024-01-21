@@ -1,6 +1,7 @@
 local consumer_events = require("thetto.core.consumer_events")
 
 --- @class ThettoCollectorRun
+--- @field source_ctx ThettoSourceContext
 --- @field _pipeline ThettoPipeline
 --- @field _consumer ThettoConsumer
 --- @field private _inputs table
@@ -9,18 +10,20 @@ local consumer_events = require("thetto.core.consumer_events")
 local M = {}
 M.__index = M
 
-function M.new(subscriber, consumer, pipeline, source_ctx, item_cursor_factory, default_kind_name, inputs)
+function M.new(subscriber, consumer, pipeline, source_ctx, item_cursor_factory, source_name, default_kind_name, inputs)
   default_kind_name = default_kind_name or "base"
 
   local tbl = {
+    source_ctx = source_ctx,
+
     _consumer = consumer,
     _pipeline = pipeline,
-    _source_ctx = source_ctx,
     _item_cursor_factory = item_cursor_factory,
+    _source_name = source_name,
     _default_kind_name = default_kind_name,
 
     _all_items = {},
-    _inputs = inputs or {},
+    _inputs = inputs,
   }
   local self = setmetatable(tbl, M)
 
@@ -51,7 +54,7 @@ function M.new(subscriber, consumer, pipeline, source_ctx, item_cursor_factory, 
 end
 
 function M.run_pipeline(self)
-  local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._all_items, self._inputs)
+  local items, pipeline_highlight = self._pipeline:apply(self.source_ctx, self._all_items, self._inputs)
   self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
 end
 
@@ -67,17 +70,18 @@ function M.promise(self)
   return self._promise
 end
 
-function M.restart(self, subscriber, source_name)
+function M.restart(self, subscriber, source_ctx)
   self:stop()
 
-  self._consumer:consume(consumer_events.source_started(source_name, self._source_ctx))
+  self._consumer:consume(consumer_events.source_started(self._source_name, source_ctx))
 
   return M.new(
     subscriber,
     self._consumer,
     self._pipeline,
-    self._source_ctx,
+    source_ctx,
     self._item_cursor_factory,
+    self._source_name,
     self._default_kind_name,
     self._inputs
   )
@@ -95,8 +99,9 @@ function M.resume(self, consumer, item_cursor_factory)
     subscriber,
     consumer,
     self._pipeline,
-    self._source_ctx,
+    self.source_ctx,
     item_cursor_factory,
+    self._source_name,
     self._default_kind_name,
     self._inputs
   )
