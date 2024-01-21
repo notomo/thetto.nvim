@@ -1,17 +1,13 @@
-local consumer_events = require("thetto.core.consumer_events")
-
 --- @class ThettoCollector
---- @field _all_items table
---- @field _source_ctx table
---- @field _subscription table
---- @field _inputs table
---- @field _item_cursor_row integer
---- @field _consumer ThettoConsumer
+--- @field _source_ctx ThettoSourceContext
 --- @field _pipeline ThettoPipeline
+--- @field _current_run ThettoCollectorRun?
+--- @field _item_cursor_row integer
 local Collector = {}
 Collector.__index = Collector
 
 --- @param pipeline ThettoPipeline
+--- @return ThettoCollector
 function Collector.new(
   source,
   pipeline,
@@ -37,14 +33,11 @@ function Collector.new(
     _ctx_key = ctx_key,
     _source_bufnr = source_bufnr,
     _source_window_id = source_window_id,
-
-    _all_items = {},
-    _inputs = {},
-    _source_ctx = source_ctx,
-    _subscription = nil,
-    _consumer = nil,
-    _item_cursor_row = 1,
     _actions = actions,
+
+    _source_ctx = source_ctx,
+    _current_run = nil,
+    _item_cursor_row = 1,
   }
   return setmetatable(tbl, Collector)
 end
@@ -52,16 +45,19 @@ end
 function Collector.start(self)
   local subscriber = require("thetto.core.source_subscriber").new(self._source, self._source_ctx)
   local consumer = self:_create_consumer()
-  local promise = self:_start(subscriber, consumer)
-  return promise, consumer
+  self._current_run = require("thetto.core.collector_run").new(
+    subscriber,
+    consumer,
+    self._pipeline,
+    self._source_ctx,
+    self._item_cursor_factory,
+    self._source.kind_name
+  )
+  return self._current_run:promise(), consumer
 end
 
---- @param consumer ThettoConsumer
 --- @param source_input_pattern string?
-function Collector.restart(self, consumer, source_input_pattern)
-  self:_stop()
-
-  self._all_items = {}
+function Collector.restart(self, source_input_pattern)
   self._source_ctx = require("thetto.core.source_context").new(
     self._source,
     self._source_bufnr,
@@ -69,63 +65,14 @@ function Collector.restart(self, consumer, source_input_pattern)
     source_input_pattern or self._pipeline:initial_source_input_pattern()
   )
   local subscriber = require("thetto.core.source_subscriber").new(self._source, self._source_ctx)
-
-  consumer:consume(consumer_events.source_started(self._source.name, self._source_ctx))
-  return self:_start(subscriber, consumer)
+  self._current_run = self._current_run:restart(subscriber, self._source.name)
+  return self._current_run:promise()
 end
 
-function Collector.replay(self, consumer_factory, item_cursor_factory)
-  item_cursor_factory = item_cursor_factory or self._item_cursor_factory
-
-  self:_stop()
-
-  local all_items = self._all_items
-  local item_cursor = item_cursor_factory(all_items)
-  local subscriber = function(observer)
-    observer:next(all_items)
-    observer:complete()
-  end
-  self._all_items = {}
-
+function Collector.resume(self, consumer_factory, item_cursor_factory)
   local consumer = self:_create_consumer(consumer_factory)
-  return self:_start(subscriber, consumer, item_cursor), consumer
-end
-
-function Collector._start(self, subscriber, consumer, default_item_cursor)
-  self._consumer = consumer
-
-  local default_kind_name = self._source.kind_name or "base"
-  local observable = require("thetto.vendor.misclib.observable").new(subscriber)
-  return require("thetto.vendor.promise").new(function(resolve, reject)
-    self._subscription = observable:subscribe({
-      next = function(items)
-        local count = #self._all_items
-        for i, item in ipairs(items) do
-          item.index = count + i
-          item.kind_name = item.kind_name or default_kind_name
-        end
-        vim.list_extend(self._all_items, items)
-
-        self:_run_pipeline()
-      end,
-      complete = function()
-        local item_cursor = default_item_cursor or self._item_cursor_factory(self._all_items)
-        resolve(self._consumer:consume(consumer_events.source_completed(item_cursor)))
-      end,
-      error = function(err)
-        reject(self._consumer:consume(consumer_events.source_error(err)))
-      end,
-    })
-  end)
-end
-
-function Collector._stop(self)
-  return self._subscription and self._subscription:unsubscribe()
-end
-
-function Collector._run_pipeline(self)
-  local items, pipeline_highlight = self._pipeline:apply(self._source_ctx, self._all_items, self._inputs)
-  self._consumer:consume(consumer_events.items_changed(items, #self._all_items, pipeline_highlight))
+  self._current_run = self._current_run:resume(consumer, item_cursor_factory or self._item_cursor_factory)
+  return self._current_run:promise(), consumer
 end
 
 --- @return ThettoConsumer
@@ -134,18 +81,18 @@ function Collector._create_consumer(self, consumer_factory)
 
   local callbacks = {
     on_change = function(inputs, source_input_pattern)
-      self._inputs = inputs
+      self._current_run:apply_inputs(inputs)
 
       if source_input_pattern then
-        return self:restart(self._consumer, source_input_pattern)
+        return self:restart(source_input_pattern)
       end
-      return self:_run_pipeline()
+      return self._current_run:run_pipeline()
     end,
     on_row_changed = function(row)
       self._item_cursor_row = row
     end,
     on_discard = function()
-      self:_stop()
+      self._current_run:stop()
     end,
   }
   local consumer_ctx = {

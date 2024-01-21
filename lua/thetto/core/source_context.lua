@@ -18,6 +18,14 @@ local resolve_cwd = function(cwd)
   return cwd
 end
 
+--- @class ThettoSourceContext
+--- @field cwd string
+--- @field bufnr integer
+--- @field window_id integer
+--- @field pattern string
+--- @field opts table
+
+--- @return ThettoSourceContext
 function M.new(source, source_bufnr, source_window_id, source_input_pattern)
   local pattern = source_input_pattern
   if not pattern and source.get_pattern then
@@ -29,7 +37,7 @@ function M.new(source, source_bufnr, source_window_id, source_input_pattern)
     bufnr = source_bufnr,
     window_id = source_window_id,
     pattern = pattern or "",
-    opts = source.opts,
+    opts = source.opts or {},
   }
 end
 

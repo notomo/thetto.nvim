@@ -9,6 +9,7 @@ function M.new(stages)
   return setmetatable(tbl, M)
 end
 
+--- @param source_ctx ThettoSourceContext
 function M.apply(self, source_ctx, items, inputs)
   local highlights = {}
   local input_index = 1

@@ -42,7 +42,7 @@ function M.reload(bufnr)
     return require("thetto.vendor.misclib.message").error(ctx)
   end
 
-  local promise = ctx.collector:restart(ctx.consumer)
+  local promise = ctx.collector:restart()
   return handle_error(promise)
 end
 
@@ -57,7 +57,7 @@ function M.resume(raw_opts)
     old_ctx.consumer:call("quit", {})
   end
 
-  local promise, consumer = ctx.collector:replay(opts.consumer_factory, opts.item_cursor_factory)
+  local promise, consumer = ctx.collector:resume(opts.consumer_factory, opts.item_cursor_factory)
   ctx:update({ consumer = consumer })
   return handle_error(promise)
 end
