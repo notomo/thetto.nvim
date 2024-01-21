@@ -27,7 +27,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
-  vim.bo[bufnr].filetype = "thetto-input"
+  vim.bo[bufnr].filetype = "thetto-inputter"
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/inputter"):format(ctx_key))
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
