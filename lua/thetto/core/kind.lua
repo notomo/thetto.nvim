@@ -54,7 +54,7 @@ end
 
 local action_key = function(kind, raw_action_name)
   local action_name
-  if action_name == "default" then
+  if raw_action_name == "default" then
     action_name = kind.default_action
   else
     action_name = raw_action_name
