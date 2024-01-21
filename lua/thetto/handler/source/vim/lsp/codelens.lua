@@ -25,7 +25,7 @@ function M.collect(source_ctx)
   end
 end
 
-M.kind_name = "position"
+M.kind_name = "vim/position"
 
 M.cwd = require("thetto.util.cwd").project()
 

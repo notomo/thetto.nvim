@@ -61,6 +61,6 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.kind_name = "position"
+M.kind_name = "vim/position"
 
 return M

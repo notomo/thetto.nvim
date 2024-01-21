@@ -34,6 +34,6 @@ function M.collect(source_ctx)
     :totable()
 end
 
-M.kind_name = "position"
+M.kind_name = "vim/position"
 
 return M
