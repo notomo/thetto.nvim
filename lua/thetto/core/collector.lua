@@ -42,8 +42,8 @@ function Collector.start(self)
     self._pipeline:initial_source_input_pattern()
   )
 
-  local subscriber = require("thetto.core.source_subscriber").new(self._source, source_ctx)
-  local consumer = self:_create_consumer(source_ctx)
+  local subscriber, source_errored = require("thetto.core.source_subscriber").new(self._source, source_ctx)
+  local consumer = self:_create_consumer(source_ctx, source_errored)
   self._current_run = require("thetto.core.collector_run").new(
     subscriber,
     consumer,
@@ -66,20 +66,21 @@ function Collector.restart(self, source_input_pattern)
     source_input_pattern or self._pipeline:initial_source_input_pattern()
   )
 
-  local subscriber = require("thetto.core.source_subscriber").new(self._source, source_ctx)
+  local subscriber, _ = require("thetto.core.source_subscriber").new(self._source, source_ctx)
   self._current_run = self._current_run:restart(subscriber, source_ctx)
   return self._current_run:promise()
 end
 
 function Collector.resume(self, consumer_factory, item_cursor_factory)
-  local consumer = self:_create_consumer(self._current_run.source_ctx, consumer_factory)
+  local source_errored = self._current_run.source_err ~= nil
+  local consumer = self:_create_consumer(self._current_run.source_ctx, source_errored, consumer_factory)
   self._current_run = self._current_run:resume(consumer, item_cursor_factory or self._item_cursor_factory)
   return self._current_run:promise(), consumer
 end
 
 --- @param source_ctx ThettoSourceContext
 --- @return ThettoConsumer
-function Collector._create_consumer(self, source_ctx, consumer_factory)
+function Collector._create_consumer(self, source_ctx, source_errored, consumer_factory)
   consumer_factory = consumer_factory or self._consumer_factory
 
   local callbacks = {
@@ -101,6 +102,7 @@ function Collector._create_consumer(self, source_ctx, consumer_factory)
   local consumer_ctx = {
     ctx_key = self._ctx_key,
     source_ctx = source_ctx,
+    source_errored = source_errored,
     item_cursor_row = self._item_cursor_row,
   }
   return consumer_factory(consumer_ctx, self._source, self._pipeline, callbacks, self._actions)

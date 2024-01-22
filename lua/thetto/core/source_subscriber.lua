@@ -3,10 +3,12 @@ local M = {}
 function M.new(source, source_ctx)
   local subscriber_or_items, source_err = source.collect(source_ctx)
   if source_err then
+    local source_errored = true
     return function(observer)
       local msg = require("thetto.vendor.misclib.message").wrap(source_err)
       observer:error(msg)
-    end
+    end,
+      source_errored
   end
 
   if type(subscriber_or_items) == "function" then

@@ -55,7 +55,6 @@ function M.consume(self, event_name, ...)
 end
 
 local actions = {}
-
 function M.call(self, action_name)
   local action = actions[action_name]
   if not action then

@@ -158,6 +158,17 @@ line1]])
     helper.go_to_sidecar(" test ")
     assert.current_line("previewed line1")
   end)
+
+  it("echoes warning message without ui if source causes error in early stage", function()
+    local p = thetto.start({
+      collect = function()
+        return nil, "early stage error for test\n"
+      end,
+    })
+    helper.wait(p)
+
+    assert.exists_message("%[thetto%] early stage error for test")
+  end)
 end)
 
 describe("thetto.start() immediate", function()
@@ -290,6 +301,21 @@ line2]])
     assert.lines([[
 line3
 line4]])
+  end)
+
+  it("can resume error", function()
+    local p1 = thetto.start({
+      collect = function()
+        return nil, "early stage error for test\n"
+      end,
+    })
+    helper.wait(p1)
+    vim.cmd.messages("clear")
+
+    local p2 = thetto.resume()
+    helper.wait(p2)
+
+    assert.exists_message("%[thetto%] early stage error for test")
   end)
 end)
 

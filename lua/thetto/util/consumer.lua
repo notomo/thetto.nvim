@@ -11,6 +11,10 @@ function M.ui(raw_opts)
       opts.has_sidecar = require("thetto.core.kind").can_preview(kind)
     end
 
+    if consumer_ctx.source_errored then
+      return require("thetto.handler.consumer.message").new()
+    end
+
     return require("thetto.handler.consumer.ui").new(consumer_ctx, source, pipeline, callbacks, actions, opts)
   end
 end
