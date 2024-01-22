@@ -2,7 +2,11 @@ local helper = require("thetto.test.helper")
 local thetto = helper.require("thetto")
 
 describe("thetto.start() default ui", function()
-  before_each(helper.before_each)
+  local notify = vim.notify
+  before_each(function()
+    helper.before_each()
+    vim.notify = notify
+  end)
   after_each(helper.after_each)
 
   it("shows item list", function()
@@ -160,14 +164,19 @@ line1]])
   end)
 
   it("echoes warning message without ui if source causes error in early stage", function()
+    local messages = {}
+    vim.notify = function(msg)
+      table.insert(messages, msg)
+    end
+
     local p = thetto.start({
       collect = function()
-        return nil, "early stage error for test\n"
+        return nil, "early stage error for test"
       end,
     })
     helper.wait(p)
 
-    assert.exists_message("%[thetto%] early stage error for test")
+    assert.equals("[thetto] early stage error for test", messages[1])
   end)
 end)
 
@@ -304,18 +313,25 @@ line4]])
   end)
 
   it("can resume error", function()
+    local messages = {}
+    vim.notify = function(msg)
+      table.insert(messages, msg)
+    end
+
     local p1 = thetto.start({
       collect = function()
-        return nil, "early stage error for test\n"
+        return nil, "early stage error for test"
       end,
     })
     helper.wait(p1)
-    vim.cmd.messages("clear")
 
     local p2 = thetto.resume()
     helper.wait(p2)
 
-    assert.exists_message("%[thetto%] early stage error for test")
+    assert.is_same({
+      "[thetto] early stage error for test",
+      "[thetto] early stage error for test",
+    }, messages)
   end)
 end)
 
