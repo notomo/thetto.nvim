@@ -216,9 +216,7 @@ describe("thetto.execute()", function()
     })
     helper.wait(p1)
 
-    local items = thetto.get()
-    local item_action_groups = require("thetto.util.action").grouping(items, { action_name = "append" })
-    local p2 = thetto.execute(item_action_groups)
+    local p2 = require("thetto.util.action").execute("append")
     helper.wait(p2)
 
     assert.lines([[line1]])

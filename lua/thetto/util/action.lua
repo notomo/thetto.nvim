@@ -79,4 +79,42 @@ function M.preview(kind_name, item, action_ctx)
   return Kind.get_preview(kind, item, action_ctx)
 end
 
+local execute = function(action_name, raw_grouping_opts, execute_opts, getter)
+  getter = getter or function()
+    return require("thetto").get()
+  end
+  local items, metadata = getter()
+
+  local grouping_opts = vim.tbl_deep_extend("force", {
+    action_name = action_name,
+    actions = metadata.actions,
+  }, raw_grouping_opts or {})
+  local item_action_groups = M.grouping(items, grouping_opts)
+
+  if #item_action_groups == 0 then
+    return
+  end
+
+  return require("thetto").execute(item_action_groups, execute_opts)
+end
+
+function M.execute(action_name, raw_grouping_opts, execute_opts, getter)
+  local result = execute(action_name, raw_grouping_opts, execute_opts, getter)
+  if not result then
+    vim.notify("[thetto] not found action: " .. (action_name or "(default)"), vim.log.levels.WARN)
+    return
+  end
+  return result
+end
+
+function M.execute_with_fallback(action_names, raw_grouping_opts, execute_opts, getter)
+  for _, action_name in ipairs(action_names) do
+    local result = execute(action_name, raw_grouping_opts, execute_opts, getter)
+    if result then
+      return result
+    end
+  end
+  vim.notify("[thetto] not found action: " .. table.concat(action_names, ", "), vim.log.levels.WARN)
+end
+
 return M
