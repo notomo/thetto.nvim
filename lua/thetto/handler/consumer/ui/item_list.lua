@@ -6,6 +6,11 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @field _footer ThettoUiItemListFooter
 --- @field _actions table
 --- @field _pipeline_highlight fun(...)
+--- @field _items table
+--- @field _page integer
+--- @field _display_limit integer
+--- @field _selected_items table
+--- @field _source_ctx ThettoSourceContext
 local M = {}
 M.__index = M
 
@@ -14,7 +19,6 @@ local _ns = vim.api.nvim_create_namespace(_ns_name)
 
 local _selfs = {}
 local _resume_states = {}
-local _states = {}
 
 --- @param sidecar ThettoUiSidecar
 --- @param pipeline ThettoPipeline
@@ -33,28 +37,24 @@ function M.open(
   actions,
   source_name
 )
-  local resume_state = _resume_states[ctx_key] or {
-    has_forcus = not insert,
-    column = 0,
-  }
-  _resume_states[ctx_key] = resume_state
-
-  local state = _states[ctx_key]
+  local state = _resume_states[ctx_key]
     or {
+      has_forcus = not insert,
+      column = 0,
+
       items = {},
       page = 0,
       display_limit = display_limit,
       selected_items = {},
       source_ctx = source_ctx,
     }
-  _states[ctx_key] = state
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
   vim.bo[bufnr].filetype = "thetto"
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/list"):format(ctx_key))
 
-  local window_id = vim.api.nvim_open_win(bufnr, resume_state.has_forcus, {
+  local window_id = vim.api.nvim_open_win(bufnr, state.has_forcus, {
     width = layout.width,
     height = layout.height,
     relative = "editor",
@@ -81,7 +81,6 @@ function M.open(
   closer:setup_autocmd(window_id)
   require("thetto.core.context").setup_expire(ctx_key, function()
     _resume_states[ctx_key] = nil
-    _states[ctx_key] = nil
   end)
 
   vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
@@ -106,16 +105,23 @@ function M.open(
     _sidecar = sidecar,
     _footer = footer,
     _decorator = require("thetto.lib.decorator").factory(_ns_name):create(bufnr, true),
-    _source_highlight = source_highlight or function() end,
     _filters = pipeline:filters(),
-    _pipeline_highlight = function() end,
     _actions = actions,
+
+    _source_highlight = source_highlight or function() end,
+    _pipeline_highlight = function() end,
     _closed = false,
+
+    _items = state.items,
+    _page = state.page,
+    _display_limit = state.display_limit,
+    _selected_items = state.selected_items,
+    _source_ctx = state.source_ctx,
   }, M)
   _selfs[bufnr] = self
 
-  self:redraw_list(state.items)
-  vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, resume_state.column })
+  self:redraw_list(self._items)
+  vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, state.column })
 
   local on_cursor_moved = require("thetto.lib.debounce").promise(100, function()
     if self._closed then
@@ -154,18 +160,15 @@ function M.redraw_list(self, items, all_items_count)
     return
   end
 
-  local state = vim.tbl_extend("keep", {
-    items = items,
-  }, _states[self._ctx_key])
-  _states[self._ctx_key] = state
+  self._items = items
 
-  local items_count = #state.items
-  local page = math.min(state.page, math.floor(items_count / state.display_limit))
+  local items_count = #self._items
+  local page = math.min(self._page, math.floor(items_count / self._display_limit))
 
-  local start_index = 1 + state.display_limit * page
+  local start_index = 1 + self._display_limit * page
   start_index = math.min(items_count, start_index)
 
-  local end_index = state.display_limit * (page + 1)
+  local end_index = self._display_limit * (page + 1)
   end_index = math.min(items_count, end_index)
 
   local index = 1
@@ -210,9 +213,7 @@ function M.apply_item_cursor(self, item_cursor)
 end
 
 function M.update_for_source_highlight(self, source_ctx)
-  local state = _states[self._ctx_key]
-  state.source_ctx = source_ctx
-  _states[self._ctx_key] = state
+  self._source_ctx = source_ctx
 end
 
 function M.update_pipeline_highlight(self, pipeline_highlight)
@@ -220,18 +221,17 @@ function M.update_pipeline_highlight(self, pipeline_highlight)
 end
 
 function M.highlight(self, topline, botline_guess)
-  local state = _states[self._ctx_key]
-  local items = state.items
+  local items = self._items
 
   local displayed_items = {}
   for i = topline + 1, botline_guess + 1, 1 do
     table.insert(displayed_items, items[i])
   end
 
-  self._source_highlight(self._decorator, displayed_items, topline, state.source_ctx)
+  self._source_highlight(self._decorator, displayed_items, topline, self._source_ctx)
   self._pipeline_highlight(self._decorator, displayed_items, topline)
 
-  local selected_items = state.selected_items
+  local selected_items = self._selected_items
   self._decorator:filter("Statement", topline, displayed_items, function(item)
     return selected_items[item.index] ~= nil
   end)
@@ -250,11 +250,16 @@ function M.close(self, current_window_id)
   _selfs[self._bufnr] = nil
 
   local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
-  local resume_state = {
+  _resume_states[self._ctx_key] = {
     has_forcus = current_window_id == self._window_id,
     column = column,
+
+    items = self._items,
+    page = self._page,
+    display_limit = self._display_limit,
+    selected_items = self._selected_items,
+    source_ctx = self._source_ctx,
   }
-  _resume_states[self._ctx_key] = resume_state
 
   self._footer:close()
 
@@ -265,22 +270,18 @@ function M.close(self, current_window_id)
 end
 
 function M._get_row_items(self, s, e)
-  local state = _states[self._ctx_key]
-  return vim.list_slice(state.items, s, e)
+  return vim.list_slice(self._items, s, e)
 end
 
 function M.get_current_item(self)
-  local state = _states[self._ctx_key]
   local row = vim.api.nvim_win_get_cursor(self._window_id)[1]
-  return state.items[row]
+  return self._items[row]
 end
 
 function M.get_items(self)
-  local state = _states[self._ctx_key]
-
   local selected_items = {}
-  for _, item in ipairs(state.items) do
-    local selected_item = state.selected_items[item.index]
+  for _, item in ipairs(self._items) do
+    local selected_item = self._selected_items[item.index]
     if selected_item then
       table.insert(selected_items, selected_item)
     end
@@ -321,29 +322,22 @@ function M.toggle_all_selection(self)
 end
 
 function M._toggle_selection(self, s, e)
-  local state = _states[self._ctx_key]
-
-  local ranged_items = vim.list_slice(state.items, s, e)
+  local ranged_items = vim.list_slice(self._items, s, e)
   for _, item in ipairs(ranged_items) do
     local index = item.index
-    if state.selected_items[index] then
-      state.selected_items[index] = nil
+    if self._selected_items[index] then
+      self._selected_items[index] = nil
     else
-      state.selected_items[index] = item
+      self._selected_items[index] = item
     end
   end
-
-  _states[self._ctx_key] = state
 
   vim.api.nvim__buf_redraw_range(self._bufnr, 0, -1)
 end
 
 function M.increase_display_limit(self, increment)
   increment = increment or 1000
-
-  local state = _states[self._ctx_key]
-  state.display_limit = state.display_limit + increment
-  _states[self._ctx_key] = state
+  self._display_limit = self._display_limit + increment
   self:redraw_list()
 end
 
