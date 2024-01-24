@@ -78,14 +78,14 @@ local handlers = {
     self._item_list:redraw_list(items, all_items_count)
   end),
   --- @param self ThettoUi
-  [consumer_events.all.source_started] = vim.schedule_wrap(function(self, source_name, source_ctx)
+  [consumer_events.all.source_started] = vim.schedule_wrap(function(self, _, source_ctx)
     self._item_list:update_for_source_highlight(source_ctx)
-    self._item_list:redraw_footer(source_name, "running")
+    self._item_list:redraw_footer("running")
   end),
   --- @param self ThettoUi
   [consumer_events.all.source_completed] = vim.schedule_wrap(function(self, item_cursor)
     self._item_list:apply_item_cursor(item_cursor)
-    self._item_list:redraw_footer(nil, "")
+    self._item_list:redraw_footer("")
   end),
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(err, vim.log.levels.ERROR)
