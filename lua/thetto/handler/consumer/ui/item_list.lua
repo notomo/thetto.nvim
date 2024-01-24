@@ -256,6 +256,8 @@ function M.close(self, current_window_id)
   }
   _resume_states[self._ctx_key] = resume_state
 
+  self._footer:close()
+
   require("thetto.vendor.misclib.window").safe_close(self._window_id)
   vim.api.nvim_set_decoration_provider(_ns, {})
 
