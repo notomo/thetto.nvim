@@ -9,7 +9,7 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @field _items table
 --- @field _page integer
 --- @field _display_limit integer
---- @field _selected_items table
+--- @field _selection ThettoUiItemListSelection
 --- @field _source_ctx ThettoSourceContext
 local M = {}
 M.__index = M
@@ -45,7 +45,6 @@ function M.open(
       items = {},
       page = 0,
       display_limit = display_limit,
-      selected_items = {},
       source_ctx = source_ctx,
     }
 
@@ -104,6 +103,7 @@ function M.open(
     _ctx_key = ctx_key,
     _sidecar = sidecar,
     _footer = footer,
+    _selection = require("thetto.handler.consumer.ui.item_list_selection").new(ctx_key, bufnr),
     _decorator = require("thetto.lib.decorator").factory(_ns_name):create(bufnr, true),
     _filters = pipeline:filters(),
     _actions = actions,
@@ -115,7 +115,6 @@ function M.open(
     _items = state.items,
     _page = state.page,
     _display_limit = state.display_limit,
-    _selected_items = state.selected_items,
     _source_ctx = state.source_ctx,
   }, M)
   _selfs[bufnr] = self
@@ -230,11 +229,7 @@ function M.highlight(self, topline, botline_guess)
 
   self._source_highlight(self._decorator, displayed_items, topline, self._source_ctx)
   self._pipeline_highlight(self._decorator, displayed_items, topline)
-
-  local selected_items = self._selected_items
-  self._decorator:filter("Statement", topline, displayed_items, function(item)
-    return selected_items[item.index] ~= nil
-  end)
+  self._selection:highlight(self._decorator, displayed_items, topline)
 end
 
 function M.enter(self)
@@ -257,11 +252,11 @@ function M.close(self, current_window_id)
     items = self._items,
     page = self._page,
     display_limit = self._display_limit,
-    selected_items = self._selected_items,
     source_ctx = self._source_ctx,
   }
 
   self._footer:close()
+  self._selection:close()
 
   require("thetto.vendor.misclib.window").safe_close(self._window_id)
   vim.api.nvim_set_decoration_provider(_ns, {})
@@ -279,19 +274,13 @@ function M.get_current_item(self)
 end
 
 function M.get_items(self)
-  local selected_items = {}
-  for _, item in ipairs(self._items) do
-    local selected_item = self._selected_items[item.index]
-    if selected_item then
-      table.insert(selected_items, selected_item)
-    end
+  local selected_items = self._selection:items(self._items)
+  if #selected_items > 0 then
+    return selected_items
   end
 
-  if #selected_items == 0 then
-    local range = require("thetto.lib.visual_mode").range()
-    return self:_get_row_items(range[1], range[2])
-  end
-  return selected_items
+  local range = require("thetto.lib.visual_mode").range()
+  return self:_get_row_items(range[1], range[2])
 end
 
 function M._redraw_sidecar(self)
@@ -311,28 +300,11 @@ function M._redraw_sidecar(self)
 end
 
 function M.toggle_selection(self)
-  local range = require("thetto.lib.visual_mode").range()
-  self:_toggle_selection(range[1], range[2])
+  self._selection:toggle(self._items)
 end
 
 function M.toggle_all_selection(self)
-  local s = 1
-  local e = vim.api.nvim_buf_line_count(self._bufnr)
-  self:_toggle_selection(s, e)
-end
-
-function M._toggle_selection(self, s, e)
-  local ranged_items = vim.list_slice(self._items, s, e)
-  for _, item in ipairs(ranged_items) do
-    local index = item.index
-    if self._selected_items[index] then
-      self._selected_items[index] = nil
-    else
-      self._selected_items[index] = item
-    end
-  end
-
-  vim.api.nvim__buf_redraw_range(self._bufnr, 0, -1)
+  self._selection:toggle_all(self._items)
 end
 
 function M.increase_display_limit(self, increment)
