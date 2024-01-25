@@ -3,12 +3,14 @@ local M = {}
 M.__index = M
 
 function M.new()
+  local original_window_id = vim.api.nvim_get_current_win()
   local group_name = "thetto_ui_" .. tostring(vim.uv.hrtime())
   local group = vim.api.nvim_create_augroup(group_name, {})
   local pattern = "_thetto_closed_" .. group_name
   local tbl = {
     _group = group,
     _pattern = pattern,
+    _original_window_id = original_window_id,
   }
   return setmetatable(tbl, M)
 end
@@ -68,6 +70,9 @@ function M.setup(self, handler)
     callback = function()
       handler()
       vim.api.nvim_clear_autocmds({ group = self._group })
+      if vim.api.nvim_win_is_valid(self._original_window_id) then
+        vim.api.nvim_set_current_win(self._original_window_id)
+      end
     end,
     once = true,
   })
