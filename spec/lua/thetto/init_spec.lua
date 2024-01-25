@@ -331,6 +331,49 @@ line4]])
       "[thetto] early stage error for test",
     }, messages)
   end)
+
+  it("can resume by specified offset with wrap", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+    })
+    helper.wait(p1)
+    thetto.call_consumer("move_to_list")
+    thetto.call_consumer("quit")
+
+    local p2 = thetto.start({
+      collect = function()
+        return {
+          { value = "line3" },
+          { value = "line4" },
+        }
+      end,
+    })
+    helper.wait(p2)
+    thetto.call_consumer("move_to_list")
+    thetto.call_consumer("quit")
+
+    local p3 = thetto.resume()
+    helper.wait(p3)
+
+    local p4 = thetto.resume({ offset = -1 })
+    helper.wait(p4)
+
+    assert.lines([[
+line1
+line2]])
+
+    local p5 = thetto.resume({ offset = -1 })
+    helper.wait(p5)
+
+    assert.lines([[
+line3
+line4]])
+  end)
 end)
 
 describe("thetto.reload()", function()
