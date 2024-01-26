@@ -63,7 +63,8 @@ function Collector.restart(self, source_input_pattern)
     self._source,
     self._source_bufnr,
     self._source_window_id,
-    source_input_pattern or self._pipeline:initial_source_input_pattern()
+    source_input_pattern or self._pipeline:initial_source_input_pattern(),
+    self._current_run.source_ctx.store_to_restart
   )
 
   local subscriber, _ = require("thetto.core.source_subscriber").new(self._source, source_ctx)

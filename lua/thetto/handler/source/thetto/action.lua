@@ -1,7 +1,13 @@
 local M = {}
 
-function M.collect()
-  local items, metadata = require("thetto").get()
+--- @param source_ctx ThettoSourceContext
+function M.collect(source_ctx)
+  if not source_ctx.store_to_restart then
+    local items, metadata = require("thetto").get()
+    source_ctx.store_to_restart = { items, metadata }
+  end
+
+  local items, metadata = unpack(source_ctx.store_to_restart)
   local item = items[1]
 
   local kind_name
