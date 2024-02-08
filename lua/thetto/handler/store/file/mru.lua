@@ -78,7 +78,7 @@ function M._save(file_path)
     listlib.remove(paths, path)
   end
   vim.list_extend(paths, _paths)
-  paths = vim.list_slice(paths, 0, _opts.limit)
+  paths = vim.list_slice(paths, #paths - _opts.limit, #paths)
 
   filelib.write_lines(file_path, paths)
 end
