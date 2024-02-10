@@ -2,8 +2,9 @@ local vim = vim
 
 local M = {}
 
+local fs_access = vim.uv.fs_access
 function M.readable(file_path)
-  return vim.fn.filereadable(file_path) ~= 0
+  return fs_access(file_path, "R")
 end
 
 function M.create_if_need(file_path)
