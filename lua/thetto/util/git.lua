@@ -201,12 +201,12 @@ function M.compare(git_root, path_before, revision_before, path_after, revision_
     local before_buffer_path, after_buffer_path = unpack(result)
     require("thetto.lib.buffer").open_scratch_tab()
 
-    vim.cmd.edit(before_buffer_path)
+    vim.cmd.edit(require("thetto.lib.file").escape(before_buffer_path))
     vim.cmd.diffthis()
     local before_winbar = vim.wo.winbar
     local before_window_id = vim.api.nvim_get_current_win()
 
-    vim.cmd.vsplit({ args = { after_buffer_path }, mods = { split = "belowright" } })
+    vim.cmd.vsplit({ args = { require("thetto.lib.file").escape(after_buffer_path) }, mods = { split = "belowright" } })
     vim.cmd.diffthis()
 
     local after_winbar = vim.wo.winbar
