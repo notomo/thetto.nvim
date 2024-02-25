@@ -72,6 +72,9 @@ end
 --- @return ThettoContext|string
 function M.get(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return "invalid buffer: " .. tostring(bufnr)
+  end
 
   local path = vim.api.nvim_buf_get_name(bufnr)
   local ctx_key = path:match("^thetto://([^/]+)/")
