@@ -30,9 +30,7 @@ end
 
 function M.apply_source()
   return function(current_stages, opts)
-    local modify = opts.source.modify_pipeline or function(stages, _)
-      return stages
-    end
+    local modify = opts.source.modify_pipeline or M.pass_through()
     return modify(current_stages, opts)
   end
 end
@@ -52,6 +50,12 @@ function M.append(stages)
     vim.list_extend(new_stages, current_stages)
     vim.list_extend(new_stages, stages)
     return new_stages
+  end
+end
+
+function M.pass_through()
+  return function(stages, _)
+    return stages
   end
 end
 
