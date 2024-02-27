@@ -29,12 +29,18 @@ function M.action_echo(items)
   end
 end
 
-M.opts.yank = { key = "value", register = "+" }
+M.opts.yank = {
+  key = "value",
+  register = "+",
+  convert = function(values)
+    return values
+  end,
+}
 function M.action_yank(items, action_ctx)
   local values = vim.tbl_map(function(item)
     return item[action_ctx.opts.key]
   end, items)
-  local value = table.concat(values, "\n")
+  local value = table.concat(action_ctx.opts.convert(values), "\n")
   if value ~= "" then
     vim.fn.setreg(action_ctx.opts.register, value)
     require("thetto.vendor.misclib.message").info("yank: " .. value)
