@@ -5,6 +5,10 @@ local setup_highlight_groups = function()
       fg = vim.api.nvim_get_hl(0, { name = "Comment" }).fg,
       bg = vim.api.nvim_get_hl(0, { name = "NormalFloat" }).bg,
     }),
+    ThettoUiItemListTitle = highlightlib.define("ThettoUiSidecarTitle", {
+      fg = vim.api.nvim_get_hl(0, { name = "Comment" }).fg,
+      bg = vim.api.nvim_get_hl(0, { name = "NormalFloat" }).bg,
+    }),
     ThettoUiItemListFooter = highlightlib.link("ThettoUiItemListFooter", "StatusLine"),
     ThettoUiAboveBorder = highlightlib.define("ThettoUiAboveBorder", {
       fg = vim.api.nvim_get_hl(0, { name = "Comment" }).fg,

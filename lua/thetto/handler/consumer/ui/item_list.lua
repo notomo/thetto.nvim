@@ -61,6 +61,8 @@ function M.open(
     col = layout.column,
     external = false,
     style = "minimal",
+    title = { { (" %s "):format(vim.fn.fnamemodify(cwd, ":~")), hl_groups.ThettoUiItemListTitle } },
+    title_pos = "center",
     border = {
       { " ", hl_groups.ThettoUiBorder },
       { layout.border_char, hl_groups.ThettoUiAboveBorder },
