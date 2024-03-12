@@ -74,6 +74,7 @@ function M.open(
       { " ", hl_groups.ThettoUiBorder },
     },
   })
+  vim.wo[window_id].winfixbuf = true
   local footer = require("thetto.handler.consumer.ui.item_list_footer").new(window_id, ctx_key, source_name, pipeline)
   footer:redraw()
 
