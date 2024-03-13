@@ -190,4 +190,6 @@ function M.get_preview(item, action_ctx)
   return promise, { raw_bufnr = bufnr }
 end
 
+M.default_action = "open"
+
 return M

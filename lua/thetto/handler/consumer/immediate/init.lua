@@ -6,6 +6,9 @@ M.__index = M
 
 local default_opts = {
   action_name = nil,
+  is_valid = function(_)
+    return true
+  end,
 }
 
 function M.new(consumer_ctx, callbacks, actions, raw_opts)
@@ -13,6 +16,7 @@ function M.new(consumer_ctx, callbacks, actions, raw_opts)
   local tbl = {
     _all_items = {},
     _action_name = opts.action_name,
+    _is_valid = opts.is_valid,
     _actions = actions,
     _item_cursor_row = consumer_ctx.item_cursor_row,
     _on_row_changed = callbacks.on_row_changed,
@@ -31,10 +35,14 @@ local handlers = {
   --- @param item_cursor ThettoItemCursor
   [consumer_events.all.source_completed] = function(self, item_cursor)
     local row = item_cursor:apply(self._item_cursor_row, #self._all_items)
+    local item = self._all_items[row]
+    if not self._is_valid(item) then
+      return require("thetto.vendor.promise").resolve()
+    end
+
     self._item_cursor_row = row
     self._on_row_changed(row)
 
-    local item = self._all_items[row]
     local action_item_groups = require("thetto.util.action").grouping({ item }, {
       action_name = self._action_name,
       actions = self._actions,
