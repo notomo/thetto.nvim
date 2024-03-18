@@ -53,6 +53,13 @@ function M.open(
   vim.bo[bufnr].filetype = "thetto"
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/list"):format(ctx_key))
 
+  local path = vim.fn.fnamemodify(cwd, ":~")
+  local trim_length = vim.fn.strchars(path) - layout.width
+  if 0 < trim_length then
+    path = ".." .. vim.fn.strpart(path, trim_length + 4 * 2)
+  end
+  local title = (" %s "):format(path)
+
   local window_id = vim.api.nvim_open_win(bufnr, state.has_forcus, {
     width = layout.width,
     height = layout.height,
@@ -61,7 +68,7 @@ function M.open(
     col = layout.column,
     external = false,
     style = "minimal",
-    title = { { (" %s "):format(vim.fn.fnamemodify(cwd, ":~")), hl_groups.ThettoUiItemListTitle } },
+    title = { { title, hl_groups.ThettoUiItemListTitle } },
     title_pos = "center",
     border = {
       { " ", hl_groups.ThettoUiBorder },
