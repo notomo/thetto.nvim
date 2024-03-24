@@ -146,6 +146,12 @@ function M.open(
       on_cursor_moved()
     end,
   })
+  vim.api.nvim_create_autocmd({ "WinEnter" }, {
+    buffer = bufnr,
+    callback = function()
+      vim.cmd.stopinsert()
+    end,
+  })
 
   vim.api.nvim_set_decoration_provider(_ns, {})
   vim.api.nvim_set_decoration_provider(_ns, {
@@ -244,7 +250,6 @@ end
 
 function M.enter(self)
   require("thetto.vendor.misclib.window").safe_enter(self._window_id)
-  vim.cmd.stopinsert()
 end
 
 function M.close(self, current_window_id)
