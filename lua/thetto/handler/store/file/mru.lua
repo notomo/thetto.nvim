@@ -5,7 +5,6 @@ local vim = vim
 
 local M = {}
 
-local _paths = {}
 local _opts = {}
 
 M.opts = {
@@ -35,15 +34,21 @@ function M.setup(raw_opts)
   })
 end
 
-function M.data()
-  local paths = M._data()
-  vim.list_extend(paths, _paths)
-  return vim.iter(paths):rev():totable()
-end
+local cache = setmetatable({}, {
+  __index = function(tbl, key)
+    local value = rawget(tbl, key)
+    if value then
+      return value
+    end
+    local paths = filelib.read_lines(_opts.file_path, 0, _opts.limit)
+    tbl[key] = paths
+    return rawget(tbl, key)
+  end,
+})
 
-function M._data()
-  local paths = filelib.read_lines(_opts.file_path, 0, _opts.limit)
-  return vim.tbl_filter(M._validate, paths)
+function M.data()
+  local paths = vim.tbl_filter(M._validate, cache.paths)
+  return vim.iter(paths):rev():totable()
 end
 
 function M._validate(path)
@@ -64,23 +69,19 @@ function M._add(bufnr, limit)
     return
   end
 
-  local removed = listlib.remove(_paths, path)
-  if not removed and #_paths > limit then
-    table.remove(_paths, 1)
+  local paths = cache.paths
+  local removed = listlib.remove(paths, path)
+  if not removed and #paths > limit then
+    table.remove(paths, 1)
   end
 
-  table.insert(_paths, path)
+  table.insert(paths, path)
 end
 
 function M._save(file_path)
-  local paths = M._data()
-  for _, path in ipairs(_paths) do
-    listlib.remove(paths, path)
-  end
-  vim.list_extend(paths, _paths)
-  paths = vim.list_slice(paths, #paths - _opts.limit, #paths)
-
-  filelib.write_lines(file_path, paths)
+  local paths = cache.paths
+  local sliced = vim.list_slice(paths, #paths - _opts.limit, #paths)
+  filelib.write_lines(file_path, sliced)
 end
 
 return M
