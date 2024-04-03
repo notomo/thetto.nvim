@@ -11,6 +11,10 @@ function M.collect(source_ctx)
   local cmd = { "git", "--no-pager", "stash", "list", "--pretty=format:%gD %s" }
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
     local stash_name = output:match("^(%S+)")
+    if not stash_name then
+      return
+    end
+
     return {
       value = output,
       stash_name = stash_name,
