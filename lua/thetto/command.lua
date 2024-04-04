@@ -74,7 +74,8 @@ function M.execute(action_item_groups, raw_opts)
     ctx.consumer:call("quit", {})
   end
 
-  return require("thetto.core.executor").execute(action_item_groups)
+  local promise = require("thetto.core.executor").execute(action_item_groups)
+  return handle_error(promise)
 end
 
 function M.get()
