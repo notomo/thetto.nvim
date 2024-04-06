@@ -103,6 +103,9 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
     on_lines = function(_, _, _, changed_row)
       local changed_index = changed_row + 1
       local debounce = debounces[changed_index]
+      if not debounce then
+        return
+      end
       self._input_promise = debounce(changed_index):next(function(...)
         return on_change(...)
       end)
