@@ -2,6 +2,7 @@
 --- @field collector ThettoCollector
 --- @field consumer ThettoConsumer
 --- @field private _fields table
+--- @field private _used_at integer
 local M = {}
 M.__index = function(tbl, k)
   local v = rawget(tbl._fields, k)
@@ -104,13 +105,12 @@ function M.resume(offset)
   end)
 
   if #ctxs == 0 then
-    return nil
+    return nil, nil
   end
 
   if offset == 0 then
     local ctx = ctxs[1]
-    ctx._used_at = now()
-    return ctx
+    return ctx, nil
   end
 
   local current = M.get()
@@ -131,12 +131,15 @@ function M.resume(offset)
   end
 
   local ctx = ctxs[wrapped_index]
-  ctx._used_at = now()
   return ctx, current
 end
 
 function M.update(self, fields)
   self._fields = vim.tbl_extend("force", self._fields, fields)
+end
+
+function M.update_used_at(self)
+  self._used_at = now()
 end
 
 function M.new_key()

@@ -54,6 +54,7 @@ function M.resume(raw_opts)
     return
   end
   if old_ctx then
+    -- don't call update_used_at() to loop resume()
     old_ctx.consumer:call("quit", {})
   end
 
@@ -71,6 +72,7 @@ function M.execute(action_item_groups, raw_opts)
       return require("thetto.vendor.misclib.message").error(ctx)
     end
 
+    ctx:update_used_at()
     ctx.consumer:call("quit", {})
   end
 
@@ -95,6 +97,10 @@ function M.call_consumer(action_name, opts)
   local ctx = require("thetto.core.context").get()
   if type(ctx) == "string" then
     return require("thetto.vendor.misclib.message").error(ctx)
+  end
+
+  if action_name == "quit" then
+    ctx:update_used_at()
   end
 
   return ctx.consumer:call(action_name, opts)
