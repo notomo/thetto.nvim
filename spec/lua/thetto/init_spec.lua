@@ -167,6 +167,24 @@ line1]])
     assert.current_line("previewed line1")
   end)
 
+  it("can close even if not can_resume", function()
+    local p = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+          { value = "line3" },
+        }
+      end,
+      can_resume = false,
+    })
+    helper.wait(p)
+
+    thetto.quit()
+
+    assert.window_count(1)
+  end)
+
   it("echoes warning message without ui if source causes error in early stage", function()
     local messages = {}
     vim.notify = function(msg)
@@ -242,7 +260,7 @@ describe("thetto.call_consumer()", function()
     })
     helper.wait(p)
 
-    thetto.call_consumer("quit")
+    thetto.quit()
 
     assert.window_count(1)
   end)
@@ -264,7 +282,7 @@ describe("thetto.resume()", function()
     helper.wait(p1)
 
     thetto.call_consumer("move_to_list")
-    thetto.call_consumer("quit")
+    thetto.quit()
 
     local p2 = thetto.resume()
     helper.wait(p2)
@@ -285,7 +303,7 @@ line2]])
     })
     helper.wait(p1)
 
-    thetto.call_consumer("quit")
+    thetto.quit()
 
     local p2 = thetto.start({
       collect = function()
@@ -347,7 +365,7 @@ line4]])
     })
     helper.wait(p1)
     thetto.call_consumer("move_to_list")
-    thetto.call_consumer("quit")
+    thetto.quit()
 
     local p2 = thetto.start({
       collect = function()
@@ -359,7 +377,7 @@ line4]])
     })
     helper.wait(p2)
     thetto.call_consumer("move_to_list")
-    thetto.call_consumer("quit")
+    thetto.quit()
 
     local p3 = thetto.resume()
     helper.wait(p3)

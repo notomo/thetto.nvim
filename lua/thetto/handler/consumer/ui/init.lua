@@ -148,4 +148,12 @@ function Ui.get_items(self)
   return self._item_list:get_items()
 end
 
+function Ui.quit_fallback()
+  local filetype = vim.bo.filetype
+  if filetype ~= "thetto" and filetype ~= "thetto-inputter" then
+    return
+  end
+  vim.api.nvim_win_close(0, true)
+end
+
 return Ui

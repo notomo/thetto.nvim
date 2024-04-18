@@ -24,6 +24,10 @@ function M.call_consumer(action_name, opts)
   return require("thetto.command").call_consumer(action_name, opts)
 end
 
+function M.quit()
+  return require("thetto.command").quit()
+end
+
 function M.setup_store(name, opts)
   require("thetto.command").setup_store(name, opts)
 end

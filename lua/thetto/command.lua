@@ -67,13 +67,7 @@ function M.execute(action_item_groups, raw_opts)
   local opts = require("thetto.core.option").new_execute_opts(raw_opts)
 
   if opts.quit then
-    local ctx = require("thetto.core.context").get()
-    if type(ctx) == "string" then
-      return require("thetto.vendor.misclib.message").error(ctx)
-    end
-
-    ctx:update_used_at()
-    ctx.consumer:call("quit", {})
+    M.quit()
   end
 
   local promise = require("thetto.core.executor").execute(action_item_groups)
@@ -98,12 +92,18 @@ function M.call_consumer(action_name, opts)
   if type(ctx) == "string" then
     return require("thetto.vendor.misclib.message").error(ctx)
   end
+  return ctx.consumer:call(action_name, opts)
+end
 
-  if action_name == "quit" then
-    ctx:update_used_at()
+function M.quit()
+  local ctx = require("thetto.core.context").get()
+  if type(ctx) == "string" then
+    return require("thetto.handler.consumer.ui").quit_fallback()
   end
 
-  return ctx.consumer:call(action_name, opts)
+  ctx:update_used_at()
+
+  return ctx.consumer:call("quit", {})
 end
 
 function M.setup_store(name, raw_opts)

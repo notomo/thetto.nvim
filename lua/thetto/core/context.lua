@@ -85,7 +85,7 @@ function M.get(bufnr)
 
   local ctx = _ctx_map[ctx_key]
   if not ctx then
-    return "context is expired: " .. path
+    return "not found context: " .. path
   end
 
   return ctx
