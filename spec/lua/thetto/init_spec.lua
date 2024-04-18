@@ -125,9 +125,13 @@ line1]])
           { value = "line1" },
           { value = "line2" },
           { value = "line3" },
+          { value = "line4" },
         }
       end,
     }, {
+      pipeline_stages_factory = require("thetto.util.pipeline").list({
+        require("thetto.util.sorter").field_by_name("value", true),
+      }),
       item_cursor_factory = require("thetto.util.item_cursor").search(function(item)
         return item.value == "line2"
       end),

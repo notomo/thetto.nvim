@@ -11,7 +11,7 @@ local consumer_events = require("thetto.core.consumer_events")
 local M = {}
 M.__index = M
 
-function M.new(subscriber, consumer, pipeline, source_ctx, item_cursor_factory, source_name, default_kind_name, inputs)
+function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_kind_name, inputs)
   default_kind_name = default_kind_name or "base"
 
   local tbl = {
@@ -20,7 +20,6 @@ function M.new(subscriber, consumer, pipeline, source_ctx, item_cursor_factory, 
 
     _consumer = consumer,
     _pipeline = pipeline,
-    _item_cursor_factory = item_cursor_factory,
     _source_name = source_name,
     _default_kind_name = default_kind_name,
 
@@ -43,8 +42,7 @@ function M.new(subscriber, consumer, pipeline, source_ctx, item_cursor_factory, 
         self:run_pipeline()
       end,
       complete = function()
-        local item_cursor = item_cursor_factory(self._all_items)
-        resolve(self._consumer:consume(consumer_events.source_completed(item_cursor)))
+        resolve(self._consumer:consume(consumer_events.source_completed()))
       end,
       error = function(err)
         self.source_err = err
@@ -83,14 +81,13 @@ function M.restart(self, subscriber, source_ctx)
     self._consumer,
     self._pipeline,
     source_ctx,
-    self._item_cursor_factory,
     self._source_name,
     self._default_kind_name,
     self._inputs
   )
 end
 
-function M.resume(self, consumer, item_cursor_factory)
+function M.resume(self, consumer)
   self:stop()
 
   local subscriber = function(observer)
@@ -107,7 +104,6 @@ function M.resume(self, consumer, item_cursor_factory)
     consumer,
     self._pipeline,
     self.source_ctx,
-    item_cursor_factory,
     self._source_name,
     self._default_kind_name,
     self._inputs

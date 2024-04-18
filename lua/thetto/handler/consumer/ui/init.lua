@@ -13,7 +13,7 @@ local default_opts = {
 }
 
 --- @param pipeline ThettoPipeline
-function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, raw_opts)
+function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, item_cusor_factory, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
 
   local filters = pipeline:filters()
@@ -37,7 +37,8 @@ function Ui.new(consumer_ctx, source, pipeline, callbacks, actions, raw_opts)
     opts.insert,
     opts.display_limit,
     actions,
-    source.name
+    source.name,
+    item_cusor_factory
   )
 
   local inputter = require("thetto.handler.consumer.ui.inputter").open(
@@ -83,8 +84,8 @@ local handlers = {
     self._item_list:redraw_footer("running")
   end),
   --- @param self ThettoUi
-  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self, item_cursor)
-    self._item_list:apply_item_cursor(item_cursor)
+  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
+    self._item_list:apply_item_cursor()
     self._item_list:redraw_footer("")
   end),
   [consumer_events.all.source_error] = function(_, err)

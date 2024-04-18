@@ -11,7 +11,7 @@ local default_opts = {
   end,
 }
 
-function M.new(consumer_ctx, callbacks, actions, raw_opts)
+function M.new(consumer_ctx, callbacks, actions, item_cursor_factory, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
@@ -19,6 +19,7 @@ function M.new(consumer_ctx, callbacks, actions, raw_opts)
     _is_valid = opts.is_valid,
     _actions = actions,
     _item_cursor_row = consumer_ctx.item_cursor_row,
+    _item_cursor_factory = item_cursor_factory,
     _on_row_changed = callbacks.on_row_changed,
   }
   return setmetatable(tbl, M)
@@ -32,8 +33,8 @@ local handlers = {
     self._all_items = items
   end,
   --- @param self ThettoImmediate
-  --- @param item_cursor ThettoItemCursor
-  [consumer_events.all.source_completed] = function(self, item_cursor)
+  [consumer_events.all.source_completed] = function(self)
+    local item_cursor = self._item_cursor_factory(self._all_items)
     local row = item_cursor:apply(self._item_cursor_row, #self._all_items)
     local item = self._all_items[row]
     if not self._is_valid(item) then

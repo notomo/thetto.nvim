@@ -49,7 +49,6 @@ function Collector.start(self)
     consumer,
     self._pipeline,
     source_ctx,
-    self._item_cursor_factory,
     self._source.name,
     self._source.kind_name,
     {}
@@ -74,15 +73,17 @@ end
 
 function Collector.resume(self, consumer_factory, item_cursor_factory)
   local source_errored = self._current_run.source_err ~= nil
-  local consumer = self:_create_consumer(self._current_run.source_ctx, source_errored, consumer_factory)
-  self._current_run = self._current_run:resume(consumer, item_cursor_factory or self._item_cursor_factory)
+  local consumer =
+    self:_create_consumer(self._current_run.source_ctx, source_errored, consumer_factory, item_cursor_factory)
+  self._current_run = self._current_run:resume(consumer)
   return self._current_run:promise(), consumer
 end
 
 --- @param source_ctx ThettoSourceContext
 --- @return ThettoConsumer
-function Collector._create_consumer(self, source_ctx, source_errored, consumer_factory)
+function Collector._create_consumer(self, source_ctx, source_errored, consumer_factory, item_cursor_factory)
   consumer_factory = consumer_factory or self._consumer_factory
+  item_cursor_factory = item_cursor_factory or self._item_cursor_factory
 
   local callbacks = {
     on_change = function(inputs, source_input_pattern)
@@ -106,7 +107,7 @@ function Collector._create_consumer(self, source_ctx, source_errored, consumer_f
     source_errored = source_errored,
     item_cursor_row = self._item_cursor_row,
   }
-  return consumer_factory(consumer_ctx, self._source, self._pipeline, callbacks, self._actions)
+  return consumer_factory(consumer_ctx, self._source, self._pipeline, callbacks, self._actions, item_cursor_factory)
 end
 
 return Collector

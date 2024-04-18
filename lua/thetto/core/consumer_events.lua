@@ -22,9 +22,8 @@ function M.source_started(source_name, source_ctx)
   return events.source_started, source_name, source_ctx
 end
 
---- @param item_cursor table
-function M.source_completed(item_cursor)
-  return events.source_completed, item_cursor
+function M.source_completed()
+  return events.source_completed
 end
 
 --- @param err string

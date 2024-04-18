@@ -10,6 +10,7 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @field _page integer
 --- @field _display_limit integer
 --- @field _selection ThettoUiItemListSelection
+--- @field _item_cursor_factory ThettoItemCursorFactory
 --- @field _source_ctx ThettoSourceContext
 local M = {}
 M.__index = M
@@ -35,7 +36,8 @@ function M.open(
   insert,
   display_limit,
   actions,
-  source_name
+  source_name,
+  item_cursor_factory
 )
   local state = _resume_states[ctx_key]
     or {
@@ -126,6 +128,7 @@ function M.open(
     _page = state.page,
     _display_limit = state.display_limit,
     _source_ctx = state.source_ctx,
+    _item_cursor_factory = item_cursor_factory,
   }, M)
   _selfs[bufnr] = self
 
@@ -216,12 +219,12 @@ function M.redraw_footer(self, status, start_index, end_index, all_items_count)
   self._footer:redraw(status, start_index, end_index, all_items_count)
 end
 
---- @param item_cursor ThettoItemCursor
-function M.apply_item_cursor(self, item_cursor)
+function M.apply_item_cursor(self)
   if self._closed then
     return
   end
 
+  local item_cursor = self._item_cursor_factory(self._items)
   local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
   row = item_cursor:apply(row, vim.api.nvim_buf_line_count(self._bufnr))
   vim.api.nvim_win_set_cursor(self._window_id, { row, column })

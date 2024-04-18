@@ -1,3 +1,5 @@
+--- @alias ThettoItemCursorFactory fun(items:table[]):ThettoItemCursor
+
 --- @class ThettoItemCursor
 local M = {}
 M.__index = M
