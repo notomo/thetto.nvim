@@ -15,9 +15,12 @@ function M.action_toggle_stage(items)
   return require("thetto.vendor.promise")
     .resolve()
     :next(function()
-      local will_be_stage = vim.tbl_filter(function(item)
-        return item.index_status ~= "staged"
-      end, items)
+      local will_be_stage = vim
+        .iter(items)
+        :filter(function(item)
+          return item.index_status ~= "staged"
+        end)
+        :totable()
       if #will_be_stage == 0 then
         return nil
       end
@@ -28,9 +31,12 @@ function M.action_toggle_stage(items)
       }, { cwd = to_git_root(items) })
     end)
     :next(function()
-      local will_be_unstage = vim.tbl_filter(function(item)
-        return item.index_status == "staged"
-      end, items)
+      local will_be_unstage = vim
+        .iter(items)
+        :filter(function(item)
+          return item.index_status == "staged"
+        end)
+        :totable()
       if #will_be_unstage == 0 then
         return nil
       end
@@ -55,12 +61,18 @@ function M.action_discard(items)
   local paths = to_paths(items)
   local git_root = to_git_root(items)
 
-  local restore_targets = vim.tbl_filter(function(item)
-    return item.index_status ~= "untracked"
-  end, items)
-  local delete_targets = vim.tbl_filter(function(item)
-    return item.index_status == "untracked"
-  end, items)
+  local restore_targets = vim
+    .iter(items)
+    :filter(function(item)
+      return item.index_status ~= "untracked"
+    end)
+    :totable()
+  local delete_targets = vim
+    .iter(items)
+    :filter(function(item)
+      return item.index_status == "untracked"
+    end)
+    :totable()
   return require("thetto.util.input")
     .promise({
       prompt = "Reset (y/n):\n" .. table.concat(paths, "\n"),

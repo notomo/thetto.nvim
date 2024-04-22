@@ -7,9 +7,12 @@ local to_texts = function(stage_ctx, ignorecase)
   if ignorecase then
     input = stage_ctx.input:lower()
   end
-  return vim.tbl_filter(function(text)
-    return text ~= ""
-  end, vim.split(input, "%s"))
+  return vim
+    .iter(vim.split(input, "%s"))
+    :filter(function(text)
+      return text ~= ""
+    end)
+    :totable()
 end
 
 local is_ignorecase = require("thetto.util.filter").is_ignorecase

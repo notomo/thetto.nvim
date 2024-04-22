@@ -16,9 +16,12 @@ function M.collect(source_ctx)
   local cmds = vim.tbl_map(function(s)
     return s:gsub(".*;", "")
   end, lines)
-  cmds = vim.tbl_filter(function(cmd)
-    return cmd ~= ""
-  end, cmds)
+  cmds = vim
+    .iter(cmds)
+    :filter(function(cmd)
+      return cmd ~= ""
+    end)
+    :totable()
 
   return vim.tbl_map(function(cmd)
     return { value = cmd, cwd = source_ctx.cwd, shell = "zsh" }

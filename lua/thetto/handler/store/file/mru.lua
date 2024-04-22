@@ -47,8 +47,7 @@ local cache = setmetatable({}, {
 })
 
 function M.data()
-  local paths = vim.tbl_filter(M._validate, cache.paths)
-  return vim.iter(paths):rev():totable()
+  return vim.iter(cache.paths):filter(M._validate):rev():totable()
 end
 
 function M._validate(path)

@@ -66,9 +66,12 @@ end
 
 function M._match(pattern, path)
   local parts = vim.split(pattern, "%", { plain = true })
-  parts = vim.tbl_filter(function(part)
-    return part ~= ""
-  end, parts)
+  parts = vim
+    .iter(parts)
+    :filter(function(part)
+      return part ~= ""
+    end)
+    :totable()
 
   if #parts == 0 then
     return nil

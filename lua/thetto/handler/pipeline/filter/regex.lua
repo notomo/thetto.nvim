@@ -5,9 +5,12 @@ local to_regexes = function(stage_ctx, ignorecase)
   if ignorecase then
     input = input:lower()
   end
-  local texts = vim.tbl_filter(function(text)
-    return text ~= ""
-  end, vim.split(input, "%s"))
+  local texts = vim
+    .iter(vim.split(input, "%s"))
+    :filter(function(text)
+      return text ~= ""
+    end)
+    :totable()
 
   local regexes = {}
   for _, text in ipairs(texts) do
