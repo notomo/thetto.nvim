@@ -66,9 +66,12 @@ local highlight_opts = {
 }
 
 function M.columns(hl_columns)
-  local columns = vim.tbl_map(function(hl_column)
-    return to_column(hl_column)
-  end, hl_columns)
+  local columns = vim
+    .iter(hl_columns)
+    :map(function(hl_column)
+      return to_column(hl_column)
+    end)
+    :totable()
   return function(decorator, items, first_line, _)
     for i, item in ipairs(items) do
       vim.iter(columns):each(function(column)

@@ -61,13 +61,16 @@ function M.collect(source_ctx)
     local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       local items = vim.mpack.decode(encoded)
-      return vim.tbl_map(function(item)
-        local value = source_ctx.opts.modify_path(item.value)
-        return {
-          value = value,
-          path = to_absolute(source_ctx.cwd, item.path),
-        }
-      end, items)
+      return vim
+        .iter(items)
+        :map(function(item)
+          local value = source_ctx.opts.modify_path(item.value)
+          return {
+            value = value,
+            path = to_absolute(source_ctx.cwd, item.path),
+          }
+        end)
+        :totable()
     end)
     local job, err = require("thetto.util.job").execute(cmd, {
       on_stdout = function(_, data)

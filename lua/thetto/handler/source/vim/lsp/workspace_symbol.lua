@@ -35,9 +35,12 @@ function M.collect(source_ctx)
     local method = "workspace/symbol"
     local params = { query = source_ctx.pattern or "" }
     local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
-      local items = vim.tbl_map(function(e)
-        return to_item(e)
-      end, result or {})
+      local items = vim
+        .iter(result or {})
+        :map(function(e)
+          return to_item(e)
+        end)
+        :totable()
       observer:next(items)
       observer:complete()
     end)

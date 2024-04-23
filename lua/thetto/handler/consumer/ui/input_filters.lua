@@ -5,9 +5,12 @@ M.__index = M
 
 function M.new(source_name, filters)
   local tbl = {
-    _input_filters = vim.tbl_map(function(filter)
-      return require("thetto.handler.consumer.ui.input_filter").new(source_name, filter.name)
-    end, filters),
+    _input_filters = vim
+      .iter(filters)
+      :map(function(filter)
+        return require("thetto.handler.consumer.ui.input_filter").new(source_name, filter.name)
+      end)
+      :totable(),
   }
   return setmetatable(tbl, M)
 end

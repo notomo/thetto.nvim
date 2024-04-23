@@ -13,9 +13,12 @@ function M.collect(source_ctx)
   local lines = vim.fn.reverse(vim.split(f:read("*a"), "\n", { plain = true }))
   f:close()
 
-  local cmds = vim.tbl_map(function(s)
-    return s:gsub(".*;", "")
-  end, lines)
+  local cmds = vim
+    .iter(lines)
+    :map(function(s)
+      return s:gsub(".*;", "")
+    end)
+    :totable()
   cmds = vim
     .iter(cmds)
     :filter(function(cmd)
@@ -23,9 +26,12 @@ function M.collect(source_ctx)
     end)
     :totable()
 
-  return vim.tbl_map(function(cmd)
-    return { value = cmd, cwd = source_ctx.cwd, shell = "zsh" }
-  end, cmds)
+  return vim
+    .iter(cmds)
+    :map(function(cmd)
+      return { value = cmd, cwd = source_ctx.cwd, shell = "zsh" }
+    end)
+    :totable()
 end
 
 M.kind_name = "cmd/shell/cmd"

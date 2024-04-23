@@ -31,11 +31,14 @@ function M.collect(source_ctx)
   end, {
     to_outputs = function(output)
       local job_data = vim.json.decode(output, { luanil = { object = true } })
-      return vim.tbl_map(function(data)
-        data.html_url = job_data.html_url
-        data.run_id = job_data.run_id
-        return data
-      end, job_data.steps)
+      return vim
+        .iter(job_data.steps)
+        :map(function(data)
+          data.html_url = job_data.html_url
+          data.run_id = job_data.run_id
+          return data
+        end)
+        :totable()
     end,
   })
 end

@@ -196,9 +196,12 @@ function M.redraw_list(self, items, all_items_count)
     index = index + 1
   end
 
-  local lines = vim.tbl_map(function(item)
-    return item.desc or item.value
-  end, paged_items)
+  local lines = vim
+    .iter(paged_items)
+    :map(function(item)
+      return item.desc or item.value
+    end)
+    :totable()
 
   vim.bo[self._bufnr].modifiable = true
   vim.api.nvim_buf_set_lines(self._bufnr, 0, -1, false, lines)

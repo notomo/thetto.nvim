@@ -19,17 +19,20 @@ function M.collect(source_ctx)
     :next(function(output)
       local outputs = vim.split(output, " ", { plain = true })
       outputs = vim.list_slice(outputs, 2)
-      return vim.tbl_map(function(path)
-        local kind_name
-        if vim.fn.isdirectory(path) ~= 0 then
-          kind_name = "file/directory"
-        end
-        return {
-          value = path,
-          path = path,
-          kind_name = kind_name,
-        }
-      end, outputs)
+      return vim
+        .iter(outputs)
+        :map(function(path)
+          local kind_name
+          if vim.fn.isdirectory(path) ~= 0 then
+            kind_name = "file/directory"
+          end
+          return {
+            value = path,
+            path = path,
+            kind_name = kind_name,
+          }
+        end)
+        :totable()
     end)
 end
 

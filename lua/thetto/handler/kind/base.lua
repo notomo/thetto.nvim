@@ -37,9 +37,12 @@ M.opts.yank = {
   end,
 }
 function M.action_yank(items, action_ctx)
-  local values = vim.tbl_map(function(item)
-    return item[action_ctx.opts.key]
-  end, items)
+  local values = vim
+    .iter(items)
+    :map(function(item)
+      return item[action_ctx.opts.key]
+    end)
+    :totable()
   local value = table.concat(action_ctx.opts.convert(values), "\n")
   if value ~= "" then
     vim.fn.setreg(action_ctx.opts.register, value)

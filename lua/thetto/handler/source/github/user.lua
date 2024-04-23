@@ -18,13 +18,16 @@ function M.collect(source_ctx)
     })
     :next(function(output)
       local users = vim.json.decode(output, { luanil = { object = true } }).items
-      return vim.tbl_map(function(user)
-        return {
-          value = user.login,
-          url = user.html_url,
-          user = { name = user.login, is_org = user.type == "Organization" },
-        }
-      end, users)
+      return vim
+        .iter(users)
+        :map(function(user)
+          return {
+            value = user.login,
+            url = user.html_url,
+            user = { name = user.login, is_org = user.type == "Organization" },
+          }
+        end)
+        :totable()
     end)
 end
 

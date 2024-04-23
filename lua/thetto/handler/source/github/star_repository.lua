@@ -9,13 +9,16 @@ function M.collect(source_ctx)
     })
     :next(function(output)
       local repos = vim.json.decode(output, { luanil = { object = true } })
-      return vim.tbl_map(function(repo)
-        return {
-          value = repo.full_name,
-          url = repo.html_url,
-          repo = { owner = repo.owner.login, name = repo.name },
-        }
-      end, repos)
+      return vim
+        .iter(repos)
+        :map(function(repo)
+          return {
+            value = repo.full_name,
+            url = repo.html_url,
+            repo = { owner = repo.owner.login, name = repo.name },
+          }
+        end)
+        :totable()
     end)
 end
 

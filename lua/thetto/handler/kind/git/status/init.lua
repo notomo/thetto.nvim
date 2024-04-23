@@ -3,9 +3,12 @@ local M = {}
 M.opts = {}
 
 local to_paths = function(items)
-  return vim.tbl_map(function(item)
-    return item.path
-  end, items)
+  return vim
+    .iter(items)
+    :map(function(item)
+      return item.path
+    end)
+    :totable()
 end
 
 local to_git_root = require("thetto.handler.kind.git._util").to_git_root
