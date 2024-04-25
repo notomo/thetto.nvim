@@ -16,7 +16,8 @@ function M.collect(source_ctx)
   local cmds = vim
     .iter(lines)
     :map(function(s)
-      return s:gsub(".*;", "")
+      local x = s:gsub(".*;", "")
+      return x
     end)
     :totable()
   cmds = vim
