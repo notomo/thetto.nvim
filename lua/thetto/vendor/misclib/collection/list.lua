@@ -60,7 +60,7 @@ function M.join_by(list, separator)
     return vim.iter(list):totable()
   end
   local new_list = {}
-  for e in vim.iter(list):skipback(1) do
+  for e in vim.iter(list):rskip(1) do
     table.insert(new_list, e)
     table.insert(new_list, separator)
   end
