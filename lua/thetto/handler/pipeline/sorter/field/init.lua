@@ -19,5 +19,6 @@ M.opts = {
 }
 
 M.is_sorter = true
+M.ignore_input = true
 
 return M

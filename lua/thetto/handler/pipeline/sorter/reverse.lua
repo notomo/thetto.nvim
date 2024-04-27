@@ -5,5 +5,6 @@ function M.apply(_, items, _)
 end
 
 M.is_sorter = true
+M.ignore_input = true
 
 return M
