@@ -45,7 +45,7 @@ function M._toggle(self, items, s, e)
     end
   end
 
-  vim.api.nvim__buf_redraw_range(self._bufnr, 0, -1)
+  vim.api.nvim__redraw({ buf = self._bufnr, range = { 0, -1 } })
 end
 
 function M.highlight(self, decorator, displayed_items, topline)
