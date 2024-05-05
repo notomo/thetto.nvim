@@ -8,11 +8,15 @@ M.opts = {}
 M.opts.execute = {
   driver = driver,
   args = { "-f" },
+  open = function()
+    require("thetto.lib.buffer").open_scratch_tab()
+  end,
 }
 
 function M.action_execute(items, action_ctx)
   for _, item in ipairs(items) do
-    require("thetto.lib.buffer").open_scratch_tab()
+    action_ctx.opts.open()
+
     local cmd = { "make" }
     vim.list_extend(cmd, action_ctx.opts.args)
 
