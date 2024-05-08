@@ -35,7 +35,7 @@ local to_hunks = function(lines)
   local merged = { hunks[1] }
   for item in vim.iter(hunks):skip(1) do
     local last = merged[#merged]
-    if last.row < item.row - 1 then
+    if last.path ~= item.path or last.row < item.row - 1 then
       table.insert(merged, item)
     end
   end
