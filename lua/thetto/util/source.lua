@@ -13,6 +13,9 @@ local default_go_to_opts = {
   filter = function(_)
     return true
   end,
+  fields = {
+    can_resume = false,
+  },
 }
 
 function M.go_to_next(source_name, raw_opts)
@@ -21,9 +24,7 @@ function M.go_to_next(source_name, raw_opts)
   local current_row = vim.fn.line(".")
   local path = vim.api.nvim_buf_get_name(0)
   vim.cmd.normal({ args = { "m'" }, bang = true })
-  require("thetto.util.source").start_by_name(source_name, {
-    can_resume = false,
-  }, {
+  require("thetto.util.source").start_by_name(source_name, opts.fields, {
     consumer_factory = require("thetto.util.consumer").immediate({ action_name = "open" }),
     item_cursor_factory = require("thetto.util.item_cursor").search(function(item)
       return opts.filter(item) and item.path == path and item.row > current_row
@@ -37,9 +38,7 @@ function M.go_to_previous(source_name, raw_opts)
   local current_row = vim.fn.line(".")
   local path = vim.api.nvim_buf_get_name(0)
   vim.cmd.normal({ args = { "m'" }, bang = true })
-  require("thetto.util.source").start_by_name(source_name, {
-    can_resume = false,
-  }, {
+  require("thetto.util.source").start_by_name(source_name, opts.fields, {
     consumer_factory = require("thetto.util.consumer").immediate({ action_name = "open" }),
     item_cursor_factory = require("thetto.util.item_cursor").search(function(item)
       return opts.filter(item) and item.path == path and item.row < current_row
