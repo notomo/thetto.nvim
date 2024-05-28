@@ -331,7 +331,7 @@ end
 function M.increase_display_limit(self, increment)
   increment = increment or 1000
   self._display_limit = self._display_limit + increment
-  self:redraw_list()
+  self:redraw_list(self._items)
 end
 
 return M
