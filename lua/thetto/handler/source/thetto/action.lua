@@ -31,7 +31,7 @@ function M.collect(source_ctx)
           from = #action_name + 1,
         },
         metadata = metadata,
-        item = item,
+        items = items,
       }
     end)
     :totable()
