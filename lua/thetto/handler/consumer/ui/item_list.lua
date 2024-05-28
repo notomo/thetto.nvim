@@ -219,7 +219,7 @@ function M.redraw_footer(self, status, start_index, end_index, all_items_count)
   if self._closed then
     return
   end
-  self._footer:redraw(status, start_index, end_index, all_items_count)
+  self._footer:redraw(status, start_index, end_index, all_items_count, self._selection:count())
 end
 
 function M.apply_item_cursor(self)

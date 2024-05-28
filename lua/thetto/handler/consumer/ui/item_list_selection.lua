@@ -70,4 +70,8 @@ function M.close(self)
   }
 end
 
+function M.count(self)
+  return vim.tbl_count(self._selected_items)
+end
+
 return M
