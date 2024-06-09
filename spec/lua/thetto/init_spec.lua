@@ -118,6 +118,36 @@ line3
 line1]])
   end)
 
+  it("can filter source items", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          {
+            value = "line1",
+            row = 3,
+          },
+          {
+            value = "line2",
+            row = 1,
+          },
+          {
+            value = "line3",
+            row = 2,
+          },
+        }
+      end,
+      filter = require("thetto.util.source").filter(function(item)
+        return item.value == "line2"
+      end),
+    })
+    helper.wait(p1)
+
+    thetto.call_consumer("move_to_list")
+
+    assert.lines([[
+line2]])
+  end)
+
   it("can set default list cursor position", function()
     local p = thetto.start({
       collect = function()

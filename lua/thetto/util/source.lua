@@ -52,4 +52,10 @@ function M.go_to_previous(source_name, raw_opts)
   })
 end
 
+function M.filter(f)
+  return function(items)
+    return vim.iter(items):filter(f):totable()
+  end
+end
+
 return M
