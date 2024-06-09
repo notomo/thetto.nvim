@@ -9,7 +9,7 @@ local _opts = {}
 
 M.opts = {
   file_path = pathlib.user_data_path("store_file_mru.txt"),
-  save_events = { "QuitPre" },
+  save_events = { "VimLeavePre" },
   limit = 500,
 }
 
