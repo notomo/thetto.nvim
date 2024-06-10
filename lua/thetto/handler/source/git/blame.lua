@@ -2,6 +2,11 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
+M.opts = {
+  commit_hash = nil,
+  path = nil,
+}
+
 function M.collect(source_ctx)
   local git_root, err = filelib.find_git_root(source_ctx.cwd)
   if err then
@@ -32,8 +37,12 @@ function M.collect(source_ctx)
   }
   next_parser = parsers.commit_hash
 
-  local path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
-  local cmd = { "git", "--no-pager", "blame", "--porcelain", path }
+  local path = source_ctx.opts.path or vim.api.nvim_buf_get_name(source_ctx.bufnr)
+  local cmd = { "git", "--no-pager", "blame", "--porcelain" }
+  if source_ctx.opts.commit_hash then
+    table.insert(cmd, source_ctx.opts.commit_hash)
+  end
+  vim.list_extend(cmd, { "--", path })
 
   local row = 0
   return require("thetto.util.job")
@@ -56,12 +65,13 @@ function M.collect(source_ctx)
         local user_name = commits[state_commit_hash].author
         local date = vim.fn.strftime("%Y-%m-%d", commits[state_commit_hash]["author-time"])
         local commit_hash = state_commit_hash:sub(1, digit)
+        local commit_hash_is_temporary = commit_hash == ("0"):rep(digit)
         local value = ("%s %s %s <%s>"):format(commit_hash, date, message, user_name)
         return {
           value = value,
           path = path,
           row = row,
-          commit_hash = state_commit_hash,
+          commit_hash = not commit_hash_is_temporary and state_commit_hash or nil,
           column_offsets = {
             date = #commit_hash + 1,
             message = #commit_hash + 1 + #date + 1,
@@ -88,7 +98,7 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.kind_name = "file"
+M.kind_name = "git/commit"
 
 M.cwd = require("thetto.util.cwd").project()
 
