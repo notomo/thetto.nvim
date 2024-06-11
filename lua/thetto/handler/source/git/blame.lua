@@ -98,7 +98,7 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.kind_name = "git/commit"
+M.kind_name = "file" -- to show file preview
 
 M.cwd = require("thetto.util.cwd").project()
 
