@@ -56,6 +56,10 @@ function M.collect(source_ctx)
     path = vim.fn.expand(source_ctx.opts.expr)
   end
 
+  if path == "" then
+    return {}
+  end
+
   local cmd = { "git", "--no-pager", "diff", "--no-color", path }
   return require("thetto.util.job").run(cmd, source_ctx, function(hunk)
     return {
