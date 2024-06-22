@@ -5,10 +5,8 @@ function M.new(source, source_ctx)
   if source_err then
     local source_errored = true
     return function(observer)
-      local msg = require("thetto.vendor.misclib.message").wrap(source_err)
-      observer:error(msg)
-    end,
-      source_errored
+      observer:error(source_err)
+    end, source_errored
   end
 
   local subscriber = M._new(result)
