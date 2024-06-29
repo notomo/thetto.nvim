@@ -300,7 +300,9 @@ function M.get_items(self)
     return selected_items
   end
 
-  local range = require("thetto.lib.visual_mode").range()
+  local range = vim.api.nvim_win_call(self._window_id, function()
+    return require("thetto.lib.visual_mode").range()
+  end)
   return self:_get_row_items(range[1], range[2])
 end
 
