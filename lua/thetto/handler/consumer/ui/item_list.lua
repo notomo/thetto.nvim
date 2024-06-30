@@ -21,6 +21,8 @@ local _ns = vim.api.nvim_create_namespace(_ns_name)
 local _selfs = {}
 local _resume_states = {}
 
+local _filetype = "thetto"
+
 --- @param sidecar ThettoUiSidecar
 --- @param pipeline ThettoPipeline
 function M.open(
@@ -52,7 +54,7 @@ function M.open(
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
-  vim.bo[bufnr].filetype = "thetto"
+  vim.bo[bufnr].filetype = _filetype
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/list"):format(ctx_key))
 
   local path = vim.fn.fnamemodify(cwd, ":~")
@@ -265,9 +267,12 @@ function M.close(self, current_window_id)
   self._closed = true
   _selfs[self._bufnr] = nil
 
+  local current_window_filetype = vim.api.nvim_win_is_valid(current_window_id)
+      and vim.bo[vim.api.nvim_win_get_buf(current_window_id)].filetype
+    or ""
   local row, column = unpack(vim.api.nvim_win_get_cursor(self._window_id))
   _resume_states[self._ctx_key] = {
-    has_forcus = current_window_id == self._window_id,
+    has_forcus = current_window_filetype == _filetype,
     column = column,
 
     items = self._items,

@@ -13,6 +13,8 @@ local _ns = vim.api.nvim_create_namespace(_ns_name)
 local _selfs = {}
 local _resume_states = {}
 
+local _filetype = "thetto-inputter"
+
 --- @param pipeline ThettoPipeline
 function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, source_name)
   local filters = pipeline:filters()
@@ -27,7 +29,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
 
   local bufnr = vim.api.nvim_create_buf(false, true)
   vim.bo[bufnr].bufhidden = "wipe"
-  vim.bo[bufnr].filetype = "thetto-inputter"
+  vim.bo[bufnr].filetype = _filetype
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/inputter"):format(ctx_key))
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
@@ -195,8 +197,11 @@ function M.close(self, current_window_id)
   self._closed = true
   _selfs[self._bufnr] = nil
 
+  local current_window_filetype = vim.api.nvim_win_is_valid(current_window_id)
+      and vim.bo[vim.api.nvim_win_get_buf(current_window_id)].filetype
+    or ""
   local resume_state = {
-    has_forcus = current_window_id == self._window_id,
+    has_forcus = current_window_filetype == _filetype,
     cursor = vim.api.nvim_win_get_cursor(self._window_id),
     is_insert_mode = vim.api.nvim_get_mode().mode == "i",
     lines = vim.api.nvim_buf_get_lines(self._bufnr, 0, -1, false),
