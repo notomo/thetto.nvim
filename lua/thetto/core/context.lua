@@ -142,8 +142,4 @@ function M.update_used_at(self)
   self._used_at = now()
 end
 
-function M.new_key()
-  return tostring(now())
-end
-
 return M

@@ -426,6 +426,49 @@ line2]])
 line3
 line4]])
   end)
+
+  it("can resume source grouped by source key", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+      key = function()
+        return "key"
+      end,
+    })
+    helper.wait(p1)
+
+    thetto.call_consumer("move_to_list")
+    thetto.quit()
+
+    local p2 = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+          { value = "line3" },
+        }
+      end,
+      key = function()
+        return "key"
+      end,
+    })
+    helper.wait(p2)
+
+    local p3 = thetto.resume()
+    helper.wait(p3)
+
+    local p4 = thetto.resume()
+    helper.wait(p4)
+
+    assert.lines([[
+line1
+line2
+line3]])
+  end)
 end)
 
 describe("thetto.reload()", function()

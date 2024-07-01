@@ -95,6 +95,8 @@ M.kind_name = "git/status/file"
 
 M.cwd = require("thetto.util.cwd").project()
 
+M.key = require("thetto.util.source_key").cwd()
+
 M.consumer_opts = {
   ui = {
     insert = false,
