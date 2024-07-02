@@ -8,7 +8,7 @@ end
 
 function M.cwd()
   return function(key_ctx)
-    local ctx_key = require("thetto.core.cwd").resolve(key_ctx.source.cwd):gsub("/", "\\")
+    local ctx_key = require("thetto.core.cwd").resolve(key_ctx.source.cwd):gsub("/", "__")
     return ctx_key
   end
 end

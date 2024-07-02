@@ -16,6 +16,7 @@ function M.start(source, raw_opts)
   local ctx_key = (source.key or require("thetto.util.source_key").unique())({
     source = source,
   })
+  require("thetto.core.context").expire(ctx_key)
 
   local collector = require("thetto.core.collector").new(
     source,

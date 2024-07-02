@@ -440,8 +440,7 @@ line4]])
       end,
     })
     helper.wait(p1)
-
-    thetto.call_consumer("move_to_list")
+    helper.input("a")
     thetto.quit()
 
     local p2 = thetto.start({
@@ -458,11 +457,10 @@ line4]])
     })
     helper.wait(p2)
 
-    local p3 = thetto.resume()
-    helper.wait(p3)
+    thetto.call_consumer("move_to_list")
 
-    local p4 = thetto.resume()
-    helper.wait(p4)
+    local p3 = thetto.resume({ offset = 1 })
+    helper.wait(p3)
 
     assert.lines([[
 line1

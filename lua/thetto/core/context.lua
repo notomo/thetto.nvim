@@ -39,6 +39,14 @@ end
 
 local _group = vim.api.nvim_create_augroup("thetto_ctx", {})
 
+function M.expire(ctx_key)
+  _ctx_map[ctx_key] = nil
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = make_pattern(ctx_key),
+    modeline = false,
+  })
+end
+
 function M.setup_expire(ctx_key, f)
   vim.api.nvim_create_autocmd({ "User" }, {
     group = _group,
@@ -62,11 +70,7 @@ function M._expire_old()
 
   local old_ctxs = vim.list_slice(ctxs, max_count + 1)
   for _, ctx in ipairs(old_ctxs) do
-    _ctx_map[ctx._key] = nil
-    vim.api.nvim_exec_autocmds("User", {
-      pattern = make_pattern(ctx._key),
-      modeline = false,
-    })
+    M.expire(ctx._key)
   end
 end
 
