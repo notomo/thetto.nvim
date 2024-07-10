@@ -21,7 +21,10 @@ function M.action_execute(items, action_ctx)
     vim.list_extend(cmd, action_ctx.opts.args)
 
     local path = item.included_from or item.path
-    vim.list_extend(cmd, { path, item.value })
+    vim.list_extend(cmd, { path })
+    if item.value ~= "" then
+      table.insert(cmd, item.value)
+    end
 
     local opts = { cwd = vim.fn.fnamemodify(path, ":h") }
     action_ctx.opts.driver(cmd, opts)
