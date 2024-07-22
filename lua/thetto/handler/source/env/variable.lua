@@ -1,13 +1,15 @@
 local M = {}
 
 function M.collect()
-  local names = vim.fn.getcompletion("*", "environment")
-  local items = {}
-  for _, name in ipairs(names) do
-    local value = ("%s=%s"):format(name, os.getenv(name):gsub("\n", "\\n"))
-    table.insert(items, { value = value })
-  end
-  return items
+  return vim
+    .iter(vim.fn.getcompletion("*", "environment"))
+    :map(function(name)
+      local value = ("%s=%s"):format(name, os.getenv(name):gsub("\n", "\\n"))
+      return {
+        value = value,
+      }
+    end)
+    :totable()
 end
 
 M.kind_name = "word"

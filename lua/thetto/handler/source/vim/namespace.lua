@@ -1,13 +1,16 @@
 local M = {}
 
 function M.collect()
-  local items = {}
-  local namespaces = vim.api.nvim_get_namespaces()
-  for name, id in pairs(namespaces) do
-    local value = ("%2d: %s"):format(id, name)
-    table.insert(items, { value = value, namespace = id })
-  end
-  return items
+  return vim
+    .iter(vim.api.nvim_get_namespaces())
+    :map(function(name, id)
+      local value = ("%2d: %s"):format(id, name)
+      return {
+        value = value,
+        namespace = id,
+      }
+    end)
+    :totable()
 end
 
 M.kind_name = "word"

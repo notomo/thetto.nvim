@@ -14,31 +14,43 @@ local encode = function(url)
   return url
 end
 
-M.opts = { file_path = nil, default_lines = {} }
+M.opts = {
+  file_path = nil,
+  default_lines = {},
+}
 
 function M.collect(source_ctx)
   local file_path = source_ctx.opts.file_path or pathlib.user_data_path("url_bookmark.txt")
   if filelib.create_if_need(file_path) then
     local f = io.open(file_path, "w")
+    if not f then
+      return nil, "can't write: " .. file_path
+    end
     for _, line in ipairs(source_ctx.opts.default_lines) do
       f:write(line .. "\n")
     end
     f:close()
   end
 
-  local items = {}
   local f = io.open(file_path, "r")
-  local i = 1
-  for line in f:lines() do
-    local url = encode(vim.fn.reverse(vim.split(line, "\t", { plain = true }))[1])
-    table.insert(items, {
-      value = line,
-      path = file_path,
-      row = i,
-      url = url,
-    })
-    i = i + 1
+  if not f then
+    return nil, "can't open: " .. file_path
   end
+
+  local items = vim
+    .iter(f:lines())
+    :enumerate()
+    :map(function(i, line)
+      local url = encode(vim.fn.reverse(vim.split(line, "\t", { plain = true }))[1])
+      return {
+        value = line,
+        path = file_path,
+        row = i,
+        url = url,
+      }
+    end)
+    :totable()
+
   f:close()
 
   return items

@@ -3,14 +3,17 @@ local pathlib = require("thetto.lib.path")
 local M = {}
 
 function M.collect()
-  local items = {}
   local home = pathlib.home()
-  local paths = vim.opt.packpath:get()
-  for _, path in ipairs(paths) do
-    local value = path:gsub(home, "~")
-    table.insert(items, { value = value, path = path })
-  end
-  return items
+  return vim
+    .iter(vim.opt.packpath:get())
+    :map(function(path)
+      local value = path:gsub(home, "~")
+      return {
+        value = value,
+        path = path,
+      }
+    end)
+    :totable()
 end
 
 M.kind_name = "file/directory"

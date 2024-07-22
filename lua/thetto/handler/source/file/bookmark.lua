@@ -4,7 +4,10 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-M.opts = { file_path = nil, default_paths = {} }
+M.opts = {
+  file_path = nil,
+  default_paths = {},
+}
 
 function M.collect(source_ctx)
   local file_path = source_ctx.opts.file_path or pathlib.user_data_path("file_bookmark.txt")
@@ -21,21 +24,24 @@ function M.collect(source_ctx)
   f:close()
   lines = listlib.unique(lines)
 
-  local paths = {}
-  for _, line in ipairs(lines) do
-    vim.list_extend(paths, vim.fn.glob(line, true, true, true))
-  end
-
-  local items = {}
-  for _, path in ipairs(paths) do
-    local kind_name = M.kind_name
-    if vim.fn.isdirectory(path) ~= 0 then
-      kind_name = "file/directory"
-    end
-    table.insert(items, { value = path, path = path, kind_name = kind_name })
-  end
-
-  return items
+  return vim
+    .iter(lines)
+    :map(function(line)
+      return vim.fn.glob(line, true, true, true)
+    end)
+    :flatten()
+    :map(function(path)
+      local kind_name = M.kind_name
+      if vim.fn.isdirectory(path) ~= 0 then
+        kind_name = "file/directory"
+      end
+      return {
+        value = path,
+        path = path,
+        kind_name = kind_name,
+      }
+    end)
+    :totable()
 end
 
 vim.api.nvim_set_hl(0, "ThettoFileBookmarkDirectory", { default = true, link = "String" })

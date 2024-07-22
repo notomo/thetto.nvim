@@ -1,11 +1,14 @@
 local M = {}
 
 function M.collect()
-  local items = {}
-  for key in pairs(package.loaded) do
-    table.insert(items, { value = key })
-  end
-  return items
+  return vim
+    .iter(package.loaded)
+    :map(function(key)
+      return {
+        value = key,
+      }
+    end)
+    :totable()
 end
 
 M.kind_name = "lua/package"
