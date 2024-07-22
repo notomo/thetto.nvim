@@ -191,15 +191,9 @@ function M.redraw_list(self, items, all_items_count)
   local end_index = self._display_limit * (page + 1)
   end_index = math.min(items_count, end_index)
 
-  local index = 1
-  local paged_items = {}
-  for i = start_index, end_index, 1 do
-    paged_items[index] = items[i]
-    index = index + 1
-  end
-
   local lines = vim
-    .iter(paged_items)
+    .iter(items)
+    :slice(start_index, end_index)
     :map(function(item)
       return item.desc or item.value
     end)
@@ -244,13 +238,7 @@ function M.update_pipeline_highlight(self, pipeline_highlight)
 end
 
 function M.highlight(self, topline, botline_guess)
-  local items = self._items
-
-  local displayed_items = {}
-  for i = topline + 1, botline_guess + 1, 1 do
-    table.insert(displayed_items, items[i])
-  end
-
+  local displayed_items = vim.iter(self._items):slice(topline + 1, botline_guess + 1):totable()
   self._source_highlight(self._decorator, displayed_items, topline, self._source_ctx)
   self._pipeline_highlight(self._decorator, displayed_items, topline)
   self._selection:highlight(self._decorator, displayed_items, topline)

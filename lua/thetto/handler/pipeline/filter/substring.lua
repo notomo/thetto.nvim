@@ -29,27 +29,25 @@ function M.apply(stage_ctx, items, opts)
   local ignorecase = is_ignorecase(opts.ignorecase, opts.smartcase, stage_ctx.input)
   local texts = to_texts(stage_ctx, ignorecase)
 
-  local filtered = {}
   local to_field = opts.to_field
   local inversed = opts.inversed
-  for _, item in ipairs(items) do
-    local field = to_field(item, stage_ctx)
-    if ignorecase then
-      field = field:lower()
-    end
-
-    local ok = true
-    for _, text in ipairs(texts) do
-      if (field:find(text, 1, true) ~= nil) == inversed then
-        ok = false
-        break
+  local filtered = vim
+    .iter(items)
+    :map(function(item)
+      local field = to_field(item, stage_ctx)
+      if ignorecase then
+        field = field:lower()
       end
-    end
 
-    if ok then
-      table.insert(filtered, item)
-    end
-  end
+      for _, text in ipairs(texts) do
+        if (field:find(text, 1, true) ~= nil) == inversed then
+          return
+        end
+      end
+
+      return item
+    end)
+    :totable()
   return filtered, highlight
 end
 

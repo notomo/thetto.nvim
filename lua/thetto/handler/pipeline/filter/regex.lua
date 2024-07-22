@@ -5,21 +5,19 @@ local to_regexes = function(stage_ctx, ignorecase)
   if ignorecase then
     input = input:lower()
   end
-  local texts = vim
+  return vim
     .iter(vim.split(input, "%s"))
     :filter(function(text)
       return text ~= ""
     end)
+    :map(function(text)
+      local ok, regex = pcall(vim.regex, text)
+      if not ok then
+        return nil
+      end
+      return regex
+    end)
     :totable()
-
-  local regexes = {}
-  for _, text in ipairs(texts) do
-    local ok, regex = pcall(vim.regex, text)
-    if ok then
-      table.insert(regexes, regex)
-    end
-  end
-  return regexes
 end
 
 local is_ignorecase = require("thetto.util.filter").is_ignorecase
@@ -36,27 +34,25 @@ function M.apply(stage_ctx, items, opts)
   local ignorecase = is_ignorecase(opts.ignorecase, opts.smartcase, stage_ctx.input)
   local regexes = to_regexes(stage_ctx, ignorecase)
 
-  local filtered = {}
   local to_field = opts.to_field
   local inversed = opts.inversed
-  for _, item in ipairs(items) do
-    local field = to_field(item, stage_ctx)
-    if ignorecase then
-      field = field:lower()
-    end
-
-    local ok = true
-    for _, regex in ipairs(regexes) do
-      if (regex:match_str(field) ~= nil) == inversed then
-        ok = false
-        break
+  local filtered = vim
+    .iter(items)
+    :map(function(item)
+      local field = to_field(item, stage_ctx)
+      if ignorecase then
+        field = field:lower()
       end
-    end
 
-    if ok then
-      table.insert(filtered, item)
-    end
-  end
+      for _, regex in ipairs(regexes) do
+        if (regex:match_str(field) ~= nil) == inversed then
+          return
+        end
+      end
+
+      return item
+    end)
+    :totable()
   return filtered, highlight
 end
 
