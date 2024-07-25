@@ -58,4 +58,45 @@ function M.filter(f)
   end
 end
 
+function M.merge(sources, fields)
+  local source = {
+    name = vim
+      .iter(sources)
+      :map(function(source)
+        return source.name
+      end)
+      :join(","),
+
+    collect = function(source_ctx)
+      local completed = {}
+      local count = #sources
+      return function(observer)
+        for i, source in ipairs(sources) do
+          local subscriber = require("thetto.core.source_subscriber").new(
+            source,
+            require("thetto.core.source_context").from(source, source_ctx)
+          )
+          subscriber({
+            next = function(o, items)
+              for _, item in ipairs(items) do
+                item.kind_name = item.kind_name or source.kind_name
+              end
+              observer.next(o, items)
+            end,
+            error = observer.error,
+            complete = function(o, ...)
+              completed[i] = true
+              if vim.tbl_count(completed) == count then
+                observer.complete(o, ...)
+              end
+            end,
+            closed = observer.closed,
+          })
+        end
+      end
+    end,
+  }
+  return vim.tbl_deep_extend("force", source, fields or {})
+end
+
 return M

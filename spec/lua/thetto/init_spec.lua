@@ -251,6 +251,38 @@ describe("thetto.start() immediate", function()
 
     assert.lines([[line1]])
   end)
+
+  it("can merge sources", function()
+    local p = thetto.start(require("thetto.util.source").merge({
+      {
+        collect = function(source_ctx)
+          return {
+            { value = "line1" .. source_ctx.opts.test1 },
+            { value = "line2" },
+          }
+        end,
+        opts = { test1 = "a" },
+      },
+      {
+        collect = function(source_ctx)
+          return {
+            { value = "line3" .. source_ctx.opts.test1 },
+            { value = "line4" },
+          }
+        end,
+        opts = { test1 = "b" },
+      },
+    }))
+    helper.wait(p)
+
+    thetto.call_consumer("move_to_list")
+
+    assert.lines([[
+line1a
+line2
+line3b
+line4]])
+  end)
 end)
 
 describe("thetto.execute()", function()
