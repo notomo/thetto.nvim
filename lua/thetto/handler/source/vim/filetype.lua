@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect()
   return vim
-    .iter(vim.fn.getcompletion("*", "filetype"))
+    .iter(require("thetto.lib.completion").get("*", "filetype"))
     :map(function(filetype)
       return { value = filetype }
     end)

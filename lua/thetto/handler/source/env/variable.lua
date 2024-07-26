@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect()
   return vim
-    .iter(vim.fn.getcompletion("*", "environment"))
+    .iter(require("thetto.lib.completion").get("*", "environment"))
     :map(function(name)
       local value = ("%s=%s"):format(name, os.getenv(name):gsub("\n", "\\n"))
       return {

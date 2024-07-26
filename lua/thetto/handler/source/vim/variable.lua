@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect()
   local items = {}
-  local names = vim.fn.getcompletion("*", "var")
+  local names = require("thetto.lib.completion").get("*", "var")
   for _, name in ipairs(names) do
     local var
     local key = name:sub(3)

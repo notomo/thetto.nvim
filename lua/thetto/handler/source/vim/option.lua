@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect()
   return vim
-    .iter(vim.fn.getcompletion("*", "option"))
+    .iter(require("thetto.lib.completion").get("*", "option"))
     :skip(1) -- NOTE: ignore 'all'
     :map(function(name)
       local cmd = ("echo &%s"):format(name)
