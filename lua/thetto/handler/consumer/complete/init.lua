@@ -19,8 +19,8 @@ local handlers = {
   end,
   --- @param self ThettoComplete
   [consumer_events.all.source_completed] = function(self)
-    vim.cmd.startinsert()
     vim.schedule(function()
+      vim.cmd.startinsert()
       vim.fn.complete(
         vim.fn.col("."),
         vim
