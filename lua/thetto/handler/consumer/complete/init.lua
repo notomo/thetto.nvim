@@ -28,6 +28,7 @@ local handlers = {
           :map(function(item)
             return {
               word = item.value,
+              menu = item.kind_name,
             }
           end)
           :totable()

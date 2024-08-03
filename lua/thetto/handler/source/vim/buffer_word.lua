@@ -10,7 +10,7 @@ function M.collect()
   local to_items = function(data)
     local already = {}
     local items = vim
-      .iter(vim.split(data, [=[[^a-zA-Z0-9_]]=], { trimempty = true }))
+      .iter(vim.split(data, [=[[^a-zA-Z0-9_]+]=], { trimempty = true }))
       :map(function(word)
         if already[word] or #word <= 2 then
           return nil
