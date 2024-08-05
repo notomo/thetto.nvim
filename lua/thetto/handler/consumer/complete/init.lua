@@ -1,11 +1,20 @@
+local vim = vim
+local fn = vim.fn
+
 --- @class ThettoComplete
 --- @field _all_items table
 local M = {}
 M.__index = M
 
-function M.new()
+local default_opts = {
+  priorities = {},
+}
+
+function M.new(raw_opts)
+  local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
+    _priorities = opts.priorities,
   }
   return setmetatable(tbl, M)
 end
@@ -18,23 +27,44 @@ local handlers = {
     self._all_items = items
   end,
   --- @param self ThettoComplete
-  [consumer_events.all.source_completed] = function(self)
-    vim.schedule(function()
-      vim.cmd.startinsert()
-      vim.fn.complete(
-        vim.fn.col("."),
-        vim
-          .iter(self._all_items)
-          :map(function(item)
-            return {
-              word = item.value,
-              menu = item.kind_name,
-            }
-          end)
-          :totable()
-      )
+  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
+    vim.cmd.startinsert()
+
+    local column = vim.api.nvim_win_get_cursor(0)[2]
+    local line = vim.api.nvim_get_current_line()
+    local pattern = ([=[\v\k*%%%dc]=]):format(column + 1)
+    local prefix, s = unpack(fn.matchstrpos(line, pattern))
+
+    local scored_items = vim
+      .iter(self._all_items)
+      :map(function(item)
+        local score = fn.matchfuzzypos({ item.value }, prefix)[3][1]
+        if not score then
+          return nil
+        end
+        return {
+          score = score + self._priorities[item.source_name or ""] or 0,
+          item = item,
+        }
+      end)
+      :totable()
+    table.sort(scored_items, function(a, b)
+      return a.score > b.score
     end)
-  end,
+
+    fn.complete(
+      s + 1,
+      vim
+        .iter(scored_items)
+        :map(function(c)
+          return {
+            word = c.item.value,
+            menu = c.item.source_name or c.item.kind_name,
+          }
+        end)
+        :totable()
+    )
+  end),
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
   end,

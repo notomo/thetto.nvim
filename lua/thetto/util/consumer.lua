@@ -40,10 +40,4 @@ function M.immediate(raw_opts)
   end
 end
 
-function M.complete()
-  return function()
-    return require("thetto.handler.consumer.complete").new()
-  end
-end
-
 return M

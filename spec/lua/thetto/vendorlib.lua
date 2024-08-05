@@ -1,6 +1,7 @@
 return {
   "notomo/misclib.nvim/lua/misclib/collection/list.lua",
   "notomo/misclib.nvim/lua/misclib/cursor.lua",
+  "notomo/misclib.nvim/lua/misclib/debounce.lua",
   "notomo/misclib.nvim/lua/misclib/decorator.lua",
   "notomo/misclib.nvim/lua/misclib/highlight.lua",
   "notomo/misclib.nvim/lua/misclib/job/init.lua",

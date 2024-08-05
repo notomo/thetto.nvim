@@ -80,6 +80,7 @@ function M.merge(sources, fields)
             next = function(o, items)
               for _, item in ipairs(items) do
                 item.kind_name = item.kind_name or source.kind_name
+                item.source_name = item.source_name or source.name
               end
               observer.next(o, items)
             end,
