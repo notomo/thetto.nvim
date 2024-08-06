@@ -28,7 +28,10 @@ local handlers = {
   end,
   --- @param self ThettoComplete
   [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
-    vim.cmd.startinsert()
+    local mode = vim.api.nvim_get_mode().mode
+    if mode ~= "i" then
+      return
+    end
 
     local column = vim.api.nvim_win_get_cursor(0)[2]
     local line = vim.api.nvim_get_current_line()
@@ -43,7 +46,7 @@ local handlers = {
           return nil
         end
         return {
-          score = score + self._priorities[item.source_name or ""] or 0,
+          score = score + (self._priorities[item.source_name or ""] or 0),
           item = item,
         }
       end)
@@ -52,18 +55,16 @@ local handlers = {
       return a.score > b.score
     end)
 
-    fn.complete(
-      s + 1,
-      vim
-        .iter(scored_items)
-        :map(function(c)
-          return {
-            word = c.item.value,
-            menu = c.item.source_name or c.item.kind_name,
-          }
-        end)
-        :totable()
-    )
+    local completion_items = vim
+      .iter(scored_items)
+      :map(function(c)
+        return {
+          word = c.item.value,
+          menu = c.item.source_name or c.item.kind_name,
+        }
+      end)
+      :totable()
+    fn.complete(s + 1, completion_items)
   end),
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)

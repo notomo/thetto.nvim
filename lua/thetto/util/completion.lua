@@ -5,7 +5,7 @@ local _group = "thetto_completion"
 function M.enable(sources)
   local priorities = {}
   vim.iter(sources):enumerate():each(function(i, source)
-    priorities[source.name] = math.pow(10, #sources - i)
+    priorities[source.name] = math.pow(100, #sources - i)
   end)
 
   local debounced = require("thetto.vendor.misclib.debounce").wrap(
