@@ -25,11 +25,12 @@ function M.collect(source_ctx)
   local dir_path = vim.fs.dirname(cursor_word)
   return vim
     .iter(vim.fs.dir(dir_path))
-    :map(function(name)
+    :map(function(name, typ)
       local full_path = vim.fs.joinpath(dir_path, name)
       return {
         value = name,
         path = full_path,
+        kind_name = typ == "directory" and "file/directory" or "file",
       }
     end)
     :totable()

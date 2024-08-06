@@ -22,7 +22,7 @@ function M.enable(sources)
   )
 
   local group = vim.api.nvim_create_augroup(_group, {})
-  vim.api.nvim_create_autocmd({ "TextChangedI" }, {
+  vim.api.nvim_create_autocmd({ "InsertEnter", "TextChangedI" }, {
     buffer = 0,
     group = group,
     callback = function()

@@ -38,10 +38,19 @@ local handlers = {
     local pattern = ([=[\v\k*%%%dc]=]):format(column + 1)
     local prefix, s = unpack(fn.matchstrpos(line, pattern))
 
+    local match = function(value)
+      return fn.matchfuzzypos({ value }, prefix)[3][1]
+    end
+    if prefix == "" then
+      match = function()
+        return 0
+      end
+    end
+
     local scored_items = vim
       .iter(self._all_items)
       :map(function(item)
-        local score = fn.matchfuzzypos({ item.value }, prefix)[3][1]
+        local score = match(item.value)
         if not score then
           return nil
         end
