@@ -33,10 +33,8 @@ local handlers = {
       return
     end
 
-    local column = vim.api.nvim_win_get_cursor(0)[2]
-    local line = vim.api.nvim_get_current_line()
-    local pattern = ([=[\v\k*%%%dc]=]):format(column + 1)
-    local prefix, s = unpack(fn.matchstrpos(line, pattern))
+    local word = require("thetto.lib.cursor").word(0)
+    local prefix = word.str
 
     local match = function(value)
       return fn.matchfuzzypos({ value }, prefix)[3][1]
@@ -73,7 +71,7 @@ local handlers = {
         }
       end)
       :totable()
-    fn.complete(s + 1, completion_items)
+    fn.complete(word.offset, completion_items)
   end),
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
