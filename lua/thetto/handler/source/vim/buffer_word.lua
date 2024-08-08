@@ -29,7 +29,7 @@ function M.collect(source_ctx)
       return vim.mpack.decode(encoded)
     end)
 
-    local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str
+    local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str or ""
 
     vim.iter(bufnrs):each(function(bufnr)
       if not vim.api.nvim_buf_is_valid(bufnr) then

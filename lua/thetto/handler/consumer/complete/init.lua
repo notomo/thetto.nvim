@@ -8,6 +8,7 @@ M.__index = M
 
 local default_opts = {
   priorities = {},
+  cursor_word = nil,
 }
 
 function M.new(raw_opts)
@@ -15,6 +16,7 @@ function M.new(raw_opts)
   local tbl = {
     _all_items = {},
     _priorities = opts.priorities,
+    _cursor_word = opts.cursor_word,
   }
   return setmetatable(tbl, M)
 end
@@ -33,8 +35,13 @@ local handlers = {
       return
     end
 
-    local word = require("thetto.lib.cursor").word(0)
-    local prefix = word.str
+    local cursor_word = self._cursor_word
+      or require("thetto.lib.cursor").word(0)
+      or {
+        str = "",
+        offset = 1,
+      }
+    local prefix = cursor_word.str
 
     local match = function(value)
       return fn.matchfuzzypos({ value }, prefix)[3][1]
@@ -71,7 +78,7 @@ local handlers = {
         }
       end)
       :totable()
-    fn.complete(word.offset, completion_items)
+    fn.complete(cursor_word.offset, completion_items)
   end),
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
