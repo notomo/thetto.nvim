@@ -43,5 +43,6 @@ function M.collect(source_ctx)
 end
 
 M.kind_name = "word"
+M.kind_label = "Buffer"
 
 return M

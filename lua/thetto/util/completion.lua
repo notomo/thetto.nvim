@@ -8,6 +8,11 @@ function M.enable(sources)
     priorities[source.name] = math.pow(100, #sources - i)
   end)
 
+  local source_to_label = {}
+  vim.iter(sources):each(function(source)
+    source_to_label[source.name] = source.kind_label
+  end)
+
   local get_cursor_words = vim
     .iter(sources)
     :map(function(source)
@@ -39,6 +44,7 @@ function M.enable(sources)
           return consumer.new({
             priorities = priorities,
             cursor_word = cursor_word,
+            source_to_label = source_to_label,
           })
         end,
       })

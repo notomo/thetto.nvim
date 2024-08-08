@@ -9,6 +9,7 @@ M.__index = M
 local default_opts = {
   priorities = {},
   cursor_word = nil,
+  source_to_label = {},
 }
 
 function M.new(raw_opts)
@@ -17,6 +18,7 @@ function M.new(raw_opts)
     _all_items = {},
     _priorities = opts.priorities,
     _cursor_word = opts.cursor_word,
+    _source_to_label = opts.source_to_label,
   }
   return setmetatable(tbl, M)
 end
@@ -74,7 +76,10 @@ local handlers = {
       :map(function(c)
         return {
           word = c.item.value,
-          menu = c.item.source_name or c.item.kind_name,
+          menu = c.item.kind_label
+            or self._source_to_label[c.item.source_name]
+            or c.item.source_name
+            or c.item.kind_name,
         }
       end)
       :totable()
