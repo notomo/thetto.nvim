@@ -23,14 +23,20 @@ function M.enable(sources)
     end
   end
 
+  local source = require("thetto.util.source").merge(sources, {
+    can_resume = false,
+  })
+  local thetto = require("thetto")
+  local consumer = require("thetto.handler.consumer.complete")
+
   local debounced = require("thetto.vendor.misclib.debounce").wrap(
     100,
     vim.schedule_wrap(function()
-      require("thetto").start(require("thetto.util.source").merge(sources), {
+      thetto.start(source, {
         consumer_factory = function(consumer_ctx)
           local window_id = consumer_ctx.source_ctx.window_id
           local cursor_word = get_cursor_word(window_id)
-          return require("thetto.handler.consumer.complete").new({
+          return consumer.new({
             priorities = priorities,
             cursor_word = cursor_word,
           })
