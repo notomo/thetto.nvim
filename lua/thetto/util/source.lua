@@ -68,9 +68,9 @@ function M.merge(sources, fields)
       :join(","),
 
     collect = function(source_ctx)
-      local completed = {}
       local count = #sources
       return function(observer)
+        local completed = {}
         local cancels = vim
           .iter(sources)
           :enumerate()

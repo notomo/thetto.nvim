@@ -1,6 +1,6 @@
 local M = {}
 
-local _group = "thetto_completion"
+local _group_name_format = "thetto_completion_%s"
 
 function M.enable(sources)
   local priorities = {}
@@ -19,6 +19,7 @@ function M.enable(sources)
       return source.get_cursor_word
     end)
     :totable()
+
   local get_cursor_word = function(window_id)
     for _, f in ipairs(get_cursor_words) do
       local cursor_word = f(window_id)
@@ -26,6 +27,7 @@ function M.enable(sources)
         return cursor_word
       end
     end
+    return require("thetto.lib.cursor").word(window_id)
   end
 
   local source = require("thetto.util.source").merge(sources, {
@@ -34,16 +36,18 @@ function M.enable(sources)
   local thetto = require("thetto")
   local consumer = require("thetto.handler.consumer.complete")
 
+  local on_discard = function() end
   local debounced = require("thetto.vendor.misclib.debounce").wrap(
     100,
     vim.schedule_wrap(function()
       thetto.start(source, {
-        consumer_factory = function(consumer_ctx)
-          local window_id = consumer_ctx.source_ctx.window_id
-          local cursor_word = get_cursor_word(window_id)
+        consumer_factory = function(_, _, _, callbacks)
+          on_discard()
+          on_discard = callbacks.on_discard
+
           return consumer.new({
             priorities = priorities,
-            cursor_word = cursor_word,
+            get_cursor_word = get_cursor_word,
             source_to_label = source_to_label,
           })
         end,
@@ -51,20 +55,29 @@ function M.enable(sources)
     end)
   )
 
-  local group = vim.api.nvim_create_augroup(_group, {})
-  vim.api.nvim_create_autocmd({ "InsertEnter", "TextChangedI" }, {
-    buffer = 0,
+  local bufnr = vim.api.nvim_get_current_buf()
+  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
+  vim.api.nvim_create_autocmd({ "InsertEnter", "TextChangedI", "TextChangedP" }, {
+    buffer = bufnr,
     group = group,
     callback = function()
       debounced()
     end,
   })
+  vim.api.nvim_create_autocmd({ "InsertLeave" }, {
+    buffer = 0,
+    group = group,
+    callback = function()
+      on_discard()
+    end,
+  })
 end
 
 function M.disable()
+  local bufnr = vim.api.nvim_get_current_buf()
   vim.api.nvim_clear_autocmds({
-    buffer = 0,
-    group = _group,
+    buffer = bufnr,
+    group = _group_name_format:format(bufnr),
   })
 end
 

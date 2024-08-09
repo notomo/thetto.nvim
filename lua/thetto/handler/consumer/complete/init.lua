@@ -8,7 +8,9 @@ M.__index = M
 
 local default_opts = {
   priorities = {},
-  cursor_word = nil,
+  get_cursor_word = function()
+    require("thetto.vendor.misclib.message").error("get_cursor_word not implemented")
+  end,
   source_to_label = {},
 }
 
@@ -17,7 +19,7 @@ function M.new(raw_opts)
   local tbl = {
     _all_items = {},
     _priorities = opts.priorities,
-    _cursor_word = opts.cursor_word,
+    _get_cursor_word = opts.get_cursor_word,
     _source_to_label = opts.source_to_label,
   }
   return setmetatable(tbl, M)
@@ -26,18 +28,14 @@ end
 local consumer_events = require("thetto.core.consumer_events")
 
 --- @param self ThettoComplete
-local complete = function(self)
+local complete = function(self, items)
   local mode = vim.api.nvim_get_mode().mode
   if mode ~= "i" then
     return
   end
 
-  local cursor_word = self._cursor_word or require("thetto.lib.cursor").word(0) or {
-    str = "",
-    offset = 1,
-  }
+  local cursor_word = self._get_cursor_word(0)
   local prefix = cursor_word.str
-
   local match = function(value)
     return fn.matchfuzzypos({ value }, prefix)[3][1]
   end
@@ -48,7 +46,7 @@ local complete = function(self)
   end
 
   local scored_items = vim
-    .iter(self._all_items)
+    .iter(items)
     :map(function(item)
       local score = match(item.value)
       if not score then
@@ -70,6 +68,9 @@ local complete = function(self)
       return {
         word = c.item.value,
         menu = c.item.kind_label or self._source_to_label[c.item.source_name] or c.item.source_name or c.item.kind_name,
+        icase = 1,
+        dup = 1,
+        empty = 1,
       }
     end)
     :totable()
@@ -82,11 +83,10 @@ local handlers = {
   --- @param self ThettoComplete
   [consumer_events.all.items_changed] = function(self, items, _)
     self._all_items = items
-    debounced_complete(self)
   end,
   --- @param self ThettoComplete
   [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
-    debounced_complete(self)
+    debounced_complete(self, self._all_items)
   end),
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)

@@ -48,6 +48,9 @@ function M.collect(source_ctx)
             kind_label = completionItemKind[item.kind],
           }
         end)
+        :filter(function(item)
+          return item.kind_label ~= "Snippet"
+        end)
         :totable()
       observer:next(items)
       observer:complete()
