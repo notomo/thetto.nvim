@@ -16,7 +16,7 @@ function M.new(source, source_ctx)
   end
 
   return function(observer)
-    subscriber({
+    return subscriber({
       next = function(o, ...)
         observer.next(o, source_filter(...))
       end,

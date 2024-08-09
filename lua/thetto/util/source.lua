@@ -71,28 +71,37 @@ function M.merge(sources, fields)
       local completed = {}
       local count = #sources
       return function(observer)
-        for i, source in ipairs(sources) do
-          local subscriber = require("thetto.core.source_subscriber").new(
-            source,
-            require("thetto.core.source_context").from(source, source_ctx)
-          )
-          subscriber({
-            next = function(o, items)
-              for _, item in ipairs(items) do
-                item.kind_name = item.kind_name or source.kind_name
-                item.source_name = item.source_name or source.name
-              end
-              observer.next(o, items)
-            end,
-            error = observer.error,
-            complete = function(o, ...)
-              completed[i] = true
-              if vim.tbl_count(completed) == count then
-                observer.complete(o, ...)
-              end
-            end,
-            closed = observer.closed,
-          })
+        local cancels = vim
+          .iter(sources)
+          :enumerate()
+          :map(function(i, source)
+            local subscriber = require("thetto.core.source_subscriber").new(
+              source,
+              require("thetto.core.source_context").from(source, source_ctx)
+            )
+            return subscriber({
+              next = function(o, items)
+                for _, item in ipairs(items) do
+                  item.kind_name = item.kind_name or source.kind_name
+                  item.source_name = item.source_name or source.name
+                end
+                observer.next(o, items)
+              end,
+              error = observer.error,
+              complete = function(o, ...)
+                completed[i] = true
+                if vim.tbl_count(completed) == count then
+                  observer.complete(o, ...)
+                end
+              end,
+              closed = observer.closed,
+            })
+          end)
+          :totable()
+        return function()
+          for _, cancel in ipairs(cancels) do
+            cancel()
+          end
         end
       end
     end,

@@ -12,12 +12,12 @@ local labels = {
 }
 
 function M.collect(source_ctx)
-  local cursor_word = cursor_lib.word(source_ctx.window_id, [=[\.?/[^[:space:]]*]=])
-  if not cursor_word then
+  local cursor_path = cursor_lib.word(source_ctx.window_id, [=[\.?/[^[:space:]]*]=])
+  if not cursor_path then
     return {}
   end
 
-  local dir_path = vim.fs.dirname(cursor_word.str)
+  local dir_path = vim.fs.dirname(cursor_path.str)
   return vim
     .iter(vim.fs.dir(dir_path))
     :map(function(name, typ)
