@@ -32,6 +32,13 @@ function M.setup(raw_opts)
     end,
     once = true,
   })
+  vim.api.nvim_create_autocmd({ "User" }, {
+    group = group,
+    pattern = { "ThettoStoreSaveTrigger" },
+    callback = function()
+      M._save(_opts.file_path)
+    end,
+  })
 end
 
 local cache = setmetatable({}, {
