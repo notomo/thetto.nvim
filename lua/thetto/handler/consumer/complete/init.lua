@@ -30,7 +30,12 @@ local consumer_events = require("thetto.core.consumer_events")
 --- @param self ThettoComplete
 local complete = function(self, items)
   local mode = vim.api.nvim_get_mode().mode
-  if mode ~= "i" then
+  if mode ~= "i" and mode ~= "ic" then
+    return
+  end
+
+  local selected = fn.complete_info({ "selected" }).selected ~= -1
+  if selected then
     return
   end
 
@@ -83,11 +88,12 @@ local handlers = {
   --- @param self ThettoComplete
   [consumer_events.all.items_changed] = function(self, items, _)
     self._all_items = items
+    debounced_complete(self, self._all_items)
   end,
   --- @param self ThettoComplete
-  [consumer_events.all.source_completed] = vim.schedule_wrap(function(self)
+  [consumer_events.all.source_completed] = function(self)
     debounced_complete(self, self._all_items)
-  end),
+  end,
   [consumer_events.all.source_error] = function(_, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
   end,

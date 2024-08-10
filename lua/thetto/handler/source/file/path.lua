@@ -3,6 +3,10 @@ local M = {}
 local cursor_lib = require("thetto.lib.cursor")
 
 function M.get_cursor_word(window_id)
+  local cursor_path = cursor_lib.word(window_id, [=[\.?/[^[:space:]]*]=])
+  if not cursor_path then
+    return nil
+  end
   return cursor_lib.word(window_id, [=[[^[:space:]/]*]=])
 end
 
