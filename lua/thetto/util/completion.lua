@@ -31,6 +31,7 @@ function M.enable(sources)
   end
 
   local source = require("thetto.util.source").merge(sources, {
+    get_cursor_word = get_cursor_word,
     can_resume = false,
   })
   local thetto = require("thetto")
@@ -41,13 +42,12 @@ function M.enable(sources)
     100,
     vim.schedule_wrap(function()
       thetto.start(source, {
-        consumer_factory = function(_, _, _, callbacks)
+        consumer_factory = function(consumer_ctx, _, _, callbacks)
           on_discard()
           on_discard = callbacks.on_discard
 
-          return consumer.new({
+          return consumer.new(consumer_ctx.source_ctx.cursor_word, {
             priorities = priorities,
-            get_cursor_word = get_cursor_word,
             source_to_label = source_to_label,
           })
         end,

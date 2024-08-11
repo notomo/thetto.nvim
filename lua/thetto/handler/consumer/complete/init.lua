@@ -8,18 +8,15 @@ M.__index = M
 
 local default_opts = {
   priorities = {},
-  get_cursor_word = function()
-    require("thetto.vendor.misclib.message").error("get_cursor_word not implemented")
-  end,
   source_to_label = {},
 }
 
-function M.new(raw_opts)
+function M.new(cursor_word, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
     _priorities = opts.priorities,
-    _get_cursor_word = opts.get_cursor_word,
+    _cursor_word = cursor_word,
     _source_to_label = opts.source_to_label,
   }
   return setmetatable(tbl, M)
@@ -34,13 +31,11 @@ local complete = function(self, items)
     return
   end
 
-  local selected = fn.complete_info({ "selected" }).selected ~= -1
-  if selected then
+  if mode == "ic" and not vim.tbl_isempty(vim.v.completed_item) then
     return
   end
 
-  local cursor_word = self._get_cursor_word(0)
-  local prefix = cursor_word.str
+  local prefix = self._cursor_word.str
   local match = function(value)
     return fn.matchfuzzypos({ value }, prefix)[3][1]
   end
@@ -79,10 +74,10 @@ local complete = function(self, items)
       }
     end)
     :totable()
-  fn.complete(cursor_word.offset, completion_items)
+  fn.complete(self._cursor_word.offset, completion_items)
 end
 
-local debounced_complete = require("thetto.vendor.misclib.debounce").wrap(10, vim.schedule_wrap(complete))
+local debounced_complete = require("thetto.vendor.misclib.debounce").wrap(50, vim.schedule_wrap(complete))
 
 local handlers = {
   --- @param self ThettoComplete
