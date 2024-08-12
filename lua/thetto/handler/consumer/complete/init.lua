@@ -11,6 +11,8 @@ local default_opts = {
   source_to_label = {},
 }
 
+local max_word_length = 25
+
 function M.new(cursor_word, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
@@ -65,8 +67,14 @@ local complete = function(self, items)
   local completion_items = vim
     .iter(scored_items)
     :map(function(c)
+      local width = fn.strwidth(c.item.value)
+      local abbr
+      if width > max_word_length then
+        abbr = c.item.value:sub(0, max_word_length) .. "..."
+      end
       return {
         word = c.item.value,
+        abbr = abbr,
         menu = c.item.kind_label or self._source_to_label[c.item.source_name] or c.item.source_name or c.item.kind_name,
         icase = 1,
         dup = 1,
