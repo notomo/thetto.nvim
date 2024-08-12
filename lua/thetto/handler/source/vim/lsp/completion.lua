@@ -32,29 +32,63 @@ local completionItemKind = {
 function M.collect(source_ctx)
   return function(observer)
     local method = vim.lsp.protocol.Methods.textDocument_completion
-    local params = vim.lsp.util.make_position_params(source_ctx.window_id)
-    local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
-      if not result then
-        observer:next({})
-        observer:complete()
+    local clients = vim.lsp.get_clients({
+      bufnr = source_ctx.bufnr,
+      method = method,
+    })
+    if vim.tbl_isempty(clients) then
+      observer:next({})
+      observer:complete()
+      return
+    end
+
+    local completed = {}
+    local complete = function(client_id)
+      completed[client_id] = true
+      if vim.tbl_count(completed) ~= #clients then
         return
       end
-
-      local items = vim
-        .iter(result.items)
-        :map(function(item)
-          return {
-            value = item.insertText or item.label,
-            kind_label = completionItemKind[item.kind],
-          }
-        end)
-        :filter(function(item)
-          return item.kind_label ~= "Snippet"
-        end)
-        :totable()
-      observer:next(items)
       observer:complete()
-    end)
+    end
+
+    local params = vim.lsp.util.make_position_params(source_ctx.window_id)
+    local request = function(client)
+      local _, request_id = client.request(method, params, function(_, result)
+        if not result then
+          observer:next({})
+          complete(client.id)
+          return
+        end
+
+        local items = vim
+          .iter(result.items)
+          :map(function(item)
+            return {
+              value = item.insertText or item.label,
+              kind_label = completionItemKind[item.kind],
+            }
+          end)
+          :filter(function(item)
+            return item.kind_label ~= "Snippet"
+          end)
+          :totable()
+        observer:next(items)
+        complete(client.id)
+      end, source_ctx.bufnr)
+
+      local cancel = function()
+        client.cancel_request(request_id)
+      end
+      return cancel
+    end
+
+    local cancels = vim.iter(clients):map(request):totable()
+
+    local cancel = function()
+      for _, f in ipairs(cancels) do
+        f()
+      end
+    end
     return cancel
   end
 end
