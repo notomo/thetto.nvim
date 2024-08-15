@@ -15,15 +15,22 @@ function M.new(source, source_ctx)
     return subscriber
   end
 
+  local observable = require("thetto.vendor.misclib.observable").new(subscriber)
   return function(observer)
-    return subscriber({
-      next = function(o, ...)
-        observer.next(o, source_filter(...))
+    local subscription = observable:subscribe({
+      next = function(...)
+        observer:next(source_filter(...))
       end,
-      error = observer.error,
-      complete = observer.complete,
-      closed = observer.closed,
+      complete = function(...)
+        observer:complete(...)
+      end,
+      error = function(...)
+        observer:error(...)
+      end,
     })
+    return function()
+      subscription:unsubscribe()
+    end
   end
 end
 
@@ -46,7 +53,7 @@ function M._new(result)
 
           -- promise returns items case
           observer:next(resolved)
-          observer:complete(resolved)
+          observer:complete()
         end)
         :catch(function(err)
           observer:error(err)

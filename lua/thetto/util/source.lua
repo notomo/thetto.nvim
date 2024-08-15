@@ -59,6 +59,9 @@ function M.filter(f)
 end
 
 function M.merge(sources, fields)
+  local SourceContext = require("thetto.core.source_context")
+  local SourceSubscriber = require("thetto.core.source_subscriber")
+  local Observable = require("thetto.vendor.misclib.observable")
   local source = {
     name = vim
       .iter(sources)
@@ -75,27 +78,29 @@ function M.merge(sources, fields)
           .iter(sources)
           :enumerate()
           :map(function(i, source)
-            local subscriber = require("thetto.core.source_subscriber").new(
-              source,
-              require("thetto.core.source_context").from(source, source_ctx)
-            )
-            return subscriber({
-              next = function(o, items)
+            local subscriber = SourceSubscriber.new(source, SourceContext.from(source, source_ctx))
+            local observable = Observable.new(subscriber)
+            local subscription = observable:subscribe({
+              next = function(items)
                 for _, item in ipairs(items) do
                   item.kind_name = item.kind_name or source.kind_name
                   item.source_name = item.source_name or source.name
                 end
-                observer.next(o, items)
+                observer:next(items)
               end,
-              error = observer.error,
-              complete = function(o, ...)
+              complete = function(...)
                 completed[i] = true
                 if vim.tbl_count(completed) == count then
-                  observer.complete(o, ...)
+                  observer:complete(...)
                 end
               end,
-              closed = observer.closed,
+              error = function(...)
+                observer:error(...)
+              end,
             })
+            return function()
+              subscription:unsubscribe()
+            end
           end)
           :totable()
         return function()
