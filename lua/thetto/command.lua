@@ -10,7 +10,6 @@ local handle_error = function(promise)
 end
 
 function M.start(source, raw_opts)
-  vim.validate({ source = { source, "table" } })
   local opts = require("thetto.core.option").new_start_opts(source, raw_opts)
 
   local ctx_key = (source.key or require("thetto.util.source_key").unique())({

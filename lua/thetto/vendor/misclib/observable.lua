@@ -1,3 +1,6 @@
+---@diagnostic disable: inject-field
+
+--- @class Subscription
 local Subscription = {}
 Subscription.__index = Subscription
 
@@ -67,6 +70,7 @@ function Subscription._cleanup(self)
   on_unsubscribe()
 end
 
+--- Unsubscribe this subscription.
 function Subscription.unsubscribe(self)
   if self:closed() then
     return
@@ -75,6 +79,8 @@ function Subscription.unsubscribe(self)
   self:_cleanup()
 end
 
+--- Returns whether this subscription is closed.
+--- @return boolean
 function Subscription.closed(self)
   return self._observer == nil
 end
@@ -82,14 +88,21 @@ end
 local Observable = {}
 Observable.__index = Observable
 
+--- @class Observer
+--- @field start fun()?
+--- @field next fun(...:any)?
+--- @field error fun(...:any)?
+--- @field complete fun()?
+
+--- @param subscriber fun(observer:Observer):fun()?
 function Observable.new(subscriber)
-  vim.validate({ subscriber = { subscriber, "function" } })
   local tbl = { _subscriber = subscriber }
   return setmetatable(tbl, Observable)
 end
 
+--- @param observer Observer
+--- @return Subscription
 function Observable.subscribe(self, observer)
-  vim.validate({ observer = { observer, "table" } })
   observer = {
     start = observer.start or function() end,
     next = observer.next or function() end,

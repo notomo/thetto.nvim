@@ -88,10 +88,10 @@ function M.merge(sources, fields)
                 end
                 observer:next(items)
               end,
-              complete = function(...)
+              complete = function()
                 completed[i] = true
                 if vim.tbl_count(completed) == count then
-                  observer:complete(...)
+                  observer:complete()
                 end
               end,
               error = function(...)

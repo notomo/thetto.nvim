@@ -21,8 +21,8 @@ function M.new(source, source_ctx)
       next = function(...)
         observer:next(source_filter(...))
       end,
-      complete = function(...)
-        observer:complete(...)
+      complete = function()
+        observer:complete()
       end,
       error = function(...)
         observer:error(...)
