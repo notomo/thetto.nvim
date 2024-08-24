@@ -2,7 +2,7 @@ local consumer_events = require("thetto.core.consumer_events")
 
 --- @class ThettoCollectorRun
 --- @field source_ctx ThettoSourceContext
---- @field source_err string?
+--- @field _source_err string?
 --- @field _pipeline ThettoPipeline
 --- @field _consumer ThettoConsumer
 --- @field private _inputs table
@@ -16,7 +16,7 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
 
   local tbl = {
     source_ctx = source_ctx,
-    source_err = nil,
+    _source_err = nil,
 
     _consumer = consumer,
     _pipeline = pipeline,
@@ -45,7 +45,7 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
         resolve(self._consumer:consume(consumer_events.source_completed()))
       end,
       error = function(err)
-        self.source_err = err
+        self._source_err = err
         reject(self._consumer:consume(consumer_events.source_error(err)))
       end,
     })
@@ -61,6 +61,10 @@ end
 
 function M.apply_inputs(self, inputs)
   self._inputs = inputs
+end
+
+function M.errored(self)
+  return #self._all_items == 0 and self._source_err ~= nil
 end
 
 function M.stop(self)
@@ -91,8 +95,8 @@ function M.resume(self, consumer)
   self:stop()
 
   local subscriber = function(observer)
-    if self.source_err then
-      observer:error(self.source_err)
+    if self:errored() then
+      observer:error(self._source_err)
       return
     end
     observer:next(self._all_items)

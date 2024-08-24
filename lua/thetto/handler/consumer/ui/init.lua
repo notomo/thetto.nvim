@@ -88,8 +88,9 @@ local handlers = {
     self._item_list:apply_item_cursor()
     self._item_list:redraw_footer("")
   end),
-  [consumer_events.all.source_error] = function(_, err)
+  [consumer_events.all.source_error] = function(self, err)
     vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
+    self._item_list:redraw_footer("")
   end,
 }
 

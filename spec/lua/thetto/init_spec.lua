@@ -394,7 +394,7 @@ line3
 line4]])
   end)
 
-  it("can resume error", function()
+  it("can resume error if no items", function()
     local messages = {}
     vim.notify = function(msg)
       table.insert(messages, msg)
@@ -414,6 +414,31 @@ line4]])
       "[thetto] early stage error for test",
       "[thetto] early stage error for test",
     }, messages)
+  end)
+
+  it("can resume items even if there was an error", function()
+    vim.notify = function() end
+
+    local p1 = thetto.start({
+      collect = function()
+        return function(observer)
+          observer:next({
+            { value = "line1" },
+          })
+          observer:error("resume test")
+        end
+      end,
+    })
+    helper.wait(p1)
+
+    thetto.quit()
+
+    local p2 = thetto.resume()
+    helper.wait(p2)
+
+    thetto.call_consumer("move_to_list")
+    assert.lines([[
+line1]])
   end)
 
   it("can resume by specified offset with wrap", function()

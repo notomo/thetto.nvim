@@ -72,7 +72,7 @@ function Collector.restart(self, source_input_pattern)
 end
 
 function Collector.resume(self, consumer_factory, item_cursor_factory)
-  local source_errored = self._current_run.source_err ~= nil
+  local source_errored = self._current_run:errored()
   local consumer =
     self:_create_consumer(self._current_run.source_ctx, source_errored, consumer_factory, item_cursor_factory)
   self._current_run = self._current_run:resume(consumer)
