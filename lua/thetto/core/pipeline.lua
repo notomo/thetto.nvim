@@ -1,4 +1,15 @@
+--- @class ThettoPipelineStageContext
+--- @field input string
+--- @field cwd string
+
+--- @class ThettoPipelineStage
+--- @field ignore_input boolean?
+--- @field is_source_input boolean?
+--- @field apply fun(stage_ctx:ThettoPipelineStageContext,items:table[],opts:table?):(table[],fun())
+--- @field opts table?
+
 --- @class ThettoPipeline
+--- @field _stages ThettoPipelineStage[]
 local M = {}
 M.__index = M
 

@@ -39,6 +39,9 @@ end
 
 function M.write_lines(path, lines)
   local f = io.open(path, "w")
+  if not f then
+    error("cannot write: " .. path)
+  end
   for _, line in ipairs(lines) do
     f:write(line .. "\n")
   end

@@ -8,10 +8,12 @@ function M.promise(ms, f)
     if not timer then
       timer = vim.uv.new_timer()
     end
+    ---@diagnostic disable-next-line: need-check-nil
     timer:stop()
 
     local args = { ... }
     return require("thetto.vendor.promise").new(function(resolve)
+      ---@diagnostic disable-next-line: need-check-nil
       timer:start(
         ms,
         0,

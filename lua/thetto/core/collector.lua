@@ -2,6 +2,13 @@
 --- @field _pipeline ThettoPipeline
 --- @field _current_run ThettoCollectorRun?
 --- @field _item_cursor_row integer
+--- @field _consumer_factory fun()
+--- @field _item_cursor_factory fun()
+--- @field _ctx_key string
+--- @field _source table
+--- @field _source_bufnr integer
+--- @field _source_window_id integer
+--- @field _actions table
 local Collector = {}
 Collector.__index = Collector
 

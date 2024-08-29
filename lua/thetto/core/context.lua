@@ -1,8 +1,10 @@
 --- @class ThettoContext
 --- @field collector ThettoCollector
 --- @field consumer ThettoConsumer
+--- @field actions table
 --- @field private _fields table
 --- @field private _used_at integer
+--- @field private _key string
 local M = {}
 M.__index = function(tbl, k)
   local v = rawget(tbl._fields, k)

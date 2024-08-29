@@ -1,6 +1,8 @@
 --- @alias ThettoItemCursorFactory fun(items:table[]):ThettoItemCursor
 
 --- @class ThettoItemCursor
+--- @field row number?
+--- @field row_offset number?
 local M = {}
 M.__index = M
 

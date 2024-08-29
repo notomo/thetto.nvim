@@ -6,6 +6,9 @@ local consumer_events = require("thetto.core.consumer_events")
 --- @field _pipeline ThettoPipeline
 --- @field _consumer ThettoConsumer
 --- @field private _inputs table
+--- @field private _source_name string
+--- @field private _default_kind_name string
+--- @field _all_items table[]
 --- @field _subscription table
 --- @field _promise table
 local M = {}
