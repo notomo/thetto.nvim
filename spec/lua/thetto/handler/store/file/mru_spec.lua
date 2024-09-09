@@ -1,5 +1,6 @@
 local helper = require("thetto.test.helper")
 local thetto = helper.require("thetto")
+local assert = helper.typed_assert(assert)
 
 describe("file/mru store", function()
   local store_file_path
@@ -28,12 +29,13 @@ describe("file/mru store", function()
     vim.cmd.tabedit()
 
     local f = io.open(store_file_path)
+    assert(f)
     local content = vim.fn.split(f:read("*a"), "\n", false)
     f:close()
     local want = {
       file_path1,
       file_path2,
     }
-    assert.is_same(want, content)
+    assert.same(want, content)
   end)
 end)

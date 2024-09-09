@@ -1,5 +1,6 @@
 local helper = require("thetto.test.helper")
 local thetto = helper.require("thetto")
+local assert = helper.typed_assert(assert)
 
 describe("thetto.start() default ui", function()
   local notify = vim.notify
@@ -217,6 +218,7 @@ line2]])
 
   it("echoes warning message without ui if source causes error in early stage", function()
     local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
     vim.notify = function(msg)
       table.insert(messages, msg)
     end
@@ -228,7 +230,7 @@ line2]])
     })
     helper.wait(p)
 
-    assert.equals("[thetto] early stage error for test", messages[1])
+    assert.equal("[thetto] early stage error for test", messages[1])
   end)
 end)
 
@@ -396,6 +398,7 @@ line4]])
 
   it("can resume error if no items", function()
     local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
     vim.notify = function(msg)
       table.insert(messages, msg)
     end
@@ -410,13 +413,14 @@ line4]])
     local p2 = thetto.resume()
     helper.wait(p2)
 
-    assert.is_same({
+    assert.same({
       "[thetto] early stage error for test",
       "[thetto] early stage error for test",
     }, messages)
   end)
 
   it("can resume items even if there was an error", function()
+    ---@diagnostic disable-next-line: duplicate-set-field
     vim.notify = function() end
 
     local p1 = thetto.start({
@@ -661,7 +665,7 @@ describe("thetto.register_source()", function()
     })
 
     local got = require("thetto.util.source").by_name("test").collect()
-    assert.is_same({
+    assert.same({
       { value = "line1" },
       { value = "line2" },
     }, got)
@@ -680,6 +684,6 @@ describe("thetto.register_kind()", function()
     })
 
     local got = require("thetto.util.kind").by_name("test").action_test()
-    assert.is_same("value", got)
+    assert.same("value", got)
   end)
 end)

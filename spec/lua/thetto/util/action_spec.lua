@@ -1,5 +1,6 @@
 local helper = require("thetto.test.helper")
 local action_util = helper.require("thetto.util.action")
+local assert = helper.typed_assert(assert)
 
 describe("action_util.grouping()", function()
   before_each(helper.before_each)
@@ -12,12 +13,12 @@ describe("action_util.grouping()", function()
       { value = "test3", kind_name = "word" },
     })
 
-    assert.is_same({
+    assert.same({
       { value = "test1", kind_name = "file" },
       { value = "test2", kind_name = "file" },
     }, got[1].items)
 
-    assert.is_same({
+    assert.same({
       { value = "test3", kind_name = "word" },
     }, got[2].items)
   end)
