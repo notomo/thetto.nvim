@@ -1,4 +1,7 @@
 --- @class ThettoUiCloser
+--- @field _group integer
+--- @field _pattern string
+--- @field _original_window_id integer
 local M = {}
 M.__index = M
 

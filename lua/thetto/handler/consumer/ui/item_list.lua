@@ -12,6 +12,11 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @field _selection ThettoUiItemListSelection
 --- @field _item_cursor_factory ThettoItemCursorFactory
 --- @field _source_ctx ThettoSourceContext
+--- @field _decorator table
+--- @field _window_id integer
+--- @field _bufnr integer
+--- @field _ctx_key string
+--- @field _source_highlight fun(...)
 local M = {}
 M.__index = M
 

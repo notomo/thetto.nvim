@@ -1,6 +1,7 @@
 ---@diagnostic disable: inject-field
 
 --- @class Subscription
+--- @field private _observer {start:fun(),next:fun(...:any),error:fun(...:any),complete:fun()}?
 local Subscription = {}
 Subscription.__index = Subscription
 
@@ -22,6 +23,7 @@ function Subscription.new(observer, subscriber)
       if self:closed() then
         return
       end
+      ---@diagnostic disable-next-line: invisible
       self._observer.next(...)
     end,
 
@@ -29,6 +31,7 @@ function Subscription.new(observer, subscriber)
       if self:closed() then
         return
       end
+      ---@diagnostic disable-next-line: invisible
       self._observer = nil
       observer.error(...)
       self:_cleanup()
@@ -38,6 +41,7 @@ function Subscription.new(observer, subscriber)
       if self:closed() then
         return
       end
+      ---@diagnostic disable-next-line: invisible
       self._observer = nil
       observer.complete()
       self:_cleanup()

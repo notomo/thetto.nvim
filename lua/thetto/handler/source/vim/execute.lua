@@ -5,7 +5,7 @@ M.opts = { cmd = "messages" }
 function M.collect(source_ctx)
   local outputs = vim.api.nvim_exec2(source_ctx.opts.cmd, { output = true }).output
   return vim
-    .iter(vim.gsplit(outputs, "\n", true))
+    .iter(vim.gsplit(outputs, "\n", { plain = true }))
     :map(function(line)
       return {
         value = line,

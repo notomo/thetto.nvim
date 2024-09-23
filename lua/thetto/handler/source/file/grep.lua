@@ -63,7 +63,7 @@ function M.collect(source_ctx)
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       return vim.mpack.decode(encoded)
     end)
-    local job, err = require("thetto.util.job").execute(cmd, {
+    local job = require("thetto.util.job").execute(cmd, {
       on_stdout = function(_, data)
         if not data then
           work_observer:queue(source_ctx.cwd, output_buffer:pop())
@@ -87,7 +87,8 @@ function M.collect(source_ctx)
       stderr_buffered = false,
       cwd = source_ctx.cwd,
     })
-    if err then
+    if type(job) == "string" then
+      local err = job
       return observer:error(err)
     end
     return vim.schedule_wrap(function()

@@ -1,6 +1,11 @@
 --- @class ThettoImmediate
 --- @field _all_items table
 --- @field _item_cursor_row integer
+--- @field _is_valid fun(item:table):boolean
+--- @field _actions table
+--- @field _action_name string?
+--- @field _on_row_changed fun(row)
+--- @field _item_cursor_factory fun(all_items:table):ThettoItemCursor
 local M = {}
 M.__index = M
 

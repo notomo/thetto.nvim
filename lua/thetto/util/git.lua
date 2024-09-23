@@ -53,6 +53,7 @@ function M._apply(git_root, diff, path_a, path_b, path_from_git_root)
 
   local patch_path = vim.fn.tempname()
   local f = io.open(patch_path, "w")
+  assert(f, "failed to open: " .. patch_path)
   f:write(table.concat(diff_lines, "\n") .. "\n")
   f:close()
 
@@ -72,6 +73,7 @@ function M._index_content_path(git_root, path_from_git_root)
       local path = vim.fn.tempname()
       do
         local f = io.open(path, "w")
+        assert(f, "failed to open: " .. path)
         f:write(head)
         f:close()
       end
@@ -91,6 +93,7 @@ function M._enable_patch(git_root, path_from_git_root, bufnr)
           working_path = vim.fn.tempname()
           do
             local f = io.open(working_path, "w")
+            assert(f, "failed to open: " .. working_path)
             local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
             f:write(table.concat(new_lines, "\n"))
             f:close()

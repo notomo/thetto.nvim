@@ -4,6 +4,11 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @field _closed boolean
 --- @field _input_promise table
 --- @field private _input_filters ThettoUiInputFilters
+--- @field private _window_id integer
+--- @field private _bufnr integer
+--- @field private _ctx_key string
+--- @field private _decorator table
+--- @field private _filter_infos table[]
 local M = {}
 M.__index = M
 
@@ -93,7 +98,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
     _bufnr = bufnr,
     _window_id = window_id,
     _ctx_key = ctx_key,
-    _filter_infos = M._filter_infos(filters),
+    _filter_infos = M._get_filter_infos(filters),
     _decorator = require("thetto.lib.decorator").factory(_ns_name):create(bufnr, true),
     _closed = false,
     _input_filters = require("thetto.handler.consumer.ui.input_filters").new(source_name, filters),
@@ -142,7 +147,7 @@ function M._fill_lines(bufnr, filters)
   end
 end
 
-function M._filter_infos(filters)
+function M._get_filter_infos(filters)
   return vim
     .iter(filters)
     :map(function(filter)

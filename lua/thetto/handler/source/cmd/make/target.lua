@@ -28,6 +28,7 @@ function M._load(path, cwd, included_from)
   local items = {}
   local row = 1
   local f = io.open(path, "r")
+  assert(f, "failed to open: " .. path)
   local dir_path = vim.fs.dirname(path)
   local to_relative = pathlib.relative_modifier(cwd)
   for line in f:lines() do

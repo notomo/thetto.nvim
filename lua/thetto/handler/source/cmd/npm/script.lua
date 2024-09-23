@@ -8,6 +8,7 @@ function M._load(path)
   end
 
   local f = io.open(path, "r")
+  assert(f, "failed to open: " .. path)
   local json = f:read("*a")
   f:close()
   local content = vim.json.decode(json)

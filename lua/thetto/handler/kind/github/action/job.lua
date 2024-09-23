@@ -27,6 +27,7 @@ function M.action_download_log(items)
     :next(function(output)
       local file_path = vim.fn.tempname()
       local f = io.open(file_path, "w")
+      assert(f, "failed to open: " .. file_path)
       f:write(output)
       f:close()
 

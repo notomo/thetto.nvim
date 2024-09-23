@@ -8,6 +8,7 @@ function M.wrap(ms, f)
     end
     local args = { ... }
     timer = vim.uv.new_timer()
+    ---@cast timer -nil
     timer:start(ms, 0, function()
       if not timer:is_closing() then
         timer:close()

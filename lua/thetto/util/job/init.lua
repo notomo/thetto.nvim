@@ -3,13 +3,13 @@ local joblib = require("thetto.vendor.misclib.job")
 local M = {}
 
 local job_start = function(cmd, opts)
-  local log_dir = vim.fn.stdpath("log")
+  local log_dir = tostring(vim.fn.stdpath("log"))
   vim.fn.mkdir(log_dir, "p")
 
   local log_path = vim.fs.joinpath(log_dir, "thetto.log")
   local log_file = io.open(log_path, "a")
   if not log_file then
-    return nil, "could not open log file: " .. log_path
+    return "could not open log file: " .. log_path
   end
   local msg
   if type(cmd) == "table" then
@@ -24,8 +24,9 @@ local job_start = function(cmd, opts)
 end
 
 local start = function(observer, cmd, opts, input)
-  local job, err = job_start(cmd, opts)
-  if err then
+  local job = job_start(cmd, opts)
+  if type(job) == "string" then
+    local err = job
     return observer:error(err)
   end
 

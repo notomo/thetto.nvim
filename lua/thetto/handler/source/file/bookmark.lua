@@ -16,6 +16,7 @@ function M.collect(source_ctx)
   end
 
   local f = io.open(file_path, "r")
+  assert(f, "failed to open: " .. file_path)
   local lines = { file_path }
   vim.list_extend(lines, source_ctx.opts.default_paths)
   for line in f:lines() do

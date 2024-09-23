@@ -2,6 +2,9 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 
 --- @class ThettoUiSidecar
 --- @field _closed boolean
+--- @field _window_id integer
+--- @field _layout {width:integer,height:integer}
+--- @field _decorator_factory table
 local M = {}
 M.__index = M
 

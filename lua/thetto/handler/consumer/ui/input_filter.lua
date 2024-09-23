@@ -2,6 +2,7 @@ local _line_histories = {}
 
 --- @class ThettoUiInputFilter
 --- @field private _current_index integer
+--- @field private _line_history string[]
 local M = {}
 M.__index = M
 

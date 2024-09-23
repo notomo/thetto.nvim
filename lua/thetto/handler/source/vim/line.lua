@@ -10,7 +10,7 @@ function M.collect(source_ctx)
 
   local kind_name
   local path = vim.api.nvim_buf_get_name(bufnr) ---@type string|nil
-  if not vim.bo[bufnr].modified and vim.fn.filereadable(path) == 1 then
+  if not vim.bo[bufnr].modified and vim.fn.filereadable(tostring(path)) == 1 then
     kind_name = "file"
   else
     path = nil

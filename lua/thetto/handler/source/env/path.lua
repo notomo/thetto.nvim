@@ -6,7 +6,7 @@ M.opts = { key = "PATH" }
 
 function M.collect(source_ctx)
   return vim
-    .iter(vim.split(os.getenv(source_ctx.opts.key), pathlib.env_separator, { plain = true }))
+    .iter(vim.split(os.getenv(source_ctx.opts.key) or "", pathlib.env_separator, { plain = true }))
     :map(function(path)
       if vim.fn.isdirectory(path) == 0 then
         return nil

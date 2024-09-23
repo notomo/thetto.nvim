@@ -3,6 +3,9 @@ local fn = vim.fn
 
 --- @class ThettoComplete
 --- @field _all_items table
+--- @field _cursor_word {str:string,offset:integer}
+--- @field _priorities table<string,integer>
+--- @field _source_to_label table<string,string>
 local M = {}
 M.__index = M
 

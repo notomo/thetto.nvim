@@ -1,4 +1,7 @@
 --- @class ThettoUiItemListSelection
+--- @field _bufnr integer
+--- @field _selected_items table<integer,table>
+--- @field _ctx_key string
 local M = {}
 M.__index = M
 

@@ -29,7 +29,9 @@ function M.action_vsplit_open(items)
 end
 
 function M._open(item, help_prefix, edit_action)
-  local ok = pcall(vim.cmd, ("%s help %s"):format(help_prefix, item.value))
+  local ok = pcall(function()
+    vim.cmd(("%s help %s"):format(help_prefix, item.value))
+  end)
   if ok then
     return
   end

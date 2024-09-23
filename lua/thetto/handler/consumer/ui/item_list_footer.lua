@@ -6,6 +6,9 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @field _end_index integer
 --- @field _all_items_count integer
 --- @field _selected_count integer
+--- @field _source_name string
+--- @field _ctx_key string
+--- @field _window_id integer
 local M = {}
 M.__index = M
 
