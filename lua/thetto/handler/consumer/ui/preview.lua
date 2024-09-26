@@ -1,5 +1,6 @@
 local filelib = require("thetto.lib.file")
 local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
+local cursorlib = require("thetto.vendor.misclib.cursor")
 
 local M = {}
 
@@ -34,7 +35,7 @@ local set_cursor = function(window_id, row, column, end_column, width)
   end
   column = column or 0
   end_column = end_column or -1
-  vim.api.nvim_win_set_cursor(window_id, { row, column })
+  cursorlib.set({ row, column }, window_id)
   if end_column <= width then
     return
   end
