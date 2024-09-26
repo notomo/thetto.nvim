@@ -55,13 +55,13 @@ function M.collect(source_ctx)
         }
       end)
       :totable()
-    return vim.mpack.encode(items)
+    return require("string.buffer").encode(items)
   end
 
   return function(observer)
     local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
-      return vim.mpack.decode(encoded)
+      return require("string.buffer").decode(encoded)
     end)
     local job = require("thetto.util.job").execute(cmd, {
       on_stdout = function(_, data)

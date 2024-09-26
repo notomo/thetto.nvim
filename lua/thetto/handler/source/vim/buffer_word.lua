@@ -15,7 +15,7 @@ function M.collect(source_ctx)
         }
       end)
       :totable()
-    return vim.mpack.encode(items)
+    return require("string.buffer").encode(items)
   end
 
   return function(observer)
@@ -26,7 +26,7 @@ function M.collect(source_ctx)
     end
 
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
-      return vim.mpack.decode(encoded)
+      return require("string.buffer").decode(encoded)
     end)
 
     local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str or ""
