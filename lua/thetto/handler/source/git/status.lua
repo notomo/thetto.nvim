@@ -16,8 +16,8 @@ function M.collect(source_ctx)
     ["Unmerged paths:"] = "conflict",
   }
   local parse_stage = function(target)
-    local path_status, path = target:match("([^:]+):%s+(.*)")
-    return path_status, path
+    local path_status, path_part = target:match("([^:]+):%s+(.*)")
+    return path_status, path_part
   end
   local parsers = {
     staged = parse_stage,
@@ -50,7 +50,8 @@ function M.collect(source_ctx)
       }
     end
 
-    local path_status, path = parsers[index_status](target)
+    local path_status, path_part = parsers[index_status](target)
+    local path = vim.split(path_part, " -> ", { plain = true })[1]
     local abs_path = vim.fs.joinpath(git_root, path)
 
     local kind
@@ -60,7 +61,7 @@ function M.collect(source_ctx)
 
     local status = ("%-13s"):format(path_status)
     local indent = "    "
-    local desc = ("%s%s %s"):format(indent, status, path)
+    local desc = ("%s%s %s"):format(indent, status, path_part)
     return {
       value = path,
       desc = desc,
