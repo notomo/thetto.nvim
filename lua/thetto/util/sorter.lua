@@ -96,4 +96,24 @@ function M.fields(converts)
   })
 end
 
+function M.field_by_merged(sorters)
+  return require("thetto.util.sorter").by_name("field", {
+    desc = vim
+      .iter(sorters)
+      :map(function(sorter)
+        return sorter.desc
+      end)
+      :join(","),
+    opts = {
+      converts = vim
+        .iter(sorters)
+        :map(function(sorter)
+          return sorter.opts.converts
+        end)
+        :flatten()
+        :totable(),
+    },
+  })
+end
+
 return M
