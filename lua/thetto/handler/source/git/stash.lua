@@ -57,28 +57,6 @@ M.actions = {
     return promise, { raw_bufnr = bufnr }
   end,
 
-  action_create = function(items)
-    local item = items[1]
-    if not item then
-      return
-    end
-
-    return require("thetto.util.input")
-      .promise({
-        prompt = "Create stash: ",
-      })
-      :next(function(input)
-        if not input or input == "" then
-          return require("thetto.vendor.misclib.message").info("invalid input to create stash")
-        end
-        return require("thetto.util.job")
-          .promise({ "git", "stash", "save", input }, { cwd = item.git_root })
-          :next(function()
-            return require("thetto.vendor.misclib.message").info(("Created stash: %s"):format(input))
-          end)
-      end)
-  end,
-
   action_pop = function(items)
     local item = items[1]
     if not item then

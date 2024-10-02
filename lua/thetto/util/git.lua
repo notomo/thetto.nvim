@@ -224,4 +224,19 @@ function M.compare(git_root, path_before, revision_before, path_after, revision_
   end)
 end
 
+function M.create_stash(git_root)
+  return require("thetto.util.input")
+    .promise({
+      prompt = "Create stash: ",
+    })
+    :next(function(input)
+      if not input or input == "" then
+        return require("thetto.vendor.misclib.message").info("invalid input to create stash")
+      end
+      return require("thetto.util.job").promise({ "git", "stash", "save", input }, { cwd = git_root }):next(function()
+        require("thetto.vendor.misclib.message").info(("Created stash: %s"):format(input))
+      end)
+    end)
+end
+
 return M
