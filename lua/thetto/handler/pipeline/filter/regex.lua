@@ -57,7 +57,7 @@ function M.apply(stage_ctx, items, opts)
 end
 
 local highlight_opts = {
-  priority = vim.highlight.priorities.user - 1,
+  priority = vim.hl.priorities.user - 1,
 }
 
 local MAX_COUNT_PER_REGEX_IN_LINE = 100

@@ -62,7 +62,7 @@ local to_column = function(hl_column)
 end
 
 local highlight_opts = {
-  priority = vim.highlight.priorities.user - 1,
+  priority = vim.hl.priorities.user - 1,
 }
 
 function M.columns(hl_columns)

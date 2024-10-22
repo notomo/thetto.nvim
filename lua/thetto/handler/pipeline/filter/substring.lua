@@ -52,7 +52,7 @@ function M.apply(stage_ctx, items, opts)
 end
 
 local highlight_opts = {
-  priority = vim.highlight.priorities.user - 1,
+  priority = vim.hl.priorities.user - 1,
 }
 
 function M.highlight(stage_ctx, opts, decorator, items, first_line)

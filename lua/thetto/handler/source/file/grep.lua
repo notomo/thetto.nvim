@@ -104,7 +104,7 @@ vim.api.nvim_set_hl(0, "ThettoFileGrepMatch", { default = true, link = "Define" 
 local highlight_target = vim.regex("\\v[[:alnum:]_]+")
 
 local highlight_opts = {
-  priority = vim.highlight.priorities.user - 1,
+  priority = vim.hl.priorities.user - 1,
 }
 
 function M.highlight(decorator, items, first_line, source_ctx)

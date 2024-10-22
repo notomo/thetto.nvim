@@ -1,7 +1,7 @@
 local Decorator = require("thetto.vendor.misclib.decorator")
 
 local highlight_opts = {
-  priority = vim.highlight.priorities.user - 1,
+  priority = vim.hl.priorities.user - 1,
 }
 
 function Decorator.filter(self, hl_group, row, elements, condition)
