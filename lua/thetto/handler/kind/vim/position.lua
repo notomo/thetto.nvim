@@ -4,7 +4,14 @@ local goto_item_pos = function(item)
   if item.bufnr then
     vim.cmd.buffer(item.bufnr)
   end
-  vim.api.nvim_win_set_cursor(0, { item.row, item.column or 0 })
+
+  local count = vim.api.nvim_buf_line_count(item.bufnr or 0)
+  local row = item.row
+  if item.row > count then
+    row = count
+  end
+
+  vim.api.nvim_win_set_cursor(0, { row, item.column or 0 })
 end
 
 function M.action_open(items)
