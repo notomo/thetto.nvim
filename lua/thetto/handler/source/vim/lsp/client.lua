@@ -56,7 +56,10 @@ M.actions = {
       return
     end
 
-    local content = vim.inspect(client.capabilities)
+    local content = vim.inspect({
+      capabilities = client.capabilities,
+      dynamic_capabilities = client.dynamic_capabilities,
+    })
     require("thetto.lib.buffer").open_scratch_tab()
     vim.bo.filetype = "lua"
     local lines = vim.split(content, "\n", { plain = true })

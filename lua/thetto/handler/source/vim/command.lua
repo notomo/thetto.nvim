@@ -28,6 +28,10 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
+M.modify_pipeline = require("thetto.util.pipeline").append({
+  require("thetto.util.sorter").field_by_name("value"),
+})
+
 M.kind_name = "vim/command"
 
 return M
