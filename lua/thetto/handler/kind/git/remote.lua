@@ -17,7 +17,7 @@ function M.action_add()
     :next(function(name)
       name = vim.trim(name)
       if not name or name == "" then
-        return require("thetto.vendor.misclib.message").info("invalid name to add remote: " .. tostring(name))
+        return require("thetto.lib.message").info("invalid name to add remote: " .. tostring(name))
       end
       remote_name = name
       return require("thetto.util.input").promise({
@@ -28,7 +28,7 @@ function M.action_add()
     :next(function(url)
       url = vim.trim(url)
       if not url or url == "" then
-        return require("thetto.vendor.misclib.message").info("invalid url to add remote: " .. tostring(url))
+        return require("thetto.lib.message").info("invalid url to add remote: " .. tostring(url))
       end
       return require("thetto.util.job").promise({ "git", "remote", "add", remote_name, url }, { cwd = git_root })
     end)

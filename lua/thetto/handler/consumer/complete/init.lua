@@ -101,7 +101,7 @@ local handlers = {
     debounced_complete(self, self._all_items)
   end,
   [consumer_events.all.source_error] = function(_, err)
-    vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
+    require("thetto.lib.message").warn(err)
   end,
 }
 

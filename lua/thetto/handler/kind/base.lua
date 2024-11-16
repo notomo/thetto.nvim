@@ -5,7 +5,7 @@ M.opts = {}
 
 function M.action_debug_print(items)
   for _, item in ipairs(items) do
-    require("thetto.vendor.misclib.message").info(vim.inspect(item))
+    require("thetto.lib.message").info(vim.inspect(item))
   end
 end
 
@@ -25,7 +25,7 @@ end
 
 function M.action_echo(items)
   for _, item in ipairs(items) do
-    require("thetto.vendor.misclib.message").info(item.value)
+    require("thetto.lib.message").info(item.value)
   end
 end
 
@@ -46,7 +46,7 @@ function M.action_yank(items, action_ctx)
   local value = table.concat(action_ctx.opts.convert(values), "\n")
   if value ~= "" then
     vim.fn.setreg(action_ctx.opts.register, value)
-    require("thetto.vendor.misclib.message").info("yank: " .. value)
+    require("thetto.lib.message").info("yank: " .. value)
   end
 end
 

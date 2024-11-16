@@ -59,7 +59,7 @@ function M.action_close_with_comment(items, action_ctx)
     })
     :next(function(input)
       if not input or input == "" then
-        return require("thetto.vendor.misclib.message").info("Canceled issue close with comment")
+        return require("thetto.lib.message").info("Canceled issue close with comment")
       end
       return require("thetto.util.action").call(action_ctx.kind_name, "close", items, {
         comment = input,

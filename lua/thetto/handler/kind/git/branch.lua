@@ -55,15 +55,13 @@ function M.action_rename(items)
     })
     :next(function(input)
       if not input or input == "" or input == old_branch then
-        return require("thetto.vendor.misclib.message").info("invalid input to rename branch: " .. tostring(input))
+        return require("thetto.lib.message").info("invalid input to rename branch: " .. tostring(input))
       end
       new_branch = input
       return require("thetto.util.job")
         .promise({ "git", "branch", "-m", old_branch, new_branch }, { cwd = item.git_root })
         :next(function()
-          return require("thetto.vendor.misclib.message").info(
-            ("Renamed branch: %s -> %s"):format(old_branch, new_branch)
-          )
+          return require("thetto.lib.message").info(("Renamed branch: %s -> %s"):format(old_branch, new_branch))
         end)
     end)
 end
@@ -83,13 +81,13 @@ function M.action_create(items)
     })
     :next(function(input)
       if not input or input == "" then
-        return require("thetto.vendor.misclib.message").info("invalid input to create branch: " .. tostring(new_branch))
+        return require("thetto.lib.message").info("invalid input to create branch: " .. tostring(new_branch))
       end
       new_branch = input
       return require("thetto.util.job")
         .promise({ "git", "switch", "-c", new_branch, from }, { cwd = item.git_root })
         :next(function()
-          return require("thetto.vendor.misclib.message").info(("Created branch from %s: %s"):format(from, new_branch))
+          return require("thetto.lib.message").info(("Created branch from %s: %s"):format(from, new_branch))
         end)
     end)
 end

@@ -56,7 +56,7 @@ local handlers = {
     return require("thetto.core.executor").execute(action_item_groups)
   end,
   [consumer_events.all.source_error] = function(_, err)
-    vim.notify(require("thetto.vendor.misclib.message").wrap(err), vim.log.levels.WARN)
+    require("thetto.lib.message").warn(err)
   end,
 }
 

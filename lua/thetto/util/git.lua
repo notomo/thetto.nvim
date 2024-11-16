@@ -117,7 +117,7 @@ function M._enable_patch(git_root, path_from_git_root, bufnr)
           vim.bo[bufnr].modified = false
         end)
         :catch(function(err)
-          require("thetto.vendor.misclib.message").warn(err)
+          require("thetto.lib.message").warn(err)
         end)
     end,
   })
@@ -231,10 +231,10 @@ function M.create_stash(git_root)
     })
     :next(function(input)
       if not input or input == "" then
-        return require("thetto.vendor.misclib.message").info("invalid input to create stash")
+        return require("thetto.lib.message").info("invalid input to create stash")
       end
       return require("thetto.util.job").promise({ "git", "stash", "save", input }, { cwd = git_root }):next(function()
-        require("thetto.vendor.misclib.message").info(("Created stash: %s"):format(input))
+        require("thetto.lib.message").info(("Created stash: %s"):format(input))
       end)
     end)
 end

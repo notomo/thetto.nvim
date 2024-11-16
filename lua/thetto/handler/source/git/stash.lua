@@ -68,7 +68,7 @@ M.actions = {
         cwd = item.git_root,
       })
       :next(function()
-        return require("thetto.vendor.misclib.message").info(("Pop stash: %s"):format(item.stash_name))
+        return require("thetto.lib.message").info(("Pop stash: %s"):format(item.stash_name))
       end)
   end,
 
@@ -83,7 +83,7 @@ M.actions = {
         cwd = item.git_root,
       })
       :next(function()
-        return require("thetto.vendor.misclib.message").info(("Applied stash: %s"):format(item.stash_name))
+        return require("thetto.lib.message").info(("Applied stash: %s"):format(item.stash_name))
       end)
   end,
 
@@ -98,7 +98,7 @@ M.actions = {
         cwd = item.git_root,
       })
       :next(function()
-        return require("thetto.vendor.misclib.message").info(("Drop stash: %s"):format(item.stash_name))
+        return require("thetto.lib.message").info(("Drop stash: %s"):format(item.stash_name))
       end)
   end,
 }

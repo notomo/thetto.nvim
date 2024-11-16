@@ -21,7 +21,7 @@ function M.collect(source_ctx)
       local path = vim.fs.joinpath(issue_template_dir, file_name)
       local content = require("thetto.lib.file").read_all(path)
       if type(content) == "table" then
-        require("thetto.vendor.misclib.message").warn(("failed to read template file: %s"):format(path))
+        require("thetto.lib.message").warn(("failed to read template file: %s"):format(path))
         return nil
       end
 
@@ -33,7 +33,7 @@ function M.collect(source_ctx)
         end
       end
       if not template_name then
-        require("thetto.vendor.misclib.message").warn(("failed to parse template name: %s"):format(file_name))
+        require("thetto.lib.message").warn(("failed to parse template name: %s"):format(file_name))
         return nil
       end
 

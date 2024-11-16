@@ -82,7 +82,7 @@ function M.action_discard(items)
     })
     :next(function(input)
       if input ~= "y" then
-        return require("thetto.vendor.misclib.message").info("Canceled discard")
+        return require("thetto.lib.message").info("Canceled discard")
       end
       local promises = {}
       if #restore_targets > 0 then
@@ -119,7 +119,7 @@ function M.action_stash(items)
       unpack(paths),
     }, { cwd = git_root })
     :next(function()
-      require("thetto.vendor.misclib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
+      require("thetto.lib.message").info("Stashed:\n" .. table.concat(paths, "\n"))
       return require("thetto").reload(bufnr)
     end)
 end
