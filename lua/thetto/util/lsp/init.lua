@@ -20,12 +20,16 @@ end
 --- @param req_cxt ThettoLspRequestContext
 function M.request(req_cxt)
   local subscriber = function(observer)
-    local clients = req_cxt.clients
+    local client_count = #req_cxt.clients
+    if client_count == 0 then
+      observer:complete()
+      return
+    end
 
     local completed = {}
     local complete = function(client_id)
       completed[client_id] = true
-      if vim.tbl_count(completed) ~= #clients then
+      if vim.tbl_count(completed) ~= client_count then
         return
       end
       observer:complete()
@@ -54,7 +58,7 @@ function M.request(req_cxt)
       return cancel
     end
 
-    local cancels = vim.iter(clients):map(request):totable()
+    local cancels = vim.iter(req_cxt.clients):map(request):totable()
     local cancel = function()
       for _, f in ipairs(cancels) do
         f()
