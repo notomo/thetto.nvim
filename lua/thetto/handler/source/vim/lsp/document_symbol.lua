@@ -3,16 +3,37 @@ local M = {}
 function M.collect(source_ctx)
   local current_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
   return function(observer)
-    local method = "textDocument/documentSymbol"
-    local params = { textDocument = vim.lsp.util.make_text_document_params(source_ctx.bufnr) }
-    local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
-      local items = {}
-      for _, v in ipairs(result or {}) do
-        vim.list_extend(items, M._to_items(source_ctx, v, "", current_path))
-      end
-      observer:next(items)
-      observer:complete()
-    end)
+    local bufnr = source_ctx.bufnr
+    local method = vim.lsp.protocol.Methods.textDocument_documentSymbol
+    local cancel = require("thetto.util.lsp").request({
+      bufnr = bufnr,
+      method = method,
+      clients = vim.lsp.get_clients({
+        bufnr = bufnr,
+        method = method,
+      }),
+      params = function(_)
+        return { textDocument = vim.lsp.util.make_text_document_params(bufnr) }
+      end,
+      observer = {
+        next = function(result)
+          local items = vim
+            .iter(result or {})
+            :map(function(v)
+              return M._to_items(source_ctx, v, "", current_path)
+            end)
+            :flatten()
+            :totable()
+          observer:next(items)
+        end,
+        complete = function()
+          observer:complete()
+        end,
+        error = function(err)
+          observer:error(err)
+        end,
+      },
+    })
     return cancel
   end
 end

@@ -25,21 +25,41 @@ end
 function M.collect(source_ctx)
   local to_item = M._to_item(source_ctx.cwd)
   return function(observer)
-    local method = "textDocument/references"
-    local params = vim.lsp.util.make_position_params(source_ctx.window_id)
-    params.context = {
-      includeDeclaration = true,
-    }
-    local _, cancel = vim.lsp.buf_request(source_ctx.bufnr, method, params, function(_, result)
-      local items = vim
-        .iter(result or {})
-        :map(function(e)
-          return to_item(e)
-        end)
-        :totable()
-      observer:next(items)
-      observer:complete()
-    end)
+    local bufnr = source_ctx.bufnr
+    local method = vim.lsp.protocol.Methods.textDocument_references
+    local cancel = require("thetto.util.lsp").request({
+      bufnr = bufnr,
+      method = method,
+      clients = vim.lsp.get_clients({
+        bufnr = bufnr,
+        method = method,
+      }),
+      params = function(client)
+        local params = vim.lsp.util.make_position_params(source_ctx.window_id, client.offset_encoding)
+        ---@diagnostic disable-next-line: inject-field
+        params.context = {
+          includeDeclaration = true,
+        }
+        return params
+      end,
+      observer = {
+        next = function(result)
+          local items = vim
+            .iter(result or {})
+            :map(function(e)
+              return to_item(e)
+            end)
+            :totable()
+          observer:next(items)
+        end,
+        complete = function()
+          observer:complete()
+        end,
+        error = function(err)
+          observer:error(err)
+        end,
+      },
+    })
     return cancel
   end
 end
