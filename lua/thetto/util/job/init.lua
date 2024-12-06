@@ -172,34 +172,37 @@ function M.promise(cmd, opts)
 
   local stdout = require("thetto.vendor.misclib.job.output").new()
   local stderr = require("thetto.vendor.misclib.job.output").new()
-  return require("thetto.vendor.promise").new(function(resolve, reject)
-    local default_opts = {
-      stderr_buffered = true,
-      stdout_buffered = true,
-      on_stdout = stdout:collector(),
-      on_stderr = stderr:collector(),
-    }
-    local on_exit = opts.on_exit or function(output)
-      vim.api.nvim_echo({ { output } }, true, {})
-    end
-    opts = vim.tbl_extend("force", default_opts, opts)
-    opts.on_exit = function(_, code)
-      if opts.is_err(code) then
-        return reject(stderr:str())
-      end
-      local output = stdout:str()
-      on_exit(output, code)
-      return resolve(output)
-    end
-    if opts.env and vim.tbl_isempty(opts.env) then
-      opts.env = nil
-    end
 
-    local _, err = job_start(cmd, opts)
-    if err ~= nil then
-      return reject(err)
+  local promise, resolve, reject = require("thetto.vendor.promise").with_resolvers()
+
+  local default_opts = {
+    stderr_buffered = true,
+    stdout_buffered = true,
+    on_stdout = stdout:collector(),
+    on_stderr = stderr:collector(),
+  }
+  local on_exit = opts.on_exit or function(output)
+    vim.api.nvim_echo({ { output } }, true, {})
+  end
+  opts = vim.tbl_extend("force", default_opts, opts)
+  opts.on_exit = function(_, code)
+    if opts.is_err(code) then
+      return reject(stderr:str())
     end
-  end)
+    local output = stdout:str()
+    on_exit(output, code)
+    return resolve(output)
+  end
+  if opts.env and vim.tbl_isempty(opts.env) then
+    opts.env = nil
+  end
+
+  local _, err = job_start(cmd, opts)
+  if err ~= nil then
+    reject(err)
+  end
+
+  return promise
 end
 
 return M

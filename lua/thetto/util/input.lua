@@ -1,11 +1,11 @@
 local M = {}
 
 function M.promise(opts)
-  return require("thetto.vendor.promise").new(function(resolve)
-    vim.ui.input(opts, function(input)
-      resolve(input)
-    end)
+  local promise, resolve = require("thetto.vendor.promise").with_resolvers()
+  vim.ui.input(opts, function(input)
+    resolve(input)
   end)
+  return promise
 end
 
 return M

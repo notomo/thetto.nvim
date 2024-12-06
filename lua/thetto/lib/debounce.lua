@@ -12,16 +12,18 @@ function M.promise(ms, f)
     timer:stop()
 
     local args = { ... }
-    return require("thetto.vendor.promise").new(function(resolve)
-      ---@diagnostic disable-next-line: need-check-nil
-      timer:start(
-        ms,
-        0,
-        vim.schedule_wrap(function()
-          resolve(f(unpack(args)))
-        end)
-      )
-    end)
+    local promise, resolve = require("thetto.vendor.promise").with_resolvers()
+
+    ---@diagnostic disable-next-line: need-check-nil
+    timer:start(
+      ms,
+      0,
+      vim.schedule_wrap(function()
+        resolve(f(unpack(args)))
+      end)
+    )
+
+    return promise
   end
 end
 
