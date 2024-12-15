@@ -9,11 +9,7 @@ function M.action_edit_last_comment(items)
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor", "--edit-last" }
-  local result = require("thetto.util.job").execute(cmd)
-  if type(result) == "string" then
-    local err = result
-    return nil, err
-  end
+  return require("thetto.util.job").promise(cmd)
 end
 
 function M.action_comment(items)
@@ -23,11 +19,7 @@ function M.action_comment(items)
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor" }
-  local result = require("thetto.util.job").execute(cmd)
-  if type(result) == "string" then
-    local err = result
-    return nil, err
-  end
+  return require("thetto.util.job").promise(cmd)
 end
 
 M.opts.close = {
@@ -45,11 +37,7 @@ function M.action_close(items, action_ctx)
     table.insert(cmd, "--comment=" .. action_ctx.opts.comment)
   end
 
-  local result = require("thetto.util.job").execute(cmd)
-  if type(result) == "string" then
-    local err = result
-    return nil, err
-  end
+  return require("thetto.util.job").promise(cmd)
 end
 
 function M.action_close_with_comment(items, action_ctx)
@@ -80,11 +68,7 @@ function M.action_reopen(items)
   end
 
   local cmd = { "gh", "issue", "reopen", item.url }
-  local result = require("thetto.util.job").execute(cmd)
-  if type(result) == "string" then
-    local err = result
-    return nil, err
-  end
+  return require("thetto.util.job").promise(cmd)
 end
 
 function M.action_list_comment(items)

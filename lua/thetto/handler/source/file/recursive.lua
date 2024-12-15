@@ -58,7 +58,6 @@ function M.collect(source_ctx)
 
   return function(observer)
     local to_absolute = source_ctx.opts.to_absolute
-    local output_buffer = require("thetto.vendor.misclib.job.output").new_buffer()
     local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
       local items = require("string.buffer").decode(encoded)
       return vim
@@ -73,36 +72,28 @@ function M.collect(source_ctx)
         :totable()
     end)
     local job = require("thetto.util.job").execute(cmd, {
-      on_stdout = function(_, data)
+      stdout = function(_, data)
         if not data then
-          work_observer:queue(source_ctx.cwd, output_buffer:pop())
+          work_observer:queue(source_ctx.cwd, "")
           return
         end
-
-        local str = output_buffer:append(data)
-        if not str then
-          return
-        end
-
-        work_observer:queue(source_ctx.cwd, str)
+        work_observer:queue(source_ctx.cwd, data)
       end,
       on_exit = function()
         work_observer:complete()
       end,
-      on_stderr = function()
+      stderr = function()
         -- workaround to ignore permission error
       end,
-      stdout_buffered = false,
-      stderr_buffered = false,
       cwd = source_ctx.cwd,
     })
     if type(job) == "string" then
       local err = job
       return observer:error(err)
     end
-    return vim.schedule_wrap(function()
-      job:stop()
-    end)
+    return function()
+      job:kill(0)
+    end
   end
 end
 

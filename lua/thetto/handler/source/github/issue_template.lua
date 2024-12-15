@@ -68,7 +68,7 @@ M.actions = {
     if item.path then
       table.insert(cmd, "--template=" .. item.value)
     end
-    return require("thetto.vendor.misclib.job").open_terminal(cmd, {
+    vim.fn.termopen(cmd, {
       cwd = item.root_dir,
       env = { _THETTO = 1 }, -- HACK
     })

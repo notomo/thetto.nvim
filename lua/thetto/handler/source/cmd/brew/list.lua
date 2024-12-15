@@ -17,11 +17,7 @@ M.actions = {
     end
     -- use install to update one package
     local cmd = { "brew", "install", item.value }
-    local result = require("thetto.util.job").execute(cmd)
-    if type(result) == "string" then
-      local err = result
-      return nil, err
-    end
+    return require("thetto.util.job").promise(cmd)
   end,
 }
 
