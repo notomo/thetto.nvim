@@ -1,23 +1,13 @@
-local filelib = require("thetto.lib.file")
-
 local M = {}
 
 function M.project(target_patterns, path)
-  return function()
-    local patterns = target_patterns or { ".git" }
-    return M.upward(patterns, path)()
-  end
+  return M.upward(target_patterns or { ".git" }, path)
 end
 
 function M.upward(target_patterns, path)
   return function()
-    for _, pattern in ipairs(target_patterns) do
-      local found = filelib.find_upward_dir(pattern, path)
-      if found ~= nil then
-        return found
-      end
-    end
-    return "."
+    local root = vim.fs.root(path or ".", target_patterns)
+    return root or "."
   end
 end
 

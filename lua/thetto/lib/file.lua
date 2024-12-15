@@ -48,25 +48,8 @@ function M.write_lines(path, lines)
   f:close()
 end
 
-function M.find_upward_dir(child_pattern, path)
-  path = path or "."
-  path = path .. ";"
-
-  local found_file = vim.fn.findfile(child_pattern, path)
-  if found_file ~= "" then
-    return vim.fn.fnamemodify(found_file, ":p:h")
-  end
-
-  local found_dir = vim.fn.finddir(child_pattern, path)
-  if found_dir ~= "" then
-    return vim.fn.fnamemodify(found_dir, ":p:h:h")
-  end
-
-  return nil
-end
-
 function M.find_git_root(cwd)
-  local git_root = M.find_upward_dir(".git", cwd)
+  local git_root = vim.fs.root(cwd or ".", { ".git" })
   if git_root == nil then
     return nil, "not found .git"
   end
