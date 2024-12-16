@@ -59,16 +59,20 @@ function M.collect(source_ctx)
   end
 
   return function(observer)
-    local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
-      return require("string.buffer").decode(encoded)
-    end)
+    local work_observer = require("thetto.util.job.work_observer").new(
+      source_ctx.cwd,
+      observer,
+      to_items,
+      function(encoded)
+        return require("string.buffer").decode(encoded)
+      end
+    )
     local job = require("thetto.util.job").execute(cmd, {
       stdout = function(_, data)
         if not data then
-          work_observer:queue(source_ctx.cwd, "")
           return
         end
-        work_observer:queue(source_ctx.cwd, data)
+        work_observer:queue(data)
       end,
       on_exit = function(_)
         work_observer:complete()

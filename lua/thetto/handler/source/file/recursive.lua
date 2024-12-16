@@ -58,26 +58,30 @@ function M.collect(source_ctx)
 
   return function(observer)
     local to_absolute = source_ctx.opts.to_absolute
-    local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
-      local items = require("string.buffer").decode(encoded)
-      return vim
-        .iter(items)
-        :map(function(item)
-          local value = source_ctx.opts.modify_path(item.value)
-          return {
-            value = value,
-            path = to_absolute(source_ctx.cwd, item.path),
-          }
-        end)
-        :totable()
-    end)
+    local work_observer = require("thetto.util.job.work_observer").new(
+      source_ctx.cwd,
+      observer,
+      to_items,
+      function(encoded)
+        local items = require("string.buffer").decode(encoded)
+        return vim
+          .iter(items)
+          :map(function(item)
+            local value = source_ctx.opts.modify_path(item.value)
+            return {
+              value = value,
+              path = to_absolute(source_ctx.cwd, item.path),
+            }
+          end)
+          :totable()
+      end
+    )
     local job = require("thetto.util.job").execute(cmd, {
       stdout = function(_, data)
         if not data then
-          work_observer:queue(source_ctx.cwd, "")
           return
         end
-        work_observer:queue(source_ctx.cwd, data)
+        work_observer:queue(data)
       end,
       on_exit = function()
         work_observer:complete()
