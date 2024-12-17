@@ -1,3 +1,5 @@
+local vim = vim
+
 local M = {}
 
 local write_log = function(cmd)
@@ -90,15 +92,31 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
     write_log(cmd)
 
     local _, job = pcall(function()
+      local rest = ""
       return vim.system(cmd, {
         text = true,
         stdout = function(_, data)
           if not data then
+            vim.schedule(function()
+              local outputs = opts.to_outputs(rest)
+              observer:next(to_items(outputs))
+            end)
             return
           end
 
-          local outputs = opts.to_outputs(data)
-          observer:next(to_items(outputs))
+          local joined = rest .. data
+          local index = joined:reverse():find("\n") or 0
+          local lines_str = joined:sub(0, -index)
+          if index == 1 then
+            rest = ""
+          else
+            rest = joined:sub(-index + 1)
+          end
+
+          vim.schedule(function()
+            local outputs = opts.to_outputs(lines_str)
+            observer:next(to_items(outputs))
+          end)
         end,
         cwd = opts.cwd,
         env = opts.env,
@@ -107,7 +125,9 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
         if o.code ~= 0 then
           return observer:error(o.stderr)
         end
-        observer:complete()
+        vim.schedule(function()
+          observer:complete()
+        end)
       end)
     end)
     if type(job) == "string" then
