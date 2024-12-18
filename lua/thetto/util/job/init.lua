@@ -1,4 +1,5 @@
 local vim = vim
+local parse_output = require("thetto.util.job.parse").output
 
 local M = {}
 
@@ -24,7 +25,7 @@ end
 function M.run(cmd, source_ctx, to_item, raw_opts)
   local default_opts = {
     to_outputs = function(output)
-      return require("thetto.util.job.parse").output(output)
+      return parse_output(output)
     end,
     stop_on_error = true,
     input = nil,
@@ -36,31 +37,35 @@ function M.run(cmd, source_ctx, to_item, raw_opts)
     write_log(cmd)
 
     local _, job = pcall(function()
-      return vim.system(cmd, {
-        text = true,
-        cwd = opts.cwd,
-        env = opts.env,
-        stdin = opts.input,
-      }, function(o)
-        local code = o.code
-        if opts.stop_on_error and code ~= 0 then
-          return observer:error(o.stderr)
-        end
+      return vim.system(
+        cmd,
+        {
+          text = true,
+          cwd = opts.cwd,
+          env = opts.env,
+          stdin = opts.input,
+        },
+        vim.schedule_wrap(function(o)
+          local code = o.code
+          if opts.stop_on_error and code ~= 0 then
+            return observer:error(o.stderr)
+          end
 
-        local out_or_err = code ~= 0 and o.stderr or o.stdout
-        local items = vim
-          .iter(opts.to_outputs(out_or_err))
-          :map(function(output)
-            local item = to_item(output, code)
-            if not item then
-              return
-            end
-            return item
-          end)
-          :totable()
-        observer:next(items)
-        observer:complete()
-      end)
+          local out_or_err = code ~= 0 and o.stderr or o.stdout
+          local items = vim
+            .iter(opts.to_outputs(out_or_err))
+            :map(function(output)
+              local item = to_item(output, code)
+              if not item then
+                return
+              end
+              return item
+            end)
+            :totable()
+          observer:next(items)
+          observer:complete()
+        end)
+      )
     end)
     if type(job) == "string" then
       local err = job
@@ -77,7 +82,7 @@ end
 function M.start(cmd, source_ctx, to_item, raw_opts)
   local default_opts = {
     to_outputs = function(data)
-      return require("thetto.util.job.parse").output(data)
+      return parse_output(data)
     end,
     input = nil,
     cwd = source_ctx.cwd,
@@ -93,42 +98,44 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
 
     local _, job = pcall(function()
       local rest = ""
-      return vim.system(cmd, {
-        text = true,
-        stdout = function(_, data)
-          if not data then
+      return vim.system(
+        cmd,
+        {
+          text = true,
+          stdout = function(_, data)
+            if not data then
+              vim.schedule(function()
+                local outputs = opts.to_outputs(rest)
+                observer:next(to_items(outputs))
+              end)
+              return
+            end
+
+            local joined = rest .. data
+            local index = joined:reverse():find("\n") or 0
+            local lines_str = joined:sub(0, -index)
+            if index == 1 then
+              rest = ""
+            else
+              rest = joined:sub(-index + 1)
+            end
+
             vim.schedule(function()
-              local outputs = opts.to_outputs(rest)
+              local outputs = opts.to_outputs(lines_str)
               observer:next(to_items(outputs))
             end)
-            return
+          end,
+          cwd = opts.cwd,
+          env = opts.env,
+          stdin = opts.input,
+        },
+        vim.schedule_wrap(function(o)
+          if o.code ~= 0 then
+            return observer:error(o.stderr)
           end
-
-          local joined = rest .. data
-          local index = joined:reverse():find("\n") or 0
-          local lines_str = joined:sub(0, -index)
-          if index == 1 then
-            rest = ""
-          else
-            rest = joined:sub(-index + 1)
-          end
-
-          vim.schedule(function()
-            local outputs = opts.to_outputs(lines_str)
-            observer:next(to_items(outputs))
-          end)
-        end,
-        cwd = opts.cwd,
-        env = opts.env,
-        stdin = opts.input,
-      }, function(o)
-        if o.code ~= 0 then
-          return observer:error(o.stderr)
-        end
-        vim.schedule(function()
           observer:complete()
         end)
-      end)
+      )
     end)
     if type(job) == "string" then
       local err = job
@@ -179,11 +186,11 @@ function M.promise(cmd, raw_opts)
       { text = true },
       vim.schedule_wrap(function(o)
         if opts.is_err(o.code) then
-          return reject(o.stderr)
+          return reject(vim.trim(o.stderr))
         end
         local output = o.stdout
         opts.on_exit(output, o.code)
-        return resolve(output)
+        return resolve(vim.trim(output))
       end)
     )
   end)

@@ -167,7 +167,7 @@ function M.content(git_root, path_or_bufnr, revision)
     end)
     :next(function(output)
       local bufnr = vim.api.nvim_create_buf(false, true)
-      local lines = vim.split(output, "\n", { plain = true })
+      local lines = require("thetto.util.job.parse").output(output)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
       vim.bo[bufnr].bufhidden = "wipe"
       vim.bo[bufnr].buftype = "acwrite"

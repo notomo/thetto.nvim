@@ -1,6 +1,6 @@
 local M = {}
 
-M.output = function(output)
+function M.output(output)
   return vim.split(output, "\n", { plain = true, trimempty = true })
 end
 
