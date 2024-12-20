@@ -1,7 +1,8 @@
 local M = {}
 
 local driver = function(cmd, opts)
-  vim.fn.termopen(cmd, opts)
+  opts.term = true
+  vim.fn.jobstart(cmd, opts)
 end
 
 M.opts = {}

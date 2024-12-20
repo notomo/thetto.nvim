@@ -68,7 +68,8 @@ M.actions = {
     if item.path then
       table.insert(cmd, "--template=" .. item.value)
     end
-    vim.fn.termopen(cmd, {
+    vim.fn.jobstart(cmd, {
+      term = true,
       cwd = item.root_dir,
       env = { _THETTO = 1 }, -- HACK
     })
