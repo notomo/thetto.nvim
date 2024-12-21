@@ -97,7 +97,7 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
     write_log(cmd)
 
     local _, job = pcall(function()
-      local rest = ""
+      local concat = require("thetto.util.job.parse").concat_func()
       return vim.system(
         cmd,
         {
@@ -105,21 +105,13 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
           stdout = function(_, data)
             if not data then
               vim.schedule(function()
-                local outputs = opts.to_outputs(rest)
+                local outputs = opts.to_outputs(concat(""))
                 observer:next(to_items(outputs))
               end)
               return
             end
 
-            local joined = rest .. data
-            local index = joined:reverse():find("\n") or 0
-            local lines_str = joined:sub(0, -index)
-            if index == 1 then
-              rest = ""
-            else
-              rest = joined:sub(-index + 1)
-            end
-
+            local lines_str = concat(data)
             vim.schedule(function()
               local outputs = opts.to_outputs(lines_str)
               observer:next(to_items(outputs))

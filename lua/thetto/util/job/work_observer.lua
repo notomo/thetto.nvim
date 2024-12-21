@@ -15,10 +15,12 @@ function M.new(cwd, observer, work_callback, to_next)
     end
   end)
 
+  local concat = require("thetto.util.job.parse").concat_func()
   return {
     queue = function(_, str)
       count = count + 1
-      bulk = bulk .. str
+      local lined_str = concat(str)
+      bulk = bulk .. lined_str
       if (count % bulk_size) == 0 then
         work:queue(cwd, bulk)
         bulk = ""
