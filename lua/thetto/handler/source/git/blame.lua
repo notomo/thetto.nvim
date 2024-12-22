@@ -78,7 +78,19 @@ function M.collect(source_ctx)
             user_name = #message + 1 + #date + 1 + #commit_hash + 1,
           },
         }
-      end, { cwd = git_root })
+      end, {
+        cwd = git_root,
+        consume = function(observer, to_items, outputs)
+          vim.schedule(function()
+            observer:next(to_items(outputs))
+          end)
+        end,
+        complete = function(observer)
+          vim.schedule(function()
+            observer:complete()
+          end)
+        end,
+      })
     end)
 end
 

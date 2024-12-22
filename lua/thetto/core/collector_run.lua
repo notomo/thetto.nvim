@@ -34,7 +34,12 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
   local promise, resolve, reject = require("thetto.vendor.promise").with_resolvers()
   self._promise = promise
 
+  local run_pipeline, cancel, close = require("thetto.lib.throttle").with_last(500, function()
+    self:run_pipeline()
+  end)
+
   local observable = require("thetto.vendor.misclib.observable").new(subscriber)
+
   self._subscription = observable:subscribe({
     next = function(items)
       local count = #self._all_items
@@ -44,9 +49,13 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
       end
       vim.list_extend(self._all_items, items)
 
-      self:run_pipeline()
+      run_pipeline()
     end,
     complete = function()
+      if cancel() then
+        self:run_pipeline()
+      end
+      close()
       resolve(self._consumer:consume(consumer_events.source_completed()))
     end,
     error = function(err)

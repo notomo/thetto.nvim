@@ -212,6 +212,8 @@ function M.redraw_list(self, items, all_items_count)
     vim.api.nvim_win_set_cursor(self._window_id, { 1, 0 })
   end
 
+  vim.api.nvim__redraw({ buf = self._bufnr, valid = true })
+
   self:redraw_footer(nil, start_index, end_index, all_items_count)
   self:_redraw_sidecar()
 end

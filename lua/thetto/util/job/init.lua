@@ -84,6 +84,12 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
     to_outputs = function(data)
       return parse_output(data)
     end,
+    consume = function(observer, to_items, outputs)
+      observer:next(to_items(outputs))
+    end,
+    complete = function(observer)
+      observer:complete()
+    end,
     input = nil,
     cwd = source_ctx.cwd,
   }
@@ -98,36 +104,28 @@ function M.start(cmd, source_ctx, to_item, raw_opts)
 
     local _, job = pcall(function()
       local concat = require("thetto.util.job.parse").concat_func()
-      return vim.system(
-        cmd,
-        {
-          text = true,
-          stdout = function(_, data)
-            if not data then
-              vim.schedule(function()
-                local outputs = opts.to_outputs(concat(""))
-                observer:next(to_items(outputs))
-              end)
-              return
-            end
-
-            local lines_str = concat(data)
-            vim.schedule(function()
-              local outputs = opts.to_outputs(lines_str)
-              observer:next(to_items(outputs))
-            end)
-          end,
-          cwd = opts.cwd,
-          env = opts.env,
-          stdin = opts.input,
-        },
-        vim.schedule_wrap(function(o)
-          if o.code ~= 0 then
-            return observer:error(o.stderr)
+      return vim.system(cmd, {
+        text = true,
+        stdout = function(_, data)
+          if not data then
+            local outputs = opts.to_outputs(concat(""))
+            opts.consume(observer, to_items, outputs)
+            return
           end
-          observer:complete()
-        end)
-      )
+
+          local lines_str = concat(data)
+          local outputs = opts.to_outputs(lines_str)
+          opts.consume(observer, to_items, outputs)
+        end,
+        cwd = opts.cwd,
+        env = opts.env,
+        stdin = opts.input,
+      }, function(o)
+        if o.code ~= 0 then
+          return observer:error(o.stderr)
+        end
+        opts.complete(observer)
+      end)
     end)
     if type(job) == "string" then
       local err = job
