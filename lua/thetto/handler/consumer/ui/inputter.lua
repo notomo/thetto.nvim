@@ -2,6 +2,7 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 
 --- @class ThettoUiInputter
 --- @field _closed boolean
+--- @field _closes fun()[]
 --- @field _input_promise table
 --- @field private _input_filters ThettoUiInputFilters
 --- @field private _window_id integer
@@ -38,11 +39,11 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
   vim.api.nvim_buf_set_name(bufnr, ("thetto://%s/inputter"):format(ctx_key))
   vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, resume_state.lines)
 
-  local debounces = vim
+  local debounce_pairs = vim
     .iter(filters)
     :map(function(filter)
       local debounce_ms = filter.debounce_ms or 50
-      return require("thetto.lib.debounce").promise(debounce_ms, function(changed_index)
+      local debounce, close = require("thetto.lib.debounce").promise(debounce_ms, function(changed_index)
         if not vim.api.nvim_buf_is_valid(bufnr) then
           return {}, nil
         end
@@ -58,6 +59,22 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
 
         return inputs, source_input_pattern
       end)
+      return {
+        debounce = debounce,
+        close = close,
+      }
+    end)
+    :totable()
+  local debounces = vim
+    .iter(debounce_pairs)
+    :map(function(x)
+      return x.debounce
+    end)
+    :totable()
+  local closes = vim
+    .iter(debounce_pairs)
+    :map(function(x)
+      return x.close
     end)
     :totable()
 
@@ -101,6 +118,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
     _filter_infos = M._get_filter_infos(filters),
     _decorator = require("thetto.lib.decorator").factory(_ns_name):create(bufnr, true),
     _closed = false,
+    _closes = closes,
     _input_filters = require("thetto.handler.consumer.ui.input_filters").new(source_name, filters),
   }
   local self = setmetatable(tbl, M)
@@ -201,6 +219,10 @@ function M.close(self, current_window_id)
   end
   self._closed = true
   _selfs[self._bufnr] = nil
+
+  for _, close in ipairs(self._closes) do
+    close()
+  end
 
   local current_window_filetype = vim.api.nvim_win_is_valid(current_window_id)
       and vim.bo[vim.api.nvim_win_get_buf(current_window_id)].filetype

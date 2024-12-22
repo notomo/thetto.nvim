@@ -2,6 +2,7 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 
 --- @class ThettoUiItemList
 --- @field _closed boolean
+--- @field _closes fun()[]
 --- @field _sidecar ThettoUiSidecar
 --- @field _footer ThettoUiItemListFooter
 --- @field _actions table
@@ -136,13 +137,14 @@ function M.open(
     _display_limit = state.display_limit,
     _source_ctx = state.source_ctx,
     _item_cursor_factory = item_cursor_factory,
+    _closes = {},
   }, M)
   _selfs[bufnr] = self
 
   self:redraw_list(self._items)
   vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, state.column })
 
-  local on_cursor_moved = require("thetto.lib.debounce").promise(100, function()
+  local on_cursor_moved, close_debounce = require("thetto.lib.debounce").promise(100, function()
     if self._closed then
       return
     end
@@ -150,6 +152,7 @@ function M.open(
     self:redraw_footer()
     return self:_redraw_sidecar()
   end)
+  table.insert(self._closes, close_debounce)
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
     buffer = bufnr,
     callback = function()
@@ -261,6 +264,10 @@ function M.close(self, current_window_id)
   end
   self._closed = true
   _selfs[self._bufnr] = nil
+
+  for _, close in ipairs(self._closes) do
+    close()
+  end
 
   local current_window_filetype = vim.api.nvim_win_is_valid(current_window_id)
       and vim.bo[vim.api.nvim_win_get_buf(current_window_id)].filetype

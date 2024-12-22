@@ -3,18 +3,13 @@ local vim = vim
 local M = {}
 
 function M.promise(ms, f)
-  local timer = nil
-  return function(...)
-    if not timer then
-      timer = vim.uv.new_timer()
-    end
-    ---@diagnostic disable-next-line: need-check-nil
+  local timer = assert(vim.uv.new_timer())
+  local factory = function(...)
     timer:stop()
 
     local args = { ... }
     local promise, resolve = require("thetto.vendor.promise").with_resolvers()
 
-    ---@diagnostic disable-next-line: need-check-nil
     timer:start(
       ms,
       0,
@@ -25,6 +20,10 @@ function M.promise(ms, f)
 
     return promise
   end
+  local close = function()
+    timer:close()
+  end
+  return factory, close
 end
 
 return M
