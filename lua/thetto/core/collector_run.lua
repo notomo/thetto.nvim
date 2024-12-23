@@ -40,8 +40,11 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
 
   local observable = require("thetto.vendor.misclib.observable").new(subscriber)
 
+  local called = false -- to run pipeline at least once before complete
   self._subscription = observable:subscribe({
     next = function(items)
+      called = true
+
       local count = #self._all_items
       for i, item in ipairs(items) do
         item.index = count + i
@@ -52,7 +55,7 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
       run_pipeline()
     end,
     complete = function()
-      if cancel() then
+      if cancel() or not called then
         self:run_pipeline()
       end
       close()
