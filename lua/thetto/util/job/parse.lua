@@ -8,7 +8,7 @@ function M.concat_func()
   local rest = ""
   return function(data)
     local joined = rest .. data
-    local index = joined:reverse():find("\n") or 0
+    local index = joined:reverse():find("\n") or 1
     local lines_str = joined:sub(0, -index)
     if index == 1 then
       rest = ""
