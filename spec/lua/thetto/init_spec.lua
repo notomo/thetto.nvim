@@ -219,44 +219,6 @@ line2]])
     assert.window_count(1)
   end)
 
-  it("echoes warning message without ui if source causes error in early stage", function()
-    local messages = {}
-    ---@diagnostic disable-next-line: duplicate-set-field
-    vim.notify = function(msg)
-      table.insert(messages, msg)
-    end
-
-    local p = thetto.start({
-      collect = function()
-        return nil, "early stage error for test"
-      end,
-    })
-    helper.wait(p)
-
-    assert.equal("[thetto] early stage error for test", messages[1])
-  end)
-end)
-
-describe("thetto.start() immediate", function()
-  before_each(helper.before_each)
-  after_each(helper.after_each)
-
-  it("executes action immedately", function()
-    local p = thetto.start({
-      collect = function()
-        return {
-          { value = "line1" },
-          { value = "line2" },
-        }
-      end,
-    }, {
-      consumer_factory = require("thetto.util.consumer").immediate({ action_name = "append" }),
-    })
-    helper.wait(p)
-
-    assert.lines([[line1]])
-  end)
-
   it("can merge sources", function()
     local p = thetto.start(require("thetto.util.source").merge({
       {
@@ -287,6 +249,94 @@ line1a
 line2
 line3b
 line4]])
+  end)
+
+  it("echoes warning message without ui if source causes error in early stage", function()
+    local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.notify = function(msg)
+      table.insert(messages, msg)
+    end
+
+    local p = thetto.start({
+      collect = function()
+        return nil, "early stage error for test"
+      end,
+    })
+    helper.wait(p)
+
+    assert.equal("[thetto] early stage error for test", messages[1])
+  end)
+
+  it("echoes warning message in fast context", function()
+    local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.notify = function(msg)
+      vim.fn.getpos(".") -- to cause error if fast context
+      table.insert(messages, msg)
+    end
+
+    local p = thetto.start({
+      collect = function()
+        return function(observer)
+          local timer = assert(vim.uv.new_timer())
+          timer:start(0, 0, function()
+            observer:error("error for test")
+            timer:close()
+          end)
+        end
+      end,
+    })
+    helper.wait(p)
+
+    assert.equal("[thetto] error for test", messages[1])
+  end)
+end)
+
+describe("thetto.start() immediate", function()
+  before_each(helper.before_each)
+  after_each(helper.after_each)
+
+  it("executes action immedately", function()
+    local p = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+    }, {
+      consumer_factory = require("thetto.util.consumer").immediate({ action_name = "append" }),
+    })
+    helper.wait(p)
+
+    assert.lines([[line1]])
+  end)
+
+  it("echoes warning message", function()
+    local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.notify = function(msg)
+      vim.fn.getpos(".") -- to cause error if fast context
+      table.insert(messages, msg)
+    end
+
+    local p = thetto.start({
+      collect = function()
+        return function(observer)
+          local timer = assert(vim.uv.new_timer())
+          timer:start(0, 0, function()
+            observer:error("error for test")
+            timer:close()
+          end)
+        end
+      end,
+    }, {
+      consumer_factory = require("thetto.util.consumer").immediate(),
+    })
+    helper.wait(p)
+
+    assert.equal("[thetto] error for test", messages[1])
   end)
 end)
 

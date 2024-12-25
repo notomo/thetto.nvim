@@ -88,10 +88,10 @@ local handlers = {
     self._item_list:apply_item_cursor()
     self._item_list:redraw_footer("")
   end),
-  [consumer_events.all.source_error] = function(self, err)
+  [consumer_events.all.source_error] = vim.schedule_wrap(function(self, err)
     require("thetto.lib.message").warn(err)
     self._item_list:redraw_footer("")
-  end,
+  end),
 }
 
 function Ui.consume(self, event_name, ...)

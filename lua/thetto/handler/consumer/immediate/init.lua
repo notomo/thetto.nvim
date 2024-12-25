@@ -55,9 +55,9 @@ local handlers = {
     })
     return require("thetto.core.executor").execute(action_item_groups)
   end,
-  [consumer_events.all.source_error] = function(_, err)
+  [consumer_events.all.source_error] = vim.schedule_wrap(function(_, err)
     require("thetto.lib.message").warn(err)
-  end,
+  end),
 }
 
 function M.consume(self, event_name, ...)
