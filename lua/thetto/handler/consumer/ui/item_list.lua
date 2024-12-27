@@ -331,10 +331,12 @@ end
 
 function M.toggle_selection(self)
   self._selection:toggle(self._items)
+  self:redraw_footer()
 end
 
 function M.toggle_all_selection(self)
   self._selection:toggle_all(self._items)
+  self:redraw_footer()
 end
 
 function M.increase_display_limit(self, increment)
