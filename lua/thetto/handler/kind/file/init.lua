@@ -98,7 +98,7 @@ function M.get_preview(item, action_ctx)
         end_row = item.end_row,
         column = item.column,
         end_column = item.end_column,
-        title = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(bufnr), ":t"),
+        title = vim.fs.basename(vim.api.nvim_buf_get_name(bufnr)),
       }
   end
   return nil,
@@ -108,7 +108,7 @@ function M.get_preview(item, action_ctx)
       end_row = item.end_row,
       column = item.column,
       end_column = item.end_column,
-      title = vim.fn.fnamemodify(item.path, ":t"),
+      title = vim.fs.basename(item.path),
     }
 end
 
@@ -138,7 +138,7 @@ local to_dirs = function(items)
   local dirs = {}
   for _, item in ipairs(items) do
     local cloned = vim.deepcopy(item)
-    cloned.path = vim.fn.fnamemodify(item.path, ":h")
+    cloned.path = vim.fs.dirname(item.path)
     table.insert(dirs, cloned)
   end
   return dirs
@@ -157,7 +157,7 @@ function M.action_directory_enter(items)
   if item == nil then
     return
   end
-  local path = vim.fn.fnamemodify(item.path, ":h")
+  local path = vim.fs.dirname(item.path)
   local source = require("thetto.util.source").by_name("file/in_dir", { cwd = path })
   return require("thetto").start(source)
 end
@@ -167,7 +167,7 @@ function M.action_list_parents(items)
   if item == nil then
     return
   end
-  local path = vim.fn.fnamemodify(item.path, ":h:h")
+  local path = vim.fs.dirname(item.path)
   local source = require("thetto.util.source").by_name("file/in_dir", { cwd = path })
   return require("thetto").start(source)
 end

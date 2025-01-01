@@ -27,7 +27,7 @@ function M.action_execute(items, action_ctx)
       table.insert(cmd, item.value)
     end
 
-    local opts = { cwd = vim.fn.fnamemodify(path, ":h") }
+    local opts = { cwd = vim.fs.dirname(path) }
     action_ctx.opts.driver(cmd, opts)
   end
 end

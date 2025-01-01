@@ -10,7 +10,7 @@ function M.resolve(cwd)
   end
   cwd = vim.fn.expand(cwd)
   if cwd == "." then
-    cwd = vim.fn.fnamemodify(".", ":p")
+    cwd = vim.fn.getcwd()
   end
   if cwd ~= "/" and vim.endswith(cwd, "/") then
     cwd = cwd:sub(1, #cwd - 1)

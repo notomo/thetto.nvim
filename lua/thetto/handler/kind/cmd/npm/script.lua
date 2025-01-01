@@ -18,7 +18,7 @@ function M.action_execute(items, action_ctx)
     action_ctx.opts.open()
 
     local cmd = { "npm", "run", item.value }
-    local opts = { cwd = vim.fn.fnamemodify(item.path, ":h") }
+    local opts = { cwd = vim.fs.dirname(item.path) }
     action_ctx.opts.driver(cmd, opts)
   end
 end

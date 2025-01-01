@@ -60,7 +60,7 @@ end
 
 function M.collect(source_ctx)
   local path = vim.fs.joinpath(source_ctx.cwd, "Makefile")
-  local dir_path = vim.fn.fnamemodify(path, ":h")
+  local dir_path = vim.fs.dirname(path)
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
 
   local items = {}

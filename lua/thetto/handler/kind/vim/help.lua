@@ -69,7 +69,7 @@ function M.get_preview(item)
       row = cursor[1],
       column = cursor[2],
       end_column = -1,
-      title = vim.fn.fnamemodify(item.path, ":t"),
+      title = vim.fs.basename(item.path),
     }
 end
 

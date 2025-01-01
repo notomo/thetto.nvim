@@ -60,7 +60,7 @@ function M.action_list_parents(items)
   if item == nil then
     return
   end
-  local path = vim.fn.fnamemodify(item.path, ":h:h:h")
+  local path = vim.fs.dirname(item.path)
   local source = require("thetto.util.source").by_name("file/in_dir", { cwd = path })
   return require("thetto").start(source)
 end

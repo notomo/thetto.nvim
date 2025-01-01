@@ -16,7 +16,7 @@ function M.dir(path)
     if vim.fn.isdirectory(path) == 1 then
       return path
     end
-    return vim.fn.fnamemodify(path, ":h")
+    return vim.fs.dirname(path)
   end
 end
 

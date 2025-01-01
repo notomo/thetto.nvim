@@ -3,7 +3,7 @@ local M = {}
 function M._find_dir(name, paths)
   for _, p in ipairs(paths) do
     local path = p:gsub("?", name)
-    local dir = vim.fn.fnamemodify(path, ":h")
+    local dir = vim.fs.dirname(path)
     if vim.fn.filereadable(path) ~= 0 or (vim.endswith(dir, name) and vim.fn.isdirectory(dir) ~= 0) then
       return dir
     end

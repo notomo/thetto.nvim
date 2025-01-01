@@ -27,7 +27,7 @@ function M.collect(source_ctx)
       desc = desc,
       workflow = {
         is_active = workflow.state == "active",
-        file_name = vim.fn.fnamemodify(workflow.path, ":t"),
+        file_name = vim.fs.basename(workflow.path),
       },
       column_offsets = { value = #mark + 1 },
     }
