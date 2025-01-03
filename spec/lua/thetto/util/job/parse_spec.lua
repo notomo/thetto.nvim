@@ -13,6 +13,17 @@ describe("parse", function()
     assert.equals("", got3)
   end)
 
+  it("returns empty string if string has no newline", function()
+    local concat = require("thetto.util.job.parse").concat_func()
+    local got1 = concat("test")
+    local got2 = concat("1\ntest2")
+    local got3 = concat("")
+
+    assert.equals("", got1)
+    assert.equals("test1\n", got2)
+    assert.equals("test2", got3)
+  end)
+
   it("returns all string if empty string is inputted", function()
     local concat = require("thetto.util.job.parse").concat_func()
     local got1 = concat("test1\ntest2")

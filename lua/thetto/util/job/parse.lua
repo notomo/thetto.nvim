@@ -5,17 +5,24 @@ function M.output(output)
 end
 
 function M.concat_func()
-  local rest = ""
+  local incomplete = ""
   return function(data)
-    local joined = rest .. data
-    local index = joined:reverse():find("\n") or 1
-    local lines_str = joined:sub(0, -index)
-    if index == 1 then
-      rest = ""
-    else
-      rest = joined:sub(-index + 1)
+    if data == "" then
+      local all = incomplete
+      incomplete = ""
+      return all
     end
-    return lines_str
+
+    local joined = incomplete .. data
+    local newline_index = joined:reverse():find("\n") or 0
+
+    local completed = joined:sub(0, -newline_index)
+    if newline_index == 1 then
+      incomplete = ""
+    else
+      incomplete = joined:sub(-newline_index + 1)
+    end
+    return completed
   end
 end
 

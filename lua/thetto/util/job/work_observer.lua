@@ -28,6 +28,8 @@ function M.new(cwd, observer, work_callback, to_next)
     end,
     complete = function()
       finished = true
+      local lined_str = concat("")
+      bulk = bulk .. lined_str
       work:queue(cwd, bulk)
       if count <= 0 then
         observer:complete()
