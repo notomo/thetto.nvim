@@ -265,7 +265,7 @@ line4]])
     })
     helper.wait(p)
 
-    assert.equal("[thetto] early stage error for test", messages[1])
+    assert.equal("[thetto] early stage error for test", messages[#messages])
   end)
 
   it("echoes warning message in fast context", function()
@@ -289,7 +289,7 @@ line4]])
     })
     helper.wait(p)
 
-    assert.equal("[thetto] error for test", messages[1])
+    assert.equal("[thetto] error for test", messages[#messages])
   end)
 end)
 
@@ -336,7 +336,7 @@ describe("thetto.start() immediate", function()
     })
     helper.wait(p)
 
-    assert.equal("[thetto] error for test", messages[1])
+    assert.equal("[thetto] error for test", messages[#messages])
   end)
 end)
 
