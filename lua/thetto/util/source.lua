@@ -62,6 +62,23 @@ function M.merge(sources, fields)
   local SourceContext = require("thetto.core.source_context")
   local SourceSubscriber = require("thetto.core.source_subscriber")
   local Observable = require("thetto.vendor.misclib.observable")
+
+  local highlight_funcs = {}
+  vim.iter(sources):enumerate():each(function(i, source)
+    highlight_funcs[source.name or ("merged_source_" .. i)] = source.highlight
+  end)
+  local highlight = nil
+  if vim.tbl_count(highlight_funcs) ~= 0 then
+    highlight = function(decorator, items, first_line, source_ctx)
+      for i, item in ipairs(items) do
+        local f = highlight_funcs[item.source_name]
+        if f then
+          f(decorator, { item }, first_line + i - 1, source_ctx)
+        end
+      end
+    end
+  end
+
   local source = {
     name = vim
       .iter(sources)
@@ -84,7 +101,7 @@ function M.merge(sources, fields)
               next = function(items)
                 for _, item in ipairs(items) do
                   item.kind_name = item.kind_name or source.kind_name
-                  item.source_name = item.source_name or source.name
+                  item.source_name = item.source_name or source.name or ("merged_source_" .. i)
                 end
                 observer:next(items)
               end,
@@ -110,6 +127,8 @@ function M.merge(sources, fields)
         end
       end
     end,
+
+    highlight = highlight,
   }
   return vim.tbl_deep_extend("force", source, fields or {})
 end
