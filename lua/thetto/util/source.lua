@@ -63,9 +63,13 @@ function M.merge(sources, fields)
   local SourceSubscriber = require("thetto.core.source_subscriber")
   local Observable = require("thetto.vendor.misclib.observable")
 
+  local name = function(i, source)
+    return source.name or ("merged_source_" .. i)
+  end
+
   local highlight_funcs = {}
   vim.iter(sources):enumerate():each(function(i, source)
-    highlight_funcs[source.name or ("merged_source_" .. i)] = source.highlight
+    highlight_funcs[name(i, source)] = source.highlight
   end)
   local highlight = nil
   if vim.tbl_count(highlight_funcs) ~= 0 then
@@ -77,6 +81,34 @@ function M.merge(sources, fields)
         end
       end
     end
+  end
+
+  local actions = {}
+  local source_actions = {}
+  local default_action_names = {}
+  vim.iter(sources):enumerate():each(function(i, source)
+    actions = vim.tbl_extend("force", actions, source.actions or {})
+    local source_name = name(i, source)
+    default_action_names[source_name] = vim.tbl_get(source, "actions", "default_action")
+    source_actions[source_name] = source.actions
+  end)
+  actions.default_action = "merged_source_default"
+  actions.action_merged_source_default = function(items)
+    local source_item_groups = require("thetto.lib.list").group_by_adjacent(items, function(item)
+      return item.source_name
+    end)
+    return require("thetto.vendor.promise").all(vim
+      .iter(source_item_groups)
+      :map(function(group)
+        local source_name, souce_items = unpack(group)
+        local action_name = default_action_names[source_name]
+        local action_item_groups = require("thetto.util.action").grouping(souce_items, {
+          action_name = action_name,
+          actions = source_actions[source_name],
+        })
+        return require("thetto.core.executor").execute(action_item_groups)
+      end)
+      :totable())
   end
 
   local source = {
@@ -101,7 +133,7 @@ function M.merge(sources, fields)
               next = function(items)
                 for _, item in ipairs(items) do
                   item.kind_name = item.kind_name or source.kind_name
-                  item.source_name = item.source_name or source.name or ("merged_source_" .. i)
+                  item.source_name = item.source_name or name(i, source)
                 end
                 observer:next(items)
               end,
@@ -128,6 +160,7 @@ function M.merge(sources, fields)
       end
     end,
 
+    actions = actions,
     highlight = highlight,
   }
   return vim.tbl_deep_extend("force", source, fields or {})
