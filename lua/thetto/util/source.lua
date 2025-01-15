@@ -160,6 +160,10 @@ function M.merge(sources, fields)
       end
     end,
 
+    can_resume = vim.iter(sources):all(function(source)
+      return source.can_resume ~= false
+    end),
+
     actions = actions,
     highlight = highlight,
   }

@@ -1,5 +1,19 @@
 local M = {}
 
+--- @class ThettoSource
+--- @field name string
+--- @field kind_name string
+--- @field collect fun(source_ctx:ThettoSourceContext):(table[]|fun(observer:Observer))
+--- @field opts table?
+--- @field consumer_opts table?
+--- @field cwd (string|fun():string)?
+--- @field can_resume boolean?
+--- @field modify_pipeline fun(stages:table[],opts:table)?
+--- @field get_pattern (fun():string)?
+--- @field key (fun(key_ctx:{source:ThettoSource}):string)?
+--- @field highlight (fun(decorator:table,items:table[],first_line:integer,source_ctx:ThettoSourceContext))?
+--- @field actions table?
+
 local _registered = {}
 
 local default_opts = {
