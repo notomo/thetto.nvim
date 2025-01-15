@@ -164,6 +164,8 @@ function M.merge(sources, fields)
       return source.can_resume ~= false
     end),
 
+    consumer_opts = vim.tbl_get(sources, 1, "consumer_opts"),
+
     actions = actions,
     highlight = highlight,
   }
