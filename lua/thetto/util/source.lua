@@ -111,6 +111,24 @@ function M.merge(sources, fields)
       :totable())
   end
 
+  local keys = vim
+    .iter(sources)
+    :map(function(source)
+      return source.key
+    end)
+    :totable()
+  local key = nil
+  if vim.tbl_count(keys) ~= 0 then
+    key = function(key_ctx)
+      return vim
+        .iter(keys)
+        :map(function(k)
+          return k(key_ctx)
+        end)
+        :join("_")
+    end
+  end
+
   local source = {
     name = vim
       .iter(sources)
@@ -163,6 +181,8 @@ function M.merge(sources, fields)
     can_resume = vim.iter(sources):all(function(source)
       return source.can_resume ~= false
     end),
+
+    key = key,
 
     consumer_opts = vim.tbl_get(sources, 1, "consumer_opts"),
 
