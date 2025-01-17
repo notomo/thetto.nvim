@@ -129,6 +129,11 @@ function M.merge(sources, fields)
     end
   end
 
+  local has_sidecar = vim.iter(sources):any(function(source)
+    local kind = require("thetto.core.kind").by_name(source.kind_name or "base", actions)
+    return require("thetto.core.kind").can_preview(kind)
+  end)
+
   local source = {
     name = vim
       .iter(sources)
@@ -183,6 +188,8 @@ function M.merge(sources, fields)
     end),
 
     key = key,
+
+    kind_name = has_sidecar and "merged_source" or "base",
 
     consumer_opts = vim.tbl_get(sources, 1, "consumer_opts"),
 
