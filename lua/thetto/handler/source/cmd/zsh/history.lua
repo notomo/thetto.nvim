@@ -5,6 +5,7 @@ function M.collect(source_ctx)
     vim.system(
       { "zsh", "-i", "-c", "echo ${HISTFILE}" },
       {
+        text = true,
         cwd = source_ctx.cwd,
       },
       vim.schedule_wrap(function(o)
