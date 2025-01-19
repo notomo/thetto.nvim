@@ -107,6 +107,20 @@ function M.action_list_children(items)
   return require("thetto").start(source)
 end
 
+function M.action_file_log(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  local source = require("thetto.util.source").by_name("git/file_log", {
+    opts = {
+      commit_hash = item.commit_hash,
+      path = item.path,
+    },
+  })
+  return require("thetto").start(source)
+end
+
 function M.action_compare(items)
   local item = items[1]
   if not item then
