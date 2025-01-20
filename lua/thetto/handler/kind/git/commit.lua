@@ -99,6 +99,7 @@ function M.action_list_children(items)
     return nil
   end
   local source = require("thetto.util.source").by_name("git/change", {
+    cwd = item.git_root,
     opts = {
       commit_hash = item.commit_hash,
       path = item.path,
@@ -113,6 +114,7 @@ function M.action_file_log(items)
     return nil
   end
   local source = require("thetto.util.source").by_name("git/file_log", {
+    cwd = item.git_root,
     opts = {
       commit_hash = item.commit_hash,
       path = item.path,

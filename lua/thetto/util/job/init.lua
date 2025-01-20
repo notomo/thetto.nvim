@@ -164,6 +164,7 @@ function M.promise(cmd, raw_opts)
     is_err = function(code)
       return code ~= 0
     end,
+    cwd = ".",
   }
   local opts = vim.tbl_extend("force", default_opts, raw_opts or {})
 
@@ -173,7 +174,10 @@ function M.promise(cmd, raw_opts)
   local _, result = pcall(function()
     vim.system(
       cmd,
-      { text = true },
+      {
+        text = true,
+        cwd = opts.cwd,
+      },
       vim.schedule_wrap(function(o)
         if opts.is_err(o.code) then
           return reject(vim.trim(o.stderr))
