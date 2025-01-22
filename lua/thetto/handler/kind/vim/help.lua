@@ -4,7 +4,7 @@ function M.action_open(items)
   for _, item in ipairs(items) do
     local err = M._open(item, "", "open")
     if err then
-      return nil, err
+      return err
     end
     vim.cmd.only()
   end
@@ -14,7 +14,7 @@ function M.action_tab_open(items)
   for _, item in ipairs(items) do
     local err = M._open(item, "tab", "tab_open")
     if err then
-      return nil, err
+      return err
     end
   end
 end
@@ -23,7 +23,7 @@ function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     local err = M._open(item, "vertical", "vsplit_open")
     if err then
-      return nil, err
+      return err
     end
   end
 end

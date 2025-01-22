@@ -360,6 +360,35 @@ describe("thetto.execute()", function()
 
     assert.lines([[line1]])
   end)
+
+  it("can echo error message", function()
+    local p1 = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+      actions = {
+        default_action = "test",
+        action_test = function()
+          return "test error"
+        end,
+      },
+    })
+    helper.wait(p1)
+
+    local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.notify = function(msg)
+      table.insert(messages, msg)
+    end
+
+    local p2 = require("thetto.util.action").execute("test")
+    helper.wait(p2)
+
+    assert.equal("[thetto] test error", messages[#messages])
+  end)
 end)
 
 describe("thetto.call_consumer()", function()

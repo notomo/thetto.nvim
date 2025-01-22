@@ -3,7 +3,7 @@ local M = {}
 function M.action_list_action_run(items)
   local item = items[1]
   if not item then
-    return nil, "no item"
+    return "no item"
   end
   local source = require("thetto.util.source").by_name("github/action/run", {
     opts = {
@@ -18,7 +18,7 @@ end
 function M.action_run(items)
   local item = items[1]
   if not item then
-    return nil, "no item"
+    return "no item"
   end
 
   local cmd = { "gh", "workflow", "run", item.workflow.file_name }

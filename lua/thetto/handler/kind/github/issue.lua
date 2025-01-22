@@ -5,7 +5,7 @@ M.opts = {}
 function M.action_edit_last_comment(items)
   local item = items[1]
   if not item then
-    return nil, "no item"
+    return "no item"
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor", "--edit-last" }
@@ -15,7 +15,7 @@ end
 function M.action_comment(items)
   local item = items[1]
   if not item then
-    return nil, "no item"
+    return "no item"
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor" }
@@ -29,7 +29,7 @@ M.opts.close = {
 function M.action_close(items, action_ctx)
   local item = items[1]
   if not item then
-    return nil, "no item"
+    return "no item"
   end
 
   local cmd = { "gh", "issue", "close", item.url, "--reason", action_ctx.opts.reason }
@@ -64,7 +64,7 @@ end
 function M.action_reopen(items)
   local item = items[1]
   if not item then
-    return nil, "no item"
+    return "no item"
   end
 
   local cmd = { "gh", "issue", "reopen", item.url }

@@ -6,7 +6,7 @@ function M.action_execute(items)
       vim.cmd(item.value)
     end)
     if not ok then
-      return nil, err
+      return err
     end
   end
 end

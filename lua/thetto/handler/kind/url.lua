@@ -21,7 +21,7 @@ function M.action_open_browser(items, action_ctx)
   if #errs == 0 then
     return
   end
-  return nil, table.concat(errs, "\n")
+  return table.concat(errs, "\n")
 end
 
 M.default_action = "open_browser"

@@ -5,7 +5,7 @@ local M = {}
 function M.action_add()
   local git_root, err = filelib.find_git_root()
   if err then
-    return nil, err
+    return err
   end
 
   local remote_name
