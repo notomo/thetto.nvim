@@ -1,11 +1,12 @@
 local M = {}
 
 function M.new(source, source_ctx)
-  local result, source_err = source.collect(source_ctx)
-  if source_err then
+  local result = source.collect(source_ctx)
+  if type(result) == "string" then
+    local err = result
     local source_errored = true
     return function(observer)
-      observer:error(source_err)
+      observer:error(err)
     end, source_errored
   end
 

@@ -45,7 +45,7 @@ function M.collect(source_ctx)
         .system({ "gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner" }, { text = true })
         :wait()
       if o.code ~= 0 then
-        return nil, vim.trim(o.stderr)
+        return vim.trim(o.stderr)
       end
       repo_with_owner = vim.trim(o.stdout)
     end

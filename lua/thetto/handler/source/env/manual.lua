@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect(source_ctx)
   if vim.fn.has("win32") == 1 then
-    return nil, "not supported in windows"
+    return "not supported in windows"
   end
 
   local cmd = { "apropos", "-l", "." }

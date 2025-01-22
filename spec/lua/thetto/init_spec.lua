@@ -260,7 +260,7 @@ line4]])
 
     local p = thetto.start({
       collect = function()
-        return nil, "early stage error for test"
+        return "early stage error for test"
       end,
     })
     helper.wait(p)
@@ -458,7 +458,7 @@ line4]])
 
     local p1 = thetto.start({
       collect = function()
-        return nil, "early stage error for test"
+        return "early stage error for test"
       end,
     })
     helper.wait(p1)

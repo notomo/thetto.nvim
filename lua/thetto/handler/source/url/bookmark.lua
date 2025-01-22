@@ -24,7 +24,7 @@ function M.collect(source_ctx)
   if filelib.create_if_need(file_path) then
     local f = io.open(file_path, "w")
     if not f then
-      return nil, "can't write: " .. file_path
+      return "can't write: " .. file_path
     end
     for _, line in ipairs(source_ctx.opts.default_lines) do
       f:write(line .. "\n")
@@ -34,7 +34,7 @@ function M.collect(source_ctx)
 
   local f = io.open(file_path, "r")
   if not f then
-    return nil, "can't open: " .. file_path
+    return "can't open: " .. file_path
   end
 
   local items = vim

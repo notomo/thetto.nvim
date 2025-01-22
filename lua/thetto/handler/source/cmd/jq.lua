@@ -2,7 +2,7 @@ local M = {}
 
 function M.collect(source_ctx)
   if not vim.api.nvim_buf_is_valid(source_ctx.bufnr) then
-    return nil, "invalid buffer: " .. source_ctx.bufnr
+    return "invalid buffer: " .. source_ctx.bufnr
   end
 
   local cmd = { "jq", source_ctx.pattern }
