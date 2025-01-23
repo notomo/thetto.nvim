@@ -79,9 +79,8 @@ end
 
 function M.collect(source_ctx)
   return function(observer)
-    local to_relative = pathlib.relative_modifier(source_ctx.cwd)
     local path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
-    local relative_path = to_relative(path)
+    local relative_path = pathlib.to_relative(path, source_ctx.cwd)
 
     local promise, cancels =
       M.request(source_ctx.bufnr, source_ctx.window_id, vim.lsp.protocol.Methods.callHierarchy_outgoingCalls)

@@ -3,12 +3,13 @@ local filelib = require("thetto.lib.file")
 
 local M = {}
 
-local to_item = function(path, target, row, included_from, to_relative)
+local to_item = function(path, target, row, included_from, cwd)
   if target == "" or target == ".PHONY" or (target or ""):find(":") ~= nil then
     return nil
   end
 
-  local path_row = ("%s:%d"):format(to_relative(path), row)
+  local relative_path = pathlib.to_relative(path, cwd)
+  local path_row = ("%s:%d"):format(relative_path, row)
   local desc = ("%s %s"):format(path_row, target or "(no)")
   return {
     desc = desc,
@@ -30,12 +31,11 @@ function M._load(path, cwd, included_from)
   local f = io.open(path, "r")
   assert(f, "failed to open: " .. path)
   local dir_path = vim.fs.dirname(path)
-  local to_relative = pathlib.relative_modifier(cwd)
   for line in f:lines() do
     vim.list_extend(items, M._parse_include(line, dir_path, path))
 
     local target = vim.fn.matchstr(line, "\\v^\\zs\\S*\\ze:[^=]*$")
-    table.insert(items, to_item(path, target, row, included_from, to_relative))
+    table.insert(items, to_item(path, target, row, included_from, cwd))
     row = row + 1
   end
   f:close()
@@ -64,9 +64,8 @@ function M.collect(source_ctx)
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
 
   local items = {}
-  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   for _, p in ipairs(vim.list_extend({ path }, paths)) do
-    local item = to_item(path, nil, 1, nil, to_relative)
+    local item = to_item(path, nil, 1, nil, source_ctx.cwd)
     table.insert(items, item)
     items = vim.list_extend(items, M._load(p, source_ctx.cwd))
   end

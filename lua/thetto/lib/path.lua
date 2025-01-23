@@ -1,14 +1,9 @@
+local vim = vim
+
 local M = {}
 
-function M.relative_modifier(base_path)
-  local pattern = "^" .. M.adjust_sep(base_path):gsub("([^%w])", "%%%1") .. "/"
-  return function(path)
-    return M.adjust_sep(path):gsub(pattern, "", 1)
-  end
-end
-
 function M.to_relative(path, base_path)
-  return M.relative_modifier(base_path)(path)
+  return vim.fs.relpath(base_path, path) or path
 end
 
 function M.parse_with_row(line)

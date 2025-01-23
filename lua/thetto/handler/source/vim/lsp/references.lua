@@ -3,10 +3,9 @@ local pathlib = require("thetto.lib.path")
 local M = {}
 
 function M._to_item(cwd)
-  local to_relative = pathlib.relative_modifier(cwd)
   return function(v)
     local path = vim.uri_to_fname(v.uri)
-    local relative_path = to_relative(path)
+    local relative_path = pathlib.to_relative(path, cwd)
     local row = v.range.start.line + 1
     return {
       value = ("%s:%d"):format(relative_path, row),

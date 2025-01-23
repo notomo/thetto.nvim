@@ -4,8 +4,6 @@ local M = {}
 
 function M.collect(source_ctx)
   return function(observer)
-    local to_relative = pathlib.relative_modifier(source_ctx.cwd)
-
     local promise, cancels = require("thetto.handler.source.vim.lsp.outgoing_calls").request(
       source_ctx.bufnr,
       source_ctx.window_id,
@@ -25,7 +23,7 @@ function M.collect(source_ctx)
                   .iter(call.fromRanges)
                   :map(function(range)
                     local path = vim.uri_to_fname(call_hierarchy.uri)
-                    local relative_path = to_relative(path)
+                    local relative_path = pathlib.to_relative(path, source_ctx.cwd)
                     local row = range.start.line + 1
                     local value = call_hierarchy.name
                     local path_with_row = ("%s:%d"):format(relative_path, row)

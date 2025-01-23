@@ -6,7 +6,6 @@ M.opts = { per_file = false }
 
 function M.collect(source_ctx)
   local home = pathlib.home()
-  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local current_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
   local jumps = vim.fn.reverse(vim.fn.getjumplist(source_ctx.window_id)[1])
   return vim
@@ -34,7 +33,7 @@ function M.collect(source_ctx)
         return
       end
 
-      local name = to_relative(path)
+      local name = pathlib.to_relative(path, source_ctx.cwd)
       local row = jump.lnum
       local label = ("%s:%d"):format(name:gsub(home, "~"), row)
       local desc = ("%s %s"):format(label, line)

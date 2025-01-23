@@ -10,7 +10,6 @@ M.opts = {
 }
 
 function M.collect(source_ctx)
-  local to_relative = pathlib.relative_modifier(source_ctx.cwd)
   local bufnr, opts = unpack(source_ctx.opts.args)
   return vim
     .iter(vim.diagnostic.get(bufnr, opts))
@@ -20,7 +19,7 @@ function M.collect(source_ctx)
       end
 
       local path = vim.api.nvim_buf_get_name(diagnostic.bufnr)
-      local relative_path = to_relative(path)
+      local relative_path = pathlib.to_relative(path, source_ctx.cwd)
       local message = diagnostic.message:gsub("\n", " ")
       local desc = ("%s %s [%s:%s]"):format(relative_path, PREFIX .. message, diagnostic.source, diagnostic.code)
       return {
