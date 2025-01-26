@@ -7,7 +7,7 @@ M.__index = M
 
 function M.new()
   local original_window_id = vim.api.nvim_get_current_win()
-  local group_name = "thetto_ui_" .. tostring(vim.uv.hrtime())
+  local group_name = "thetto.ui.time_" .. tostring(vim.uv.hrtime())
   local group = vim.api.nvim_create_augroup(group_name, {})
   local pattern = "_thetto_closed_" .. group_name
   local tbl = {

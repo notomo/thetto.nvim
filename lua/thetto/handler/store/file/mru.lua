@@ -16,7 +16,7 @@ M.opts = {
 function M.setup(raw_opts)
   _opts = vim.tbl_extend("force", M.opts, raw_opts or {})
 
-  local group = vim.api.nvim_create_augroup("thetto_file_mru", {})
+  local group = vim.api.nvim_create_augroup("thetto.file_mru", {})
   vim.api.nvim_create_autocmd({ "BufEnter" }, {
     group = group,
     pattern = { "*" },

@@ -1,6 +1,6 @@
 local M = {}
 
-local _group_name_format = "thetto_completion_%s"
+local _group_name_format = "thetto.completion.buffer_%s"
 
 function M.enable(sources)
   local priorities = {}

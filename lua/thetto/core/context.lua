@@ -39,7 +39,7 @@ local make_pattern = function(ctx_key)
   return "thetto_ctx_deleted_" .. ctx_key
 end
 
-local _group = vim.api.nvim_create_augroup("thetto_ctx", {})
+local _group = vim.api.nvim_create_augroup("thetto.ctx", {})
 
 function M.expire(ctx_key)
   _ctx_map[ctx_key] = nil

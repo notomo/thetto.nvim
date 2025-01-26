@@ -19,7 +19,7 @@ local setup_highlight_groups = function()
   }
 end
 
-local group = vim.api.nvim_create_augroup("thetto_highlight_group", {})
+local group = vim.api.nvim_create_augroup("thetto.highlight_group", {})
 vim.api.nvim_create_autocmd({ "ColorScheme" }, {
   group = group,
   pattern = { "*" },
