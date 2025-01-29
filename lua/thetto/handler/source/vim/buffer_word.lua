@@ -41,7 +41,8 @@ function M.collect(source_ctx)
         return
       end
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-      work_observer:queue(table.concat(lines, "\n"), cursor_word)
+      table.insert(lines, cursor_word)
+      work_observer:queue(table.concat(lines, "\n"))
     end)
     work_observer:complete()
   end

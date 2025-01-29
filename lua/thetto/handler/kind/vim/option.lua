@@ -10,12 +10,12 @@ function M.action_toggle(items)
     end
 
     local prompt = ("setlocal %s="):format(name)
-    local value = vim.fn.input(prompt, item.option.value)
+    local value = vim.fn.input(prompt, item.option.value) ---@type string|number
     if value == "" then
       return
     end
     if info.type == "number" then
-      value = tonumber(value)
+      value = assert(tonumber(value))
     end
     vim.opt_local[name] = value
   end)
