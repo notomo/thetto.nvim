@@ -142,7 +142,7 @@ function M.open(
   _selfs[bufnr] = self
 
   self:redraw_list(self._items)
-  vim.api.nvim_win_set_cursor(window_id, { item_cursor_row, state.column })
+  require("thetto.vendor.misclib.cursor").set({ item_cursor_row, state.column }, window_id)
 
   local on_cursor_moved, close_debounce = require("thetto.lib.debounce").promise(100, function()
     if self._closed then
