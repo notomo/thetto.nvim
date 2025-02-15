@@ -10,26 +10,23 @@ describe("thetto.start() default ui", function()
   end)
   after_each(helper.after_each)
 
-  it(
-    "shows item list aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    function()
-      local p = thetto.start({
-        collect = function()
-          return {
-            { value = "line1" },
-            { value = "line2" },
-          }
-        end,
-      })
-      helper.wait(p)
+  it("shows item list", function()
+    local p = thetto.start({
+      collect = function()
+        return {
+          { value = "line1" },
+          { value = "line2" },
+        }
+      end,
+    })
+    helper.wait(p)
 
-      thetto.call_consumer("move_to_list")
+    thetto.call_consumer("move_to_list")
 
-      assert.lines([[
+    assert.lines([[
 line1
 line2]])
-    end
-  )
+  end)
 
   it("can filter items by input", function()
     local p1 = thetto.start({
