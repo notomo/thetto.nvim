@@ -4,7 +4,7 @@ local parse_output = require("thetto.util.job.parse").output
 local M = {}
 
 local write_log = function(cmd)
-  local log_dir = tostring(vim.fn.stdpath("log"))
+  local log_dir = vim.fn.stdpath("log")
   vim.fn.mkdir(log_dir, "p")
 
   local log_path = vim.fs.joinpath(log_dir, "thetto.log")
