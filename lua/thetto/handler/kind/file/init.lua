@@ -48,12 +48,12 @@ end
 
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
+    require("thetto.lib.buffer").open_scratch_tab()
     local bufnr = get_bufnr(item)
     if bufnr ~= -1 then
-      require("thetto.lib.buffer").open_scratch_tab()
       vim.cmd.buffer(bufnr)
     else
-      vim.cmd.tabedit(filelib.escape(item.path))
+      vim.cmd.edit(filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
@@ -73,7 +73,10 @@ function M.action_vsplit_open(items)
       vim.cmd.vsplit()
       vim.cmd.buffer(bufnr)
     else
-      vim.cmd.vsplit(filelib.escape(item.path))
+      vim.cmd.vnew()
+      vim.bo.buftype = "nofile"
+      vim.bo.bufhidden = "wipe"
+      vim.cmd.edit(filelib.escape(item.path))
     end
     adjust_cursor(item)
   end
