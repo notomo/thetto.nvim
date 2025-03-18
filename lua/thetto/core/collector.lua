@@ -109,6 +109,7 @@ function Collector._create_consumer(self, source_ctx, source_errored, consumer_f
     end,
   }
   local consumer_ctx = {
+    source_name = self._source.name,
     ctx_key = self._ctx_key,
     source_ctx = source_ctx,
     source_errored = source_errored,

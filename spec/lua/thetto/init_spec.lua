@@ -335,6 +335,26 @@ describe("thetto.start() immediate", function()
 
     assert.equal("[thetto] error for test", messages[#messages])
   end)
+
+  it("echoes if no items", function()
+    local messages = {}
+    ---@diagnostic disable-next-line: duplicate-set-field
+    vim.notify = function(msg)
+      table.insert(messages, msg)
+    end
+
+    local p = thetto.start({
+      name = "test",
+      collect = function()
+        return {}
+      end,
+    }, {
+      consumer_factory = require("thetto.util.consumer").immediate(),
+    })
+    helper.wait(p)
+
+    assert.equal("[thetto] test: no items", messages[#messages])
+  end)
 end)
 
 describe("thetto.execute()", function()

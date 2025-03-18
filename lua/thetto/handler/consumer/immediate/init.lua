@@ -1,4 +1,5 @@
 --- @class ThettoImmediate
+--- @field _source_name string
 --- @field _all_items table
 --- @field _item_cursor_row integer
 --- @field _is_valid fun(item:table):boolean
@@ -19,6 +20,7 @@ local default_opts = {
 function M.new(consumer_ctx, callbacks, actions, item_cursor_factory, raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
+    _source_name = consumer_ctx.source_name,
     _all_items = {},
     _action_name = opts.action_name,
     _is_valid = opts.is_valid,
@@ -39,6 +41,10 @@ local handlers = {
   end,
   --- @param self ThettoImmediate
   [consumer_events.all.source_completed] = function(self)
+    if #self._all_items == 0 then
+      require("thetto.lib.message").info(self._source_name .. ": no items")
+    end
+
     local item_cursor = self._item_cursor_factory(self._all_items)
     local row = item_cursor:apply(self._item_cursor_row, #self._all_items)
     local item = self._all_items[row]
