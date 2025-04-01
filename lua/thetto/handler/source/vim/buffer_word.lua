@@ -25,9 +25,14 @@ function M.collect(source_ctx)
       return
     end
 
-    local work_observer = require("thetto.util.job.work_observer").new(observer, to_items, function(encoded)
-      return require("string.buffer").decode(encoded)
-    end)
+    local work_observer = require("thetto.util.job.work_observer").new(
+      source_ctx.cwd,
+      observer,
+      to_items,
+      function(encoded)
+        return require("string.buffer").decode(encoded)
+      end
+    )
 
     local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str or ""
 
