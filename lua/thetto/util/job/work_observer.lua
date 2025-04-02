@@ -2,7 +2,7 @@ local M = {}
 
 local bulk_size = 50
 
-function M.new(cwd, observer, work_callback, to_next)
+function M.new(cwd, observer, work_callback, to_next, optional_arg)
   local finished = false
   local count = 0
   local bulk = ""
@@ -22,7 +22,7 @@ function M.new(cwd, observer, work_callback, to_next)
       local lined_str = concat(str)
       bulk = bulk .. lined_str
       if (count % bulk_size) == 0 then
-        work:queue(cwd, bulk)
+        work:queue(cwd, bulk, optional_arg)
         bulk = ""
       end
     end,
@@ -30,7 +30,7 @@ function M.new(cwd, observer, work_callback, to_next)
       finished = true
       local lined_str = concat("")
       bulk = bulk .. lined_str
-      work:queue(cwd, bulk)
+      work:queue(cwd, bulk, optional_arg)
       if count <= 0 then
         observer:complete()
       end

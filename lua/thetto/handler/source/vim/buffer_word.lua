@@ -1,8 +1,8 @@
 local M = {}
 
 function M.collect(source_ctx)
-  local to_items = function(data, cursor_word)
-    local already = { [cursor_word] = cursor_word }
+  local to_items = function(_, data, cursor_word)
+    local already = { [cursor_word] = true }
     local items = vim
       .iter(vim.split(data, [=[[^a-zA-Z0-9_]+]=], { trimempty = true }))
       :map(function(word)
@@ -25,16 +25,17 @@ function M.collect(source_ctx)
       return
     end
 
+    local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str or ""
+
     local work_observer = require("thetto.util.job.work_observer").new(
       source_ctx.cwd,
       observer,
       to_items,
       function(encoded)
         return require("string.buffer").decode(encoded)
-      end
+      end,
+      cursor_word
     )
-
-    local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str or ""
 
     local bufnrs = vim.tbl_keys(vim.iter(vim.api.nvim_tabpage_list_wins(0)):fold({}, function(acc, window_id)
       local bufnr = vim.api.nvim_win_get_buf(window_id)
@@ -46,7 +47,6 @@ function M.collect(source_ctx)
         return
       end
       local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-      table.insert(lines, cursor_word)
       work_observer:queue(table.concat(lines, "\n"))
     end)
     work_observer:complete()
