@@ -57,7 +57,10 @@ function M.enable(sources)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
-  vim.api.nvim_create_autocmd({ "InsertEnter", "TextChangedI", "TextChangedP" }, {
+  vim.api.nvim_create_autocmd({
+    "TextChangedI",
+    "TextChangedP",
+  }, {
     buffer = bufnr,
     group = group,
     callback = function()
@@ -75,9 +78,10 @@ end
 
 function M.disable()
   local bufnr = vim.api.nvim_get_current_buf()
+  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
   vim.api.nvim_clear_autocmds({
     buffer = bufnr,
-    group = _group_name_format:format(bufnr),
+    group = group,
   })
 end
 

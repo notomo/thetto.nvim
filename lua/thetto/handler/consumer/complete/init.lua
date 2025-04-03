@@ -41,13 +41,12 @@ local complete = function(self, items)
   end
 
   local prefix = self._cursor_word.str
+  if prefix == "" then
+    return
+  end
+
   local match = function(value)
     return fn.matchfuzzypos({ value }, prefix)[3][1]
-  end
-  if prefix == "" then
-    match = function()
-      return 0
-    end
   end
 
   local scored_items = vim
