@@ -26,4 +26,19 @@ function M.promise(ms, f)
   return factory, close
 end
 
+function M.wrap(ms, f)
+  local timer = assert(vim.uv.new_timer())
+  return function(...)
+    timer:stop()
+
+    local args = { ... }
+    timer:start(ms, 0, function()
+      timer:stop()
+      f(unpack(args))
+    end)
+  end, function()
+    timer:stop()
+  end
+end
+
 return M

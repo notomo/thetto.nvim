@@ -35,38 +35,66 @@ function M.enable(sources)
     can_resume = false,
   })
   local thetto = require("thetto")
-  local consumer = require("thetto.handler.consumer.complete")
-
+  local consumer = require("thetto.handler.consumer.complete").new({
+    priorities = priorities,
+    source_to_label = source_to_label,
+  })
   local on_discard = function() end
-  local debounced = require("thetto.vendor.misclib.debounce").wrap(
-    100,
-    vim.schedule_wrap(function()
+  local debounced = require("thetto.vendor.misclib.debounce").wrap(100, function()
+    vim.schedule(function()
+      on_discard()
+      on_discard = function() end
       thetto.start(source, {
         consumer_factory = function(consumer_ctx, _, _, callbacks)
-          on_discard()
           on_discard = callbacks.on_discard
-
-          return consumer.new(consumer_ctx.source_ctx.cursor_word, {
-            priorities = priorities,
-            source_to_label = source_to_label,
-          })
+          consumer:apply(consumer_ctx.source_ctx.cursor_word)
+          return consumer
         end,
       })
     end)
-  )
+  end)
 
   local bufnr = vim.api.nvim_get_current_buf()
+  local changedtick = vim.b[bufnr].changedtick
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
   vim.api.nvim_create_autocmd({
     "TextChangedI",
+  }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
+
+      changedtick = vim.b[bufnr].changedtick
+
+      consumer:cancel()
+      debounced()
+    end,
+  })
+
+  vim.api.nvim_create_autocmd({
     "TextChangedP",
   }, {
     buffer = bufnr,
     group = group,
     callback = function()
+      if not vim.api.nvim_buf_is_valid(bufnr) then
+        return
+      end
+
+      local new = vim.b[bufnr].changedtick
+      if new == changedtick then
+        return
+      end
+      changedtick = new
+
+      consumer:cancel()
       debounced()
     end,
   })
+
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
     buffer = 0,
     group = group,

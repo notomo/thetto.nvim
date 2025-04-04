@@ -16,12 +16,12 @@ local default_opts = {
 
 local max_word_length = 25
 
-function M.new(cursor_word, raw_opts)
+function M.new(raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
     _priorities = opts.priorities,
-    _cursor_word = cursor_word,
+    _cursor_word = nil,
     _source_to_label = opts.source_to_label,
   }
   return setmetatable(tbl, M)
@@ -30,7 +30,7 @@ end
 local consumer_events = require("thetto.core.consumer_events")
 
 --- @param self ThettoComplete
-local complete = function(self, items)
+local complete = function(self, items, cursor_word)
   local mode = vim.api.nvim_get_mode().mode
   if mode ~= "i" and mode ~= "ic" then
     return
@@ -40,7 +40,7 @@ local complete = function(self, items)
     return
   end
 
-  local prefix = self._cursor_word.str
+  local prefix = cursor_word.str
   if prefix == "" then
     return
   end
@@ -84,20 +84,20 @@ local complete = function(self, items)
       }
     end)
     :totable()
-  fn.complete(self._cursor_word.offset, completion_items)
+  fn.complete(cursor_word.offset, completion_items)
 end
 
-local debounced_complete = require("thetto.vendor.misclib.debounce").wrap(50, vim.schedule_wrap(complete))
+local debounced_complete, cancel = require("thetto.lib.debounce").wrap(100, vim.schedule_wrap(complete))
 
 local handlers = {
   --- @param self ThettoComplete
   [consumer_events.all.items_changed] = function(self, items, _)
     self._all_items = items
-    debounced_complete(self, self._all_items)
+    debounced_complete(self, self._all_items, self._cursor_word)
   end,
   --- @param self ThettoComplete
   [consumer_events.all.source_completed] = function(self)
-    debounced_complete(self, self._all_items)
+    debounced_complete(self, self._all_items, self._cursor_word)
   end,
   [consumer_events.all.source_error] = function(_, err)
     require("thetto.lib.message").warn(err)
@@ -119,6 +119,14 @@ function M.call(self, action_name)
     return
   end
   return action(self)
+end
+
+function M.apply(self, cursor_word)
+  self._cursor_word = cursor_word
+end
+
+function M.cancel()
+  cancel()
 end
 
 function M.get_items(self)
