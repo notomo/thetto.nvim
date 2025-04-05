@@ -50,6 +50,7 @@ function M.collect(source_ctx)
             :map(function(item)
               return {
                 value = item.insertText or item.label,
+                desc = item.label,
                 kind_label = completionItemKind[item.kind],
               }
             end)
