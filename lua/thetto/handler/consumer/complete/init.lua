@@ -31,6 +31,8 @@ local consumer_events = require("thetto.core.consumer_events")
 
 --- @param self ThettoComplete
 local complete = function(self, items, cursor_word)
+  self._all_items = items
+
   local mode = vim.api.nvim_get_mode().mode
   if mode ~= "i" and mode ~= "ic" then
     return
@@ -42,6 +44,10 @@ local complete = function(self, items, cursor_word)
 
   local prefix = cursor_word.str
   if prefix == "" then
+    return
+  end
+
+  if #items == 0 then
     return
   end
 
@@ -63,6 +69,9 @@ local complete = function(self, items, cursor_word)
     end)
     :totable()
   table.sort(scored_items, function(a, b)
+    if a.score == b.score then
+      return a.item.value > b.item.value
+    end
     return a.score > b.score
   end)
 
@@ -87,17 +96,12 @@ local complete = function(self, items, cursor_word)
   fn.complete(cursor_word.offset, completion_items)
 end
 
-local debounced_complete, cancel = require("thetto.lib.debounce").wrap(100, vim.schedule_wrap(complete))
+local debounced_complete, cancel = require("thetto.lib.debounce").wrap(110, vim.schedule_wrap(complete))
 
 local handlers = {
   --- @param self ThettoComplete
   [consumer_events.all.items_changed] = function(self, items, _)
-    self._all_items = items
-    debounced_complete(self, self._all_items, self._cursor_word)
-  end,
-  --- @param self ThettoComplete
-  [consumer_events.all.source_completed] = function(self)
-    debounced_complete(self, self._all_items, self._cursor_word)
+    debounced_complete(self, items, self._cursor_word)
   end,
   [consumer_events.all.source_error] = function(_, err)
     require("thetto.lib.message").warn(err)

@@ -54,7 +54,7 @@ function M.collect(source_ctx)
               }
             end)
             :filter(function(item)
-              return item.kind_label ~= "Snippet"
+              return item.kind_label ~= "Snippet" and item.kind_label ~= "Text"
             end)
             :totable()
           observer:next(items)
