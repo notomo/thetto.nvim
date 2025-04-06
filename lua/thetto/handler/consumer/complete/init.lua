@@ -6,12 +6,14 @@ local fn = vim.fn
 --- @field _cursor_word {str:string,offset:integer}
 --- @field _priorities table<string,integer>
 --- @field _source_to_label table<string,string>
+--- @field _is_manual boolean
 local M = {}
 M.__index = M
 
 local default_opts = {
   priorities = {},
   source_to_label = {},
+  is_manual = false,
 }
 
 function M.new(raw_opts)
@@ -21,6 +23,7 @@ function M.new(raw_opts)
     _priorities = opts.priorities,
     _cursor_word = nil,
     _source_to_label = opts.source_to_label,
+    _is_manual = opts.is_manual,
   }
   return setmetatable(tbl, M)
 end
@@ -40,17 +43,22 @@ local complete = function(self, items, cursor_word)
     return
   end
 
-  local prefix = cursor_word.str
-  if prefix == "" then
+  if #items == 0 then
     return
   end
 
-  if #items == 0 then
+  local prefix = cursor_word.str
+  if prefix == "" and not self._is_manual then
     return
   end
 
   local match = function(value)
     return fn.matchfuzzypos({ value }, prefix)[3][1]
+  end
+  if prefix == "" then
+    match = function()
+      return 0
+    end
   end
 
   local scored_items = vim
