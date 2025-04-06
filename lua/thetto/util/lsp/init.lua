@@ -37,7 +37,10 @@ function M.request(req_cxt)
 
     local request = function(client)
       local params = req_cxt.params(client)
+      local finished = false
       local _, request_id = client:request(req_cxt.method, params, function(err, result, ctx)
+        finished = true
+
         if err then
           observer:error(err)
           return
@@ -53,7 +56,9 @@ function M.request(req_cxt)
       end, req_cxt.bufnr)
 
       local cancel = function()
-        client:cancel_request(request_id)
+        if not finished and request_id then
+          client:cancel_request(request_id)
+        end
       end
       return cancel
     end
