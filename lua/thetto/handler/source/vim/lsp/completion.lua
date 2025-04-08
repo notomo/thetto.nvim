@@ -72,6 +72,45 @@ function M.collect(source_ctx)
   end
 end
 
+function M.set_completion_info(index)
+  local window_id = vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
+  local method = vim.lsp.protocol.Methods.textDocument_hover
+  local cancel = require("thetto.util.lsp").request({
+    bufnr = bufnr,
+    method = method,
+    clients = vim.lsp.get_clients({
+      bufnr = bufnr,
+      method = method,
+    }),
+    params = function(client)
+      return vim.lsp.util.make_position_params(window_id, client.offset_encoding)
+    end,
+    observer = {
+      next = function(result)
+        local content = result.contents.value
+        local t = vim.api.nvim__complete_set(index, { info = content })
+        if vim.tbl_isempty(t) then
+          return
+        end
+
+        vim.bo[t.bufnr].filetype = "markdown"
+        local info_window_id = t.winid
+        vim.wo[info_window_id].wrap = true
+        vim.api.nvim_win_set_config(info_window_id, {
+          border = "solid",
+          fixed = true,
+        })
+      end,
+      complete = function() end,
+      error = function(err)
+        require("thetto.lib.message").warn(err)
+      end,
+    },
+  })
+  return cancel
+end
+
 M.kind_name = "word"
 
 M.cwd = require("thetto.util.cwd").project()

@@ -48,10 +48,6 @@ local complete = function(self, items, cursor_word)
   end
 
   local prefix = cursor_word.str
-  if prefix == "" and not self._is_manual then
-    return
-  end
-
   local match = function(value)
     return fn.matchfuzzypos({ value }, prefix)[3][1]
   end
@@ -91,6 +87,9 @@ local complete = function(self, items, cursor_word)
         icase = 1,
         dup = 1,
         empty = 1,
+        user_data = {
+          source_name = c.item.source_name,
+        },
       }
     end)
     :totable()

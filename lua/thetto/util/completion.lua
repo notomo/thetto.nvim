@@ -48,6 +48,8 @@ function M.enable(sources)
       consumer:cancel()
     end,
   })
+
+  M._set_completion_info(sources, bufnr, group)
 end
 
 function M.disable()
@@ -78,6 +80,7 @@ function M.trigger(sources)
       consumer:cancel()
     end,
   })
+  M._set_completion_info(sources, bufnr, group)
 end
 
 function M._starter(sources, raw_consumer_opts)
@@ -128,6 +131,36 @@ function M._starter(sources, raw_consumer_opts)
     })
   end,
     consumer
+end
+
+function M._set_completion_info(sources, bufnr, group)
+  local source_map = vim.iter(sources):fold({}, function(acc, s)
+    acc[s.name] = s
+    return acc
+  end)
+
+  vim.api.nvim_create_autocmd({ "CompleteChanged" }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      local info = vim.fn.complete_info({ "selected", "completed" })
+      local index = info.selected
+      if index == -1 then
+        return
+      end
+
+      local source_name = info.completed.user_data.source_name
+      local source = source_map[source_name]
+      if not source then
+        return
+      end
+
+      if not source.set_completion_info then
+        return
+      end
+      source.set_completion_info(index)
+    end,
+  })
 end
 
 return M
