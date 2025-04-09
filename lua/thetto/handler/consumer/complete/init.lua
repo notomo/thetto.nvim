@@ -89,6 +89,7 @@ local complete = function(self, items, cursor_word)
         empty = 1,
         user_data = {
           source_name = c.item.source_name,
+          item = c.item.original_item,
         },
       }
     end)

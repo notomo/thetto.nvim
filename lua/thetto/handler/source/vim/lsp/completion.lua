@@ -48,10 +48,17 @@ function M.collect(source_ctx)
           local items = vim
             .iter(result.items)
             :map(function(item)
+              local descs = { item.label }
+              local detail = vim.tbl_get(item, "labelDetails", "description")
+              if detail then
+                table.insert(descs, detail)
+              end
+
               return {
                 value = item.insertText or item.label,
-                desc = item.label,
+                desc = table.concat(descs, " "),
                 kind_label = completionItemKind[item.kind],
+                original_item = item,
               }
             end)
             :filter(function(item)
@@ -101,6 +108,37 @@ function M.set_completion_info(index)
           border = "solid",
           fixed = true,
         })
+      end,
+      complete = function() end,
+      error = function(err)
+        require("thetto.lib.message").warn(err)
+      end,
+    },
+  })
+  return cancel
+end
+
+function M.resolve(params)
+  local window_id = vim.api.nvim_get_current_win()
+  local bufnr = vim.api.nvim_win_get_buf(window_id)
+  local method = vim.lsp.protocol.Methods.completionItem_resolve
+  local cancel = require("thetto.util.lsp").request({
+    bufnr = bufnr,
+    method = method,
+    clients = vim.lsp.get_clients({
+      bufnr = bufnr,
+      method = method,
+    }),
+    params = function()
+      return params
+    end,
+    server_capabilities = { "completionProvider", "resolveProvider" },
+    observer = {
+      next = function(result, ctx)
+        if result.additionalTextEdits then
+          local client = assert(vim.lsp.get_clients({ id = ctx.client_id })[1])
+          vim.lsp.util.apply_text_edits(result.additionalTextEdits, bufnr, client.offset_encoding)
+        end
       end,
       complete = function() end,
       error = function(err)

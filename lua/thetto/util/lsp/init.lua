@@ -16,6 +16,7 @@ end
 --- @field bufnr integer
 --- @field observer Observer
 --- @field params fun(vim.lsp.client):table
+--- @field server_capabilities string[]?
 
 --- @param req_cxt ThettoLspRequestContext
 function M.request(req_cxt)
@@ -36,6 +37,11 @@ function M.request(req_cxt)
     end
 
     local request = function(client)
+      if req_cxt.server_capabilities and vim.tbl_get(client.server_capabilities, req_cxt.server_capabilities) then
+        complete(client.id)
+        return
+      end
+
       local params = req_cxt.params(client)
       local finished = false
       local _, request_id = client:request(req_cxt.method, params, function(err, result, ctx)

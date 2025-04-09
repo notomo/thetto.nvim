@@ -40,6 +40,7 @@ function M.enable(sources)
     end,
   })
 
+  local cancel_resolve = M._set_resolver(sources, bufnr, group)
   local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
     buffer = bufnr,
@@ -47,6 +48,7 @@ function M.enable(sources)
     callback = function()
       on_discard()
       consumer:cancel()
+      cancel_resolve()
       cancel_set_completion_info()
     end,
   })
@@ -163,6 +165,42 @@ function M._set_completion_info(sources, bufnr, group)
         return
       end
       cancel = source.set_completion_info(index)
+    end,
+  })
+
+  return function()
+    cancel()
+  end
+end
+
+function M._set_resolver(sources, bufnr, group)
+  local source_map = vim.iter(sources):fold({}, function(acc, s)
+    acc[s.name] = s
+    return acc
+  end)
+
+  local cancel = function() end
+  vim.api.nvim_create_autocmd({ "CompleteDone" }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      cancel()
+
+      local completed_item = vim.v.completed_item
+      if vim.tbl_isempty(completed_item) then
+        return
+      end
+
+      local source_name = completed_item.user_data.source_name
+      local source = source_map[source_name]
+      if not source then
+        return
+      end
+
+      if not source.resolve then
+        return
+      end
+      cancel = source.resolve(completed_item.user_data.item)
     end,
   })
 
