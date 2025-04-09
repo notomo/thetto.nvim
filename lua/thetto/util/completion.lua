@@ -40,16 +40,16 @@ function M.enable(sources)
     end,
   })
 
+  local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
     buffer = bufnr,
     group = group,
     callback = function()
       on_discard()
       consumer:cancel()
+      cancel_set_completion_info()
     end,
   })
-
-  M._set_completion_info(sources, bufnr, group)
 end
 
 function M.disable()
@@ -72,15 +72,16 @@ function M.trigger(sources)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
+  local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
     buffer = bufnr,
     group = group,
     callback = function()
       on_discard()
       consumer:cancel()
+      cancel_set_completion_info()
     end,
   })
-  M._set_completion_info(sources, bufnr, group)
 end
 
 function M._starter(sources, raw_consumer_opts)
@@ -139,10 +140,13 @@ function M._set_completion_info(sources, bufnr, group)
     return acc
   end)
 
+  local cancel = function() end
   vim.api.nvim_create_autocmd({ "CompleteChanged" }, {
     buffer = bufnr,
     group = group,
     callback = function()
+      cancel()
+
       local info = vim.fn.complete_info({ "selected", "completed" })
       local index = info.selected
       if index == -1 then
@@ -158,9 +162,13 @@ function M._set_completion_info(sources, bufnr, group)
       if not source.set_completion_info then
         return
       end
-      source.set_completion_info(index)
+      cancel = source.set_completion_info(index)
     end,
   })
+
+  return function()
+    cancel()
+  end
 end
 
 return M
