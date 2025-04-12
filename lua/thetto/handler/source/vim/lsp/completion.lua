@@ -29,6 +29,11 @@ local completionItemKind = {
   [25] = "TypeParameter",
 }
 
+local insertTextFormat = {
+  PlainText = 1,
+  Snippet = 2,
+}
+
 function M.collect(source_ctx)
   return function(observer)
     local bufnr = source_ctx.bufnr
@@ -121,6 +126,13 @@ end
 function M.resolve(params)
   local window_id = vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(window_id)
+
+  if params.insertText and params.insertTextFormat == insertTextFormat.Snippet then
+    local row, column = unpack(vim.api.nvim_win_get_cursor(window_id))
+    vim.api.nvim_buf_set_text(bufnr, row - 1, column - #params.insertText, row - 1, column, { "" })
+    vim.snippet.expand(params.insertText)
+  end
+
   local method = vim.lsp.protocol.Methods.completionItem_resolve
   local cancel = require("thetto.util.lsp").request({
     bufnr = bufnr,
