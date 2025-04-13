@@ -18,10 +18,10 @@ end
 --- @field params fun(vim.lsp.client):table
 --- @field server_capabilities string[]?
 
---- @param req_cxt ThettoLspRequestContext
-function M.request(req_cxt)
+--- @param req_ctx ThettoLspRequestContext
+function M.request(req_ctx)
   local subscriber = function(observer)
-    local client_count = #req_cxt.clients
+    local client_count = #req_ctx.clients
     if client_count == 0 then
       observer:complete()
       return
@@ -37,14 +37,14 @@ function M.request(req_cxt)
     end
 
     local request = function(client)
-      if req_cxt.server_capabilities and vim.tbl_get(client.server_capabilities, req_cxt.server_capabilities) then
+      if req_ctx.server_capabilities and vim.tbl_get(client.server_capabilities, req_ctx.server_capabilities) then
         complete(client.id)
         return
       end
 
-      local params = req_cxt.params(client)
+      local params = req_ctx.params(client)
       local finished = false
-      local _, request_id = client:request(req_cxt.method, params, function(err, result, ctx)
+      local _, request_id = client:request(req_ctx.method, params, function(err, result, ctx)
         finished = true
 
         if err then
@@ -59,7 +59,7 @@ function M.request(req_cxt)
 
         observer:next(result, ctx)
         complete(client.id)
-      end, req_cxt.bufnr)
+      end, req_ctx.bufnr)
 
       local cancel = function()
         if not finished and request_id then
@@ -69,7 +69,7 @@ function M.request(req_cxt)
       return cancel
     end
 
-    local cancels = vim.iter(req_cxt.clients):map(request):totable()
+    local cancels = vim.iter(req_ctx.clients):map(request):totable()
     local cancel = function()
       for _, f in ipairs(cancels) do
         f()
@@ -79,7 +79,7 @@ function M.request(req_cxt)
   end
 
   local observable = require("thetto.vendor.misclib.observable").new(subscriber)
-  local subscription = observable:subscribe(req_cxt.observer)
+  local subscription = observable:subscribe(req_ctx.observer)
   return function()
     subscription:unsubscribe()
   end
