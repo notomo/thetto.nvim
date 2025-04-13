@@ -129,7 +129,13 @@ function M.resolve(params)
 
   if params.insertText and params.insertTextFormat == insertTextFormat.Snippet then
     local row, column = unpack(vim.api.nvim_win_get_cursor(window_id))
-    vim.api.nvim_buf_set_text(bufnr, row - 1, column - #params.insertText, row - 1, column, { "" })
+
+    local splitted = vim.split(params.insertText, "\n", { plain = true })
+    local height = #splitted
+    vim.api.nvim_win_set_cursor(window_id, { row - height + 1, column })
+    local last_column = vim.fn.col("$") - 1
+
+    vim.api.nvim_buf_set_text(bufnr, row - height, last_column - #splitted[1], row - 1, column, { "" })
     vim.snippet.expand(params.insertText)
   end
 
