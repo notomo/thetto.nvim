@@ -34,8 +34,18 @@ local insertTextFormat = {
   Snippet = 2,
 }
 
+local get_last_char = function(source_ctx)
+  local cursor = vim.api.nvim_win_get_cursor(source_ctx.window_id)
+  local row = cursor[1]
+  local current_line = vim.api.nvim_buf_get_lines(source_ctx.bufnr, row - 1, row, false)[1]
+  local line = current_line:sub(1, cursor[2])
+  local last = line:sub(-1)
+  return last
+end
+
 function M.collect(source_ctx)
   return function(observer)
+    local last_char = get_last_char(source_ctx)
     local bufnr = source_ctx.bufnr
     local method = vim.lsp.protocol.Methods.textDocument_completion
     local cancel = require("thetto.util.lsp").request({
@@ -46,7 +56,21 @@ function M.collect(source_ctx)
         method = method,
       }),
       params = function(client)
-        return vim.lsp.util.make_position_params(source_ctx.window_id, client.offset_encoding)
+        local trigger_characters = vim.tbl_get(client.server_capabilities, "completionProvider", "triggerCharacters")
+        local params = vim.lsp.util.make_position_params(source_ctx.window_id, client.offset_encoding)
+        if not source_ctx.is_manual and vim.tbl_contains(trigger_characters, last_char) then
+          return vim.tbl_extend("force", params, {
+            context = {
+              triggerKind = vim.lsp.protocol.CompletionTriggerKind.TriggerCharacter,
+              triggerCharacter = last_char,
+            },
+          })
+        end
+        return vim.tbl_extend("force", params, {
+          context = {
+            triggerKind = vim.lsp.protocol.CompletionTriggerKind.Invoked,
+          },
+        })
       end,
       observer = {
         next = function(result)
@@ -82,6 +106,20 @@ function M.collect(source_ctx)
     })
     return cancel
   end
+end
+
+function M.should_collect(source_ctx)
+  local last_char = get_last_char(source_ctx)
+  local bufnr = source_ctx.bufnr
+  local method = vim.lsp.protocol.Methods.textDocument_completion
+  local clients = vim.lsp.get_clients({
+    bufnr = bufnr,
+    method = method,
+  })
+  return vim.iter(clients):any(function(client)
+    local trigger_characters = vim.tbl_get(client.server_capabilities, "completionProvider", "triggerCharacters")
+    return source_ctx.is_manual or vim.tbl_contains(trigger_characters, last_char)
+  end)
 end
 
 function M.set_completion_info(index)

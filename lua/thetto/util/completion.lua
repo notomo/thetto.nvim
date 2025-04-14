@@ -1,6 +1,10 @@
 local M = {}
 
 local _group_name_format = "thetto.completion.buffer_%s"
+local cache = {}
+local clear_cache = function()
+  cache = {}
+end
 
 function M.enable(sources)
   local starter, consumer = M._starter(sources)
@@ -40,6 +44,14 @@ function M.enable(sources)
     end,
   })
 
+  vim.api.nvim_create_autocmd({ "ModeChanged" }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      clear_cache()
+    end,
+  })
+
   local cancel_resolve = M._set_resolver(sources, bufnr, group)
   local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
@@ -50,6 +62,7 @@ function M.enable(sources)
       consumer:cancel()
       cancel_resolve()
       cancel_set_completion_info()
+      clear_cache()
     end,
   })
 end
@@ -70,10 +83,20 @@ function M.trigger(sources)
     on_discard = callbacks.on_discard
   end
 
+  clear_cache()
   starter(on_consumer_factory)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
+
+  vim.api.nvim_create_autocmd({ "ModeChanged" }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      clear_cache()
+    end,
+  })
+
   local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
     buffer = bufnr,
@@ -114,15 +137,89 @@ function M._starter(sources, raw_consumer_opts)
     return require("thetto.lib.cursor").word(window_id)
   end
 
-  local source = require("thetto.util.source").merge(sources, {
-    get_cursor_word = get_cursor_word,
-    can_resume = false,
-  })
-  local thetto = require("thetto")
+  local SourceContext = require("thetto.core.source_context")
+  local SourceSubscriber = require("thetto.core.source_subscriber")
+  local Observable = require("thetto.vendor.misclib.observable")
+  local name = function(i, source)
+    return source.name or ("merged_source_" .. i)
+  end
+
   local consumer_opts = vim.tbl_deep_extend("force", {
     priorities = priorities,
     source_to_label = source_to_label,
   }, raw_consumer_opts or {})
+
+  local source = require("thetto.util.source").merge(sources, {
+    get_cursor_word = get_cursor_word,
+    can_resume = false,
+
+    collect = function(source_ctx)
+      local count = #sources
+      return function(observer)
+        local completed = {}
+        local complete = function(i)
+          completed[i] = true
+          if vim.tbl_count(completed) == count then
+            observer:complete()
+          end
+        end
+
+        local cancels = vim
+          .iter(sources)
+          :enumerate()
+          :map(function(i, source)
+            local specific_source_ctx = SourceContext.from(source, source_ctx, consumer_opts.is_manual)
+            if source.min_trigger_length and #specific_source_ctx.cursor_word.str < source.min_trigger_length then
+              complete(i)
+              return
+            end
+
+            local save_cache = source.should_collect
+                and function(items)
+                  cache[i] = cache[i] or {}
+                  vim.list_extend(cache[i], items)
+                end
+              or function() end
+
+            if cache[i] and source.should_collect and not source.should_collect(specific_source_ctx) then
+              local items = cache[i]
+              observer:next(items)
+              complete(i)
+              return
+            end
+
+            local subscriber = SourceSubscriber.new(source, specific_source_ctx)
+            local observable = Observable.new(subscriber)
+            local subscription = observable:subscribe({
+              next = function(items)
+                for _, item in ipairs(items) do
+                  item.kind_name = item.kind_name or source.kind_name
+                  item.source_name = item.source_name or name(i, source)
+                end
+                save_cache(items)
+                observer:next(items)
+              end,
+              complete = function()
+                complete(i)
+              end,
+              error = function(...)
+                observer:error(...)
+              end,
+            })
+            return function()
+              subscription:unsubscribe()
+            end
+          end)
+          :totable()
+        return function()
+          for _, cancel in ipairs(cancels) do
+            cancel()
+          end
+        end
+      end
+    end,
+  })
+  local thetto = require("thetto")
   local consumer = require("thetto.handler.consumer.complete").new(consumer_opts)
   return function(on_consumer_factory)
     thetto.start(source, {

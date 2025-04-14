@@ -8,6 +8,7 @@ local M = {}
 --- @field cursor_word {str:string,offset:integer}
 --- @field opts table
 --- @field store_to_restart table?
+--- @field is_manual boolean
 
 local get_pattern = function(source, source_input_pattern)
   local pattern = source_input_pattern
@@ -38,10 +39,11 @@ function M.new(source, source_bufnr, source_window_id, source_input_pattern, sto
     window_id = source_window_id,
     opts = source.opts or {},
     store_to_restart = store_to_restart,
+    is_manual = false,
   }
 end
 
-function M.from(source, source_ctx)
+function M.from(source, source_ctx, is_manual)
   return {
     pattern = get_pattern(source, nil),
     cursor_word = source_ctx.cursor_word,
@@ -50,6 +52,7 @@ function M.from(source, source_ctx)
     window_id = source_ctx.window_id,
     opts = source.opts or {},
     store_to_restart = source_ctx.store_to_restart,
+    is_manual = is_manual,
   }
 end
 

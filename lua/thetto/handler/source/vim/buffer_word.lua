@@ -19,12 +19,6 @@ function M.collect(source_ctx)
   end
 
   return function(observer)
-    if source_ctx.cursor_word.str == "" then
-      observer:next({})
-      observer:complete()
-      return
-    end
-
     local cursor_word = require("thetto.lib.cursor").word(source_ctx.window_id).str or ""
 
     local work_observer = require("thetto.util.job.work_observer").new(
@@ -55,5 +49,7 @@ end
 
 M.kind_name = "word"
 M.kind_label = "Buffer"
+
+M.min_trigger_length = 1
 
 return M
