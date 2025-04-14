@@ -62,7 +62,6 @@ function M.enable(sources)
       consumer:cancel()
       cancel_resolve()
       cancel_set_completion_info()
-      clear_cache()
     end,
   })
 end
@@ -297,7 +296,7 @@ function M._set_resolver(sources, bufnr, group)
       if not source.resolve then
         return
       end
-      cancel = source.resolve(completed_item.user_data.item)
+      cancel = source.resolve(completed_item.user_data.item) or function() end
     end,
   })
 
