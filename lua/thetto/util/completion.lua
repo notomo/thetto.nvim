@@ -7,17 +7,9 @@ local clear_cache = function()
 end
 
 function M.enable(sources)
-  local starter, consumer = M._starter(sources)
-  local on_discard = function() end
-  local on_consumer_factory = function(callbacks)
-    on_discard = callbacks.on_discard
-  end
-  local debounced = require("thetto.vendor.misclib.debounce").wrap(
-    100,
-    vim.schedule_wrap(function()
-      starter(on_consumer_factory)
-    end)
-  )
+  local starter = M._starter(sources, false)
+  local debounced = require("thetto.vendor.misclib.debounce").wrap(100, vim.schedule_wrap(starter.start))
+  local consumer = starter.consumer
 
   local bufnr = vim.api.nvim_get_current_buf()
   local changedtick = vim.b[bufnr].changedtick
@@ -44,26 +36,7 @@ function M.enable(sources)
     end,
   })
 
-  vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-    buffer = bufnr,
-    group = group,
-    callback = function()
-      clear_cache()
-    end,
-  })
-
-  local cancel_resolve = M._set_resolver(sources, bufnr, group)
-  local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
-  vim.api.nvim_create_autocmd({ "InsertLeave" }, {
-    buffer = bufnr,
-    group = group,
-    callback = function()
-      on_discard()
-      consumer:cancel()
-      cancel_resolve()
-      cancel_set_completion_info()
-    end,
-  })
+  M._set_autocmd(sources, bufnr, group, starter.cancel)
 end
 
 function M.disable()
@@ -76,39 +49,17 @@ function M.disable()
 end
 
 function M.trigger(sources)
-  local starter, consumer = M._starter(sources, { is_manual = true })
-  local on_discard = function() end
-  local on_consumer_factory = function(callbacks)
-    on_discard = callbacks.on_discard
-  end
+  local starter = M._starter(sources, true)
 
   clear_cache()
-  starter(on_consumer_factory)
+  starter.start()
 
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
-
-  vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-    buffer = bufnr,
-    group = group,
-    callback = function()
-      clear_cache()
-    end,
-  })
-
-  local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
-  vim.api.nvim_create_autocmd({ "InsertLeave" }, {
-    buffer = bufnr,
-    group = group,
-    callback = function()
-      on_discard()
-      consumer:cancel()
-      cancel_set_completion_info()
-    end,
-  })
+  M._set_autocmd(sources, bufnr, group, starter.cancel)
 end
 
-function M._starter(sources, raw_consumer_opts)
+function M._starter(sources, is_manual)
   local priorities = {}
   vim.iter(sources):enumerate():each(function(i, source)
     priorities[source.name] = math.pow(100, #sources - i)
@@ -143,11 +94,6 @@ function M._starter(sources, raw_consumer_opts)
     return source.name or ("merged_source_" .. i)
   end
 
-  local consumer_opts = vim.tbl_deep_extend("force", {
-    priorities = priorities,
-    source_to_label = source_to_label,
-  }, raw_consumer_opts or {})
-
   local source = require("thetto.util.source").merge(sources, {
     get_cursor_word = get_cursor_word,
     can_resume = false,
@@ -167,7 +113,7 @@ function M._starter(sources, raw_consumer_opts)
           .iter(sources)
           :enumerate()
           :map(function(i, source)
-            local specific_source_ctx = SourceContext.from(source, source_ctx, consumer_opts.is_manual)
+            local specific_source_ctx = SourceContext.from(source, source_ctx, is_manual)
             if source.min_trigger_length and #specific_source_ctx.cursor_word.str < source.min_trigger_length then
               complete(i)
               return
@@ -219,17 +165,51 @@ function M._starter(sources, raw_consumer_opts)
     end,
   })
   local thetto = require("thetto")
-  local consumer = require("thetto.handler.consumer.complete").new(consumer_opts)
-  return function(on_consumer_factory)
-    thetto.start(source, {
-      consumer_factory = function(consumer_ctx, _, _, callbacks)
-        on_consumer_factory(callbacks)
-        consumer:apply(consumer_ctx.source_ctx.cursor_word)
-        return consumer
-      end,
-    })
-  end,
-    consumer
+  local consumer = require("thetto.handler.consumer.complete").new({
+    priorities = priorities,
+    source_to_label = source_to_label,
+  })
+
+  local on_discard = function() end
+  local starter = {
+    consumer = consumer,
+    cancel = function()
+      on_discard()
+      consumer:cancel()
+    end,
+    start = function()
+      thetto.start(source, {
+        consumer_factory = function(consumer_ctx, _, _, callbacks)
+          on_discard = callbacks.on_discard
+          consumer:apply(consumer_ctx.source_ctx.cursor_word)
+          return consumer
+        end,
+      })
+    end,
+  }
+  return starter
+end
+
+function M._set_autocmd(sources, bufnr, group, cancel_collect)
+  vim.api.nvim_create_autocmd({ "ModeChanged" }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      clear_cache()
+    end,
+  })
+
+  local cancel_resolve = M._set_resolver(sources, bufnr, group)
+  local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
+  vim.api.nvim_create_autocmd({ "InsertLeave" }, {
+    buffer = bufnr,
+    group = group,
+    callback = function()
+      cancel_collect()
+      cancel_resolve()
+      cancel_set_completion_info()
+    end,
+  })
 end
 
 function M._set_completion_info(sources, bufnr, group)
