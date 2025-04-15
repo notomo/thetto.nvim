@@ -88,6 +88,7 @@ function M.collect(source_ctx)
                 desc = table.concat(descs, " "),
                 kind_label = completionItemKind[item.kind],
                 original_item = item,
+                deprecated = item.deprecated,
               }
             end)
             :filter(function(item)
