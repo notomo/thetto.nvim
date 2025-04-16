@@ -83,8 +83,13 @@ function M.collect(source_ctx)
                 table.insert(descs, detail)
               end
 
+              local value = item.insertText or item.label
+              if vim.startswith(value, ".") then
+                value = value:sub(2)
+              end
+
               return {
-                value = item.insertText or item.label,
+                value = value,
                 desc = table.concat(descs, " "),
                 kind_label = completionItemKind[item.kind],
                 original_item = item,
