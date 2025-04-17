@@ -34,6 +34,8 @@ local insertTextFormat = {
   Snippet = 2,
 }
 
+local content_modified_err = -32801
+
 local get_last_char = function(source_ctx)
   local cursor = vim.api.nvim_win_get_cursor(source_ctx.window_id)
   local row = cursor[1]
@@ -160,6 +162,9 @@ function M.set_completion_info(index)
       end,
       complete = function() end,
       error = function(err)
+        if err and err.code == content_modified_err then
+          return
+        end
         require("thetto.lib.message").warn(err)
       end,
     },
@@ -204,6 +209,9 @@ function M.resolve(params)
       end,
       complete = function() end,
       error = function(err)
+        if err and err.code == content_modified_err then
+          return
+        end
         require("thetto.lib.message").warn(err)
       end,
     },
