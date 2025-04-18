@@ -51,12 +51,13 @@ end
 function M.trigger(sources)
   local starter = M._starter(sources, true)
 
-  clear_cache()
-  starter.start()
-
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
   M._set_autocmd(sources, bufnr, group, starter.cancel)
+
+  clear_cache()
+
+  return starter.start()
 end
 
 function M._starter(sources, is_manual)
@@ -178,7 +179,7 @@ function M._starter(sources, is_manual)
       consumer:cancel()
     end,
     start = function()
-      thetto.start(source, {
+      return thetto.start(source, {
         consumer_factory = function(consumer_ctx, _, _, callbacks)
           on_discard = callbacks.on_discard
           consumer:apply(consumer_ctx.source_ctx.cursor_word)
