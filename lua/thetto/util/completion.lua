@@ -3,7 +3,9 @@ local M = {}
 local _group_name_format = "thetto.completion.buffer_%s"
 local cache = {}
 local clear_cache = function()
-  cache = {}
+  for _, k in ipairs(vim.tbl_keys(cache)) do
+    cache[k] = nil
+  end
 end
 
 function M.enable(sources)
@@ -88,83 +90,10 @@ function M._starter(sources, is_manual)
     return require("thetto.lib.cursor").word(window_id)
   end
 
-  local SourceContext = require("thetto.core.source_context")
-  local SourceSubscriber = require("thetto.core.source_subscriber")
-  local Observable = require("thetto.vendor.misclib.observable")
-  local name = function(i, source)
-    return source.name or ("merged_source_" .. i)
-  end
-
   local source = require("thetto.util.source").merge(sources, {
     get_cursor_word = get_cursor_word,
     can_resume = false,
-
-    collect = function(source_ctx)
-      local count = #sources
-      return function(observer)
-        local completed = {}
-        local complete = function(i)
-          completed[i] = true
-          if vim.tbl_count(completed) == count then
-            observer:complete()
-          end
-        end
-
-        local cancels = vim
-          .iter(sources)
-          :enumerate()
-          :map(function(i, source)
-            local specific_source_ctx = SourceContext.from(source, source_ctx, is_manual)
-            if source.min_trigger_length and #specific_source_ctx.cursor_word.str < source.min_trigger_length then
-              complete(i)
-              return
-            end
-
-            local save_cache = source.should_collect
-                and function(items)
-                  cache[i] = cache[i] or {}
-                  vim.list_extend(cache[i], items)
-                end
-              or function() end
-
-            if cache[i] and source.should_collect and not source.should_collect(specific_source_ctx) then
-              local items = cache[i]
-              observer:next(items)
-              complete(i)
-              return
-            end
-
-            local subscriber = SourceSubscriber.new(source, specific_source_ctx)
-            local observable = Observable.new(subscriber)
-            local subscription = observable:subscribe({
-              next = function(items)
-                for _, item in ipairs(items) do
-                  item.kind_name = item.kind_name or source.kind_name
-                  item.source_name = item.source_name or name(i, source)
-                end
-                save_cache(items)
-                observer:next(items)
-              end,
-              complete = function()
-                complete(i)
-              end,
-              error = function(...)
-                observer:error(...)
-              end,
-            })
-            return function()
-              subscription:unsubscribe()
-            end
-          end)
-          :totable()
-        return function()
-          for _, cancel in ipairs(cancels) do
-            cancel()
-          end
-        end
-      end
-    end,
-  })
+  }, cache, is_manual)
   local thetto = require("thetto")
   local consumer = require("thetto.handler.consumer.complete").new({
     priorities = priorities,
@@ -200,8 +129,13 @@ function M._set_autocmd(sources, bufnr, group, cancel_collect)
     end,
   })
 
-  local cancel_resolve = M._set_resolver(sources, bufnr, group)
-  local cancel_set_completion_info = M._set_completion_info(sources, bufnr, group)
+  local source_map = vim.iter(sources):fold({}, function(acc, s)
+    acc[s.name] = s
+    return acc
+  end)
+
+  local cancel_resolve = M._set_resolver(source_map, bufnr, group)
+  local cancel_set_completion_info = M._set_completion_info(source_map, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
     buffer = bufnr,
     group = group,
@@ -213,12 +147,7 @@ function M._set_autocmd(sources, bufnr, group, cancel_collect)
   })
 end
 
-function M._set_completion_info(sources, bufnr, group)
-  local source_map = vim.iter(sources):fold({}, function(acc, s)
-    acc[s.name] = s
-    return acc
-  end)
-
+function M._set_completion_info(source_map, bufnr, group)
   local cancel = function() end
   vim.api.nvim_create_autocmd({ "CompleteChanged" }, {
     buffer = bufnr,
@@ -250,12 +179,7 @@ function M._set_completion_info(sources, bufnr, group)
   end
 end
 
-function M._set_resolver(sources, bufnr, group)
-  local source_map = vim.iter(sources):fold({}, function(acc, s)
-    acc[s.name] = s
-    return acc
-  end)
-
+function M._set_resolver(source_map, bufnr, group)
   local cancel = function() end
   vim.api.nvim_create_autocmd({ "CompleteDone" }, {
     buffer = bufnr,

@@ -60,7 +60,9 @@ function M.filter(f)
   end
 end
 
-function M.merge(sources, fields)
+function M.merge(sources, fields, cache, is_manual)
+  cache = cache or {}
+
   local SourceContext = require("thetto.core.source_context")
   local SourceSubscriber = require("thetto.core.source_subscriber")
   local Observable = require("thetto.vendor.misclib.observable")
@@ -148,10 +150,37 @@ function M.merge(sources, fields)
       local count = #sources
       return function(observer)
         local completed = {}
+        local complete = function(i)
+          completed[i] = true
+          if vim.tbl_count(completed) == count then
+            observer:complete()
+          end
+        end
+
         local cancels = vim
           .iter(sources)
           :enumerate()
           :map(function(i, source)
+            local specific_source_ctx = SourceContext.from(source, source_ctx, is_manual)
+            if source.min_trigger_length and #specific_source_ctx.cursor_word.str < source.min_trigger_length then
+              complete(i)
+              return
+            end
+
+            local save_cache = source.should_collect
+                and function(items)
+                  cache[i] = cache[i] or {}
+                  vim.list_extend(cache[i], items)
+                end
+              or function() end
+
+            if cache[i] and source.should_collect and not source.should_collect(specific_source_ctx) then
+              local items = cache[i]
+              observer:next(items)
+              complete(i)
+              return
+            end
+
             local subscriber = SourceSubscriber.new(source, SourceContext.from(source, source_ctx))
             local observable = Observable.new(subscriber)
             local subscription = observable:subscribe({
@@ -160,13 +189,11 @@ function M.merge(sources, fields)
                   item.kind_name = item.kind_name or source.kind_name
                   item.source_name = item.source_name or name(i, source)
                 end
+                save_cache(items)
                 observer:next(items)
               end,
               complete = function()
-                completed[i] = true
-                if vim.tbl_count(completed) == count then
-                  observer:complete()
-                end
+                complete(i)
               end,
               error = function(...)
                 observer:error(...)
