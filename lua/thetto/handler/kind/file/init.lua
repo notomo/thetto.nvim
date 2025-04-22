@@ -25,19 +25,14 @@ local adjust_cursor = function(item)
   vim.api.nvim_win_set_cursor(0, { row, item.column or 0 })
 end
 
-local get_bufnr = function(item)
-  local pattern = ("^%s$"):format(item.path)
-  return vim.fn.bufnr(pattern)
-end
-
 function M.escape(path)
   return ([[`='%s'`]]):format(path:gsub("'", "''"))
 end
 
 function M.action_open(items)
   for _, item in ipairs(items) do
-    local bufnr = get_bufnr(item)
-    if bufnr ~= -1 then
+    local bufnr = require("thetto.vendor.misclib.buffer").find(item.path)
+    if bufnr then
       vim.cmd.buffer(bufnr)
     else
       vim.cmd.edit(filelib.escape(item.path))
@@ -49,8 +44,8 @@ end
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
     require("thetto.lib.buffer").open_scratch_tab()
-    local bufnr = get_bufnr(item)
-    if bufnr ~= -1 then
+    local bufnr = require("thetto.vendor.misclib.buffer").find(item.path)
+    if bufnr then
       vim.cmd.buffer(bufnr)
     else
       vim.cmd.edit(filelib.escape(item.path))
@@ -68,8 +63,8 @@ end
 
 function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
-    local bufnr = get_bufnr(item)
-    if bufnr ~= -1 then
+    local bufnr = require("thetto.vendor.misclib.buffer").find(item.path)
+    if bufnr then
       vim.cmd.vsplit()
       vim.cmd.buffer(bufnr)
     else
@@ -92,8 +87,8 @@ function M.get_preview(item, action_ctx)
   if vim.fn.isdirectory(item.path) == 1 then
     return require("thetto.util.action").preview("file/directory", item, action_ctx)
   end
-  local bufnr = get_bufnr(item)
-  if bufnr ~= -1 and vim.api.nvim_buf_is_loaded(bufnr) then
+  local bufnr = require("thetto.vendor.misclib.buffer").find(item.path)
+  if bufnr and vim.api.nvim_buf_is_loaded(bufnr) then
     return nil,
       {
         bufnr = bufnr,
@@ -124,8 +119,8 @@ end
 
 function M.action_delete_buffer(items)
   for _, item in ipairs(items) do
-    local bufnr = get_bufnr(item)
-    if bufnr ~= -1 then
+    local bufnr = require("thetto.vendor.misclib.buffer").find(item.path)
+    if bufnr then
       vim.api.nvim_buf_delete(bufnr, { force = true })
     end
   end
