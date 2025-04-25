@@ -166,6 +166,12 @@ function M._set_completion_info(source_map, bufnr, group)
         return
       end
 
+      if source.edit_on_completion then
+        local client_id = info.completed.user_data.client_id
+        local original_item = info.completed.user_data.item
+        source.edit_on_completion(bufnr, client_id, original_item)
+      end
+
       if not source.set_completion_info then
         return
       end

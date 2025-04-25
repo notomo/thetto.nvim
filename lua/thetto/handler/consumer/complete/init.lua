@@ -81,15 +81,17 @@ local complete = function(self, items, cursor_word)
     .iter(scored_items)
     :map(function(c)
       return {
-        word = c.item.value,
+        word = c.item.has_edit and "" or c.item.value,
         abbr = c.item.desc,
         menu = c.item.kind_label or self._source_to_label[c.item.source_name] or c.item.source_name or c.item.kind_name,
         icase = 1,
         dup = 1,
         empty = 1,
+        equal = c.item.has_edit and 1 or 0,
         user_data = {
           source_name = c.item.source_name,
           item = c.item.original_item,
+          client_id = c.item.client_id,
         },
         abbr_hlgroup = c.item.deprecated and "DiagnosticDeprecated" or nil,
       }

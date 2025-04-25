@@ -75,7 +75,7 @@ function M.collect(source_ctx)
         })
       end,
       observer = {
-        next = function(result)
+        next = function(result, ctx)
           local items = vim
             .iter(result.items)
             :map(function(item)
@@ -86,16 +86,14 @@ function M.collect(source_ctx)
               end
 
               local value = item.insertText or item.label
-              if vim.startswith(value, ".") then
-                value = value:sub(2)
-              end
-
               return {
                 value = value,
                 desc = table.concat(descs, " "),
                 kind_label = completionItemKind[item.kind],
                 original_item = item,
+                has_edit = item.textEdit ~= nil,
                 deprecated = item.deprecated,
+                client_id = ctx.client_id,
               }
             end)
             :filter(function(item)
@@ -128,6 +126,17 @@ function M.should_collect(source_ctx)
     local trigger_characters = vim.tbl_get(client.server_capabilities, "completionProvider", "triggerCharacters")
     return source_ctx.is_manual or vim.tbl_contains(trigger_characters, last_char)
   end)
+end
+
+function M.edit_on_completion(bufnr, client_id, original_item)
+  if original_item.textEdit then
+    local client = assert(vim.lsp.get_clients({ id = client_id })[1])
+    vim.schedule(function()
+      vim.lsp.util.apply_text_edits({ original_item.textEdit }, bufnr, client.offset_encoding)
+      local last_column = vim.fn.col("$") - 1
+      vim.api.nvim_win_set_cursor(0, { vim.fn.line("."), last_column })
+    end)
+  end
 end
 
 function M.set_completion_info(index)
