@@ -60,7 +60,7 @@ function Collector.start(self)
     self._source.kind_name,
     {}
   )
-  return self._current_run:promise(), consumer
+  return self._current_run:promise(), consumer, source_errored
 end
 
 --- @param source_input_pattern string?

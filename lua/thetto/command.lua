@@ -28,8 +28,8 @@ function M.start(source, raw_opts)
     opts.actions
   )
 
-  local promise, consumer = collector:start()
-  if source.can_resume ~= false then
+  local promise, consumer, source_errored = collector:start()
+  if source.can_resume ~= false and not source_errored then
     require("thetto.core.context").set(ctx_key, {
       collector = collector,
       consumer = consumer,
@@ -55,7 +55,7 @@ function M.resume(raw_opts)
 
   local ctx, old_ctx = require("thetto.core.context").resume(opts.offset)
   if not ctx then
-    return
+    return handle_error(require("thetto.vendor.promise").reject("no context to resume"))
   end
   if old_ctx then
     -- don't call update_used_at() to loop resume()

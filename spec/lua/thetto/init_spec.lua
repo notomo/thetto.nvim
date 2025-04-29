@@ -495,7 +495,7 @@ line3
 line4]])
   end)
 
-  it("can resume error if no items", function()
+  it("doesn't resume early stage error", function()
     local messages = {}
     ---@diagnostic disable-next-line: duplicate-set-field
     vim.notify = function(msg)
@@ -514,7 +514,7 @@ line4]])
 
     assert.same({
       "[thetto] early stage error for test",
-      "[thetto] early stage error for test",
+      "[thetto] no context to resume",
     }, messages)
   end)
 
