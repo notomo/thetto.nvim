@@ -58,8 +58,12 @@ function M.collect(source_ctx)
         method = method,
       }),
       params = function(client)
-        local trigger_characters = vim.tbl_get(client.server_capabilities, "completionProvider", "triggerCharacters")
         local params = vim.lsp.util.make_position_params(source_ctx.window_id, client.offset_encoding)
+        if params.position.line < 0 or params.position.character < 0 then
+          return nil
+        end
+
+        local trigger_characters = vim.tbl_get(client.server_capabilities, "completionProvider", "triggerCharacters")
         if not source_ctx.is_manual and vim.tbl_contains(trigger_characters, last_char) then
           return vim.tbl_extend("force", params, {
             context = {
