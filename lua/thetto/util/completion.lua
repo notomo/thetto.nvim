@@ -8,8 +8,14 @@ local clear_cache = function()
   end
 end
 
-function M.enable(sources)
-  local starter = M._starter(sources, false)
+local default_opts = {
+  kind_priorities = {},
+}
+
+function M.enable(sources, raw_opts)
+  local opts = vim.tbl_extend("force", default_opts, raw_opts or {})
+
+  local starter = M._starter(sources, false, opts)
   local debounced = require("thetto.vendor.misclib.debounce").wrap(100, vim.schedule_wrap(starter.start))
   local consumer = starter.consumer
 
@@ -50,8 +56,10 @@ function M.disable()
   })
 end
 
-function M.trigger(sources)
-  local starter = M._starter(sources, true)
+function M.trigger(sources, raw_opts)
+  local opts = vim.tbl_extend("force", default_opts, raw_opts or {})
+
+  local starter = M._starter(sources, true, opts)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
@@ -62,7 +70,7 @@ function M.trigger(sources)
   return starter.start()
 end
 
-function M._starter(sources, is_manual)
+function M._starter(sources, is_manual, opts)
   local priorities = {}
   vim.iter(sources):enumerate():each(function(i, source)
     priorities[source.name] = math.pow(100, #sources - i)
@@ -97,6 +105,7 @@ function M._starter(sources, is_manual)
   local thetto = require("thetto")
   local consumer = require("thetto.handler.consumer.complete").new({
     priorities = priorities,
+    kind_priorities = opts.kind_priorities,
     source_to_label = source_to_label,
   })
 
