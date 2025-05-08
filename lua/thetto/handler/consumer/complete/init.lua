@@ -81,7 +81,7 @@ local complete = function(self, items, cursor_word)
     .iter(scored_items)
     :map(function(c)
       return {
-        word = c.item.has_edit and "" or c.item.value,
+        word = c.item.has_edit and prefix or c.item.value,
         abbr = c.item.desc,
         menu = c.item.kind_label or self._source_to_label[c.item.source_name] or c.item.source_name or c.item.kind_name,
         icase = 1,
