@@ -132,10 +132,13 @@ function M.should_collect(source_ctx)
   end)
 end
 
+local editting = false
 function M.edit_on_completion(bufnr, client_id, original_item)
-  if original_item.textEdit then
+  if not editting and original_item.textEdit then
+    editting = true
     local client = assert(vim.lsp.get_clients({ id = client_id })[1])
     vim.schedule(function()
+      editting = false
       vim.lsp.util.apply_text_edits({ original_item.textEdit }, bufnr, client.offset_encoding)
       local last_column = vim.fn.col("$") - 1
       vim.api.nvim_win_set_cursor(0, { vim.fn.line("."), last_column })
