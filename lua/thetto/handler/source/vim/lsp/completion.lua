@@ -113,8 +113,10 @@ function M.edit_on_completion(bufnr, client_id, original_item)
     vim.schedule(function()
       editting = false
       vim.lsp.util.apply_text_edits({ original_item.textEdit }, bufnr, client.offset_encoding)
-      local last_column = vim.fn.col("$") - 1
-      vim.api.nvim_win_set_cursor(0, { vim.fn.line("."), last_column })
+      vim.api.nvim_win_set_cursor(0, {
+        original_item.textEdit.range["end"].line + 1,
+        original_item.textEdit.range["end"].character + #original_item.textEdit.newText - 1,
+      })
     end)
   end
 end
