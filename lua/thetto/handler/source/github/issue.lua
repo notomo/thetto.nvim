@@ -49,7 +49,6 @@ function M.collect(source_ctx)
         return vim.trim(o.stderr)
       end
       repo_with_owner = vim.trim(o.stdout)
-      vim.print(repo_with_owner)
     end
 
     cmd = {

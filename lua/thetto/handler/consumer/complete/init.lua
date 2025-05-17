@@ -96,6 +96,7 @@ local complete = function(self, items, cursor_word)
           source_name = c.item.source_name,
           item = c.item.original_item,
           client_id = c.item.client_id,
+          offset = cursor_word.offset,
         },
         abbr_hlgroup = c.item.deprecated and "DiagnosticDeprecated" or nil,
       }

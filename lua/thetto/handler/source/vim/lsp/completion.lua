@@ -68,7 +68,8 @@ function M.collect(source_ctx)
                 desc = table.concat(descs, " "),
                 kind_label = completionItemKind[item.kind],
                 original_item = item,
-                has_edit = item.textEdit ~= nil,
+                has_edit = item.textEdit ~= nil
+                  or (item.insertText and item.insertTextFormat == insertTextFormat.Snippet),
                 deprecated = item.deprecated,
                 client_id = ctx.client_id,
               }
@@ -91,34 +92,85 @@ function M.collect(source_ctx)
   end
 end
 
-function M.should_collect(source_ctx)
-  local last_char = get_last_char(source_ctx)
-  local bufnr = source_ctx.bufnr
-  local method = vim.lsp.protocol.Methods.textDocument_completion
-  local clients = vim.lsp.get_clients({
-    bufnr = bufnr,
-    method = method,
-  })
-  return vim.iter(clients):any(function(client)
-    local trigger_characters = vim.tbl_get(client.server_capabilities, "completionProvider", "triggerCharacters")
-    return source_ctx.is_manual or vim.tbl_contains(trigger_characters, last_char)
-  end)
-end
+local ns = vim.api.nvim_create_namespace("thetto.lsp.completion")
+local group = vim.api.nvim_create_augroup("thetto.lsp.completion", {})
 
-local editting = false
-function M.edit_on_completion(bufnr, client_id, original_item)
-  if not editting and original_item.textEdit then
-    editting = true
-    local client = assert(vim.lsp.get_clients({ id = client_id })[1])
-    vim.schedule(function()
-      editting = false
-      vim.lsp.util.apply_text_edits({ original_item.textEdit }, bufnr, client.offset_encoding)
-      vim.api.nvim_win_set_cursor(0, {
-        original_item.textEdit.range["end"].line + 1,
-        original_item.textEdit.range["end"].character + #original_item.textEdit.newText - 1,
-      })
-    end)
+function M.edit_on_completion(bufnr, _, original_item, offset)
+  if not original_item.textEdit and original_item.insertTextFormat ~= insertTextFormat.Snippet then
+    return
   end
+
+  local row, column = unpack(vim.api.nvim_win_get_cursor(0))
+  local text_edit
+  if original_item.textEdit then
+    text_edit = original_item.textEdit
+  else
+    text_edit = {
+      newText = original_item.insertText,
+      range = {
+        start = {
+          line = row - 1,
+          character = offset - 1,
+        },
+        ["end"] = {
+          line = row - 1,
+          character = column,
+        },
+      },
+    }
+  end
+
+  vim.api.nvim_create_autocmd({ "CompleteChanged", "ModeChanged" }, {
+    buffer = 0,
+    group = group,
+    callback = function()
+      vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    end,
+  })
+
+  local lines = vim.split(text_edit.newText or "", "\n", { plain = true })
+  local range = text_edit.range
+  local first_line = lines[1]
+
+  local overlay_args = {}
+  if range.start.character < column then
+    local line = first_line:sub(0, column - range.start.character)
+    overlay_args = {
+      s = range.start.line,
+      e = range.start.character,
+      opts = {
+        end_line = range.start.line,
+        end_col = column,
+        virt_text_pos = "overlay",
+        virt_text = { { line, "Comment" } },
+      },
+    }
+  end
+
+  local line = first_line:sub(column - range.start.character + 1)
+  local opts = {
+    end_line = range["end"].line,
+    end_col = range["end"].character,
+    virt_text_pos = "inline",
+    virt_text = { { line, "Comment" } },
+  }
+  local virt_lines = vim
+    .iter(lines)
+    :skip(1)
+    :map(function(x)
+      return { { x, "Comment" } }
+    end)
+    :totable()
+  if #virt_lines > 0 then
+    opts.virt_lines = virt_lines
+  end
+  vim.schedule(function()
+    vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
+    if not vim.tbl_isempty(overlay_args) then
+      vim.api.nvim_buf_set_extmark(bufnr, ns, overlay_args.s, overlay_args.e, overlay_args.opts)
+    end
+    vim.api.nvim_buf_set_extmark(bufnr, ns, range.start.line, column, opts)
+  end)
 end
 
 function M.set_completion_info(index)
@@ -163,20 +215,21 @@ function M.set_completion_info(index)
   return cancel
 end
 
-function M.resolve(params)
+function M.resolve(params, client_id, offset)
   local window_id = vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(window_id)
 
   if params.insertText and params.insertTextFormat == insertTextFormat.Snippet then
     local row, column = unpack(vim.api.nvim_win_get_cursor(window_id))
-
-    local splitted = vim.split(params.insertText, "\n", { plain = true })
-    local height = #splitted
-    vim.api.nvim_win_set_cursor(window_id, { row - height + 1, column })
-    local last_column = vim.fn.col("$") - 1
-
-    vim.api.nvim_buf_set_text(bufnr, row - height, last_column - #splitted[1], row - 1, column, { "" })
+    vim.api.nvim_buf_set_text(bufnr, row - 1, offset - 1, row - 1, column, { "" })
     vim.snippet.expand(params.insertText)
+  elseif params.textEdit then
+    local client = assert(vim.lsp.get_clients({ id = client_id })[1])
+    vim.lsp.util.apply_text_edits({ params.textEdit }, bufnr, client.offset_encoding)
+    vim.api.nvim_win_set_cursor(window_id, {
+      params.textEdit.range["end"].line + 1,
+      params.textEdit.range["end"].character + #params.textEdit.newText - 1,
+    })
   end
 
   local method = vim.lsp.protocol.Methods.completionItem_resolve

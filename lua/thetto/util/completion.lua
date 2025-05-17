@@ -177,8 +177,9 @@ function M._set_completion_info(source_map, bufnr, group)
 
       if source.edit_on_completion then
         local client_id = info.completed.user_data.client_id
+        local offset = info.completed.user_data.offset
         local original_item = info.completed.user_data.item
-        source.edit_on_completion(bufnr, client_id, original_item)
+        source.edit_on_completion(bufnr, client_id, original_item, offset)
       end
 
       if not source.set_completion_info then
@@ -205,6 +206,10 @@ function M._set_resolver(source_map, bufnr, group)
       end
       cancel()
 
+      if vim.tbl_get(vim.v.event, "reason") == "cancel" then
+        return
+      end
+
       local source_name = completed_item.user_data.source_name
       local source = source_map[source_name]
       if not source then
@@ -214,7 +219,9 @@ function M._set_resolver(source_map, bufnr, group)
       if not source.resolve then
         return
       end
-      cancel = source.resolve(completed_item.user_data.item) or function() end
+      local client_id = completed_item.user_data.client_id
+      local offset = completed_item.user_data.offset
+      cancel = source.resolve(completed_item.user_data.item, client_id, offset) or function() end
     end,
   })
 end
