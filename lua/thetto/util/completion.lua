@@ -71,11 +71,6 @@ function M.trigger(sources, raw_opts)
 end
 
 function M._starter(sources, is_manual, opts)
-  local priorities = {}
-  vim.iter(sources):enumerate():each(function(i, source)
-    priorities[source.name] = math.pow(100, #sources - i)
-  end)
-
   local source_to_label = {}
   vim.iter(sources):each(function(source)
     source_to_label[source.name] = source.kind_label
@@ -104,7 +99,6 @@ function M._starter(sources, is_manual, opts)
   }, cache, is_manual)
   local thetto = require("thetto")
   local consumer = require("thetto.handler.consumer.complete").new({
-    priorities = priorities,
     kind_priorities = opts.kind_priorities,
     source_to_label = source_to_label,
   })

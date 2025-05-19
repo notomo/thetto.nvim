@@ -12,7 +12,6 @@ local M = {}
 M.__index = M
 
 local default_opts = {
-  priorities = {},
   kind_priorities = {},
   source_to_label = {},
   is_manual = false,
@@ -22,7 +21,6 @@ function M.new(raw_opts)
   local opts = vim.tbl_deep_extend("force", default_opts, raw_opts)
   local tbl = {
     _all_items = {},
-    _priorities = opts.priorities,
     _kind_priorities = opts.kind_priorities,
     _cursor_word = nil,
     _source_to_label = opts.source_to_label,
@@ -68,8 +66,7 @@ local complete = function(self, items, cursor_word)
         return nil
       end
       return {
-        score = (score + (self._priorities[item.source_name or ""] or 0))
-          * (self._kind_priorities[item.kind_label or ""] or 1),
+        score = (score + (self._kind_priorities[item.kind_label or ""] or 0)),
         item = item,
       }
     end)
