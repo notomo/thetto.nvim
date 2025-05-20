@@ -3,7 +3,7 @@ local M = {}
 local cursor_lib = require("thetto.lib.cursor")
 
 function M.get_cursor_word(window_id)
-  local cursor_path = cursor_lib.word(window_id, [=[\.?/[^[:space:]]*]=])
+  local cursor_path = cursor_lib.word(window_id, [=[(\~|\.)?/[^[:space:]]*]=])
   if not cursor_path then
     return nil
   end
@@ -16,7 +16,7 @@ local labels = {
 }
 
 function M.collect(source_ctx)
-  local cursor_path = cursor_lib.word(source_ctx.window_id, [=[\.?/[^[:space:]]*]=])
+  local cursor_path = cursor_lib.word(source_ctx.window_id, [=[(\~|\.)?/[^[:space:]]*]=])
   if not cursor_path then
     return {}
   end
