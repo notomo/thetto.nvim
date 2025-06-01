@@ -181,7 +181,7 @@ function M.merge(sources, fields, cache, is_manual)
               return
             end
 
-            local subscriber = SourceSubscriber.new(source, SourceContext.from(source, source_ctx))
+            local subscriber = SourceSubscriber.new(source, specific_source_ctx)
             local observable = Observable.new(subscriber)
             local subscription = observable:subscribe({
               next = function(items)
