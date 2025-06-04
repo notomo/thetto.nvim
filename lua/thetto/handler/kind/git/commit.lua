@@ -108,6 +108,22 @@ function M.action_list_children(items)
   return require("thetto").start(source)
 end
 
+function M.action_list_change_to(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  local source = require("thetto.util.source").by_name("git/change", {
+    cwd = item.git_root,
+    opts = {
+      commit_hash = item.commit_hash,
+      commit_hash_to = "HEAD",
+      path = item.path,
+    },
+  })
+  return require("thetto").start(source)
+end
+
 function M.action_file_log(items)
   local item = items[1]
   if not item then
@@ -132,7 +148,13 @@ function M.action_compare(items)
     return nil
   end
   local commit_hash = item.commit_hash or "HEAD"
-  return require("thetto.util.git").compare(item.git_root, item.path, commit_hash .. "^", item.path, commit_hash)
+  return require("thetto.util.git").compare(
+    item.git_root,
+    item.path,
+    commit_hash .. "^",
+    item.path,
+    item.commit_hash_to or commit_hash
+  )
 end
 --
 M.default_action = "open"

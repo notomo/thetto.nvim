@@ -4,6 +4,7 @@ local M = {}
 
 M.opts = {
   commit_hash = nil,
+  commit_hash_to = nil,
   path = nil,
 }
 
@@ -14,7 +15,7 @@ local status_mapping = {
   R = "rename",
 }
 
-function M._to_item(git_root, commit_hash, output)
+function M._to_item(git_root, commit_hash, commit_hash_to, output)
   local status_mark, path_parts = output:match("^(.)%S*%s+(.*)")
   local status = status_mapping[status_mark]
 
@@ -33,6 +34,7 @@ function M._to_item(git_root, commit_hash, output)
     desc = desc,
     path = abs_path,
     commit_hash = commit_hash,
+    commit_hash_to = commit_hash_to,
     status = status,
     git_root = git_root,
     column_offsets = {
@@ -50,8 +52,9 @@ function M.collect(source_ctx)
 
   local cmd = { "git", "--no-pager", "diff", "--name-status" }
   local commit_hash = source_ctx.opts.commit_hash
+  local commit_hash_to = source_ctx.opts.commit_hash_to
   if commit_hash then
-    table.insert(cmd, ("%s^...%s"):format(commit_hash, commit_hash))
+    table.insert(cmd, ("%s^...%s"):format(commit_hash, commit_hash_to or commit_hash))
   end
   table.insert(cmd, "--")
 
@@ -62,13 +65,13 @@ function M.collect(source_ctx)
         table.insert(cmd, source_ctx.opts.path)
       end
       return require("thetto.util.job").start(cmd, source_ctx, function(output)
-        return M._to_item(git_root, commit_hash, output)
+        return M._to_item(git_root, commit_hash, commit_hash_to, output)
       end, { cwd = git_root })
     end)
   end
 
   return require("thetto.util.job").start(cmd, source_ctx, function(output)
-    return M._to_item(git_root, commit_hash, output)
+    return M._to_item(git_root, commit_hash, commit_hash_to, output)
   end, { cwd = git_root })
 end
 

@@ -8,7 +8,9 @@ function M.render_diff(bufnr, item)
   local cmd = { "git", "--no-pager", "show", "--date=iso" }
 
   local target = item.commit_hash or item.stash_name
-  if target then
+  if target and item.commit_hash_to then
+    table.insert(cmd, ("%s^...%s"):format(target, item.commit_hash_to))
+  elseif target then
     table.insert(cmd, target)
   end
 
