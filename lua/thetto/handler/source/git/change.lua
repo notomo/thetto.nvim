@@ -99,4 +99,8 @@ M.kind_name = "git/change"
 
 M.cwd = require("thetto.util.cwd").project()
 
+M.actions = {
+  default_action = "compare",
+}
+
 return M
