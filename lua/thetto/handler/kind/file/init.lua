@@ -56,7 +56,8 @@ end
 
 function M.action_tab_drop(items)
   for _, item in ipairs(items) do
-    vim.cmd.drop({ mods = { tab = 0 }, args = { filelib.escape(item.path) } })
+    local tab = vim.fn.tabpagenr()
+    vim.cmd.drop({ mods = { tab = tab }, args = { filelib.escape(item.path) } })
     adjust_cursor(item)
   end
 end

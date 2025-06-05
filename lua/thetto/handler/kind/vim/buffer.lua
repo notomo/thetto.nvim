@@ -25,8 +25,9 @@ end
 function M.action_tab_drop(items)
   for _, item in ipairs(items) do
     local path = vim.api.nvim_buf_get_name(item.bufnr)
+    local tab = vim.fn.tabpagenr()
     if path ~= "" then
-      vim.cmd.drop({ mods = { tab = 0 }, args = { filelib.escape(path) } })
+      vim.cmd.drop({ mods = { tab = tab }, args = { filelib.escape(path) } })
     end
   end
 end
