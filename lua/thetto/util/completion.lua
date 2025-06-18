@@ -7,6 +7,7 @@ local clear_cache = function()
     cache[k] = nil
   end
 end
+local manual_triggered = false
 
 local default_opts = {
   kind_priorities = {},
@@ -29,6 +30,10 @@ function M.enable(sources, raw_opts)
     buffer = bufnr,
     group = group,
     callback = function()
+      if manual_triggered then
+        return
+      end
+
       if not vim.api.nvim_buf_is_valid(bufnr) then
         return
       end
@@ -62,10 +67,12 @@ function M.trigger(sources, raw_opts)
   local starter = M._starter(sources, true, opts)
 
   local bufnr = vim.api.nvim_get_current_buf()
-  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
+  local group = vim.api.nvim_create_augroup(("thetto.completion.trigger.buffer_%s"):format(bufnr), {})
   M._set_autocmd(sources, bufnr, group, starter.cancel)
 
   clear_cache()
+
+  manual_triggered = true
 
   return starter.start()
 end
@@ -143,6 +150,7 @@ function M._set_autocmd(sources, bufnr, group, cancel_collect)
     buffer = bufnr,
     group = group,
     callback = function()
+      manual_triggered = false
       cancel_collect()
       cancel_set_completion_info()
     end,
