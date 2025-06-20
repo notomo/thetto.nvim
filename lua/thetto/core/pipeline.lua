@@ -4,6 +4,7 @@
 
 --- @class ThettoPipelineStage
 --- @field ignore_input boolean?
+--- @field input_index integer?
 --- @field is_source_input boolean?
 --- @field apply fun(stage_ctx:ThettoPipelineStageContext,items:table[],opts:table?):(table[],fun())
 --- @field opts table?
@@ -28,6 +29,8 @@ function M.apply(self, source_ctx, items, inputs)
     local input
     if stage.ignore_input then
       input = ""
+    elseif stage.input_index then
+      input = inputs[stage.input_index] or ""
     else
       input = inputs[input_index] or ""
       input_index = input_index + 1
