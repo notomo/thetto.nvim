@@ -1,7 +1,7 @@
 local M = {}
 
 M.opts = {
-  max_depth = 10,
+  max_depth = 20,
   to_absolute = function(_, path)
     return path
   end,
