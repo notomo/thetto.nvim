@@ -50,7 +50,13 @@ local complete = function(self, items, cursor_word)
 
   local prefix = cursor_word.str
   local match = function(value)
-    return fn.matchfuzzypos({ value }, prefix)[3][1]
+    local result = fn.matchfuzzypos({ value }, prefix)
+    local matches = result[2][1]
+    local score = result[3][1]
+    if matches and matches[1] == 0 then
+      return score * 10
+    end
+    return score
   end
   if prefix == "" then
     match = function()
