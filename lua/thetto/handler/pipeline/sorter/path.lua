@@ -14,9 +14,12 @@ function M.apply(stage_ctx, items, _)
     :totable()
 
   table.sort(items, function(item_a, item_b)
+    local file_name_a = vim.fs.basename(item_a.path):lower()
+    local file_name_b = vim.fs.basename(item_b.path):lower()
     for _, x in ipairs(inputs) do
-      local match_a = vim.fs.basename(item_a.path):lower():match(x)
-      local match_b = vim.fs.basename(item_b.path):lower():match(x)
+      local match_a = file_name_a:match(x)
+      local match_b = file_name_b:match(x)
+
       if match_a and not match_b then
         return true
       end
