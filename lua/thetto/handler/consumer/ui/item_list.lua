@@ -92,6 +92,7 @@ function M.open(
     },
   })
   vim.wo[window_id].winfixbuf = true
+  vim.wo[window_id].cursorline = true
   local footer = require("thetto.handler.consumer.ui.item_list_footer").new(window_id, ctx_key, source_name, pipeline)
   footer:redraw()
 
