@@ -156,7 +156,28 @@ function M.action_compare(items)
     item.commit_hash_to or commit_hash
   )
 end
---
+
+function M.action_compare_open(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  if not item.path then
+    return nil
+  end
+  local commit_hash = item.commit_hash or "HEAD"
+  return require("thetto.util.git").compare(
+    item.git_root,
+    item.path,
+    commit_hash .. "^",
+    item.path,
+    item.commit_hash_to or commit_hash,
+    function()
+      vim.cmd.only()
+    end
+  )
+end
+
 M.default_action = "open"
 
 return M

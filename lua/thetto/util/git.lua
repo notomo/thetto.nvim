@@ -197,12 +197,14 @@ function M.content(git_root, path_or_bufnr, revision)
     end)
 end
 
-function M.compare(git_root, path_before, revision_before, path_after, revision_after)
+function M.compare(git_root, path_before, revision_before, path_after, revision_after, open)
   local before = M.content(git_root, path_before, revision_before)
   local after = M.content(git_root, path_after, revision_after)
   return require("thetto.vendor.promise").all({ before, after }):next(function(result)
     local before_buffer_path, after_buffer_path = unpack(result)
-    require("thetto.lib.buffer").open_scratch_tab()
+
+    open = open or require("thetto.lib.buffer").open_scratch_tab
+    open()
 
     vim.cmd.edit(require("thetto.lib.file").escape(before_buffer_path))
     vim.cmd.diffthis()

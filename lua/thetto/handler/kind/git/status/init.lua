@@ -159,7 +159,23 @@ function M.action_compare(items)
   if not item then
     return nil
   end
+  if not item.path then
+    return nil
+  end
   return require("thetto.util.git").compare(item.git_root, item.path, "HEAD", item.path)
+end
+
+function M.action_compare_open(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  if not item.path then
+    return nil
+  end
+  return require("thetto.util.git").compare(item.git_root, item.path, "HEAD", item.path, nil, function()
+    vim.cmd.only()
+  end)
 end
 
 function M.action_diff(items)
