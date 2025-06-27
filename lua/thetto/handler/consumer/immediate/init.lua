@@ -55,6 +55,18 @@ local handlers = {
     self._item_cursor_row = row
     self._on_row_changed(row)
 
+    local excluded_items = vim
+      .iter(self._all_items)
+      :slice(0, row)
+      :filter(function(x)
+        return not self._is_valid(x)
+      end)
+      :totable()
+
+    require("thetto.lib.message").echo(
+      (" %d / %d "):format(row - #excluded_items, #vim.iter(self._all_items):filter(self._is_valid):totable())
+    )
+
     local action_item_groups = require("thetto.util.action").grouping({ item }, {
       action_name = self._action_name,
       actions = self._actions,
