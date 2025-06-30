@@ -64,7 +64,11 @@ local handlers = {
       :totable()
 
     require("thetto.lib.message").echo(
-      (" %d / %d "):format(row - #excluded_items, #vim.iter(self._all_items):filter(self._is_valid):totable())
+      ("%s: %d / %d "):format(
+        self._source_name,
+        row - #excluded_items,
+        #vim.iter(self._all_items):filter(self._is_valid):totable()
+      )
     )
 
     local action_item_groups = require("thetto.util.action").grouping({ item }, {
