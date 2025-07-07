@@ -32,6 +32,24 @@ function M.action_tab_drop(items)
   end
 end
 
+function M.action_reload(items)
+  local bufnrs = vim
+    .iter(items)
+    :map(function(item)
+      local bufnr = item.bufnr
+      if vim.bo[bufnr].buftype ~= "" then
+        return nil
+      end
+      return bufnr
+    end)
+    :totable()
+  for _, bufnr in ipairs(bufnrs) do
+    vim.api.nvim_buf_call(bufnr, function()
+      vim.cmd.edit({ bang = true })
+    end)
+  end
+end
+
 function M.get_preview(item)
   if not vim.api.nvim_buf_is_loaded(item.bufnr) then
     return
