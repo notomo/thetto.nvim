@@ -38,6 +38,19 @@ function M.action_dry_run(items, action_ctx)
   })
 end
 
+function M.action_terminal(items, action_ctx)
+  return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, {
+    driver = function(cmd, opts)
+      vim.fn.jobstart(vim.opt.shell:get(), {
+        cwd = opts.cwd,
+        term = true,
+      })
+      local input = table.concat(cmd, " ") .. "\n"
+      vim.api.nvim_put({ input }, "c", true, true)
+    end,
+  })
+end
+
 M.default_action = "execute"
 
 return require("thetto.core.kind").extend(M, "file")
