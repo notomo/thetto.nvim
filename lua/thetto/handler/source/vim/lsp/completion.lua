@@ -1,11 +1,7 @@
 local M = {}
 
 local completionItemKind = vim.lsp.protocol.CompletionItemKind
-
-local insertTextFormat = {
-  PlainText = 1,
-  Snippet = 2,
-}
+local insertTextFormat = vim.lsp.protocol.InsertTextFormat
 
 local content_modified_err = -32801
 
