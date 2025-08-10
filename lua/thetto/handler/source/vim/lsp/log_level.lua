@@ -30,7 +30,7 @@ M.actions = {
     if not item then
       return
     end
-    vim.lsp.set_log_level(item.level)
+    vim.lsp.log.set_level(item.level)
   end,
   default_action = "set",
 }
