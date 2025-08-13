@@ -193,7 +193,7 @@ function M.set_completion_info(index)
 
         vim.bo[t.bufnr].filetype = "markdown"
         local info_window_id = t.winid
-        vim.wo[info_window_id].wrap = true
+        vim.wo[info_window_id][0].wrap = true
         vim.api.nvim_win_set_config(info_window_id, {
           border = "solid",
           fixed = true,

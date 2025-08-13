@@ -97,7 +97,7 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
       { " ", hl_groups.ThettoUiBorder },
     },
   })
-  vim.wo[window_id].winfixbuf = true
+  vim.wo[window_id][0].winfixbuf = true
 
   require("thetto.handler.consumer.ui.current_dir").apply(window_id, cwd)
 
