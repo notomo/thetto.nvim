@@ -67,6 +67,9 @@ function M.redraw(self, preview)
     title = { { title, hl_groups.ThettoUiSidecarTitle } },
     title_pos = "center",
   })
+  if preview.wrap then
+    vim.wo[self._window_id][0].wrap = true
+  end
 
   callback(self._decorator_factory, self._window_id)
 end
