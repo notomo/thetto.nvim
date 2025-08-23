@@ -56,10 +56,6 @@ function M.find_git_root(cwd)
   return git_root, nil
 end
 
-function M.escape(path)
-  return ([[`='%s'`]]):format(path:gsub("'", "''"))
-end
-
 function M.lcd(path)
   vim.fn.chdir(path, "window")
 end

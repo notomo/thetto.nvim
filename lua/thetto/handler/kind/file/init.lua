@@ -1,5 +1,3 @@
-local filelib = require("thetto.lib.file")
-
 local M = {}
 
 M.opts = {}
@@ -25,17 +23,13 @@ local adjust_cursor = function(item)
   vim.api.nvim_win_set_cursor(0, { row, item.column or 0 })
 end
 
-function M.escape(path)
-  return ([[`='%s'`]]):format(path:gsub("'", "''"))
-end
-
 function M.action_open(items)
   for _, item in ipairs(items) do
     local bufnr = require("thetto.vendor.misclib.buffer").find(item.path)
     if bufnr then
       vim.cmd.buffer(bufnr)
     else
-      vim.cmd.edit(filelib.escape(item.path))
+      vim.cmd.edit({ args = { item.path }, magic = { file = false } })
     end
     adjust_cursor(item)
   end
@@ -48,7 +42,7 @@ function M.action_tab_open(items)
     if bufnr then
       vim.cmd.buffer(bufnr)
     else
-      vim.cmd.edit(filelib.escape(item.path))
+      vim.cmd.edit({ args = { item.path }, magic = { file = false } })
     end
     adjust_cursor(item)
   end
@@ -57,7 +51,7 @@ end
 function M.action_tab_drop(items)
   for _, item in ipairs(items) do
     local tab = vim.fn.tabpagenr()
-    vim.cmd.drop({ mods = { tab = tab }, args = { filelib.escape(item.path) } })
+    vim.cmd.drop({ mods = { tab = tab }, args = { item.path }, magic = { file = false } })
     adjust_cursor(item)
   end
 end
@@ -72,7 +66,7 @@ function M.action_vsplit_open(items)
       vim.cmd.vnew()
       vim.bo.buftype = "nofile"
       vim.bo.bufhidden = "wipe"
-      vim.cmd.edit(filelib.escape(item.path))
+      vim.cmd.edit({ args = { item.path }, magic = { file = false } })
     end
     adjust_cursor(item)
   end

@@ -1,5 +1,3 @@
-local filelib = require("thetto.lib.file")
-
 local M = {}
 
 function M.action_open(items)
@@ -27,7 +25,7 @@ function M.action_tab_drop(items)
     local path = vim.api.nvim_buf_get_name(item.bufnr)
     local tab = vim.fn.tabpagenr()
     if path ~= "" then
-      vim.cmd.drop({ mods = { tab = tab }, args = { filelib.escape(path) } })
+      vim.cmd.drop({ mods = { tab = tab }, args = { path }, magic = { file = false } })
     end
   end
 end
