@@ -89,7 +89,6 @@ function M.collect(source_ctx)
 end
 
 local ns = vim.api.nvim_create_namespace("thetto.lsp.completion")
-local group = vim.api.nvim_create_augroup("thetto.lsp.completion", {})
 
 function M.edit_on_completion(bufnr, _, original_item, offset)
   if not original_item.textEdit and original_item.insertTextFormat ~= insertTextFormat.Snippet then
@@ -116,6 +115,7 @@ function M.edit_on_completion(bufnr, _, original_item, offset)
     }
   end
 
+  local group = vim.api.nvim_create_augroup("thetto.lsp.completion", {})
   vim.api.nvim_create_autocmd({ "CompleteChanged", "ModeChanged" }, {
     buffer = 0,
     group = group,

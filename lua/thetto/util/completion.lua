@@ -1,5 +1,6 @@
 local M = {}
 
+local _auto_group_name_format = "thetto.completion.auto.buffer_%s"
 local _group_name_format = "thetto.completion.buffer_%s"
 local cache = {}
 local clear_cache = function()
@@ -22,13 +23,12 @@ function M.enable(sources, raw_opts)
 
   local bufnr = vim.api.nvim_get_current_buf()
   local changedtick = vim.b[bufnr].changedtick
-  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
   vim.api.nvim_create_autocmd({
     "TextChangedI",
     "TextChangedP",
   }, {
     buffer = bufnr,
-    group = group,
+    group = vim.api.nvim_create_augroup(_auto_group_name_format:format(bufnr), {}),
     callback = function()
       if manual_triggered then
         return
@@ -49,15 +49,19 @@ function M.enable(sources, raw_opts)
     end,
   })
 
+  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
   M._set_autocmd(sources, bufnr, group, starter.cancel)
 end
 
 function M.disable()
   local bufnr = vim.api.nvim_get_current_buf()
-  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false })
   vim.api.nvim_clear_autocmds({
     buffer = bufnr,
-    group = group,
+    group = vim.api.nvim_create_augroup(_auto_group_name_format:format(bufnr), { clear = false }),
+  })
+  vim.api.nvim_clear_autocmds({
+    buffer = bufnr,
+    group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false }),
   })
 end
 
@@ -67,7 +71,7 @@ function M.trigger(sources, raw_opts)
   local starter = M._starter(sources, true, opts)
 
   local bufnr = vim.api.nvim_get_current_buf()
-  local group = vim.api.nvim_create_augroup(("thetto.completion.trigger.buffer_%s"):format(bufnr), {})
+  local group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), {})
   M._set_autocmd(sources, bufnr, group, starter.cancel)
 
   clear_cache()
