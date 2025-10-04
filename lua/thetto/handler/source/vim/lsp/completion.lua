@@ -224,7 +224,7 @@ function M.resolve(params, client_id, offset)
     vim.lsp.util.apply_text_edits({ params.textEdit }, bufnr, client.offset_encoding)
     vim.api.nvim_win_set_cursor(window_id, {
       params.textEdit.range["end"].line + 1,
-      params.textEdit.range["end"].character + #params.textEdit.newText - 1,
+      params.textEdit.range["start"].character + #params.textEdit.newText,
     })
   end
 
