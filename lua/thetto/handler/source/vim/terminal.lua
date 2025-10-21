@@ -20,7 +20,7 @@ function M.collect(source_ctx)
       local name = vim.api.nvim_buf_get_name(bufnr)
       local value = name:gsub("~", home)
       value = value:gsub("^term://", "")
-      value = value:gsub(source_ctx.cwd, dir)
+      value = value:gsub(vim.pesc(source_ctx.cwd), dir)
 
       return {
         value = value,
