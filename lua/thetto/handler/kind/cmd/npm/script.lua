@@ -17,7 +17,7 @@ function M.action_execute(items, action_ctx)
   for _, item in ipairs(items) do
     action_ctx.opts.open()
 
-    local cmd = { "npm", "run", item.value }
+    local cmd = { "node", "--run", item.value }
     local opts = { cwd = vim.fs.dirname(item.path) }
     action_ctx.opts.driver(cmd, opts)
   end
