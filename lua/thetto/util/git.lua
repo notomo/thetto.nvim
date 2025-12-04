@@ -140,7 +140,7 @@ function M.state()
   return vim.b[bufnr].thetto_git_state
 end
 
-function M.content(git_root, path_or_bufnr, revision)
+function M.content(git_root, path_or_bufnr, revision, scratch_bufnr)
   local path = M._to_path(path_or_bufnr)
   if not revision then
     return require("thetto.vendor.promise").resolve(path)
@@ -166,7 +166,7 @@ function M.content(git_root, path_or_bufnr, revision)
       return require("thetto.vendor.promise").reject(err)
     end)
     :next(function(output)
-      local bufnr = vim.api.nvim_create_buf(false, true)
+      local bufnr = scratch_bufnr or vim.api.nvim_create_buf(false, true)
       local lines = require("thetto.util.job.parse").output(output)
       vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
       vim.bo[bufnr].bufhidden = "wipe"

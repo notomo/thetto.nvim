@@ -71,6 +71,7 @@ function M.collect(source_ctx)
           value = value,
           path = path,
           row = row,
+          git_root = git_root,
           commit_hash = not commit_hash_is_temporary and state_commit_hash or nil,
           column_offsets = {
             date = #commit_hash + 1,
@@ -110,7 +111,31 @@ M.highlight = require("thetto.util.highlight").columns({
   },
 })
 
-M.kind_name = "file" -- to show file preview
+M.kind_name = "git/commit"
+
+M.actions = {
+  default_action = "blame",
+
+  action_blame = function(items)
+    local item = items[1]
+    if not item then
+      return
+    end
+    local source = require("thetto.util.source").by_name("git/blame", {
+      cwd = item.git_root,
+      opts = {
+        commit_hash = item.commit_hash,
+      },
+    })
+    return require("thetto").start(source)
+  end,
+
+  get_preview = function(item)
+    local bufnr = vim.api.nvim_create_buf(false, true)
+    local promise = require("thetto.util.git").content(item.git_root, item.path, item.commit_hash, bufnr)
+    return promise, { raw_bufnr = bufnr }
+  end,
+}
 
 M.cwd = require("thetto.util.cwd").project()
 
