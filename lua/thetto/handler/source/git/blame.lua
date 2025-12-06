@@ -78,6 +78,7 @@ function M.collect(source_ctx)
             message = #commit_hash + 1 + #date + 1,
             user_name = #message + 1 + #date + 1 + #commit_hash + 1,
           },
+          source_commit_hash = source_ctx.opts.commit_hash,
         }
       end, {
         cwd = git_root,
@@ -121,19 +122,36 @@ M.actions = {
     if not item then
       return
     end
+
     local source = require("thetto.util.source").by_name("git/blame", {
       cwd = item.git_root,
       opts = {
         commit_hash = item.commit_hash,
       },
+      consumer_opts = {
+        ui = {
+          insert = false,
+        },
+      },
     })
-    return require("thetto").start(source)
+    return require("thetto").start(source, {
+      item_cursor_factory = require("thetto.util.item_cursor").search(function(x)
+        return x.row == item.row
+      end),
+    })
   end,
 
-  get_preview = function(item)
+  get_preview = function(item, action_ctx)
+    if not item.source_commit_hash then
+      return require("thetto.util.action").preview("file", item, action_ctx)
+    end
+
     local bufnr = vim.api.nvim_create_buf(false, true)
-    local promise = require("thetto.util.git").content(item.git_root, item.path, item.commit_hash, bufnr)
-    return promise, { raw_bufnr = bufnr }
+    local promise = require("thetto.util.git").content(item.git_root, item.path, item.source_commit_hash, bufnr)
+    return promise, {
+      raw_bufnr = bufnr,
+      row = item.row,
+    }
   end,
 }
 

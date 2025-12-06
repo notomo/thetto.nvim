@@ -326,8 +326,9 @@ function M._redraw_sidecar(self)
 
   local kind = require("thetto.core.kind").by_name(item.kind_name, self._actions)
   local promise, preview = require("thetto.core.kind").get_preview(kind, item)
-  self._sidecar:redraw(preview)
-  return promise
+  return promise:next(function()
+    self._sidecar:redraw(preview)
+  end)
 end
 
 function M.toggle_selection(self)

@@ -10,6 +10,10 @@ function helper.before_each()
 end
 
 function helper.after_each()
+  -- workaround
+  vim.cmd.split()
+  vim.cmd.only()
+
   helper.cleanup()
   helper.cleanup_loaded_modules(plugin_name)
 end
