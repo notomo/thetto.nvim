@@ -42,8 +42,8 @@ end
 function M.open(items, f)
   local promises = {}
   for _, item in ipairs(items) do
-    local promise = require("thetto.util.git").content(item.git_root, item.path, item.commit_hash):next(function(path)
-      f(path)
+    local promise = require("thetto.util.git").content(item.git_root, item.path, item.commit_hash):next(function(x)
+      f(x.buffer_path)
     end)
     table.insert(promises, promise)
   end

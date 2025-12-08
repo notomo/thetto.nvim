@@ -113,9 +113,9 @@ function M.action_tab_open(items)
   end
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
-  return require("thetto.util.git").content(item.git_root, bufnr, item.commit_hash):next(function(buffer_path)
+  return require("thetto.util.git").content(item.git_root, bufnr, item.commit_hash):next(function(x)
     require("thetto.lib.buffer").open_scratch_tab()
-    vim.cmd.edit({ args = { buffer_path }, magic = { file = false } })
+    vim.cmd.edit({ args = { x.buffer_path }, magic = { file = false } })
     require("thetto.vendor.misclib.cursor").set(cursor)
   end)
 end
