@@ -39,8 +39,12 @@ function M.collect(source_ctx)
 
   local path = source_ctx.opts.path or vim.api.nvim_buf_get_name(source_ctx.bufnr)
   local cmd = { "git", "--no-pager", "blame", "--porcelain" }
+  local source_commit_hash
   if source_ctx.opts.commit_hash then
-    table.insert(cmd, source_ctx.opts.commit_hash)
+    source_commit_hash = vim.trim(
+      vim.system({ "git", "rev-parse", source_ctx.opts.commit_hash }, { cwd = git_root, text = true }):wait().stdout
+    )
+    table.insert(cmd, source_commit_hash)
   end
   vim.list_extend(cmd, { "--", path })
 
@@ -78,7 +82,7 @@ function M.collect(source_ctx)
             message = #commit_hash + 1 + #date + 1,
             user_name = #message + 1 + #date + 1 + #commit_hash + 1,
           },
-          source_commit_hash = source_ctx.opts.commit_hash,
+          source_commit_hash = source_commit_hash,
         }
       end, {
         cwd = git_root,
@@ -118,30 +122,6 @@ M.kind_name = "git/commit"
 
 M.actions = {
   default_action = "blame",
-
-  action_blame = function(items)
-    local item = items[1]
-    if not item then
-      return
-    end
-
-    local source = require("thetto.util.source").by_name("git/blame", {
-      cwd = item.git_root,
-      opts = {
-        commit_hash = item.commit_hash,
-      },
-      consumer_opts = {
-        ui = {
-          insert = false,
-        },
-      },
-    })
-    return require("thetto").start(source, {
-      item_cursor_factory = require("thetto.util.item_cursor").search(function(x)
-        return x.row == item.row
-      end),
-    })
-  end,
 
   get_preview = function(item, action_ctx)
     if not item.source_commit_hash then

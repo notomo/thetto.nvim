@@ -178,6 +178,33 @@ function M.action_compare_open(items)
   )
 end
 
+function M.action_blame(items)
+  local item = items[1]
+  if not item then
+    return nil
+  end
+  if not item.path then
+    return nil
+  end
+  local source = require("thetto.util.source").by_name("git/blame", {
+    cwd = item.git_root,
+    opts = {
+      commit_hash = item.commit_hash or "HEAD",
+      path = item.path,
+    },
+    consumer_opts = {
+      ui = {
+        insert = false,
+      },
+    },
+  })
+  return require("thetto").start(source, {
+    item_cursor_factory = require("thetto.util.item_cursor").search(function(x)
+      return x.row == item.row
+    end),
+  })
+end
+
 M.default_action = "open"
 
 return M
