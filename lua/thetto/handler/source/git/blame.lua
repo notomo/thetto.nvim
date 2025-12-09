@@ -98,7 +98,9 @@ end
 
 M.highlight = require("thetto.util.highlight").columns({
   {
-    group = "Comment",
+    group = function(item)
+      return item.source_commit_hash == item.commit_hash and "NormalFloat" or "Comment"
+    end,
     end_key = "date",
   },
   {
