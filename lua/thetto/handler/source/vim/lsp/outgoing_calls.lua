@@ -4,7 +4,7 @@ local M = {}
 
 function M._prepare(bufnr, window_id)
   local promise, resolve, reject = require("thetto.vendor.promise").with_resolvers()
-  local method = vim.lsp.protocol.Methods.textDocument_prepareCallHierarchy
+  local method = "textDocument/prepareCallHierarchy"
   local results = {}
   local cancel = require("thetto.util.lsp").request({
     bufnr = bufnr,
@@ -82,8 +82,7 @@ function M.collect(source_ctx)
     local path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
     local relative_path = pathlib.to_relative(path, source_ctx.cwd)
 
-    local promise, cancels =
-      M.request(source_ctx.bufnr, source_ctx.window_id, vim.lsp.protocol.Methods.callHierarchy_outgoingCalls)
+    local promise, cancels = M.request(source_ctx.bufnr, source_ctx.window_id, "callHierarchy/outgoingCalls")
 
     promise
       :next(function(results)

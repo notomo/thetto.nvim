@@ -25,7 +25,7 @@ function M.collect(source_ctx)
   local to_item = M._to_item(source_ctx.cwd)
   return function(observer)
     local bufnr = source_ctx.bufnr
-    local method = vim.lsp.protocol.Methods.textDocument_implementation
+    local method = "textDocument/implementation"
     local cancel = require("thetto.util.lsp").request({
       bufnr = bufnr,
       method = method,

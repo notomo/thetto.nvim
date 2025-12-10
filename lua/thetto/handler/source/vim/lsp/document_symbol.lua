@@ -4,7 +4,7 @@ function M.collect(source_ctx)
   local current_path = vim.api.nvim_buf_get_name(source_ctx.bufnr)
   return function(observer)
     local bufnr = source_ctx.bufnr
-    local method = vim.lsp.protocol.Methods.textDocument_documentSymbol
+    local method = "textDocument/documentSymbol"
     local cancel = require("thetto.util.lsp").request({
       bufnr = bufnr,
       method = method,

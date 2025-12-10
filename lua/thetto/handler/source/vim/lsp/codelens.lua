@@ -3,7 +3,7 @@ local M = {}
 function M.collect(source_ctx)
   return function(observer)
     local bufnr = source_ctx.bufnr
-    local method = vim.lsp.protocol.Methods.textDocument_codeLens
+    local method = "textDocument/codeLens"
     local cancel = require("thetto.util.lsp").request({
       bufnr = bufnr,
       method = method,

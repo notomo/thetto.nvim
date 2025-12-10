@@ -7,7 +7,7 @@ function M.collect(source_ctx)
     local promise, cancels = require("thetto.handler.source.vim.lsp.outgoing_calls").request(
       source_ctx.bufnr,
       source_ctx.window_id,
-      vim.lsp.protocol.Methods.callHierarchy_incomingCalls
+      "callHierarchy/incomingCalls"
     )
 
     promise

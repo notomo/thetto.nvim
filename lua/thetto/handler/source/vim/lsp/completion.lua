@@ -18,7 +18,7 @@ function M.collect(source_ctx)
   return function(observer)
     local last_char = get_last_char(source_ctx)
     local bufnr = source_ctx.bufnr
-    local method = vim.lsp.protocol.Methods.textDocument_completion
+    local method = "textDocument/completion"
     local cancel = require("thetto.util.lsp").request({
       bufnr = bufnr,
       method = method,
@@ -172,7 +172,7 @@ end
 function M.set_completion_info(index)
   local window_id = vim.api.nvim_get_current_win()
   local bufnr = vim.api.nvim_win_get_buf(window_id)
-  local method = vim.lsp.protocol.Methods.textDocument_hover
+  local method = "textDocument/hover"
   local cancel = require("thetto.util.lsp").request({
     bufnr = bufnr,
     method = method,
@@ -228,7 +228,7 @@ function M.resolve(params, client_id, offset)
     })
   end
 
-  local method = vim.lsp.protocol.Methods.completionItem_resolve
+  local method = "completionItem/resolve"
   local cancel = require("thetto.util.lsp").request({
     bufnr = bufnr,
     method = method,
