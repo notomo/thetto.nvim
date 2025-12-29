@@ -50,7 +50,7 @@ function M.collect(source_ctx)
       observer = {
         next = function(result, ctx)
           local items = vim
-            .iter(result.items)
+            .iter(result.items or result or {})
             :map(function(item)
               local descs = { item.label }
               local detail = vim.tbl_get(item, "labelDetails", "description")
