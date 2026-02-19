@@ -40,4 +40,18 @@ function M.in_tabpage(tabpage_index)
   end
 end
 
+function M.tab_drop(bufnr)
+  for _, tabnr in ipairs(vim.api.nvim_list_tabpages()) do
+    for _, winnr in ipairs(vim.api.nvim_tabpage_list_wins(tabnr)) do
+      if vim.api.nvim_win_get_buf(winnr) == bufnr then
+        vim.api.nvim_set_current_tabpage(tabnr)
+        vim.api.nvim_set_current_win(winnr)
+        return
+      end
+    end
+  end
+  vim.cmd.tabnew()
+  vim.api.nvim_win_set_buf(0, bufnr)
+end
+
 return M
