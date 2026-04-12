@@ -84,7 +84,7 @@ end
 function M._enable_patch(git_root, path_from_git_root, bufnr)
   local index_path, working_path
   vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
-    buffer = bufnr,
+    buf = bufnr,
     callback = function()
       M._index_content_path(git_root, path_from_git_root)
         :next(function(index_content_path)

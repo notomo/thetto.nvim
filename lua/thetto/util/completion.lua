@@ -27,7 +27,7 @@ function M.enable(sources, raw_opts)
     "TextChangedI",
     "TextChangedP",
   }, {
-    buffer = bufnr,
+    buf = bufnr,
     group = vim.api.nvim_create_augroup(_auto_group_name_format:format(bufnr), {}),
     callback = function()
       if manual_triggered then
@@ -56,11 +56,11 @@ end
 function M.disable()
   local bufnr = vim.api.nvim_get_current_buf()
   vim.api.nvim_clear_autocmds({
-    buffer = bufnr,
+    buf = bufnr,
     group = vim.api.nvim_create_augroup(_auto_group_name_format:format(bufnr), { clear = false }),
   })
   vim.api.nvim_clear_autocmds({
-    buffer = bufnr,
+    buf = bufnr,
     group = vim.api.nvim_create_augroup(_group_name_format:format(bufnr), { clear = false }),
   })
 end
@@ -136,7 +136,7 @@ end
 
 function M._set_autocmd(sources, bufnr, group, cancel_collect)
   vim.api.nvim_create_autocmd({ "ModeChanged" }, {
-    buffer = bufnr,
+    buf = bufnr,
     group = group,
     callback = function()
       clear_cache()
@@ -151,7 +151,7 @@ function M._set_autocmd(sources, bufnr, group, cancel_collect)
   M._set_resolver(source_map, bufnr, group)
   local cancel_set_completion_info = M._set_completion_info(source_map, bufnr, group)
   vim.api.nvim_create_autocmd({ "InsertLeave" }, {
-    buffer = bufnr,
+    buf = bufnr,
     group = group,
     callback = function()
       manual_triggered = false
@@ -164,7 +164,7 @@ end
 function M._set_completion_info(source_map, bufnr, group)
   local cancel = function() end
   vim.api.nvim_create_autocmd({ "CompleteChanged" }, {
-    buffer = bufnr,
+    buf = bufnr,
     group = group,
     callback = function()
       cancel()
@@ -203,7 +203,7 @@ end
 function M._set_resolver(source_map, bufnr, group)
   local cancel = function() end
   vim.api.nvim_create_autocmd({ "CompleteDone" }, {
-    buffer = bufnr,
+    buf = bufnr,
     group = group,
     callback = function()
       local completed_item = vim.v.completed_item

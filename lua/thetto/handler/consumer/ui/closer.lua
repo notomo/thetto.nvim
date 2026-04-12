@@ -35,7 +35,7 @@ function M.setup_autocmd(self, window_id)
 
   vim.api.nvim_create_autocmd({ "BufLeave" }, {
     group = self._group,
-    buffer = original_bufnr,
+    buf = original_bufnr,
     callback = function()
       vim.api.nvim_create_autocmd({ "BufEnter" }, {
         group = self._group,

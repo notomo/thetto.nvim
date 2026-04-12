@@ -7,7 +7,7 @@ M.opts = {
 function M.collect(source_ctx)
   local buffer = source_ctx.opts.buffer and source_ctx.bufnr or nil
   local autocmds = vim.api.nvim_get_autocmds({
-    buffer = buffer,
+    buf = buffer,
   })
   return vim
     .iter(autocmds)

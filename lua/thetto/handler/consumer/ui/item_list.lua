@@ -104,7 +104,7 @@ function M.open(
   end)
 
   vim.api.nvim_create_autocmd({ "BufReadCmd" }, {
-    buffer = bufnr,
+    buf = bufnr,
     callback = function()
       require("thetto").reload(bufnr)
     end,
@@ -155,13 +155,13 @@ function M.open(
   end)
   table.insert(self._closes, close_debounce)
   vim.api.nvim_create_autocmd({ "CursorMoved" }, {
-    buffer = bufnr,
+    buf = bufnr,
     callback = function()
       on_cursor_moved()
     end,
   })
   vim.api.nvim_create_autocmd({ "WinEnter" }, {
-    buffer = bufnr,
+    buf = bufnr,
     callback = function()
       vim.cmd.stopinsert()
     end,

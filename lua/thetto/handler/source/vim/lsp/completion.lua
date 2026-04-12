@@ -117,7 +117,7 @@ function M.edit_on_completion(bufnr, _, original_item, offset)
 
   local group = vim.api.nvim_create_augroup("thetto.lsp.completion", {})
   vim.api.nvim_create_autocmd({ "CompleteChanged", "ModeChanged" }, {
-    buffer = 0,
+    buf = 0,
     group = group,
     callback = function()
       vim.api.nvim_buf_clear_namespace(bufnr, ns, 0, -1)
