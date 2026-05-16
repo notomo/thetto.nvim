@@ -1,9 +1,60 @@
-local vim = vim
-
 local M = {}
 
+local _dedup_sep
+if vim.uv.os_uname().version:match("Windows") then
+  _dedup_sep = function(path)
+    return (path:gsub("[/\\][/\\]*", "/"))
+  end
+else
+  _dedup_sep = function(path)
+    return (path:gsub("//+", "/"))
+  end
+end
+
+local function join(...)
+  -- don't use vim.fs to use in uv.nw_thread
+  local n = select("#", ...)
+  local segments = {}
+  for i = 1, n do
+    local s = select(i, ...)
+    if s and #s > 0 then
+      segments[#segments + 1] = s
+    end
+  end
+  local path = table.concat(segments, "/")
+  return _dedup_sep(path)
+end
+
+local function normalize(path)
+  -- don't use vim.fs to use in uv.nw_thread
+  local x = path:gsub("\\", "/")
+  return x
+end
+
+local function abspath(path)
+  -- don't use vim.fs to use in uv.nw_thread
+  path = normalize(path)
+
+  if vim.startswith(path, "/") then
+    return path
+  end
+
+  local cwd = M.normalize(vim.uv.cwd())
+  if path == "." then
+    return cwd
+  end
+  return join(cwd, path)
+end
+
 function M.to_relative(path, base_path)
-  return vim.fs.relpath(base_path, path) or path
+  -- don't use vim.fs to use in uv.nw_thread
+  path = normalize(abspath(path))
+  base_path = normalize(abspath(base_path))
+  if path == base_path then
+    return "."
+  end
+  base_path = base_path .. (path ~= "/" and "/" or "")
+  return vim.startswith(path, base_path) and path:sub(#base_path + 1) or path
 end
 
 function M.parse_with_row(line)
