@@ -305,11 +305,11 @@ describe("thetto.start() immediate", function()
         }
       end,
     }, {
-      consumer_factory = require("thetto.util.consumer").immediate({ action_name = "append" }),
+      consumer_factory = require("thetto.util.consumer").immediate({ action_name = "echo" }),
     })
     helper.wait(p)
 
-    assert.lines([[line1]])
+    assert.exists_message([[line1]])
   end)
 
   it("echoes warning message", function()
