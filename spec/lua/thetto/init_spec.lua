@@ -1,6 +1,8 @@
+local ntf = require("ntf")
+local describe, it, before_each, after_each = ntf.describe, ntf.it, ntf.before_each, ntf.after_each
 local helper = require("thetto.test.helper")
-local thetto = helper.require("thetto")
-local assert = helper.typed_assert(assert)
+local thetto = require("thetto")
+local assert = helper.typed_assert(ntf.assert)
 
 describe("thetto.start() default ui", function()
   local notify = vim.notify

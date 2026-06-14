@@ -1,5 +1,7 @@
+local ntf = require("ntf")
+local describe, it = ntf.describe, ntf.it
 local helper = require("thetto.test.helper")
-local assert = helper.typed_assert(assert)
+local assert = helper.typed_assert(ntf.assert)
 
 describe("parse", function()
   it("joins streamed string", function()

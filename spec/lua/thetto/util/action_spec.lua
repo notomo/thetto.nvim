@@ -1,6 +1,8 @@
+local ntf = require("ntf")
+local describe, it, before_each, after_each = ntf.describe, ntf.it, ntf.before_each, ntf.after_each
 local helper = require("thetto.test.helper")
-local action_util = helper.require("thetto.util.action")
-local assert = helper.typed_assert(assert)
+local action_util = require("thetto.util.action")
+local assert = helper.typed_assert(ntf.assert)
 
 describe("action_util.grouping()", function()
   before_each(helper.before_each)

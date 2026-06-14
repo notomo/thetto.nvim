@@ -1,5 +1,7 @@
+local ntf = require("ntf")
+local describe, it, before_each, after_each = ntf.describe, ntf.it, ntf.before_each, ntf.after_each
 local helper = require("thetto.test.helper")
-local completion_util = helper.require("thetto.util.completion")
+local completion_util = require("thetto.util.completion")
 
 describe("action_util.trigger()", function()
   before_each(helper.before_each)

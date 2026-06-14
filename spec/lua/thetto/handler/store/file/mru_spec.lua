@@ -1,12 +1,17 @@
+local ntf = require("ntf")
+local describe, it, before_each, after_each, setup, teardown =
+  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.setup, ntf.teardown
 local helper = require("thetto.test.helper")
-local thetto = helper.require("thetto")
-local assert = helper.typed_assert(assert)
+local thetto = require("thetto")
+local assert = helper.typed_assert(ntf.assert)
 
 describe("file/mru store", function()
   local store_file_path
   before_each(function()
     helper.before_each()
-    helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root)
+    helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(helper.root, {
+      base_dir = ("test_data_%d/"):format(vim.fn.getpid()),
+    })
     helper.test_data:cd("")
     store_file_path = helper.test_data:create_file("store.txt")
   end)
