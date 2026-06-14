@@ -61,8 +61,8 @@ assert.register_eq("lines", function()
   return table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
 end)
 
-function helper.typed_assert(assert)
-  local x = require("assertlib").typed(assert)
+function helper.typed_assert(raw_assert)
+  local x = require("assertlib").typed(raw_assert)
   ---@cast x +{lines:fun(want)}
   return x
 end
