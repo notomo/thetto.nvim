@@ -15,12 +15,13 @@ function M.collect(source_ctx)
 end
 
 function M._to_items(source_ctx, patterns, path)
-  local index, matches
+  local index, matches, prefix
   for i, pattern in ipairs(patterns) do
-    local m = M._match(pattern, path)
+    local m, p = M._match(pattern, path)
     if m ~= nil then
       index = i
       matches = m
+      prefix = p
       break
     end
   end
@@ -40,7 +41,7 @@ function M._to_items(source_ctx, patterns, path)
         return
       end
 
-      local abs_path = format_pattern:format(unpack(matches))
+      local abs_path = (prefix or "") .. format_pattern:format(unpack(matches))
       local value = abs_path:gsub(home, "~")
       if filelib.readable(abs_path) then
         return {
@@ -65,6 +66,17 @@ function M._to_items(source_ctx, patterns, path)
 end
 
 function M._match(pattern, path)
+  -- A pattern without a "/" describes only the file name, so match it against
+  -- the basename and keep the directory as a prefix to put back later.
+  -- A pattern with a "/" describes the path tail, so "%" may span directories.
+  local target = path
+  local prefix
+  if not pattern:find("/", 1, true) then
+    local basename = vim.fs.basename(path)
+    prefix = path:sub(1, #path - #basename)
+    target = basename
+  end
+
   local parts = vim.split(pattern, "%", { plain = true })
   parts = vim
     .iter(parts)
@@ -80,18 +92,18 @@ function M._match(pattern, path)
   local index = 1
   local matches = {}
   for _, part in ipairs(parts) do
-    local s, e = path:find(part, index, true)
+    local s, e = target:find(part, index, true)
     if s == nil then
       return nil
     end
     if index < s then
-      local match = path:sub(index, s - 1)
+      local match = target:sub(index, s - 1)
       table.insert(matches, match)
     end
     index = e + 1
   end
 
-  return matches
+  return matches, prefix
 end
 
 M.opts = { pattern_groups = {}, allow_new = false }
