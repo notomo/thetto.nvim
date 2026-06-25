@@ -1,6 +1,5 @@
 local ntf = require("ntf")
-local describe, it, before_each, after_each, setup, teardown =
-  ntf.describe, ntf.it, ntf.before_each, ntf.after_each, ntf.setup, ntf.teardown
+local describe, it, before_each, after_each = ntf.describe, ntf.it, ntf.before_each, ntf.after_each
 local helper = require("thetto.test.helper")
 local thetto = require("thetto")
 local assert = helper.typed_assert(ntf.assert)
