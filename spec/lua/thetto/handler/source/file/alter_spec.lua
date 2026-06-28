@@ -8,8 +8,7 @@ local alter = require("thetto.handler.source.file.alter")
 describe("file/alter source", function()
   before_each(function()
     helper.before_each()
-    helper.test_data =
-      require("thetto.vendor.misclib.test.data_dir").setup(helper.root, { base_dir = "spec/test_data/" })
+    helper.test_data = require("thetto.vendor.misclib.test.data_dir").setup(vim.fs.joinpath(helper.root, "spec"))
   end)
 
   after_each(function()
