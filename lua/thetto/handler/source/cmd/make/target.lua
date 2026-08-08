@@ -21,10 +21,31 @@ local to_item = function(path, target, row, included_from, cwd)
   }
 end
 
-function M._load(path, cwd, included_from)
+local expand = function(str, variables)
+  return (str:gsub("%$[%(%{]([%w_]+)[%)%}]", function(name)
+    return variables[name] or vim.env[name] or ""
+  end))
+end
+
+function M._parse_variable(line, variables)
+  local name, operator, value = line:match("^([%w_]+)%s*([?:]?=)%s*(.-)%s*$")
+  if not name then
+    return
+  end
+
+  if operator == "?=" and (variables[name] or vim.env[name]) then
+    return
+  end
+
+  variables[name] = expand(value, variables)
+end
+
+function M._load(path, cwd, included_from, variables)
   if not filelib.readable(path) then
     return {}
   end
+
+  variables = variables or {}
 
   local items = {}
   local row = 1
@@ -32,7 +53,8 @@ function M._load(path, cwd, included_from)
   assert(f, "failed to open: " .. path)
   local dir_path = vim.fs.dirname(path)
   for line in f:lines() do
-    vim.list_extend(items, M._parse_include(line, dir_path, path))
+    M._parse_variable(line, variables)
+    vim.list_extend(items, M._parse_include(line, dir_path, path, variables))
 
     local target = vim.fn.matchstr(line, "\\v^\\zs\\S*\\ze:[^=]*$")
     table.insert(items, to_item(path, target, row, included_from, cwd))
@@ -43,19 +65,20 @@ function M._load(path, cwd, included_from)
   return items
 end
 
-function M._parse_include(line, dir_path, included_from)
-  -- support one file path (no glob)
+function M._parse_include(line, dir_path, included_from, variables)
   local included = line:match("^include (.+)")
   if not included then
     return {}
   end
 
-  local path = vim.fn.simplify(dir_path .. "/" .. included)
+  local included_path = expand(included, variables or {})
+  local path =
+    vim.fn.simplify(vim.startswith(included_path, "/") and included_path or (dir_path .. "/" .. included_path))
   if not filelib.readable(path) then
     return {}
   end
 
-  return M._load(path, dir_path, included_from)
+  return M._load(path, dir_path, included_from, variables)
 end
 
 function M.collect(source_ctx)
