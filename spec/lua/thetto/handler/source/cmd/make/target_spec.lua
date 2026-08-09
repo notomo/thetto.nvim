@@ -35,6 +35,24 @@ describe("cmd/make/target source", function()
     assert.same({ "", "own_target", "mk_target" }, values)
   end)
 
+  it("expands a variable in a target name", function()
+    local path = helper.test_data:create_file("Makefile", "DIR = build\n$(DIR)/artifact:\n\techo artifact\n")
+
+    assert.same({ "build/artifact" }, targets(path))
+  end)
+
+  it("leaves a target name as written if the variable calls a make function", function()
+    local path = helper.test_data:create_file("Makefile", "DIR = $(shell pwd)\n$(DIR)/artifact:\n\techo artifact\n")
+
+    assert.same({ "$(DIR)/artifact" }, targets(path))
+  end)
+
+  it("leaves a target name as written if the variable is unknown", function()
+    local path = helper.test_data:create_file("Makefile", "$(UNKNOWN_DIR)/artifact:\n\techo artifact\n")
+
+    assert.same({ "$(UNKNOWN_DIR)/artifact" }, targets(path))
+  end)
+
   it("collects the targets of an included file", function()
     helper.test_data:create_file("shared/shared.mk", "shared_target:\n\techo shared\n")
     local path = helper.test_data:create_file("Makefile", "include shared/shared.mk\n\nown_target:\n\techo own\n")

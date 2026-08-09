@@ -22,9 +22,15 @@ local to_item = function(path, target, row, included_from, cwd)
 end
 
 local expand = function(str, variables)
-  return (str:gsub("%$[%(%{]([%w_]+)[%)%}]", function(name)
-    return variables[name] or vim.env[name] or ""
-  end))
+  return (
+    str:gsub("%$[%(%{]([%w_]+)[%)%}]", function(name)
+      local value = variables[name] or vim.env[name]
+      if not value or value:find("%$[%(%{]") then
+        return nil
+      end
+      return value
+    end)
+  )
 end
 
 function M._parse_variable(line, variables)
@@ -57,7 +63,7 @@ function M._load(path, cwd, included_from, variables)
     vim.list_extend(items, M._parse_include(line, dir_path, path, variables))
 
     local target = vim.fn.matchstr(line, "\\v^\\zs\\S*\\ze:[^=]*$")
-    table.insert(items, to_item(path, target, row, included_from, cwd))
+    table.insert(items, to_item(path, expand(target, variables), row, included_from, cwd))
     row = row + 1
   end
   f:close()
