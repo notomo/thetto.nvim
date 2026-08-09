@@ -86,10 +86,8 @@ function M.collect(source_ctx)
   local dir_path = vim.fs.dirname(path)
   local paths = vim.fn.glob(dir_path .. "/*.mk", false, true)
 
-  local items = {}
+  local items = { to_item(path, nil, 1, nil, source_ctx.cwd) }
   for _, p in ipairs(vim.list_extend({ path }, paths)) do
-    local item = to_item(path, nil, 1, nil, source_ctx.cwd)
-    table.insert(items, item)
     items = vim.list_extend(items, M._load(p, source_ctx.cwd))
   end
   return items

@@ -23,6 +23,18 @@ describe("cmd/make/target source", function()
     end, items)
   end
 
+  it("collects the item that runs make with no target once", function()
+    helper.test_data:create_file("Makefile", "own_target:\n\techo own\n")
+    helper.test_data:create_file("other.mk", "mk_target:\n\techo mk\n")
+
+    local items = target.collect({ cwd = helper.test_data.full_path })
+    local values = vim.tbl_map(function(item)
+      return item.value
+    end, items)
+
+    assert.same({ "", "own_target", "mk_target" }, values)
+  end)
+
   it("collects the targets of an included file", function()
     helper.test_data:create_file("shared/shared.mk", "shared_target:\n\techo shared\n")
     local path = helper.test_data:create_file("Makefile", "include shared/shared.mk\n\nown_target:\n\techo own\n")
