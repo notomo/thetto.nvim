@@ -23,7 +23,10 @@ function M.all(fs)
   local tasks = vim
     .iter(fs)
     :map(function(f)
-      return vim.async.run(f)
+      -- WHY: a child task that fails closes its siblings, while Promise.all
+      -- left the other promises running
+      -- NOT: vim.async.run(f) without detaching it
+      return vim.async.run(f):detach()
     end)
     :totable()
 
@@ -41,7 +44,10 @@ function M.all_settled(fs)
   local tasks = vim
     .iter(fs)
     :map(function(f)
-      return vim.async.run(f)
+      -- WHY: the failure of an attached child fails this task too, so the first
+      -- one would close the rest instead of letting them settle
+      -- NOT: vim.async.run(f) without detaching it
+      return vim.async.run(f):detach()
     end)
     :totable()
 
