@@ -2,6 +2,7 @@ local M = {}
 
 local to_git_root = require("thetto.handler.kind.git._util").to_git_root
 
+--- @async
 function M.action_checkout(items)
   local item = items[1]
   if item == nil then
@@ -9,9 +10,10 @@ function M.action_checkout(items)
   end
 
   local cmd = { "git", "checkout", "-b", item.value, "refs/tags/" .. item.value }
-  return require("thetto.util.job").promise(cmd, { cwd = item.git_root })
+  return require("thetto.util.job").await(cmd, { cwd = item.git_root })
 end
 
+--- @async
 function M.action_delete(items)
   local branches = {}
   for _, item in ipairs(items) do
@@ -21,7 +23,7 @@ function M.action_delete(items)
   local cmd = { "git", "tag", "--delete" }
   vim.list_extend(cmd, branches)
 
-  return require("thetto.util.job").promise(cmd, { cwd = to_git_root(items) })
+  return require("thetto.util.job").await(cmd, { cwd = to_git_root(items) })
 end
 
 M.default_action = "checkout"

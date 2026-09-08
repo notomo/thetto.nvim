@@ -44,6 +44,7 @@ M.consumer_opts = {
 
 M.actions = {
 
+  --- @async
   action_tab_open = function(items)
     return require("thetto.handler.kind.git._util").open_diff(items, function(bufnr)
       require("thetto.lib.buffer").open_scratch_tab()
@@ -52,54 +53,49 @@ M.actions = {
   end,
 
   get_preview = function(item)
-    local bufnr = require("thetto.util.git").diff_buffer()
-    local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
-    return promise, { raw_bufnr = bufnr }
+    return require("thetto.handler.kind.git._util").preview_diff(item)
   end,
 
+  --- @async
   action_pop = function(items)
     local item = items[1]
     if not item then
       return
     end
-    return require("thetto.util.job")
-      .promise({ "git", "stash", "pop", item.stash_name }, {
-        on_exit = function() end,
-        cwd = item.git_root,
-      })
-      :next(function()
-        return require("thetto.lib.message").info(("Pop stash: %s"):format(item.stash_name))
-      end)
+
+    require("thetto.util.job").await({ "git", "stash", "pop", item.stash_name }, {
+      on_exit = function() end,
+      cwd = item.git_root,
+    })
+    return require("thetto.lib.message").info(("Pop stash: %s"):format(item.stash_name))
   end,
 
+  --- @async
   action_apply = function(items)
     local item = items[1]
     if not item then
       return
     end
-    return require("thetto.util.job")
-      .promise({ "git", "stash", "apply", item.stash_name }, {
-        on_exit = function() end,
-        cwd = item.git_root,
-      })
-      :next(function()
-        return require("thetto.lib.message").info(("Applied stash: %s"):format(item.stash_name))
-      end)
+
+    require("thetto.util.job").await({ "git", "stash", "apply", item.stash_name }, {
+      on_exit = function() end,
+      cwd = item.git_root,
+    })
+    return require("thetto.lib.message").info(("Applied stash: %s"):format(item.stash_name))
   end,
 
+  --- @async
   action_delete = function(items)
     local item = items[1]
     if not item then
       return
     end
-    return require("thetto.util.job")
-      .promise({ "git", "stash", "drop", item.stash_name }, {
-        on_exit = function() end,
-        cwd = item.git_root,
-      })
-      :next(function()
-        return require("thetto.lib.message").info(("Drop stash: %s"):format(item.stash_name))
-      end)
+
+    require("thetto.util.job").await({ "git", "stash", "drop", item.stash_name }, {
+      on_exit = function() end,
+      cwd = item.git_root,
+    })
+    return require("thetto.lib.message").info(("Drop stash: %s"):format(item.stash_name))
   end,
 }
 

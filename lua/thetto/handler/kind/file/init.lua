@@ -137,10 +137,12 @@ local to_dirs = function(items)
   return dirs
 end
 
+--- @async
 function M.action_directory_open(items)
   return require("thetto.util.action").call("file/directory", "open", to_dirs(items))
 end
 
+--- @async
 function M.action_directory_tab_open(items)
   return require("thetto.util.action").call("file/directory", "tab_open", to_dirs(items))
 end

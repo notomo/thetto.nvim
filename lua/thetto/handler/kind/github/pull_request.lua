@@ -1,5 +1,6 @@
 local M = {}
 
+--- @async
 function M.action_checkout(items)
   local item = items[1]
   if not item then
@@ -7,7 +8,7 @@ function M.action_checkout(items)
   end
 
   local cmd = { "gh", "pr", "checkout", item.url }
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
 return require("thetto.core.kind").extend(M, "url")

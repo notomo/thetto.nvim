@@ -2,12 +2,14 @@ local M = {}
 
 local open_diff = require("thetto.handler.kind.git._util").open_diff
 
+--- @async
 function M.action_open(items)
   return open_diff(items, function(bufnr)
     vim.cmd.buffer(bufnr)
   end)
 end
 
+--- @async
 function M.action_vsplit_open(items)
   return open_diff(items, function(bufnr)
     vim.cmd.vsplit()
@@ -15,6 +17,7 @@ function M.action_vsplit_open(items)
   end)
 end
 
+--- @async
 function M.action_tab_open(items)
   return open_diff(items, function(bufnr)
     require("thetto.lib.buffer").open_scratch_tab()
@@ -23,72 +26,63 @@ function M.action_tab_open(items)
 end
 
 function M.get_preview(item)
-  local bufnr = require("thetto.util.git").diff_buffer()
-  local promise = require("thetto.handler.kind.git._util").render_diff(bufnr, item)
-  return promise, { raw_bufnr = bufnr }
+  return require("thetto.handler.kind.git._util").preview_diff(item)
 end
 
+--- @async
 function M.action_fixup(items)
   local item = items[1]
   if not item then
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job")
-    .promise({ "git", "commit", "--fixup=" .. item.commit_hash }, { cwd = item.git_root })
-    :next(function()
-      return require("thetto").reload(bufnr)
-    end)
+  require("thetto.util.job").await({ "git", "commit", "--fixup=" .. item.commit_hash }, { cwd = item.git_root })
+  return require("thetto").reload(bufnr)
 end
 
+--- @async
 function M.action_reword(items)
   local item = items[1]
   if not item then
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job")
-    .promise({ "git", "commit", "--fixup=reword:" .. item.commit_hash }, { cwd = item.git_root })
-    :next(function()
-      return require("thetto").reload(bufnr)
-    end)
+  require("thetto.util.job").await({ "git", "commit", "--fixup=reword:" .. item.commit_hash }, { cwd = item.git_root })
+  return require("thetto").reload(bufnr)
 end
 
+--- @async
 function M.action_rebase_interactively(items)
   local item = items[1]
   if not item then
     return nil
   end
-  return require("thetto.util.job").promise(
+  return require("thetto.util.job").await(
     { "git", "rebase", "-i", "--autosquash", item.commit_hash .. "~" },
     { cwd = item.git_root }
   )
 end
 
+--- @async
 function M.action_reset(items)
   local item = items[1]
   if not item then
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job")
-    .promise({ "git", "reset", item.commit_hash }, { cwd = item.git_root })
-    :next(function()
-      return require("thetto").reload(bufnr)
-    end)
+  require("thetto.util.job").await({ "git", "reset", item.commit_hash }, { cwd = item.git_root })
+  return require("thetto").reload(bufnr)
 end
 
+--- @async
 function M.action_checkout(items)
   local item = items[1]
   if not item then
     return nil
   end
   local bufnr = vim.api.nvim_get_current_buf()
-  return require("thetto.util.job")
-    .promise({ "git", "checkout", item.commit_hash }, { cwd = item.git_root })
-    :next(function()
-      return require("thetto").reload(bufnr)
-    end)
+  require("thetto.util.job").await({ "git", "checkout", item.commit_hash }, { cwd = item.git_root })
+  return require("thetto").reload(bufnr)
 end
 
 M.action_diff = M.action_tab_open
@@ -139,6 +133,7 @@ function M.action_file_log(items)
   return require("thetto").start(source)
 end
 
+--- @async
 function M.action_compare(items)
   local item = items[1]
   if not item then
@@ -157,6 +152,7 @@ function M.action_compare(items)
   )
 end
 
+--- @async
 function M.action_compare_open(items)
   local item = items[1]
   if not item then

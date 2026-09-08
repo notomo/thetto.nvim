@@ -97,11 +97,12 @@ function M.merge(sources, fields, cache, is_manual)
     source_actions[source_name] = source.actions
   end)
   actions.default_action = "merged_source_default"
+  --- @async
   actions.action_merged_source_default = function(items)
     local source_item_groups = require("thetto.lib.list").group_by_adjacent(items, function(item)
       return item.source_name
     end)
-    return require("thetto.vendor.promise").all(vim
+    return require("thetto.lib.async").all(vim
       .iter(source_item_groups)
       :map(function(group)
         local source_name, souce_items = unpack(group)
@@ -110,7 +111,10 @@ function M.merge(sources, fields, cache, is_manual)
           action_name = action_name,
           actions = source_actions[source_name],
         })
-        return require("thetto.core.executor").execute(action_item_groups)
+        --- @async
+        return function()
+          return require("thetto.core.executor").execute(action_item_groups)
+        end
       end)
       :totable())
   end

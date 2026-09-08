@@ -61,6 +61,7 @@ M.kind_name = "file"
 M.actions = {
   opts = { yank = { key = "url" } },
 
+  --- @async
   action_open_url = function(items)
     return require("thetto.util.action").call("url", "open_browser", items)
   end,

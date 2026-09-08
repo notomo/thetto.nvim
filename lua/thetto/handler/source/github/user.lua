@@ -11,24 +11,25 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "gh", "api", "-X", "GET", "search/users", "-f", "q=" .. pattern }
-  return require("thetto.util.job")
-    .promise(cmd, {
+  --- @async
+  local collect = function()
+    local output = require("thetto.util.job").await(cmd, {
       cwd = source_ctx.cwd,
       on_exit = function() end,
     })
-    :next(function(output)
-      local users = vim.json.decode(output, { luanil = { object = true } }).items
-      return vim
-        .iter(users)
-        :map(function(user)
-          return {
-            value = user.login,
-            url = user.html_url,
-            user = { name = user.login, is_org = user.type == "Organization" },
-          }
-        end)
-        :totable()
-    end)
+    local users = vim.json.decode(output, { luanil = { object = true } }).items
+    return vim
+      .iter(users)
+      :map(function(user)
+        return {
+          value = user.login,
+          url = user.html_url,
+          user = { name = user.login, is_org = user.type == "Organization" },
+        }
+      end)
+      :totable()
+  end
+  return vim.async.run(collect)
 end
 
 M.kind_name = "github/user"

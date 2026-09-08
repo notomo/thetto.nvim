@@ -41,24 +41,32 @@ function M._new(result)
     return subscriber
   end
 
-  if type(result.next) == "function" then
-    local promise = result
+  if require("thetto.lib.async").is_task(result) then
+    local task = result
     return function(observer)
-      promise
-        :next(function(resolved)
-          if type(resolved) == "function" then
-            -- promise returns subscriber case
-            resolved(observer)
-            return
-          end
+      --- @async
+      --- @return nil
+      local consume = function()
+        local resolved = vim.async.await(task)
+        if type(resolved) == "function" then
+          -- task returns subscriber case
+          resolved(observer)
+          return
+        end
 
-          -- promise returns items case
-          observer:next(resolved)
-          observer:complete()
-        end)
-        :catch(function(err)
-          observer:error(err)
-        end)
+        -- task returns items case
+        observer:next(resolved)
+        observer:complete()
+      end
+
+      local cancel = require("thetto.lib.async").observe(observer, consume)
+      return function()
+        -- WHY: closing the source task first resumes the consumer with "closed" and
+        -- reports the unsubscribe as a source error
+        -- NOT: task:close() before cancel()
+        cancel()
+        task:close()
+      end
     end
   end
 

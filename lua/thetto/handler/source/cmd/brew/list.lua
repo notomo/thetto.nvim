@@ -10,6 +10,7 @@ end
 M.kind_name = "word"
 
 M.actions = {
+  --- @async
   action_update = function(items)
     local item = items[1]
     if not item then
@@ -17,7 +18,7 @@ M.actions = {
     end
     -- use install to update one package
     local cmd = { "brew", "install", item.value }
-    return require("thetto.util.job").promise(cmd)
+    return require("thetto.util.job").await(cmd)
   end,
 }
 

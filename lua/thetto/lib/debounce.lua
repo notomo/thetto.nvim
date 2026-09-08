@@ -2,13 +2,13 @@ local vim = vim
 
 local M = {}
 
-function M.promise(ms, f)
+function M.task(ms, f)
   local timer = assert(vim.uv.new_timer())
   local factory = function(...)
     timer:stop()
 
     local args = { ... }
-    local promise, resolve = require("thetto.vendor.promise").with_resolvers()
+    local task, resolve = require("thetto.lib.async").with_resolvers()
 
     timer:start(
       ms,
@@ -18,7 +18,7 @@ function M.promise(ms, f)
       end)
     )
 
-    return promise
+    return task
   end
   local close = function()
     timer:close()

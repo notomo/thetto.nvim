@@ -49,7 +49,7 @@ local handlers = {
     local row = item_cursor:apply(self._item_cursor_row, #self._all_items)
     local item = self._all_items[row]
     if not self._is_valid(item) then
-      return require("thetto.vendor.promise").resolve()
+      return nil
     end
 
     self._item_cursor_row = row
@@ -75,9 +75,12 @@ local handlers = {
       action_name = self._action_name,
       actions = self._actions,
     })
-    return require("thetto.core.executor").execute(action_item_groups):next(function()
+    --- @async
+    local execute = function()
+      require("thetto.core.executor").execute(action_item_groups)
       return self._all_items
-    end)
+    end
+    return vim.async.run(execute)
   end,
   [consumer_events.all.source_error] = vim.schedule_wrap(function(_, err)
     require("thetto.lib.message").warn(err)

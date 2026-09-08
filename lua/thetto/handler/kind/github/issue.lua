@@ -2,6 +2,7 @@ local M = {}
 
 M.opts = {}
 
+--- @async
 function M.action_edit_last_comment(items)
   local item = items[1]
   if not item then
@@ -9,9 +10,10 @@ function M.action_edit_last_comment(items)
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor", "--edit-last" }
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
+--- @async
 function M.action_comment(items)
   local item = items[1]
   if not item then
@@ -19,13 +21,14 @@ function M.action_comment(items)
   end
 
   local cmd = { "gh", "issue", "comment", item.url, "--editor" }
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
 M.opts.close = {
   reason = "completed",
   comment = "",
 }
+--- @async
 function M.action_close(items, action_ctx)
   local item = items[1]
   if not item then
@@ -37,30 +40,30 @@ function M.action_close(items, action_ctx)
     table.insert(cmd, "--comment=" .. action_ctx.opts.comment)
   end
 
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
+--- @async
 function M.action_close_with_comment(items, action_ctx)
-  return require("thetto.util.input")
-    .promise({
-      prompt = "Comment: ",
-    })
-    :next(function(input)
-      if not input or input == "" then
-        return require("thetto.lib.message").info("Canceled issue close with comment")
-      end
-      return require("thetto.util.action").call(action_ctx.kind_name, "close", items, {
-        comment = input,
-      })
-    end)
+  local input = require("thetto.util.input").await({
+    prompt = "Comment: ",
+  })
+  if not input or input == "" then
+    return require("thetto.lib.message").info("Canceled issue close with comment")
+  end
+  return require("thetto.util.action").call(action_ctx.kind_name, "close", items, {
+    comment = input,
+  })
 end
 
+--- @async
 function M.action_close_not_planned(items, action_ctx)
   return require("thetto.util.action").call(action_ctx.kind_name, "close", items, {
     reason = { "not planned" },
   })
 end
 
+--- @async
 function M.action_reopen(items)
   local item = items[1]
   if not item then
@@ -68,7 +71,7 @@ function M.action_reopen(items)
   end
 
   local cmd = { "gh", "issue", "reopen", item.url }
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
 function M.action_list_comment(items)

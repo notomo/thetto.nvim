@@ -33,9 +33,9 @@ function helper.on_finished()
   })
 end
 
-function helper.wait(promise)
+function helper.wait(task)
   local on_finished = helper.on_finished()
-  promise:finally(function()
+  task:on_complete(function()
     on_finished()
   end)
   on_finished:wait()

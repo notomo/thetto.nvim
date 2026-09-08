@@ -145,7 +145,7 @@ function M.open(
   self:redraw_list(self._items)
   require("thetto.vendor.misclib.cursor").set({ item_cursor_row, state.column }, window_id)
 
-  local on_cursor_moved, close_debounce = require("thetto.lib.debounce").promise(100, function()
+  local on_cursor_moved, close_debounce = require("thetto.lib.debounce").task(100, function()
     if self._closed then
       return
     end
@@ -325,10 +325,25 @@ function M._redraw_sidecar(self)
   end
 
   local kind = require("thetto.core.kind").by_name(item.kind_name, self._actions)
-  local promise, preview = require("thetto.core.kind").get_preview(kind, item)
-  return promise:next(function()
+  local task, preview = require("thetto.core.kind").get_preview(kind, item)
+  if not task then
     self._sidecar:redraw(preview)
-  end)
+    return
+  end
+
+  --- @async
+  --- @return nil
+  local redraw = function()
+    local ok, err = pcall(vim.async.await, task)
+    if not ok then
+      if vim.async.is_closing() then
+        return
+      end
+      return require("thetto.lib.message").warn(err)
+    end
+    self._sidecar:redraw(preview)
+  end
+  return vim.async.run(redraw)
 end
 
 function M.toggle_selection(self)

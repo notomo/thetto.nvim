@@ -66,6 +66,7 @@ function M.grouping(items, raw_opts)
   return action_item_groups
 end
 
+--- @async
 function M.call(kind_name, action_name, items, action_opts)
   local action_item_groups = M.grouping(items, {
     action_name = action_name,

@@ -1,11 +1,13 @@
 local M = {}
 
+--- @async
 function M.action_open(items)
   return require("thetto.handler.kind.git._util").open(items, function(bufnr)
     vim.cmd.buffer(bufnr)
   end)
 end
 
+--- @async
 function M.action_vsplit_open(items)
   return require("thetto.handler.kind.git._util").open(items, function(bufnr)
     vim.cmd.vsplit()
@@ -13,6 +15,7 @@ function M.action_vsplit_open(items)
   end)
 end
 
+--- @async
 function M.action_tab_open(items)
   return require("thetto.handler.kind.git._util").open(items, function(bufnr)
     require("thetto.lib.buffer").open_scratch_tab()

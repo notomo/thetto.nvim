@@ -90,13 +90,13 @@ end
 function M.get_preview(kind, item, raw_action_ctx)
   local f = kind.get_preview
   if not f then
-    return require("thetto.vendor.promise").resolve(), { lines = {} }
+    return nil, { lines = {} }
   end
 
   local action_opts = vim.tbl_get(kind, "opts", "preview") or {}
   local action_ctx = vim.tbl_deep_extend("force", { opts = action_opts }, raw_action_ctx or {})
-  local promise, preview = f(item, action_ctx)
-  return require("thetto.vendor.promise").resolve(promise), preview or { lines = {} }
+  local task, preview = f(item, action_ctx)
+  return task, preview or { lines = {} }
 end
 
 function M.can_preview(kind)

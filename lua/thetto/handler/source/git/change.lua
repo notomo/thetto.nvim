@@ -60,14 +60,16 @@ function M.collect(source_ctx)
 
   if commit_hash and source_ctx.opts.path then
     -- fallback for renamed file path
-    return require("thetto.util.git").exists(git_root, commit_hash, source_ctx.opts.path):next(function(ok)
-      if ok then
+    --- @async
+    local collect = function()
+      if require("thetto.util.git").exists(git_root, commit_hash, source_ctx.opts.path) then
         table.insert(cmd, source_ctx.opts.path)
       end
       return require("thetto.util.job").start(cmd, source_ctx, function(output)
         return M._to_item(git_root, commit_hash, commit_hash_to, output)
       end, { cwd = git_root })
-    end)
+    end
+    return vim.async.run(collect)
   end
 
   return require("thetto.util.job").start(cmd, source_ctx, function(output)

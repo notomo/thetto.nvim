@@ -15,6 +15,7 @@ function M.action_list_action_run(items)
   return require("thetto").start(source)
 end
 
+--- @async
 function M.action_run(items)
   local item = items[1]
   if not item then
@@ -22,7 +23,8 @@ function M.action_run(items)
   end
 
   local cmd = { "gh", "workflow", "run", item.workflow.file_name }
-  return require("thetto.util.job").promise(cmd):next(M.action_list_action_run)
+  require("thetto.util.job").await(cmd)
+  return M.action_list_action_run(items)
 end
 
 M.action_list_children = M.action_list_action_run

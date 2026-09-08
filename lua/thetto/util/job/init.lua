@@ -156,7 +156,8 @@ function M.execute(cmd, raw_opts)
   return result
 end
 
-function M.promise(cmd, raw_opts)
+--- @async
+function M.await(cmd, raw_opts)
   local default_opts = {
     on_exit = function(output)
       vim.api.nvim_echo({ { output } }, true, {})
@@ -170,30 +171,44 @@ function M.promise(cmd, raw_opts)
 
   write_log(cmd)
 
-  local promise, resolve, reject = require("thetto.vendor.promise").with_resolvers()
-  local _, result = pcall(function()
-    vim.system(
+  --- @type vim.SystemCompleted?
+  local completed
+  --- @type string?
+  local start_err
+  vim.async.await(function(callback)
+    -- WHY: without schedule_wrap the task resumes in a fast event context and
+    -- any vim.api call after this await fails with E5560
+    -- NOT: passing the callback to vim.system as it is
+    local ok, err = pcall(
+      vim.system,
       cmd,
       {
         text = true,
         cwd = opts.cwd,
       },
       vim.schedule_wrap(function(o)
-        if opts.is_err(o.code) then
-          return reject(vim.trim(o.stderr))
-        end
-        local output = o.stdout
-        opts.on_exit(output, o.code)
-        return resolve(vim.trim(output))
+        completed = o
+        callback()
       end)
     )
+    if not ok then
+      start_err = tostring(err)
+      callback()
+    end
   end)
-  if type(result) == "string" then
-    local err = result
-    reject(err)
+
+  if start_err then
+    error(start_err, 0)
   end
 
-  return promise
+  local o = assert(completed)
+  if opts.is_err(o.code) then
+    error(vim.trim(o.stderr or ""), 0)
+  end
+
+  local output = o.stdout or ""
+  opts.on_exit(output, o.code)
+  return vim.trim(output)
 end
 
 return M

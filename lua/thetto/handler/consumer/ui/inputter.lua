@@ -3,7 +3,7 @@ local hl_groups = require("thetto.handler.consumer.ui.highlight_group")
 --- @class ThettoUiInputter
 --- @field _closed boolean
 --- @field _closes fun()[]
---- @field _input_promise table
+--- @field _input_task vim.async.Task?
 --- @field private _input_filters ThettoUiInputFilters
 --- @field private _window_id integer
 --- @field private _bufnr integer
@@ -43,9 +43,10 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
     .iter(filters)
     :map(function(filter)
       local debounce_ms = filter.debounce_ms or 50
-      local debounce, close = require("thetto.lib.debounce").promise(debounce_ms, function(changed_index)
+      --- @return { inputs: string[], source_input_pattern: string? }
+      local to_changed = function(changed_index)
         if not vim.api.nvim_buf_is_valid(bufnr) then
-          return {}, nil
+          return { inputs = {} }
         end
 
         M._fill_lines(bufnr, filters)
@@ -57,8 +58,13 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
           source_input_pattern = inputs[changed_index]
         end
 
-        return inputs, source_input_pattern
-      end)
+        return {
+          inputs = inputs,
+          source_input_pattern = source_input_pattern,
+        }
+      end
+
+      local debounce, close = require("thetto.lib.debounce").task(debounce_ms, to_changed)
       return {
         debounce = debounce,
         close = close,
@@ -131,9 +137,15 @@ function M.open(ctx_key, cwd, closer, layout, on_change, pipeline, insert, sourc
       if not debounce then
         return
       end
-      self._input_promise = debounce(changed_index):next(function(...)
-        return on_change(...)
-      end)
+      local task = debounce(changed_index)
+      --- @async
+      --- @return nil
+      local change = function()
+        --- @type { inputs: string[], source_input_pattern: string? }
+        local changed = vim.async.await(task)
+        on_change(changed.inputs, changed.source_input_pattern)
+      end
+      self._input_task = vim.async.run(change)
     end,
   })
 
@@ -240,8 +252,8 @@ function M.close(self, current_window_id)
   require("thetto.vendor.misclib.window").safe_close(self._window_id)
 end
 
-function M.promise(self)
-  return self._input_promise
+function M.task(self)
+  return self._input_task
 end
 
 return M

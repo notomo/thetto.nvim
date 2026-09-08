@@ -92,6 +92,7 @@ M.actions = {
     end
   end,
 
+  --- @async
   action_edit = function(items)
     local item = items[1]
     if not item then
@@ -101,17 +102,14 @@ M.actions = {
       return require("thetto.lib.message").info(("%s is readonly"):format(item.register_name))
     end
 
-    return require("thetto.util.input")
-      .promise({
-        prompt = "Edit register: ",
-        default = vim.fn.getreg(item.register_name):gsub("\n", "\\n"),
-      })
-      :next(function(new_value)
-        if not new_value then
-          return require("thetto.lib.message").info("Canceled")
-        end
-        vim.fn.setreg(item.register_name, new_value)
-      end)
+    local new_value = require("thetto.util.input").await({
+      prompt = "Edit register: ",
+      default = vim.fn.getreg(item.register_name):gsub("\n", "\\n"),
+    })
+    if not new_value then
+      return require("thetto.lib.message").info("Canceled")
+    end
+    vim.fn.setreg(item.register_name, new_value)
   end,
 }
 

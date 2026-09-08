@@ -10,7 +10,7 @@ local consumer_events = require("thetto.core.consumer_events")
 --- @field private _default_kind_name string
 --- @field _all_items table[]
 --- @field _subscription table
---- @field _promise table
+--- @field _task vim.async.Task
 local M = {}
 M.__index = M
 
@@ -31,8 +31,8 @@ function M.new(subscriber, consumer, pipeline, source_ctx, source_name, default_
   }
   local self = setmetatable(tbl, M)
 
-  local promise, resolve, reject = require("thetto.vendor.promise").with_resolvers()
-  self._promise = promise
+  local task, resolve, reject = require("thetto.lib.async").with_resolvers()
+  self._task = task
 
   local run_pipeline, cancel, close = require("thetto.lib.throttle").with_last(500, function()
     self:run_pipeline()
@@ -87,8 +87,8 @@ function M.stop(self)
   return self._subscription and self._subscription:unsubscribe()
 end
 
-function M.promise(self)
-  return self._promise
+function M.task(self)
+  return self._task
 end
 
 function M.restart(self, subscriber, source_ctx)

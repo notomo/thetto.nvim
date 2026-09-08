@@ -1,5 +1,6 @@
 local M = {}
 
+--- @async
 function M.action_remove(items)
   local ids = vim
     .iter(items)
@@ -9,9 +10,10 @@ function M.action_remove(items)
     :totable()
   local cmd = { "docker", "rmi" }
   vim.list_extend(cmd, ids)
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
+--- @async
 function M.action_untag(items)
   local ids = vim
     .iter(items)
@@ -21,7 +23,7 @@ function M.action_untag(items)
     :totable()
   local cmd = { "docker", "rmi" }
   vim.list_extend(cmd, ids)
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
 return M

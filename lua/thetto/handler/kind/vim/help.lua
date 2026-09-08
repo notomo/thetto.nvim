@@ -1,5 +1,6 @@
 local M = {}
 
+--- @async
 function M.action_open(items)
   for _, item in ipairs(items) do
     local err = M._open(item, "", "open")
@@ -10,6 +11,7 @@ function M.action_open(items)
   end
 end
 
+--- @async
 function M.action_tab_open(items)
   for _, item in ipairs(items) do
     local err = M._open(item, "tab", "tab_open")
@@ -19,6 +21,7 @@ function M.action_tab_open(items)
   end
 end
 
+--- @async
 function M.action_vsplit_open(items)
   for _, item in ipairs(items) do
     local err = M._open(item, "vertical", "vsplit_open")
@@ -28,6 +31,7 @@ function M.action_vsplit_open(items)
   end
 end
 
+--- @async
 function M._open(item, help_prefix, edit_action)
   local ok = pcall(function()
     vim.cmd(("%s help %s"):format(help_prefix, item.value))

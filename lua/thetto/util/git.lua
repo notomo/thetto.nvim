@@ -4,32 +4,28 @@ function M.root(cwd)
   return require("thetto.lib.file").find_git_root(cwd)
 end
 
+--- @async
 function M.exists(git_root, commit_hash, path)
   local cmd = { "git", "show", "--quiet", "--pretty=format:%h", commit_hash, "--", path }
-  return require("thetto.util.job")
-    .promise(cmd, {
-      cwd = git_root,
-      on_exit = function() end,
-    })
-    :next(function(output)
-      return output ~= ""
-    end)
+  local output = require("thetto.util.job").await(cmd, {
+    cwd = git_root,
+    on_exit = function() end,
+  })
+  return output ~= ""
 end
 
+--- @async
 function M.diff(git_root, bufnr, cmd)
   cmd = cmd or { "git", "--no-pager", "diff", "--date=iso" }
-  return require("thetto.util.job")
-    .promise(cmd, {
-      cwd = git_root,
-      on_exit = function() end,
-    })
-    :next(function(output)
-      if not vim.api.nvim_buf_is_valid(bufnr) then
-        return
-      end
-      local lines = vim.split(output, "\n", { plain = true })
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-    end)
+  local output = require("thetto.util.job").await(cmd, {
+    cwd = git_root,
+    on_exit = function() end,
+  })
+  if not vim.api.nvim_buf_is_valid(bufnr) then
+    return
+  end
+  local lines = vim.split(output, "\n", { plain = true })
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
 end
 
 function M.diff_buffer()
@@ -39,6 +35,7 @@ function M.diff_buffer()
   return bufnr
 end
 
+--- @async
 function M._apply(git_root, diff, path_a, path_b, path_from_git_root)
   if diff == "" then
     return
@@ -57,28 +54,27 @@ function M._apply(git_root, diff, path_a, path_b, path_from_git_root)
   f:write(table.concat(diff_lines, "\n") .. "\n")
   f:close()
 
-  return require("thetto.util.job").promise({ "git", "apply", "--verbose", "--cached", patch_path }, {
+  return require("thetto.util.job").await({ "git", "apply", "--verbose", "--cached", patch_path }, {
     cwd = git_root,
     on_exit = function() end,
   })
 end
 
+--- @async
 function M._index_content_path(git_root, path_from_git_root)
-  return require("thetto.util.job")
-    .promise({ "git", "--no-pager", "show", ":" .. path_from_git_root }, {
-      cwd = git_root,
-      on_exit = function() end,
-    })
-    :next(function(head)
-      local path = vim.fn.tempname()
-      do
-        local f = io.open(path, "w")
-        assert(f, "failed to open: " .. path)
-        f:write(head)
-        f:close()
-      end
-      return path
-    end)
+  local head = require("thetto.util.job").await({ "git", "--no-pager", "show", ":" .. path_from_git_root }, {
+    cwd = git_root,
+    on_exit = function() end,
+  })
+
+  local path = vim.fn.tempname()
+  do
+    local f = io.open(path, "w")
+    assert(f, "failed to open: " .. path)
+    f:write(head)
+    f:close()
+  end
+  return path
 end
 
 function M._enable_patch(git_root, path_from_git_root, bufnr)
@@ -86,39 +82,44 @@ function M._enable_patch(git_root, path_from_git_root, bufnr)
   vim.api.nvim_create_autocmd({ "BufWriteCmd" }, {
     buf = bufnr,
     callback = function()
-      M._index_content_path(git_root, path_from_git_root)
-        :next(function(index_content_path)
-          index_path = index_content_path
+      --- @async
+      --- @return nil
+      local write = function()
+        index_path = M._index_content_path(git_root, path_from_git_root)
 
-          working_path = vim.fn.tempname()
-          do
-            local f = io.open(working_path, "w")
-            assert(f, "failed to open: " .. working_path)
-            local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-            f:write(table.concat(new_lines, "\n"))
-            f:close()
-          end
+        working_path = vim.fn.tempname()
+        do
+          local f = io.open(working_path, "w")
+          assert(f, "failed to open: " .. working_path)
+          local new_lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+          f:write(table.concat(new_lines, "\n"))
+          f:close()
+        end
 
-          return require("thetto.util.job").promise(
-            { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
-            {
-              cwd = git_root,
-              on_exit = function() end,
-              is_err = function(code)
-                return code ~= 0 and code ~= 1
-              end,
-            }
-          )
-        end)
-        :next(function(diff)
-          return M._apply(git_root, diff, index_path, working_path, path_from_git_root)
-        end)
-        :next(function()
-          vim.bo[bufnr].modified = false
-        end)
-        :catch(function(err)
+        local diff = require("thetto.util.job").await(
+          { "git", "--no-pager", "diff", "--no-index", "--", index_path, working_path },
+          {
+            cwd = git_root,
+            on_exit = function() end,
+            is_err = function(code)
+              return code ~= 0 and code ~= 1
+            end,
+          }
+        )
+
+        M._apply(git_root, diff, index_path, working_path, path_from_git_root)
+        vim.bo[bufnr].modified = false
+      end
+
+      --- @async
+      --- @return nil
+      local run = function()
+        local ok, err = pcall(write)
+        if not ok then
           require("thetto.lib.message").warn(err)
-        end)
+        end
+      end
+      vim.async.run(run)
     end,
   })
 end
@@ -140,121 +141,123 @@ function M.state()
   return vim.b[bufnr].thetto_git_state
 end
 
+--- @async
 function M.content(git_root, path_or_bufnr, revision, scratch_bufnr)
   local path = M._to_path(path_or_bufnr)
   if not revision then
-    return require("thetto.vendor.promise").resolve({
+    return {
       buffer_path = path,
-    })
+    }
   end
 
   local path_from_git_root = path:sub(#git_root + 2)
   local treeish = ("%s:%s"):format(revision, path_from_git_root)
 
-  return require("thetto.util.job")
-    .promise({
-      "git",
-      "--no-pager",
-      "show",
-      treeish,
-    }, {
-      cwd = git_root,
-      on_exit = function() end,
-    })
-    :catch(function(err)
-      if err:match(" does not exist in ") or err:match(" exists on disk, but not in ") then
-        return ""
-      end
-      return require("thetto.vendor.promise").reject(err)
-    end)
-    :next(function(output)
-      local bufnr = scratch_bufnr or vim.api.nvim_create_buf(false, true)
-      local lines = require("thetto.util.job.parse").output(output)
-      vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-      vim.bo[bufnr].bufhidden = "wipe"
-      vim.bo[bufnr].buftype = "acwrite"
-      vim.bo[bufnr].modified = false
-      vim.b[bufnr].thetto_git_state = {
-        path = path,
-        revision = revision,
-      }
+  local ok, output = pcall(require("thetto.util.job").await, {
+    "git",
+    "--no-pager",
+    "show",
+    treeish,
+  }, {
+    cwd = git_root,
+    on_exit = function() end,
+  })
+  if not ok then
+    local err = output
+    if not err:match(" does not exist in ") and not err:match(" exists on disk, but not in ") then
+      error(err, 0)
+    end
+    output = ""
+  end
 
-      local buffer_path = "thetto-git://" .. vim.fs.joinpath(git_root, treeish)
-      local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
-      if old == -1 then
-        vim.api.nvim_buf_set_name(bufnr, buffer_path)
-      end
+  local bufnr = scratch_bufnr or vim.api.nvim_create_buf(false, true)
+  local lines = require("thetto.util.job.parse").output(output)
+  vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+  vim.bo[bufnr].bufhidden = "wipe"
+  vim.bo[bufnr].buftype = "acwrite"
+  vim.bo[bufnr].modified = false
+  vim.b[bufnr].thetto_git_state = {
+    path = path,
+    revision = revision,
+  }
 
-      local filetype, on_detect = vim.filetype.match({ buf = bufnr, filename = path })
-      if filetype then
-        on_detect = on_detect or function(_) end
-        vim.bo[bufnr].filetype = filetype
-        on_detect(bufnr)
-      end
+  local buffer_path = "thetto-git://" .. vim.fs.joinpath(git_root, treeish)
+  local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
+  if old == -1 then
+    vim.api.nvim_buf_set_name(bufnr, buffer_path)
+  end
 
-      return {
-        path_from_git_root = path_from_git_root,
-        bufnr = bufnr,
-        buffer_path = buffer_path,
-      }
-    end)
+  local filetype, on_detect = vim.filetype.match({ buf = bufnr, filename = path })
+  if filetype then
+    on_detect = on_detect or function(_) end
+    vim.bo[bufnr].filetype = filetype
+    on_detect(bufnr)
+  end
+
+  return {
+    path_from_git_root = path_from_git_root,
+    bufnr = bufnr,
+    buffer_path = buffer_path,
+  }
 end
 
+--- @async
 function M.compare(git_root, path_before, revision_before, path_after, revision_after, open)
-  return require("thetto.vendor.promise")
-    .all({
-      M.content(git_root, path_before, revision_before),
-      M.content(git_root, path_after, revision_after),
-    })
-    :next(function(result)
-      local before, after = unpack(result)
+  local result = require("thetto.lib.async").all({
+    --- @async
+    function()
+      return M.content(git_root, path_before, revision_before)
+    end,
+    --- @async
+    function()
+      return M.content(git_root, path_after, revision_after)
+    end,
+  })
+  local before, after = unpack(result)
 
-      if before.bufnr then
-        M._enable_patch(git_root, before.path_from_git_root, before.bufnr)
-      end
-      if after.bufnr then
-        M._enable_patch(git_root, after.path_from_git_root, after.bufnr)
-      end
+  if before.bufnr then
+    M._enable_patch(git_root, before.path_from_git_root, before.bufnr)
+  end
+  if after.bufnr then
+    M._enable_patch(git_root, after.path_from_git_root, after.bufnr)
+  end
 
-      local before_buffer_path = before.buffer_path
-      local after_buffer_path = after.buffer_path
+  local before_buffer_path = before.buffer_path
+  local after_buffer_path = after.buffer_path
 
-      open = open or require("thetto.lib.buffer").open_scratch_tab
-      open()
+  open = open or require("thetto.lib.buffer").open_scratch_tab
+  open()
 
-      vim.cmd.edit({ args = { before_buffer_path }, magic = { file = false } })
-      vim.cmd.diffthis()
-      local before_winbar = vim.wo.winbar
-      local before_window_id = vim.api.nvim_get_current_win()
+  vim.cmd.edit({ args = { before_buffer_path }, magic = { file = false } })
+  vim.cmd.diffthis()
+  local before_winbar = vim.wo.winbar
+  local before_window_id = vim.api.nvim_get_current_win()
 
-      vim.cmd.vsplit({ args = { after_buffer_path }, mods = { split = "belowright" }, magic = { file = false } })
-      vim.cmd.diffthis()
+  vim.cmd.vsplit({ args = { after_buffer_path }, mods = { split = "belowright" }, magic = { file = false } })
+  vim.cmd.diffthis()
 
-      local after_window_id = vim.api.nvim_get_current_win()
-      local after_winbar = vim.wo[after_window_id][0].winbar
+  local after_window_id = vim.api.nvim_get_current_win()
+  local after_winbar = vim.wo[after_window_id][0].winbar
 
-      -- to match the height of two windows
-      if before_winbar == "" and after_winbar ~= "" then
-        vim.wo[before_window_id][0].winbar = after_winbar
-      elseif before_winbar ~= "" and after_winbar == "" then
-        vim.wo[after_window_id][0].winbar = before_winbar
-      end
-    end)
+  -- to match the height of two windows
+  if before_winbar == "" and after_winbar ~= "" then
+    vim.wo[before_window_id][0].winbar = after_winbar
+  elseif before_winbar ~= "" and after_winbar == "" then
+    vim.wo[after_window_id][0].winbar = before_winbar
+  end
 end
 
+--- @async
 function M.create_stash(git_root)
-  return require("thetto.util.input")
-    .promise({
-      prompt = "Create stash: ",
-    })
-    :next(function(input)
-      if not input or input == "" then
-        return require("thetto.lib.message").info("invalid input to create stash")
-      end
-      return require("thetto.util.job").promise({ "git", "stash", "save", input }, { cwd = git_root }):next(function()
-        require("thetto.lib.message").info(("Created stash: %s"):format(input))
-      end)
-    end)
+  local input = require("thetto.util.input").await({
+    prompt = "Create stash: ",
+  })
+  if not input or input == "" then
+    return require("thetto.lib.message").info("invalid input to create stash")
+  end
+
+  require("thetto.util.job").await({ "git", "stash", "save", input }, { cwd = git_root })
+  require("thetto.lib.message").info(("Created stash: %s"):format(input))
 end
 
 return M

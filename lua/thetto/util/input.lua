@@ -1,11 +1,11 @@
 local M = {}
 
-function M.promise(opts)
-  local promise, resolve = require("thetto.vendor.promise").with_resolvers()
-  vim.ui.input(opts, function(input)
-    resolve(input)
-  end)
-  return promise
+--- @async
+--- @param opts table
+--- @return string?
+function M.await(opts)
+  local input = vim.async.await(2, vim.ui.input, opts) --[[@as string?]]
+  return input
 end
 
 return M

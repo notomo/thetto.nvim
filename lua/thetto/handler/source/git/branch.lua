@@ -20,36 +20,37 @@ function M.collect(source_ctx)
     table.insert(cmd, "--all")
   end
 
-  return require("thetto.util.job")
-    .promise({ "git", "branch", "--points-at", "HEAD" }, {
+  --- @async
+  local collect = function()
+    local heads = require("thetto.util.job").await({ "git", "branch", "--points-at", "HEAD" }, {
       on_exit = function() end,
       cwd = source_ctx.cwd,
     })
-    :next(function(heads)
-      local head_output = vim
-        .iter(vim.split(heads, "\n", { plain = true }))
-        :filter(function(line)
-          return vim.startswith(line, "*")
-        end)
-        :totable()[1]
-      local current_branch = string.match(head_output, "* (.*)")
-      return require("thetto.util.job").start(cmd, source_ctx, function(output)
-        local branch_name, commit_hash, message = output:match("^([^\t]+)\t(%S+) (.*)")
-        local is_current_branch = branch_name == current_branch
-        return {
-          value = branch_name,
-          commit_hash = commit_hash,
-          git_root = git_root,
-          desc = ("%s %s %s"):format(commit_hash, branch_name, message),
-          is_current_branch = is_current_branch,
-          _is_current_branch = is_current_branch and 1 or 0,
-          column_offsets = {
-            value = #commit_hash + 1,
-            message = #commit_hash + 1 + #branch_name,
-          },
-        }
-      end, { cwd = git_root })
-    end)
+    local head_output = vim
+      .iter(vim.split(heads, "\n", { plain = true }))
+      :filter(function(line)
+        return vim.startswith(line, "*")
+      end)
+      :totable()[1]
+    local current_branch = string.match(head_output, "* (.*)")
+    return require("thetto.util.job").start(cmd, source_ctx, function(output)
+      local branch_name, commit_hash, message = output:match("^([^\t]+)\t(%S+) (.*)")
+      local is_current_branch = branch_name == current_branch
+      return {
+        value = branch_name,
+        commit_hash = commit_hash,
+        git_root = git_root,
+        desc = ("%s %s %s"):format(commit_hash, branch_name, message),
+        is_current_branch = is_current_branch,
+        _is_current_branch = is_current_branch and 1 or 0,
+        column_offsets = {
+          value = #commit_hash + 1,
+          message = #commit_hash + 1 + #branch_name,
+        },
+      }
+    end, { cwd = git_root })
+  end
+  return vim.async.run(collect)
 end
 
 vim.api.nvim_set_hl(0, "ThettoGitActiveBranch", { default = true, link = "Type" })

@@ -9,6 +9,7 @@ function M.action_list_action_step(items)
   end
 end
 
+--- @async
 function M.action_download_log(items)
   local item = items[1]
   if not item then
@@ -20,22 +21,20 @@ function M.action_download_log(items)
     "api",
     ("/repos/:owner/:repo/actions/runs/%s/logs"):format(item.run.id),
   }
-  return require("thetto.util.job")
-    .promise(cmd, {
-      on_exit = function() end,
-    })
-    :next(function(output)
-      local file_path = vim.fn.tempname()
-      local f = io.open(file_path, "w")
-      assert(f, "failed to open: " .. file_path)
-      f:write(output)
-      f:close()
+  local output = require("thetto.util.job").await(cmd, {
+    on_exit = function() end,
+  })
 
-      local output_dir = vim.fn.stdpath("cache") .. "/thetto/github_action_log/" .. item.run.id
-      vim.fn.mkdir(output_dir, "p")
+  local file_path = vim.fn.tempname()
+  local f = io.open(file_path, "w")
+  assert(f, "failed to open: " .. file_path)
+  f:write(output)
+  f:close()
 
-      return require("thetto.util.job").promise({ "unzip", "-o", file_path, "-d", output_dir })
-    end)
+  local output_dir = vim.fn.stdpath("cache") .. "/thetto/github_action_log/" .. item.run.id
+  vim.fn.mkdir(output_dir, "p")
+
+  return require("thetto.util.job").await({ "unzip", "-o", file_path, "-d", output_dir })
 end
 
 M.action_list_children = M.action_list_action_step

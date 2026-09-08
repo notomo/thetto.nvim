@@ -60,7 +60,7 @@ function Collector.start(self)
     self._source.kind_name,
     {}
   )
-  return self._current_run:promise(), consumer, source_errored
+  return self._current_run:task(), consumer, source_errored
 end
 
 --- @param source_input_pattern string?
@@ -75,7 +75,7 @@ function Collector.restart(self, source_input_pattern)
 
   local subscriber, _ = require("thetto.core.source_subscriber").new(self._source, source_ctx)
   self._current_run = self._current_run:restart(subscriber, source_ctx)
-  return self._current_run:promise()
+  return self._current_run:task()
 end
 
 function Collector.resume(self, consumer_factory, item_cursor_factory)
@@ -83,7 +83,7 @@ function Collector.resume(self, consumer_factory, item_cursor_factory)
   local consumer =
     self:_create_consumer(self._current_run.source_ctx, source_errored, consumer_factory, item_cursor_factory)
   self._current_run = self._current_run:resume(consumer)
-  return self._current_run:promise(), consumer
+  return self._current_run:task(), consumer
 end
 
 --- @param source_ctx ThettoSourceContext

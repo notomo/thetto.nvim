@@ -54,6 +54,7 @@ function M.action_list_action_workflows(items)
   end
 end
 
+--- @async
 function M.action_clone(items)
   local item = items[1]
   if not item then
@@ -61,7 +62,7 @@ function M.action_clone(items)
   end
 
   local cmd = { "gh", "repo", "clone", item.value }
-  return require("thetto.util.job").promise(cmd)
+  return require("thetto.util.job").await(cmd)
 end
 
 return require("thetto.core.kind").extend(M, "url")

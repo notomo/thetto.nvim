@@ -11,29 +11,29 @@ function M.collect(source_ctx)
   end
 
   local cmd = { "whereis", pattern }
-  return require("thetto.util.job")
-    .promise(cmd, {
+  --- @async
+  local collect = function()
+    local output = require("thetto.util.job").await(cmd, {
       cwd = source_ctx.cwd,
       on_exit = function() end,
     })
-    :next(function(output)
-      local outputs = vim.split(output, " ", { plain = true })
-      outputs = vim.list_slice(outputs, 2)
-      return vim
-        .iter(outputs)
-        :map(function(path)
-          local kind_name
-          if vim.fn.isdirectory(path) ~= 0 then
-            kind_name = "file/directory"
-          end
-          return {
-            value = path,
-            path = path,
-            kind_name = kind_name,
-          }
-        end)
-        :totable()
-    end)
+    local outputs = vim.list_slice(vim.split(output, " ", { plain = true }), 2)
+    return vim
+      .iter(outputs)
+      :map(function(path)
+        local kind_name
+        if vim.fn.isdirectory(path) ~= 0 then
+          kind_name = "file/directory"
+        end
+        return {
+          value = path,
+          path = path,
+          kind_name = kind_name,
+        }
+      end)
+      :totable()
+  end
+  return vim.async.run(collect)
 end
 
 M.kind_name = "file"

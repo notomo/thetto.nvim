@@ -23,6 +23,7 @@ function M.action_execute(items, action_ctx)
   end
 end
 
+--- @async
 function M.action_terminal(items, action_ctx)
   return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, {
     driver = function(cmd, opts)

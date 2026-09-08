@@ -133,7 +133,7 @@ local actions = {
   end,
   --- @param self ThettoUi
   wait = function(self)
-    return self._inputter:promise()
+    return self._inputter:task()
   end,
 }
 

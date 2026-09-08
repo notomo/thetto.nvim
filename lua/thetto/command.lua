@@ -1,12 +1,23 @@
 local M = {}
 
-local handle_error = function(promise)
-  return promise:catch(function(err)
-    if not err then
+--- @param f async fun(): any
+--- @return vim.async.Task
+local handle_error = function(f)
+  -- WHY: vim.async drops the failure of a task nobody observes, without any message
+  -- NOT: returning the task and letting the caller observe it
+  --- @async
+  --- @return any
+  local run = function()
+    local ok, result = pcall(f)
+    if ok then
+      return result
+    end
+    if not result or vim.async.is_closing() then
       return
     end
-    require("thetto.lib.message").warn(err)
-  end)
+    require("thetto.lib.message").warn(result)
+  end
+  return vim.async.run(run)
 end
 
 function M.start(source, raw_opts)
@@ -28,7 +39,7 @@ function M.start(source, raw_opts)
     opts.actions
   )
 
-  local promise, consumer, source_errored = collector:start()
+  local task, consumer, source_errored = collector:start()
   if source.can_resume ~= false and not source_errored then
     require("thetto.core.context").set(ctx_key, {
       collector = collector,
@@ -36,7 +47,11 @@ function M.start(source, raw_opts)
       actions = opts.actions,
     })
   end
-  return handle_error(promise)
+  --- @async
+  local wait = function()
+    return vim.async.await(task)
+  end
+  return handle_error(wait)
 end
 
 function M.reload(bufnr)
@@ -46,8 +61,12 @@ function M.reload(bufnr)
     error(require("thetto.lib.message").wrap(err), 0)
   end
 
-  local promise = ctx.collector:restart()
-  return handle_error(promise)
+  local task = ctx.collector:restart()
+  --- @async
+  local wait = function()
+    return vim.async.await(task)
+  end
+  return handle_error(wait)
 end
 
 function M.resume(raw_opts)
@@ -55,16 +74,22 @@ function M.resume(raw_opts)
 
   local ctx, old_ctx = require("thetto.core.context").resume(opts.offset)
   if not ctx then
-    return handle_error(require("thetto.vendor.promise").reject("no context to resume"))
+    return handle_error(function()
+      error("no context to resume", 0)
+    end)
   end
   if old_ctx then
     -- don't call update_used_at() to loop resume()
     old_ctx.consumer:call("quit", {})
   end
 
-  local promise, consumer = ctx.collector:resume(opts.consumer_factory, opts.item_cursor_factory)
+  local task, consumer = ctx.collector:resume(opts.consumer_factory, opts.item_cursor_factory)
   ctx:update({ consumer = consumer })
-  return handle_error(promise)
+  --- @async
+  local wait = function()
+    return vim.async.await(task)
+  end
+  return handle_error(wait)
 end
 
 function M.execute(action_item_groups, raw_opts)
@@ -74,8 +99,11 @@ function M.execute(action_item_groups, raw_opts)
     M.quit()
   end
 
-  local promise = require("thetto.core.executor").execute(action_item_groups)
-  return handle_error(promise)
+  --- @async
+  local execute = function()
+    return require("thetto.core.executor").execute(action_item_groups)
+  end
+  return handle_error(execute)
 end
 
 function M.get()

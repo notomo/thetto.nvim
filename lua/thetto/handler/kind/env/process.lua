@@ -17,6 +17,7 @@ else
   end
 end
 
+--- @async
 function M.action_kill(items)
   local pids = vim
     .iter(items)
@@ -26,10 +27,13 @@ function M.action_kill(items)
     :totable()
 
   local cmds = M.get_cmds(pids)
-  return require("thetto.vendor.promise").all_settled(vim
+  return require("thetto.lib.async").all_settled(vim
     .iter(cmds)
     :map(function(cmd)
-      return require("thetto.util.job").promise(cmd)
+      --- @async
+      return function()
+        return require("thetto.util.job").await(cmd)
+      end
     end)
     :totable())
 end
