@@ -141,6 +141,23 @@ function M.state()
   return vim.b[bufnr].thetto_git_state
 end
 
+function M._set_name(bufnr, buffer_path)
+  local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
+  if old ~= -1 then
+    return
+  end
+  vim.api.nvim_buf_set_name(bufnr, buffer_path)
+end
+
+local function show(content)
+  if not content.bufnr then
+    vim.cmd.edit({ args = { content.buffer_path }, magic = { file = false } })
+    return
+  end
+  vim.api.nvim_win_set_buf(0, content.bufnr)
+  M._set_name(content.bufnr, content.buffer_path)
+end
+
 --- @async
 function M.content(git_root, path_or_bufnr, revision, scratch_bufnr)
   local path = M._to_path(path_or_bufnr)
@@ -182,10 +199,7 @@ function M.content(git_root, path_or_bufnr, revision, scratch_bufnr)
   }
 
   local buffer_path = "thetto-git://" .. vim.fs.joinpath(git_root, treeish)
-  local old = vim.fn.bufnr(("^%s$"):format(buffer_path))
-  if old == -1 then
-    vim.api.nvim_buf_set_name(bufnr, buffer_path)
-  end
+  M._set_name(bufnr, buffer_path)
 
   local filetype, on_detect = vim.filetype.match({ buf = bufnr, filename = path })
   if filetype then
@@ -222,18 +236,16 @@ function M.compare(git_root, path_before, revision_before, path_after, revision_
     M._enable_patch(git_root, after.path_from_git_root, after.bufnr)
   end
 
-  local before_buffer_path = before.buffer_path
-  local after_buffer_path = after.buffer_path
-
   open = open or require("thetto.lib.buffer").open_scratch_tab
   open()
 
-  vim.cmd.edit({ args = { before_buffer_path }, magic = { file = false } })
+  show(before)
   vim.cmd.diffthis()
   local before_winbar = vim.wo.winbar
   local before_window_id = vim.api.nvim_get_current_win()
 
-  vim.cmd.vsplit({ args = { after_buffer_path }, mods = { split = "belowright" }, magic = { file = false } })
+  vim.cmd.vsplit({ mods = { split = "belowright" } })
+  show(after)
   vim.cmd.diffthis()
 
   local after_window_id = vim.api.nvim_get_current_win()
