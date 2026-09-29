@@ -259,17 +259,20 @@ function M.compare(git_root, path_before, revision_before, path_after, revision_
   end
 end
 
---- @async
 function M.create_stash(git_root)
-  local input = require("thetto.util.input").await({
-    prompt = "Create stash: ",
-  })
-  if not input or input == "" then
-    return require("thetto.lib.message").info("invalid input to create stash")
-  end
+  --- @async
+  local run = function()
+    local input = require("thetto.util.input").await({
+      prompt = "Create stash: ",
+    })
+    if not input or input == "" then
+      return require("thetto.lib.message").info("invalid input to create stash")
+    end
 
-  require("thetto.util.job").await({ "git", "stash", "save", input }, { cwd = git_root })
-  require("thetto.lib.message").info(("Created stash: %s"):format(input))
+    require("thetto.util.job").await({ "git", "stash", "save", input }, { cwd = git_root })
+    require("thetto.lib.message").info(("Created stash: %s"):format(input))
+  end
+  return vim.async.run(run)
 end
 
 return M
