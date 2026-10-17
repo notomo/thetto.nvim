@@ -17,7 +17,7 @@ function M.action_toggle(items)
     if info.type == "number" then
       value = assert(tonumber(value))
     end
-    vim.opt_local[name] = value
+    vim.api.nvim_set_option_value(name, value, { scope = "local" })
   end)
 end
 

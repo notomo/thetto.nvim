@@ -6,7 +6,7 @@ local adjust_cursor = function(item)
   if item.pattern ~= nil then
     vim.fn.search(item.pattern)
     vim.fn.setreg("/", item.pattern)
-    vim.opt.hlsearch = true
+    vim.o.hlsearch = true
     vim.v.searchforward = 1
     return
   end

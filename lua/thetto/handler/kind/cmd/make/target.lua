@@ -43,7 +43,7 @@ end
 function M.action_terminal(items, action_ctx)
   return require("thetto.util.action").call(action_ctx.kind_name, "execute", items, {
     driver = function(cmd, opts)
-      vim.fn.jobstart(vim.opt.shell:get(), {
+      vim.fn.jobstart(vim.o.shell, {
         cwd = opts.cwd,
         term = true,
       })

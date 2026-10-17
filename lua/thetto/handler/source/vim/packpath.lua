@@ -5,7 +5,7 @@ local M = {}
 function M.collect()
   local home = pathlib.home()
   return vim
-    .iter(vim.opt.packpath:get())
+    .iter(vim.split(vim.o.packpath, ",", { plain = true }))
     :map(function(path)
       local value = path:gsub(home, "~")
       return {
